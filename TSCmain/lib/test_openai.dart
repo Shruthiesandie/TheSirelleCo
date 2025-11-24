@@ -1,22 +1,25 @@
 import 'package:dart_openai/dart_openai.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
-  // 1. Set your API key
-  OpenAI.apiKey = "";
+  await dotenv.load(fileName: ".env");
 
-  // 2. Send a message to OpenAI
+  OpenAI.apiKey = dotenv.env['OPENAI_API_KEY']!;
+
+  print("Sending request...");
+
   final response = await OpenAI.instance.chat.create(
     model: "gpt-4o-mini",
     messages: [
       ChatMessage(
         role: ChatMessageRole.user,
         content: [
-          MessageContent.text("Hello! How are you?")
+          MessageContent.text("Say hello to Vishruth!")
         ],
-      ),
+      )
     ],
   );
 
-  // 3. Print the reply
+  print("Response:");
   print(response.choices.first.message.content!.first.text);
 }
