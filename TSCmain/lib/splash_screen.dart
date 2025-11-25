@@ -8,11 +8,11 @@ class SplashScreenPages extends StatefulWidget {
 }
 
 class _SplashScreenPagesState extends State<SplashScreenPages> {
-
   @override
   void initState() {
     super.initState();
 
+    // Navigate to Home after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       Navigator.pushReplacementNamed(context, "/home");
     });
@@ -21,13 +21,22 @@ class _SplashScreenPagesState extends State<SplashScreenPages> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // set theme background
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
 
-      body: Center(
-        child: Image.asset(
-          "assets/splash/splash.png",   // 👈 your logo file
-          width: 260,
-          fit: BoxFit.contain,
+        // 💗 Soft pastel background
+        decoration: const BoxDecoration(
+          color: Color(0xFFFFEFEF), // light pink
+        ),
+
+        // Center your logo without stretching
+        child: Center(
+          child: Image.asset(
+            "assets/splash/splash.png",
+            width: MediaQuery.of(context).size.width * 0.55,  // responsive size
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
