@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'splash_screen.dart';   // 👈 Your splash file in lib/
+// Splash Screen
+import 'splash_screen.dart';
 
+// Home Page
+import 'home/pages/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,12 +18,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      // Start app with splash screen
+      // Start app with your custom splash
       home: const SplashScreenPages(),
 
-      // All navigation routes
+      // Navigation routes
       routes: {
-        
+        '/home': (context) => const HomePage(),
       },
     );
   }
