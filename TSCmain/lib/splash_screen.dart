@@ -8,6 +8,7 @@ class SplashScreenPages extends StatefulWidget {
 }
 
 class _SplashScreenPagesState extends State<SplashScreenPages> {
+
   @override
   void initState() {
     super.initState();
@@ -20,16 +21,16 @@ class _SplashScreenPagesState extends State<SplashScreenPages> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
+      // 💗 Full-screen background color
+      backgroundColor: const Color(0xFFFDEEEE), 
 
-        // Background matches your image color
-        color: const Color(0xFFFCE4EC), // light baby pink
-
-        child: Image.asset(
-          "assets/splash/splash.png",
-          fit: BoxFit.contain,   // shows the full image without cutting
+      body: Center(
+        child: SizedBox(
+          width: 300,        // 👈 CHANGE THIS TO RESIZE LOGO (140–240 recommended)
+          child: Image.asset(
+            "assets/splash/splash.png",
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
