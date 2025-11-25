@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
 
       // All navigation routes
       routes: {
-        '/home': (context) =>  HomePage(),
+        
       },
     );
   }
