@@ -33,7 +33,7 @@ class _SplashScreenPagesState extends State<SplashScreenPages> {
         // Center your logo without stretching
         child: Center(
           child: Image.asset(
-            "assets/splash/splash.png",
+            "assets/splash/splash.jpg",
             width: MediaQuery.of(context).size.width * 0.55,  // responsive size
             fit: BoxFit.contain,
           ),
