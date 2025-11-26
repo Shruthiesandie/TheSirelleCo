@@ -6,6 +6,10 @@ import 'splash_screen.dart';
 // Home Page
 import 'home/pages/home_page.dart';
 
+// 🔥 Add these imports
+import 'home/pages/search_page.dart';
+import 'home/pages/love_page.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -23,9 +27,9 @@ class MyApp extends StatelessWidget {
 
       // Navigation routes
       routes: {
-        '/home': (context) => const HomePage(),
-        '/search': (context) => const SearchPage(),
-        '/love': (context) => const LovePage(),
+        '/home': (context) => HomePage(),
+        '/search': (context) => SearchPage(),  // no const
+        '/love': (context) => LovePage(),      // no const
       },
     );
   }
