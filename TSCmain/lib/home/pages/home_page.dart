@@ -36,41 +36,44 @@ class _HomePageState extends State<HomePage> {
       setState(() => _menuOpen = false);
       return;
     }
-
     setState(() => _menuOpen = false);
     Navigator.pushNamed(context, "/category/$slug");
   }
 
   @override
   Widget build(BuildContext context) {
+    final double screenW = MediaQuery.of(context).size.width;
+
+    // Number of bottom nav items (update if you change the bar)
+    const int itemsCount = 5;
+
+    // index of your center grid icon (0-based). Here it's the 3rd item: index 2.
+    const int centerIndex = 2;
+
+    // width of each item (approx)
+    final double itemWidth = screenW / itemsCount;
+
+    // center x of the target item (we add a small manual shift option if needed)
+    // If your BottomNavigationBar has extra internal padding, tweak anchorShift.
+    const double anchorShift = 0.0; // <- adjust this (positive moves arc right)
+    final double anchorX = (itemWidth * centerIndex) + (itemWidth / 2) + anchorShift;
+
     return Scaffold(
       key: _scaffoldKey,
-
       drawer: Drawer(
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20),
-            bottomRight: Radius.circular(20),
-          ),
+          borderRadius:
+              BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
         ),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: const [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFFFC1E3), Color(0xFFB4F8C8)],
-                ),
-              ),
-              child: Text(
-                "Hello, User 🎀",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+        child: ListView(padding: EdgeInsets.zero, children: const [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [Color(0xFFFFC1E3), Color(0xFFB4F8C8)]),
             ),
-          ],
-        ),
+            child: Text("Hello, User 🎀", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          ),
+        ]),
       ),
-
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90),
         child: Container(
@@ -79,32 +82,12 @@ class _HomePageState extends State<HomePage> {
           child: SafeArea(
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.menu, size: 28, color: Colors.black),
-                  onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Image.asset(
-                      "assets/logo/logo.png",
-                      height: 70,
-                      width: 70,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.search, size: 26, color: Colors.black),
-                      onPressed: () => Navigator.pushNamed(context, "/search"),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.favorite, size: 26, color: Colors.black),
-                      onPressed: () => Navigator.pushNamed(context, "/love"),
-                    ),
-                  ],
-                ),
+                IconButton(icon: const Icon(Icons.menu, size: 28, color: Colors.black), onPressed: () => _scaffoldKey.currentState!.openDrawer()),
+                Expanded(child: Center(child: Image.asset("assets/logo/logo.png", height: 70, width: 70, fit: BoxFit.contain))),
+                Row(children: [
+                  IconButton(icon: const Icon(Icons.search, size: 26, color: Colors.black), onPressed: () => Navigator.pushNamed(context, "/search")),
+                  IconButton(icon: const Icon(Icons.favorite, size: 26, color: Colors.black), onPressed: () => Navigator.pushNamed(context, "/love")),
+                ])
               ],
             ),
           ),
@@ -114,9 +97,13 @@ class _HomePageState extends State<HomePage> {
       body: Stack(
         children: [
           Positioned.fill(child: _getPage(_selectedIndex)),
+
+          // Pass the anchorX so the arc is wrapped around the grid icon
           PinterestArcMenu(
             isOpen: _menuOpen,
             onSelect: _openCategory,
+            anchorX: anchorX,
+            bottomOffset: kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom - 6,
           ),
         ],
       ),

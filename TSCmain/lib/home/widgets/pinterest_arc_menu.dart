@@ -8,10 +8,19 @@ class PinterestArcMenu extends StatefulWidget {
   final bool isOpen;
   final CategorySelect onSelect;
 
+  /// anchorX is the screen x-coordinate (logical pixels) where the arc
+  /// should be centered (usually the center of the grid icon).
+  final double anchorX;
+
+  /// vertical distance above the bottom (in logical pixels) where arc will sit.
+  final double bottomOffset;
+
   const PinterestArcMenu({
     super.key,
     required this.isOpen,
     required this.onSelect,
+    required this.anchorX,
+    this.bottomOffset = 78,
   });
 
   @override
@@ -24,6 +33,10 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
   late Animation<double> _arc;
   late Animation<double> _scale;
   late Animation<double> _fade;
+
+  // arc widget size (you can tweak if needed)
+  static const double arcWidth = 220;
+  static const double arcHeight = 120;
 
   @override
   void initState() {
@@ -46,7 +59,7 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
   }
 
   @override
-  void didUpdateWidget(covariant PinterestArcMenu oldWidget) {
+  void didUpdateWidget(PinterestArcMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isOpen != oldWidget.isOpen) {
       widget.isOpen ? _ctrl.forward() : _ctrl.reverse();
@@ -59,8 +72,17 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
     super.dispose();
   }
 
+  /// Keep arc inside screen — returns left coordinate
+  double _computeLeft(double screenWidth) {
+    final double left = widget.anchorX - (arcWidth / 2);
+    // clamp so arc doesn't overflow edges
+    return left.clamp(8.0, screenWidth - arcWidth - 8.0);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final double screenW = MediaQuery.of(context).size.width;
+
     if (!widget.isOpen && _ctrl.value == 0) return const SizedBox.shrink();
 
     return IgnorePointer(
@@ -72,6 +94,7 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
 
           return Stack(
             children: [
+              // Dim background - tap to close (send "close")
               GestureDetector(
                 onTap: () => widget.onSelect("close"),
                 child: Container(
@@ -79,36 +102,46 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
                 ),
               ),
 
+              // Positioned arc anchored at anchorX
               Positioned(
-                bottom: 78,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Transform.scale(
-                    scale: t,
-                    child: CustomPaint(
-                      painter: _ArcPainter(),
-                      child: SizedBox(
-                        width: 220,
-                        height: 120,
-                        child: Stack(
-                          alignment: Alignment.topCenter,
-                          children: [
-                            Positioned(
-                              top: 18,
-                              left: 35,
-                              child: _icon(Icons.male, "male", Colors.blue),
-                            ),
-                            Positioned(
-                              top: 0,
-                              child: _icon(Icons.transgender, "all", Colors.purple),
-                            ),
-                            Positioned(
-                              top: 18,
-                              right: 35,
-                              child: _icon(Icons.female, "female", Colors.pink),
-                            ),
-                          ],
+                bottom: widget.bottomOffset,
+                left: _computeLeft(screenW),
+                child: SizedBox(
+                  width: arcWidth,
+                  height: arcHeight,
+                  child: Center(
+                    child: Transform.scale(
+                      scale: t,
+                      child: CustomPaint(
+                        painter: _ArcPainter(),
+                        child: SizedBox(
+                          width: arcWidth,
+                          height: arcHeight,
+                          child: Stack(
+                            alignment: Alignment.topCenter,
+                            children: [
+                              // Left icon — offset from arc left
+                              Positioned(
+                                top: 18,
+                                left: 35,
+                                child: _icon(Icons.male, "male", const Color(0xFF4A90E2)),
+                              ),
+
+                              // Center icon — centered relative to arc
+                              Positioned(
+                                top: 0,
+                                left: (arcWidth / 2) - 28, // center
+                                child: _icon(Icons.transgender, "all", const Color(0xFFE9446A)),
+                              ),
+
+                              // Right icon — offset from arc right
+                              Positioned(
+                                top: 18,
+                                right: 35,
+                                child: _icon(Icons.female, "female", const Color(0xFFFF6CB5)),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -156,6 +189,7 @@ class _ArcPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final path = Path();
 
+    // Smooth arc like Pinterest — quadratic curve with a taller control point
     path.moveTo(0, size.height);
     path.quadraticBezierTo(
       size.width / 2,
@@ -165,17 +199,13 @@ class _ArcPainter extends CustomPainter {
     );
     path.close();
 
-    canvas.drawShadow(
-      path,
-      Colors.black.withOpacity(0.25),
-      16,
-      true,
-    );
+    // shadow under arc
+    canvas.drawShadow(path, Colors.black.withOpacity(0.25), 16, true);
 
     final paint = Paint()..color = Colors.white;
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(_) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
