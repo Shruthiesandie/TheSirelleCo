@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => const HomePage(),
         '/search': (context) => const SearchPage(),
-        '/favourites': (context) => const LovePage(),
+        '/love': (context) => const LovePage(),
       },
     );
   }
