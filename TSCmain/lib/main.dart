@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'splash_screen.dart';
 
 // Home Page
-import 'home/pages/home.dart';
+import 'home/pages/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,6 +24,8 @@ class MyApp extends StatelessWidget {
       // Navigation routes
       routes: {
         '/home': (context) => const HomePage(),
+        '/search': (context) => const SearchPage(),
+        '/favourites': (context) => const LovePage(),
       },
     );
   }
