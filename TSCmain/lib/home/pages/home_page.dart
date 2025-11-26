@@ -10,6 +10,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   // Page navigation handler
   Widget _getPage(int index) {
     switch (index) {
@@ -28,10 +30,11 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Build UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+
       // -------------------- DRAWER --------------------
       drawer: Drawer(
         shape: const RoundedRectangleBorder(
@@ -58,83 +61,75 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      // -------------------- APP BAR CUSTOM SECTION --------------------
+      // -------------------- CUSTOM TOP BAR --------------------
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: const BoxDecoration(color: Colors.white),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Hamburger Menu
-              IconButton(
-                icon: const Icon(Icons.menu, size: 28, color: Colors.black),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-              ),
+          color: Colors.white,
+          child: SafeArea(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Hamburger
+                IconButton(
+                  icon: const Icon(Icons.menu, size: 28, color: Colors.black),
+                  onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                ),
 
-              // Center Logo
-              SizedBox(
-                height: 40,
-                child: Image.asset("assets/logo/logo.png"), // <-- your logo
-              ),
+                // Logo
+                SizedBox(
+                  height: 40,
+                  child: Image.asset("assets/logo/logo.png"),
+                ),
 
-              // Right Icons (Search + Favourites)
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.search,
-                        size: 26, color: Colors.black87),
-                    onPressed: () => Navigator.pushNamed(context, "/search"),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.favorite,
-                        size: 26, color: Colors.black87),
-                    onPressed: () =>
-                        Navigator.pushNamed(context, "/favourites"),
-                  ),
-                ],
-              ),
-            ],
+                // Search + Love
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.search,
+                          size: 26, color: Colors.black),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, "/search"),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.favorite,
+                          size: 26, color: Colors.black),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, "/love"), // FIXED
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
 
-      // -------------------- PAGE BODY --------------------
+      // -------------------- BODY --------------------
       body: _getPage(_selectedIndex),
 
-      // -------------------- BOTTOM NAV BAR --------------------
+      // -------------------- BOTTOM NAV --------------------
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.pinkAccent,
         unselectedItemColor: Colors.grey,
         iconSize: 28,
+
+        showSelectedLabels: false,   // REMOVE LABELS
+        showUnselectedLabels: false, // REMOVE LABELS
+
         onTap: (index) {
           setState(() => _selectedIndex = index);
         },
 
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.card_membership),
-            label: "Membership",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view),
-            label: "Categories",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: "Cart",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
+          BottomNavigationBarItem(icon: Icon(Icons.card_membership), label: ""),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ""),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ""),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
         ],
       ),
     );
