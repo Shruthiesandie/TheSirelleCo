@@ -142,7 +142,7 @@ class _HalfCircleMenuState extends State<HalfCircleMenu>
 
                 // semicircle anchored to bottom center
                 Positioned(
-                  bottom: 70, // adjust so semicircle sits above bottom nav (change if nav height differs)
+                  bottom: MediaQuery.of(context).padding.bottom + 75, // adjust so semicircle sits above bottom nav (change if nav height differs)
                   child: Transform.scale(
                     scale: t,
                     child: SizedBox(
