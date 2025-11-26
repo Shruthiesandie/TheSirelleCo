@@ -63,42 +63,41 @@ class _HomePageState extends State<HomePage> {
 
       // -------------------- CUSTOM TOP BAR --------------------
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(90), // bigger AppBar
+        preferredSize: const Size.fromHeight(90),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           color: Colors.white,
           child: SafeArea(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Hamburger
+                // -------------------- LEFT SIDE ICON --------------------
                 IconButton(
                   icon: const Icon(Icons.menu, size: 28, color: Colors.black),
                   onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                 ),
 
-                // -------------------- LOGO --------------------
-                Image.asset(
-                  "assets/logo/logo.png",
-                  height: 95,     // ← adjust size here
-                  width: 95,      // ← adjust size here
-                  fit: BoxFit.contain,
+                // -------------------- CENTER LOGO --------------------
+                Expanded(
+                  child: Center(
+                    child: Image.asset(
+                      "assets/logo/logo.png",
+                      height: 95,   // ← adjust this to resize logo
+                      width: 95,    // ← adjust this to resize logo
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
 
-                // Search + Love
+                // -------------------- RIGHT SIDE ICONS --------------------
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.search,
-                          size: 26, color: Colors.black),
-                      onPressed: () =>
-                          Navigator.pushNamed(context, "/search"),
+                      icon: const Icon(Icons.search, size: 26, color: Colors.black),
+                      onPressed: () => Navigator.pushNamed(context, "/search"),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.favorite,
-                          size: 26, color: Colors.black),
-                      onPressed: () =>
-                          Navigator.pushNamed(context, "/love"),
+                      icon: const Icon(Icons.favorite, size: 26, color: Colors.black),
+                      onPressed: () => Navigator.pushNamed(context, "/love"),
                     ),
                   ],
                 ),
