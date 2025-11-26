@@ -78,15 +78,19 @@ class _HomePageState extends State<HomePage> {
 
                 // -------------------- CENTER LOGO --------------------
                 Expanded(
-                  child: Center(
-                    child: Image.asset(
-                      "assets/logo/logo.png",
-                      height: 95,   // ← adjust this to resize logo
-                      width: 95,    // ← adjust this to resize logo
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
+  child: Transform.translate(
+    offset: const Offset(25, 0), // ← SHIFT LOGO (x , y)
+    child: Center(
+      child: Image.asset(
+        "assets/logo/logo.png",
+        height: 85,
+        width: 85,
+        fit: BoxFit.contain,
+      ),
+    ),
+  ),
+),
+
 
                 // -------------------- RIGHT SIDE ICONS --------------------
                 Row(
