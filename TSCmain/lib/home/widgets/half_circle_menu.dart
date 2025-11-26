@@ -1,4 +1,5 @@
 // lib/widgets/half_circle_menu.dart
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -256,10 +257,7 @@ class _SemiCirclePainter extends CustomPainter {
     // draw gradient semicircle
     canvas.drawPath(path, paint);
   }
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Need math import
-import 'dart:math' as math;
