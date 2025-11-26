@@ -1,6 +1,5 @@
-// lib/home/home.dart
 import 'package:flutter/material.dart';
-import '../widgets/half_circle_menu.dart'; // NEW import
+import '../widgets/half_circle_menu.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,11 +31,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _openMenu() => setState(() => _menuOpen = true);
   void _closeMenu() => setState(() => _menuOpen = false);
 
   void _onCategorySelect(String slug) {
-    // Close menu, then navigate
     _closeMenu();
     if (slug == 'male') {
       Navigator.pushNamed(context, '/category/male');
@@ -49,10 +46,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    const double bottomNavHeight = 68.0; // used to position the semicircle
     return Scaffold(
       key: _scaffoldKey,
-      // drawer, appbar etc — keep your existing header. (Replace with your current header)
+
+      // -------------------- DRAWER --------------------
       drawer: Drawer(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -71,14 +68,15 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Text(
                 "Hello, User 🎀",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
       ),
 
-      // keep your current topbar (you can paste your existing appBar here)
+      // -------------------- TOP APP BAR --------------------
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90),
         child: Container(
@@ -87,29 +85,40 @@ class _HomePageState extends State<HomePage> {
           child: SafeArea(
             child: Row(
               children: [
+                // Sidebar menu icon
                 IconButton(
-                  icon: const Icon(Icons.menu, size: 28, color: Colors.black),
-                  onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                  icon: const Icon(Icons.menu,
+                      size: 28, color: Colors.black),
+                  onPressed: () =>
+                      _scaffoldKey.currentState!.openDrawer(),
                 ),
+
+                // CENTER LOGO
                 Expanded(
                   child: Center(
                     child: Image.asset(
                       "assets/logo/logo.png",
-                      height: 64,
-                      width: 64,
+                      height: 85,
+                      width: 85,
                       fit: BoxFit.contain,
                     ),
                   ),
                 ),
+
+                // Right icons
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.search, size: 26, color: Colors.black),
-                      onPressed: () => Navigator.pushNamed(context, "/search"),
+                      icon: const Icon(Icons.search,
+                          size: 26, color: Colors.black),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, "/search"),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.favorite, size: 26, color: Colors.black),
-                      onPressed: () => Navigator.pushNamed(context, "/love"),
+                      icon: const Icon(Icons.favorite,
+                          size: 26, color: Colors.black),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, "/love"),
                     ),
                   ],
                 ),
@@ -119,54 +128,52 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      // BODY is a stack so we can overlay the semicircle above bottom nav
+      // -------------------- BODY + SEMICIRCLE STACK --------------------
       body: Stack(
         children: [
-          // main app content
           Positioned.fill(child: _getPage(_selectedIndex)),
 
-          // semicircle menu overlay
+          // semicircle overlay
           HalfCircleMenu(
             isOpen: _menuOpen,
-            radius: 140, // adjust size here; make larger for bigger semicircle
+            radius: 140,
             onSelect: _onCategorySelect,
             onClose: _closeMenu,
           ),
         ],
       ),
 
-      bottomNavigationBar: SizedBox(
-        height: bottomNavHeight,
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.pinkAccent,
-          unselectedItemColor: Colors.grey,
-          iconSize: 28,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          onTap: (index) {
-            // if tapped center icon index (we'll assume center is index 2),
-            // toggle the semicircle instead of switching page.
-            if (index == 2) {
-              setState(() {
-                _menuOpen = !_menuOpen;
-              });
-              return;
-            }
-            setState(() {
-              _selectedIndex = index;
-              _menuOpen = false; // close menu if open
-            });
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-            BottomNavigationBarItem(icon: Icon(Icons.card_membership), label: ""),
-            BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ""), // center: All Categories
-            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ""),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
-          ],
-        ),
+      // -------------------- BOTTOM NAV --------------------
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.pinkAccent,
+        unselectedItemColor: Colors.grey,
+        iconSize: 28,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        onTap: (index) {
+          if (index == 2) {
+            setState(() => _menuOpen = !_menuOpen);
+            return;
+          }
+          setState(() {
+            _selectedIndex = index;
+            _menuOpen = false;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home), label: ""),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.card_membership), label: ""),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.grid_view), label: ""),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart), label: ""),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person), label: ""),
+        ],
       ),
     );
   }
