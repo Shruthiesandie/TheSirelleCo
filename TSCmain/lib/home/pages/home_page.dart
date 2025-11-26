@@ -80,8 +80,8 @@ class _HomePageState extends State<HomePage> {
                 // -------------------- LOGO --------------------
                 Image.asset(
                   "assets/logo/logo.png",
-                  height: 64,     // ← adjust size here
-                  width: 64,      // ← adjust size here
+                  height: 95,     // ← adjust size here
+                  width: 95,      // ← adjust size here
                   fit: BoxFit.contain,
                 ),
 
