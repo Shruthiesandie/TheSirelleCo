@@ -9,6 +9,8 @@ import 'home/pages/home_page.dart';
 // 🔥 Add these imports
 import 'home/pages/search_page.dart';
 import 'home/pages/love_page.dart';
+import 'home/pages/allcategories_page.dart';
+
 
 void main() {
   runApp(const MyApp());
