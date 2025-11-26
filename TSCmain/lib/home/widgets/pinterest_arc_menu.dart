@@ -1,3 +1,4 @@
+// lib/home/widgets/pinterest_arc_menu.dart
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
@@ -6,6 +7,7 @@ typedef CategorySelect = void Function(String slug);
 class PinterestArcMenu extends StatefulWidget {
   final bool isOpen;
   final CategorySelect onSelect;
+
   const PinterestArcMenu({
     super.key,
     required this.isOpen,
@@ -26,6 +28,7 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
   @override
   void initState() {
     super.initState();
+
     _ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 450),
@@ -33,17 +36,17 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
 
     _arc = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack);
     _scale = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: const Interval(0.3, 1.0)),
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.30, 1.0)),
     );
     _fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _ctrl, curve: const Interval(0.4, 1.0)),
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.40, 1.0)),
     );
 
-    if (widget.isOpen) _ctrl.value = 1.0;
+    if (widget.isOpen) _ctrl.value = 1;
   }
 
   @override
-  void didUpdateWidget(PinterestArcMenu oldWidget) {
+  void didUpdateWidget(covariant PinterestArcMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isOpen != oldWidget.isOpen) {
       widget.isOpen ? _ctrl.forward() : _ctrl.reverse();
@@ -58,47 +61,53 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.isOpen && _ctrl.value == 0) return const SizedBox.shrink();
+
     return IgnorePointer(
       ignoring: !widget.isOpen,
       child: AnimatedBuilder(
         animation: _ctrl,
         builder: (_, __) {
           final t = _arc.value;
-          if (t == 0) return const SizedBox.shrink();
 
           return Stack(
             children: [
-              // close tap
               GestureDetector(
                 onTap: () => widget.onSelect("close"),
                 child: Container(
-                  color: Colors.black.withOpacity(0.15 * t),
+                  color: Colors.black.withOpacity(0.18 * t),
                 ),
               ),
 
-              // Arc popup
               Positioned(
+                bottom: 78,
                 left: 0,
                 right: 0,
-                bottom: 82,
                 child: Center(
                   child: Transform.scale(
                     scale: t,
                     child: CustomPaint(
                       painter: _ArcPainter(),
-                      child: Container(
-                        width: 200,
-                        height: 110,
-                        alignment: Alignment.topCenter,
-                        padding: const EdgeInsets.only(top: 18),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      child: SizedBox(
+                        width: 220,
+                        height: 120,
+                        child: Stack(
+                          alignment: Alignment.topCenter,
                           children: [
-                            _buildIcon(Icons.male, "male", Colors.blue),
-                            const SizedBox(width: 25),
-                            _buildIcon(Icons.transgender, "all", Colors.purple),
-                            const SizedBox(width: 25),
-                            _buildIcon(Icons.female, "female", Colors.pink),
+                            Positioned(
+                              top: 18,
+                              left: 35,
+                              child: _icon(Icons.male, "male", Colors.blue),
+                            ),
+                            Positioned(
+                              top: 0,
+                              child: _icon(Icons.transgender, "all", Colors.purple),
+                            ),
+                            Positioned(
+                              top: 18,
+                              right: 35,
+                              child: _icon(Icons.female, "female", Colors.pink),
+                            ),
                           ],
                         ),
                       ),
@@ -113,7 +122,7 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
     );
   }
 
-  Widget _buildIcon(IconData icon, String slug, Color color) {
+  Widget _icon(IconData icon, String slug, Color color) {
     return FadeTransition(
       opacity: _fade,
       child: ScaleTransition(
@@ -121,15 +130,16 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
         child: GestureDetector(
           onTap: () => widget.onSelect(slug),
           child: Container(
-            width: 52,
-            height: 52,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.1),
-                  blurRadius: 10,
+                  color: Colors.black.withOpacity(.12),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
@@ -144,26 +154,28 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
 class _ArcPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-
     final path = Path();
 
     path.moveTo(0, size.height);
     path.quadraticBezierTo(
       size.width / 2,
-      -20,
+      -30,
       size.width,
       size.height,
     );
     path.close();
 
-    canvas.drawShadow(path, Colors.black.withOpacity(0.15), 12, true);
+    canvas.drawShadow(
+      path,
+      Colors.black.withOpacity(0.25),
+      16,
+      true,
+    );
+
+    final paint = Paint()..color = Colors.white;
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(_) => false;
 }
