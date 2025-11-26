@@ -1,4 +1,5 @@
-// lib/widgets/half_circle_menu.dart
+// lib/home/widgets/half_circle_menu.dart
+
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,25 +7,18 @@ import 'package:flutter/services.dart';
 typedef CategoryCallback = void Function(String slug);
 
 class HalfCircleMenu extends StatefulWidget {
-  /// isOpen: control open/closed externally
-  final bool isOpen;
-
-  /// radius controls semicircle width/height
-  final double radius;
-
-  /// icons callbacks. slug examples: 'male', 'female', 'all'
-  final CategoryCallback onSelect;
-
-  /// called when user closes (tap outside or toggles)
-  final VoidCallback onClose;
+  final bool isOpen;               // open/close externally
+  final double radius;             // size of semicircle
+  final CategoryCallback onSelect; // male / female / all
+  final VoidCallback onClose;      // tapping outside closes
 
   const HalfCircleMenu({
-    Key? key,
+    super.key,
     required this.isOpen,
     this.radius = 120,
     required this.onSelect,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   State<HalfCircleMenu> createState() => _HalfCircleMenuState();
@@ -33,37 +27,51 @@ class HalfCircleMenu extends StatefulWidget {
 class _HalfCircleMenuState extends State<HalfCircleMenu>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
-  late Animation<double> _expand; // 0..1
+  late Animation<double> _expand;
   late Animation<double> _iconScale;
   late Animation<double> _iconFade;
 
   @override
   void initState() {
     super.initState();
+
     _ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 420),
     );
 
-    _expand = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack);
-    _iconScale = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: const Interval(0.4, 1.0, curve: Curves.easeOut)),
-    );
-    _iconFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: const Interval(0.5, 1.0, curve: Curves.easeIn)),
+    _expand = CurvedAnimation(
+      parent: _ctrl,
+      curve: Curves.easeOutBack,
     );
 
-    // If widget.isOpen true at start, open
+    _iconScale = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.40, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _iconFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _ctrl,
+        curve: const Interval(0.50, 1.0, curve: Curves.easeIn),
+      ),
+    );
+
     if (widget.isOpen) _ctrl.value = 1.0;
   }
 
   @override
   void didUpdateWidget(covariant HalfCircleMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (widget.isOpen != oldWidget.isOpen) {
       if (widget.isOpen) {
-        // slight delay to feel tactile
-        Future.delayed(const Duration(milliseconds: 80), () => _ctrl.forward());
+        Future.delayed(
+          const Duration(milliseconds: 80),
+          () => _ctrl.forward(),
+        );
       } else {
         _ctrl.reverse();
       }
@@ -76,37 +84,37 @@ class _HalfCircleMenuState extends State<HalfCircleMenu>
     super.dispose();
   }
 
-  // helper to build tappable icon with animation
-  Widget _buildIcon({required IconData icon, required String slug, required Color color}) {
+  // reusable animated icon
+  Widget _buildIcon({
+    required IconData icon,
+    required String slug,
+    required Color color,
+  }) {
     return FadeTransition(
       opacity: _iconFade,
       child: ScaleTransition(
         scale: _iconScale,
-        child: Semantics(
-          button: true,
-          label: slug, // accessibility label ("male", "female", "all")
-          child: GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              widget.onSelect(slug);
-            },
-            child: Container(
-              width: 56,
-              height: 56,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  )
-                ],
-              ),
-              child: Icon(icon, size: 28, color: color),
+        child: GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            widget.onSelect(slug);
+          },
+          child: Container(
+            width: 56,
+            height: 56,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
+            child: Icon(icon, size: 28, color: color),
           ),
         ),
       ),
@@ -115,34 +123,34 @@ class _HalfCircleMenuState extends State<HalfCircleMenu>
 
   @override
   Widget build(BuildContext context) {
-    // Build the animated semicircle + icons inside.
     final double w = widget.radius * 2;
     final double h = widget.radius;
 
     return IgnorePointer(
-      ignoring: !_ctrl.isCompleted && !_ctrl.isAnimating && _ctrl.value == 0,
+      ignoring:
+          !_ctrl.isCompleted && !_ctrl.isAnimating && _ctrl.value == 0,
       child: AnimatedBuilder(
         animation: _ctrl,
         builder: (context, child) {
-          final double t = _expand.value; // 0..1
-          // bottom margin to sit above bottom nav: adjust as needed
+          final double t = _expand.value.clamp(0.0, 1.0);
+
           return Opacity(
             opacity: t,
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                // backdrop to allow tap to close (semi-transparent)
                 if (t > 0.01)
                   GestureDetector(
                     onTap: widget.onClose,
                     child: Container(
-                      color: Colors.black.withOpacity(0.18 * t),
+                      color:
+                          Colors.black.withOpacity(0.18 * t.clamp(0, 1)),
                     ),
                   ),
 
-                // semicircle anchored to bottom center
+                // SEMICIRCLE
                 Positioned(
-                  bottom: MediaQuery.of(context).padding.bottom + 75, // adjust so semicircle sits above bottom nav (change if nav height differs)
+                  bottom: MediaQuery.of(context).padding.bottom + 75,
                   child: Transform.scale(
                     scale: t,
                     child: SizedBox(
@@ -150,67 +158,86 @@ class _HalfCircleMenuState extends State<HalfCircleMenu>
                       height: h,
                       child: CustomPaint(
                         painter: _SemiCirclePainter(
-                          gradient: LinearGradient(
+                          gradient: const LinearGradient(
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
-                            colors: const [
-                              Color(0xFFB4F8C8), // matcha
-                              Color(0xFFFFC1E3), // pink
+                            colors: [
+                              Color(0xFFB4F8C8),
+                              Color(0xFFFFC1E3),
                             ],
                           ),
-                          shadowColor: Colors.black.withOpacity(0.12),
+                          shadowColor:
+                              Colors.black.withOpacity(0.12),
                         ),
                         child: Padding(
-                          // left/right padding so icons don't touch edges
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
                           child: Stack(
                             children: [
-                              // Left icon (male)
+                              // LEFT ICON
                               Positioned(
                                 left: 8,
                                 top: 16,
                                 child: Opacity(
-                                  opacity: _iconFade.value,
+                                  opacity:
+                                      _iconFade.value.clamp(0, 1),
                                   child: Transform.translate(
-                                    offset: Offset(-30 * (1 - _iconFade.value), 0),
+                                    offset: Offset(
+                                      -30 *
+                                          (1 - _iconFade.value)
+                                              .clamp(0, 1),
+                                      0,
+                                    ),
                                     child: _buildIcon(
                                       icon: Icons.male,
                                       slug: "male",
-                                      color: const Color(0xFF2E86AB), // soft blue
+                                      color: const Color(0xFF2E86AB),
                                     ),
                                   ),
                                 ),
                               ),
 
-                              // Center icon (both)
+                              // CENTER ICON
                               Positioned(
                                 left: (w / 2) - 28,
                                 top: 4,
                                 child: Opacity(
-                                  opacity: _iconFade.value,
+                                  opacity:
+                                      _iconFade.value.clamp(0, 1),
                                   child: Transform.translate(
-                                    offset: Offset(0, 10 * (1 - _iconFade.value)),
+                                    offset: Offset(
+                                      0,
+                                      10 *
+                                          (1 - _iconFade.value)
+                                              .clamp(0, 1),
+                                    ),
                                     child: _buildIcon(
                                       icon: Icons.transgender,
                                       slug: "all",
-                                      color: const Color(0xFFB93A3A), // soft red
+                                      color: const Color(0xFFB93A3A),
                                     ),
                                   ),
                                 ),
                               ),
 
-                              // Right icon (female)
+                              // RIGHT ICON
                               Positioned(
                                 right: 8,
                                 top: 16,
                                 child: Opacity(
-                                  opacity: _iconFade.value,
+                                  opacity:
+                                      _iconFade.value.clamp(0, 1),
                                   child: Transform.translate(
-                                    offset: Offset(30 * (1 - _iconFade.value), 0),
+                                    offset: Offset(
+                                      30 *
+                                          (1 - _iconFade.value)
+                                              .clamp(0, 1),
+                                      0,
+                                    ),
                                     child: _buildIcon(
                                       icon: Icons.female,
                                       slug: "female",
-                                      color: const Color(0xFFFF5C9D), // pastel pink
+                                      color: const Color(0xFFFF5C9D),
                                     ),
                                   ),
                                 ),
@@ -235,7 +262,10 @@ class _SemiCirclePainter extends CustomPainter {
   final Gradient gradient;
   final Color shadowColor;
 
-  _SemiCirclePainter({required this.gradient, required this.shadowColor});
+  _SemiCirclePainter({
+    required this.gradient,
+    required this.shadowColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -244,20 +274,20 @@ class _SemiCirclePainter extends CustomPainter {
       ..shader = gradient.createShader(rect)
       ..style = PaintingStyle.fill;
 
-    // draw semicircle as a rounded arc
     final Path path = Path();
     path.moveTo(0, size.height);
-    path.arcTo(Rect.fromLTWH(0, 0, size.width, size.height * 2), math.pi, -math.pi, true);
+    path.arcTo(
+        Rect.fromLTWH(0, 0, size.width, size.height * 2),
+        math.pi,
+        -math.pi,
+        true);
     path.lineTo(size.width, size.height);
     path.close();
 
-    // subtle shadow
     canvas.drawShadow(path, shadowColor, 6, true);
-
-    // draw gradient semicircle
     canvas.drawPath(path, paint);
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
