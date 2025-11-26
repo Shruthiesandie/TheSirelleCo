@@ -78,19 +78,11 @@ class _HomePageState extends State<HomePage> {
                 ),
 
                 // -------------------- LOGO --------------------
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.pinkAccent.withOpacity(0.35),
-                    ), // debug border
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Image.asset(
-                    "assets/logo/logo.png",
-                    height: 70,   // <— CHANGE THIS to resize logo
-                    width: 70,    // <— keep equal for perfect scaling
-                    fit: BoxFit.contain,
-                  ),
+                Image.asset(
+                  "assets/logo/logo.png",
+                  height: 64,     // ← adjust size here
+                  width: 64,      // ← adjust size here
+                  fit: BoxFit.contain,
                 ),
 
                 // Search + Love
