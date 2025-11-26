@@ -1,5 +1,3 @@
-// lib/home/widgets/pinterest_arc_menu.dart
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 typedef CategorySelect = void Function(String slug);
