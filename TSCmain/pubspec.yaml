@@ -29,4 +29,5 @@ flutter:
   assets:
     - .env
     - assets/splash/splash.png
-    - assets/logo/logo.jpg
+    - assets/logo/
+    
