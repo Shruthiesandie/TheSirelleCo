@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
 
       // -------------------- CUSTOM TOP BAR --------------------
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
+        preferredSize: const Size.fromHeight(90), // bigger AppBar
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           color: Colors.white,
@@ -77,10 +77,20 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                 ),
 
-                // Logo
-                SizedBox(
-                  height: 40,
-                  child: Image.asset("assets/logo/logo.png"),
+                // -------------------- LOGO --------------------
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.pinkAccent.withOpacity(0.35),
+                    ), // debug border
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.asset(
+                    "assets/logo/logo.png",
+                    height: 64,   // <— CHANGE THIS to resize logo
+                    width: 64,    // <— keep equal for perfect scaling
+                    fit: BoxFit.contain,
+                  ),
                 ),
 
                 // Search + Love
@@ -96,7 +106,7 @@ class _HomePageState extends State<HomePage> {
                       icon: const Icon(Icons.favorite,
                           size: 26, color: Colors.black),
                       onPressed: () =>
-                          Navigator.pushNamed(context, "/love"), // FIXED
+                          Navigator.pushNamed(context, "/love"),
                     ),
                   ],
                 ),
@@ -116,14 +126,11 @@ class _HomePageState extends State<HomePage> {
         selectedItemColor: Colors.pinkAccent,
         unselectedItemColor: Colors.grey,
         iconSize: 28,
-
-        showSelectedLabels: false,   // REMOVE LABELS
-        showUnselectedLabels: false, // REMOVE LABELS
-
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         onTap: (index) {
           setState(() => _selectedIndex = index);
         },
-
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
           BottomNavigationBarItem(icon: Icon(Icons.card_membership), label: ""),
