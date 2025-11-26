@@ -87,8 +87,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: Image.asset(
                     "assets/logo/logo.png",
-                    height: 64,   // <— CHANGE THIS to resize logo
-                    width: 64,    // <— keep equal for perfect scaling
+                    height: 70,   // <— CHANGE THIS to resize logo
+                    width: 70,    // <— keep equal for perfect scaling
                     fit: BoxFit.contain,
                   ),
                 ),
