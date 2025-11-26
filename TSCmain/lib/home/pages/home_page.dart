@@ -1,3 +1,4 @@
+// lib/home/pages/home_page.dart
 import 'package:flutter/material.dart';
 import '../widgets/popup_bubble_menu.dart';
 
@@ -14,6 +15,7 @@ class _HomePageState extends State<HomePage> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // ---------------- PAGE NAVIGATION ----------------
   Widget _getPage(int index) {
     switch (index) {
       case 0:
@@ -31,20 +33,19 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // ---------------- HANDLE CATEGORY SELECTION ----------------
   void _openCategory(String slug) {
     setState(() => _menuOpen = false);
-
     Navigator.pushNamed(context, "/category/$slug");
   }
 
+  // ------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
-    const double bottomNavHeight = 68;
-
     return Scaffold(
       key: _scaffoldKey,
 
-      // ⭐ Your existing drawer
+      // ---------------- DRAWER ----------------
       drawer: Drawer(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -61,14 +62,16 @@ class _HomePageState extends State<HomePage> {
                   colors: [Color(0xFFFFC1E3), Color(0xFFB4F8C8)],
                 ),
               ),
-              child: Text("Hello, User 🎀",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              child: Text(
+                "Hello, User 🎀",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
       ),
 
-      // ⭐ Your existing top logo bar
+      // ---------------- TOP APP BAR ----------------
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90),
         child: Container(
@@ -77,10 +80,13 @@ class _HomePageState extends State<HomePage> {
           child: SafeArea(
             child: Row(
               children: [
+                // MENU BUTTON
                 IconButton(
                   icon: const Icon(Icons.menu, size: 28, color: Colors.black),
                   onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                 ),
+
+                // CENTER LOGO
                 Expanded(
                   child: Center(
                     child: Image.asset(
@@ -91,6 +97,8 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
+
+                // RIGHT SIDE ICONS
                 Row(
                   children: [
                     IconButton(
@@ -98,8 +106,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () => Navigator.pushNamed(context, "/search"),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.favorite,
-                          size: 26, color: Colors.black),
+                      icon: const Icon(Icons.favorite, size: 26, color: Colors.black),
                       onPressed: () => Navigator.pushNamed(context, "/love"),
                     ),
                   ],
@@ -110,48 +117,51 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      // ⭐ BODY + POPUP overlay
+      // ---------------- BODY + POPUP OVERLAY ----------------
       body: Stack(
         children: [
           Positioned.fill(child: _getPage(_selectedIndex)),
 
+          // Popup bubble menu
           PopupBubbleMenu(
             isOpen: _menuOpen,
             onSelect: _openCategory,
+            onClose: () => setState(() => _menuOpen = false),
           ),
         ],
       ),
 
-      // ⭐ Bottom navigation with center trigger
-      bottomNavigationBar: SizedBox(
-        height: bottomNavHeight,
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.pinkAccent,
-          unselectedItemColor: Colors.grey,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          iconSize: 28,
-          onTap: (index) {
-            if (index == 2) {
-              // CENTER ICON = open bubble
-              setState(() => _menuOpen = !_menuOpen);
-              return;
-            }
-            setState(() {
-              _selectedIndex = index;
-              _menuOpen = false;
-            });
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-            BottomNavigationBarItem(icon: Icon(Icons.card_membership), label: ""),
-            BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ""), // YOUR TRIGGER
-            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ""),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
-          ],
-        ),
+      // ---------------- BOTTOM NAV BAR ----------------
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.pinkAccent,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        iconSize: 28,
+
+        // ----- NAVIGATION & POPUP CONTROL -----
+        onTap: (index) {
+          if (index == 2) {
+            // CENTER ITEM TRIGGERS POPUP
+            setState(() => _menuOpen = !_menuOpen);
+            return;
+          }
+
+          setState(() {
+            _selectedIndex = index;
+            _menuOpen = false;
+          });
+        },
+
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
+          BottomNavigationBarItem(icon: Icon(Icons.card_membership), label: ""),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ""), // CENTER TRIGGER
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ""),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
+        ],
       ),
     );
   }
