@@ -1,4 +1,6 @@
+// lib/home/home.dart
 import 'package:flutter/material.dart';
+import '../widgets/half_circle_menu.dart'; // NEW import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,10 +11,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  bool _menuOpen = false;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Page navigation handler
   Widget _getPage(int index) {
     switch (index) {
       case 0:
@@ -20,7 +22,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return const Center(child: Text("Membership Page"));
       case 2:
-        return const Center(child: Text("All Categories Page"));
+        return const Center(child: Text("All Categories (placeholder)"));
       case 3:
         return const Center(child: Text("Cart Page"));
       case 4:
@@ -30,12 +32,27 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _openMenu() => setState(() => _menuOpen = true);
+  void _closeMenu() => setState(() => _menuOpen = false);
+
+  void _onCategorySelect(String slug) {
+    // Close menu, then navigate
+    _closeMenu();
+    if (slug == 'male') {
+      Navigator.pushNamed(context, '/category/male');
+    } else if (slug == 'female') {
+      Navigator.pushNamed(context, '/category/female');
+    } else {
+      Navigator.pushNamed(context, '/category/all');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    const double bottomNavHeight = 68.0; // used to position the semicircle
     return Scaffold(
       key: _scaffoldKey,
-
-      // -------------------- DRAWER --------------------
+      // drawer, appbar etc — keep your existing header. (Replace with your current header)
       drawer: Drawer(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -61,7 +78,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      // -------------------- CUSTOM TOP BAR --------------------
+      // keep your current topbar (you can paste your existing appBar here)
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90),
         child: Container(
@@ -70,29 +87,20 @@ class _HomePageState extends State<HomePage> {
           child: SafeArea(
             child: Row(
               children: [
-                // -------------------- LEFT SIDE ICON --------------------
                 IconButton(
                   icon: const Icon(Icons.menu, size: 28, color: Colors.black),
                   onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                 ),
-
-                // -------------------- CENTER LOGO --------------------
                 Expanded(
-  child: Transform.translate(
-    offset: const Offset(25, 0), // ← SHIFT LOGO (x , y)
-    child: Center(
-      child: Image.asset(
-        "assets/logo/logo.png",
-        height: 85,
-        width: 85,
-        fit: BoxFit.contain,
-      ),
-    ),
-  ),
-),
-
-
-                // -------------------- RIGHT SIDE ICONS --------------------
+                  child: Center(
+                    child: Image.asset(
+                      "assets/logo/logo.png",
+                      height: 64,
+                      width: 64,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
                 Row(
                   children: [
                     IconButton(
@@ -111,28 +119,54 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      // -------------------- BODY --------------------
-      body: _getPage(_selectedIndex),
+      // BODY is a stack so we can overlay the semicircle above bottom nav
+      body: Stack(
+        children: [
+          // main app content
+          Positioned.fill(child: _getPage(_selectedIndex)),
 
-      // -------------------- BOTTOM NAV --------------------
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.pinkAccent,
-        unselectedItemColor: Colors.grey,
-        iconSize: 28,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        onTap: (index) {
-          setState(() => _selectedIndex = index);
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.card_membership), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
+          // semicircle menu overlay
+          HalfCircleMenu(
+            isOpen: _menuOpen,
+            radius: 140, // adjust size here; make larger for bigger semicircle
+            onSelect: _onCategorySelect,
+            onClose: _closeMenu,
+          ),
         ],
+      ),
+
+      bottomNavigationBar: SizedBox(
+        height: bottomNavHeight,
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: Colors.pinkAccent,
+          unselectedItemColor: Colors.grey,
+          iconSize: 28,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          onTap: (index) {
+            // if tapped center icon index (we'll assume center is index 2),
+            // toggle the semicircle instead of switching page.
+            if (index == 2) {
+              setState(() {
+                _menuOpen = !_menuOpen;
+              });
+              return;
+            }
+            setState(() {
+              _selectedIndex = index;
+              _menuOpen = false; // close menu if open
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
+            BottomNavigationBarItem(icon: Icon(Icons.card_membership), label: ""),
+            BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ""), // center: All Categories
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ""),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
+          ],
+        ),
       ),
     );
   }

@@ -29,7 +29,10 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => HomePage(),
         '/search': (context) => SearchPage(),  // no const
-        '/love': (context) => LovePage(),      // no const
+        '/love': (context) => LovePage(),
+        '/category/male': (ctx) => CategoryPage(category: 'male'),
+        '/category/female': (ctx) =>  CategoryPage(category: 'female'),
+        '/category/all': (ctx) =>  CategoryPage(category: 'all'),      // no const
       },
     );
   }
