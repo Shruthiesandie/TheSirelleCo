@@ -15,7 +15,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9E1D9), // same aesthetic as splash 😍
+      backgroundColor: const Color(0xFFFCEEEE), // 💗 lighter pink background
 
       // ---------------- TOP NAV -----------------
       appBar: PreferredSize(
@@ -23,12 +23,13 @@ class _HomePageState extends State<HomePage> {
         child: SafeArea(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20),
+            color: Colors.white, // 🤍 top bar now pure white
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Icon(Icons.menu, size: 28, color: Colors.black),
 
-                // Center icon/logo
+                // Center logo
                 Image.asset(
                   "assets/logo/logo.png",
                   height: 40,
@@ -66,7 +67,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
 
-      // ---------------- BOTTOM BAR -----------------
+      // ---------------- BOTTOM NAV -----------------
       bottomNavigationBar: _buildAestheticNavBar(),
     );
   }
@@ -75,7 +76,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
       height: 70,
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: Colors.white, // 🤍 bottom bar white
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(26),
           topRight: Radius.circular(26),
