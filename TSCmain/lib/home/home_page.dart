@@ -15,15 +15,6 @@ class _HomePageState extends State<HomePage> {
   // ⭐ Added for hamburger menu to work
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // ⭐ NEW — Pages for bottom navigation switching
-  final List<Widget> pages = const [
-    Center(child: Text("Home Page", style: TextStyle(fontSize: 22))),
-    Center(child: Text("Membership Page", style: TextStyle(fontSize: 22))),
-    SizedBox(), // placeholder for plus button
-    Center(child: Text("Cart Page", style: TextStyle(fontSize: 22))),
-    Center(child: Text("Profile Page", style: TextStyle(fontSize: 22))),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -36,7 +27,7 @@ class _HomePageState extends State<HomePage> {
 
           backgroundColor: const Color(0xFFFCEEEE), // Pink bg
 
-          // ⭐ DRAWER ADDED
+          // ⭐ DRAWER ADDED — only thing changed
           drawer: Drawer(
             backgroundColor: Colors.white,
             child: ListView(
@@ -61,42 +52,57 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // ---------------- TOP BAR ----------------
+          // ---------------- TOP BAR (curved now) ----------------
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90),
             child: ClipPath(
               clipper: TopBarClipper(),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: const BoxDecoration(color: Colors.white),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                ),
                 child: Row(
                   children: [
+                    // LEFT ICON — ⭐ now opens drawer
                     IconButton(
                       icon: const Icon(Icons.menu, size: 28, color: Colors.black),
-                      onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                      onPressed: () =>
+                          _scaffoldKey.currentState!.openDrawer(), // ⭐ updated
                     ),
 
+                    // ⭐ FULL MANUAL LOGO CONTROL ⭐
                     Expanded(
                       child: Transform.translate(
-                        offset: const Offset(20,0),
+                        offset: const Offset(100, 0), // Move logo right
                         child: SizedBox(
                           height: 80,
                           width: 80,
-                          child: Image.asset("assets/logo/logo.png"),
+                          child: Container(
+                            alignment: Alignment.centerLeft,
+                            child: Image.asset(
+                              "assets/logo/logo.png",
+                              fit: BoxFit.contain,
+                            ),
+                          ),
                         ),
                       ),
                     ),
 
+                    // RIGHT SIDE ICONS
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.search, size: 26, color: Colors.black),
-                          onPressed: () => Navigator.pushNamed(context, "/search"),
+                          icon: const Icon(Icons.search,
+                              size: 26, color: Colors.black),
+                          onPressed: () =>
+                              Navigator.pushNamed(context, "/search"),
                         ),
                         IconButton(
                           icon: const Icon(Icons.favorite_border,
                               size: 26, color: Colors.black),
-                          onPressed: () => Navigator.pushNamed(context, "/love"),
+                          onPressed: () =>
+                              Navigator.pushNamed(context, "/love"),
                         ),
                       ],
                     ),
@@ -106,10 +112,15 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // ---------------- BODY (updated navigation) ----------------
+          // ---------------- BODY ----------------
           body: Stack(
             children: [
-              pages[_selected],  // ⭐ SWITCH PAGES HERE
+              const Center(
+                child: Text(
+                  "Home Page",
+                  style: TextStyle(fontSize: 22, color: Colors.black87),
+                ),
+              ),
 
               PinterestArcMenu(
                 isOpen: _arcOpen,
@@ -127,7 +138,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ---------------- NAV BAR ----------------
+  // ---------------- Aesthetic Bottom Nav ----------------
   Widget _buildAestheticNavBar() {
     return Container(
       height: 74,
@@ -168,6 +179,13 @@ class _HomePageState extends State<HomePage> {
                 decoration: const BoxDecoration(
                   color: Colors.pinkAccent,
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: const Icon(Icons.add, size: 30, color: Colors.white),
               ),
@@ -178,16 +196,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ---------------- ICON LOGIC UPDATED ----------------
+  // ---------------- UPDATED NAV ICON LOGIC ----------------
   Widget _navIcon(IconData icon, int index) {
     return GestureDetector(
       onTap: () {
-        if (index == 2) return; // plus icon handled separately
-
         setState(() {
           _selected = index;
           _arcOpen = false;
         });
+
+        if (index == 0) Navigator.pushNamed(context, "/home");
+        if (index == 1) Navigator.pushNamed(context, "/membership");
+        if (index == 3) Navigator.pushNamed(context, "/cart");
+        if (index == 4) Navigator.pushNamed(context, "/profile");
       },
       child: Icon(
         icon,
@@ -198,7 +219,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// ---------------- CURVED TOP BAR ----------------
+// ---------------- CURVED TOP BAR CLIPPER ----------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -219,5 +240,5 @@ class TopBarClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(_) => false;
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
