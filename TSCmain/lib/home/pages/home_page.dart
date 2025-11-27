@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // -----------------------------------------
-  // GENDER BUTTON ACTIONS
+  // CATEGORY BUTTON ACTIONS
   // -----------------------------------------
   void _onMaleSelect() {
     setState(() => _menuOpen = false);
@@ -47,22 +47,13 @@ class _HomePageState extends State<HomePage> {
     Navigator.pushNamed(context, "/category/female");
   }
 
+  void _onUnisexSelect() {
+    setState(() => _menuOpen = false);
+    Navigator.pushNamed(context, "/category/unisex");
+  }
+
   @override
   Widget build(BuildContext context) {
-    final double screenW = MediaQuery.of(context).size.width;
-
-    // number of bottom items
-    const int itemCount = 5;
-
-    // index of center button (All Categories)
-    const int centerIndex = 2;
-
-    // width of each nav item
-    final double itemWidth = screenW / itemCount;
-
-    // center X for the arc menu
-    final double anchorX = (itemWidth * centerIndex) + (itemWidth / 2);
-
     return Scaffold(
       key: _scaffoldKey,
 
@@ -102,13 +93,10 @@ class _HomePageState extends State<HomePage> {
           child: SafeArea(
             child: Row(
               children: [
-                // Hamburger menu
                 IconButton(
                   icon: const Icon(Icons.menu, size: 28, color: Colors.black),
                   onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                 ),
-
-                // Center Logo
                 Expanded(
                   child: Center(
                     child: Image.asset(
@@ -118,8 +106,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-
-                // Search + Love
                 Row(
                   children: [
                     IconButton(
@@ -145,11 +131,11 @@ class _HomePageState extends State<HomePage> {
         children: [
           Positioned.fill(child: _getPage(_selectedIndex)),
 
-          // Pinterest Arc Menu
           PinterestArcMenu(
             isOpen: _menuOpen,
             onMaleTap: _onMaleSelect,
             onFemaleTap: _onFemaleSelect,
+            onUnisexTap: _onUnisexSelect, // NEW
           ),
         ],
       ),
@@ -165,9 +151,9 @@ class _HomePageState extends State<HomePage> {
         showSelectedLabels: false,
         showUnselectedLabels: false,
         iconSize: 28,
+
         onTap: (index) {
           if (index == 2) {
-            // toggle menu
             setState(() => _menuOpen = !_menuOpen);
             return;
           }
@@ -177,10 +163,17 @@ class _HomePageState extends State<HomePage> {
             _menuOpen = false;
           });
         },
+
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
           BottomNavigationBarItem(icon: Icon(Icons.card_membership), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ""),
+
+          // CENTER BUTTON → PLUS
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add, size: 36, color: Colors.pinkAccent),
+            label: "",
+          ),
+
           BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ""),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
         ],
