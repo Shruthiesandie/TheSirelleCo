@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'splash_screen.dart';
 
 // Home Page
-import 'home/pages/home_page.dart';
+
 
 // 🔥 Add these imports
 import 'home/pages/search_page.dart';
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
 
       // Navigation routes
       routes: {
-        '/home': (context) => HomePage(),
+        
         '/search': (context) => SearchPage(),  // no const
         '/love': (context) => LovePage(),
         '/category/male': (ctx) => CategoryPage(category: 'male'),

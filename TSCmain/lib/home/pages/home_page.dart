@@ -1,183 +1,152 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../widgets/pinterest_arc_menu.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class PinterestArcMenu extends StatefulWidget {
+  final bool isOpen;
+  final VoidCallback onMaleTap;
+  final VoidCallback onFemaleTap;
+  final VoidCallback onUnisexTap;
+
+  const PinterestArcMenu({
+    super.key,
+    required this.isOpen,
+    required this.onMaleTap,
+    required this.onFemaleTap,
+    required this.onUnisexTap,
+  });
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<PinterestArcMenu> createState() => _PinterestArcMenuState();
 }
 
-class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-  bool _menuOpen = false;
+class _PinterestArcMenuState extends State<PinterestArcMenu>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+  }
 
-  // -----------------------------------------
-  // PAGE SWITCHER
-  // -----------------------------------------
-  Widget _getPage(int index) {
-    switch (index) {
-      case 0:
-        return const Center(child: Text("Home Page"));
-      case 1:
-        return const Center(child: Text("Membership Page"));
-      case 2:
-        return const Center(child: Text("All Categories Page"));
-      case 3:
-        return const Center(child: Text("Cart Page"));
-      case 4:
-        return const Center(child: Text("Profile Page"));
-      default:
-        return const Center(child: Text("Home Page"));
+  @override
+  void didUpdateWidget(PinterestArcMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.isOpen) {
+      _ctrl.forward();
+    } else {
+      _ctrl.reverse();
     }
-  }
-
-  // -----------------------------------------
-  // CATEGORY BUTTON ACTIONS
-  // -----------------------------------------
-  void _onMaleSelect() {
-    setState(() => _menuOpen = false);
-    Navigator.pushNamed(context, "/category/male");
-  }
-
-  void _onFemaleSelect() {
-    setState(() => _menuOpen = false);
-    Navigator.pushNamed(context, "/category/female");
-  }
-
-  void _onUnisexSelect() {
-    setState(() => _menuOpen = false);
-    Navigator.pushNamed(context, "/category/unisex");
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (context, _) {
+        final t = _ctrl.value;
 
-      // -----------------------------------------
-      // DRAWER
-      // -----------------------------------------
-      drawer: Drawer(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20),
-            bottomRight: Radius.circular(20),
-          ),
-        ),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: const [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                gradient:
-                    LinearGradient(colors: [Color(0xFFFFC1E3), Color(0xFFB4F8C8)]),
+        // ❌ If closed → hide completely
+        if (t == 0) return const SizedBox.shrink();
+
+        return Positioned(
+          bottom: 70,
+          left: 0,
+          right: 0,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // ----------------------------
+              // ARC BACKGROUND
+              // ----------------------------
+              Transform.scale(
+                scale: t,
+                child: CustomPaint(
+                  size: const Size(260, 140),
+                  painter: ArcPainter(progress: t),
+                ),
               ),
-              child: Text("Hello, User 🎀",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        ),
-      ),
 
-      // -----------------------------------------
-      // TOP BAR
-      // -----------------------------------------
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(90),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          color: Colors.white,
-          child: SafeArea(
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.menu, size: 28, color: Colors.black),
-                  onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Image.asset(
-                      "assets/logo/logo.png",
-                      height: 55,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-                Row(
+              // ----------------------------
+              // 3 BUTTONS
+              // ----------------------------
+              Positioned(
+                bottom: 40 * t,
+                child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.search, size: 26, color: Colors.black),
-                      onPressed: () => Navigator.pushNamed(context, "/search"),
+                    Transform.translate(
+                      offset: Offset(-60 * t, 0),
+                      child: _circle(Icons.male, Colors.blue, widget.onMaleTap),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.favorite, size: 26, color: Colors.black),
-                      onPressed: () => Navigator.pushNamed(context, "/love"),
+                    const SizedBox(width: 40),
+                    Transform.translate(
+                      offset: Offset(0, -12 * t),
+                      child: _circle(Icons.transgender, Colors.purple,
+                          widget.onUnisexTap),
+                    ),
+                    const SizedBox(width: 40),
+                    Transform.translate(
+                      offset: Offset(60 * t, 0),
+                      child: _circle(
+                          Icons.female, Colors.pink, widget.onFemaleTap),
                     ),
                   ],
-                )
-              ],
-            ),
+                ),
+              ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
+    );
+  }
 
-      // -----------------------------------------
-      // BODY + ARC MENU
-      // -----------------------------------------
-      body: Stack(
-        children: [
-          Positioned.fill(child: _getPage(_selectedIndex)),
-
-          PinterestArcMenu(
-            isOpen: _menuOpen,
-            onMaleTap: _onMaleSelect,
-            onFemaleTap: _onFemaleSelect,
-            onUnisexTap: _onUnisexSelect, // NEW
-          ),
-        ],
-      ),
-
-      // -----------------------------------------
-      // BOTTOM NAV BAR
-      // -----------------------------------------
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.pinkAccent,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        iconSize: 28,
-
-        onTap: (index) {
-          if (index == 2) {
-            setState(() => _menuOpen = !_menuOpen);
-            return;
-          }
-
-          setState(() {
-            _selectedIndex = index;
-            _menuOpen = false;
-          });
-        },
-
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.card_membership), label: ""),
-
-          // CENTER BUTTON → PLUS
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add, size: 36, color: Colors.pinkAccent),
-            label: "",
-          ),
-
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
-        ],
+  Widget _circle(IconData icon, Color color, VoidCallback tap) {
+    return GestureDetector(
+      onTap: tap,
+      child: CircleAvatar(
+        radius: 26,
+        backgroundColor: Colors.white,
+        child: Icon(icon, size: 28, color: color),
       ),
     );
   }
+}
+
+class ArcPainter extends CustomPainter {
+  final double progress;
+  ArcPainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // prevent drawing when closed
+    if (progress == 0) return;
+
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
+
+    double w = size.width;
+    double h = size.height;
+
+    double bump = lerpDouble(0, 70, progress)!;
+    double topY = lerpDouble(h - 20, h - 110, progress)!;
+
+    Path path = Path();
+    path.moveTo(0, h);
+    path.lineTo(0, topY);
+    path.quadraticBezierTo(w / 2, topY - bump, w, topY);
+    path.lineTo(w, h);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant ArcPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
