@@ -1,4 +1,3 @@
-// lib/home/pages/home_page.dart
 import 'package:flutter/material.dart';
 import '../widgets/pinterest_arc_menu.dart';
 
@@ -12,8 +11,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   bool _menuOpen = false;
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // -----------------------------------------
+  // PAGE SWITCHER
+  // -----------------------------------------
   Widget _getPage(int index) {
     switch (index) {
       case 0:
@@ -21,7 +24,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return const Center(child: Text("Membership Page"));
       case 2:
-        return const Center(child: Text("All Categories Placeholder"));
+        return const Center(child: Text("All Categories Page"));
       case 3:
         return const Center(child: Text("Cart Page"));
       case 4:
@@ -31,49 +34,66 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _openCategory(String slug) {
-    if (slug == "close") {
-      setState(() => _menuOpen = false);
-      return;
-    }
+  // -----------------------------------------
+  // GENDER BUTTON ACTIONS
+  // -----------------------------------------
+  void _onMaleSelect() {
     setState(() => _menuOpen = false);
-    Navigator.pushNamed(context, "/category/$slug");
+    Navigator.pushNamed(context, "/category/male");
+  }
+
+  void _onFemaleSelect() {
+    setState(() => _menuOpen = false);
+    Navigator.pushNamed(context, "/category/female");
   }
 
   @override
   Widget build(BuildContext context) {
     final double screenW = MediaQuery.of(context).size.width;
 
-    // Number of bottom nav items (update if you change the bar)
-    const int itemsCount = 5;
+    // number of bottom items
+    const int itemCount = 5;
 
-    // index of your center grid icon (0-based). Here it's the 3rd item: index 2.
+    // index of center button (All Categories)
     const int centerIndex = 2;
 
-    // width of each item (approx)
-    final double itemWidth = screenW / itemsCount;
+    // width of each nav item
+    final double itemWidth = screenW / itemCount;
 
-    // center x of the target item (we add a small manual shift option if needed)
-    // If your BottomNavigationBar has extra internal padding, tweak anchorShift.
-    const double anchorShift = 0.0; // <- adjust this (positive moves arc right)
-    final double anchorX = (itemWidth * centerIndex) + (itemWidth / 2) + anchorShift;
+    // center X for the arc menu
+    final double anchorX = (itemWidth * centerIndex) + (itemWidth / 2);
 
     return Scaffold(
       key: _scaffoldKey,
+
+      // -----------------------------------------
+      // DRAWER
+      // -----------------------------------------
       drawer: Drawer(
         shape: const RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
-        ),
-        child: ListView(padding: EdgeInsets.zero, children: const [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [Color(0xFFFFC1E3), Color(0xFFB4F8C8)]),
-            ),
-            child: Text("Hello, User 🎀", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20),
           ),
-        ]),
+        ),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: const [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                gradient:
+                    LinearGradient(colors: [Color(0xFFFFC1E3), Color(0xFFB4F8C8)]),
+              ),
+              child: Text("Hello, User 🎀",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
       ),
+
+      // -----------------------------------------
+      // TOP BAR
+      // -----------------------------------------
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90),
         child: Container(
@@ -82,32 +102,61 @@ class _HomePageState extends State<HomePage> {
           child: SafeArea(
             child: Row(
               children: [
-                IconButton(icon: const Icon(Icons.menu, size: 28, color: Colors.black), onPressed: () => _scaffoldKey.currentState!.openDrawer()),
-                Expanded(child: Center(child: Image.asset("assets/logo/logo.png", height: 70, width: 70, fit: BoxFit.contain))),
-                Row(children: [
-                  IconButton(icon: const Icon(Icons.search, size: 26, color: Colors.black), onPressed: () => Navigator.pushNamed(context, "/search")),
-                  IconButton(icon: const Icon(Icons.favorite, size: 26, color: Colors.black), onPressed: () => Navigator.pushNamed(context, "/love")),
-                ])
+                // Hamburger menu
+                IconButton(
+                  icon: const Icon(Icons.menu, size: 28, color: Colors.black),
+                  onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                ),
+
+                // Center Logo
+                Expanded(
+                  child: Center(
+                    child: Image.asset(
+                      "assets/logo/logo.png",
+                      height: 55,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+
+                // Search + Love
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.search, size: 26, color: Colors.black),
+                      onPressed: () => Navigator.pushNamed(context, "/search"),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.favorite, size: 26, color: Colors.black),
+                      onPressed: () => Navigator.pushNamed(context, "/love"),
+                    ),
+                  ],
+                )
               ],
             ),
           ),
         ),
       ),
 
+      // -----------------------------------------
+      // BODY + ARC MENU
+      // -----------------------------------------
       body: Stack(
         children: [
           Positioned.fill(child: _getPage(_selectedIndex)),
 
-          // Pass the anchorX so the arc is wrapped around the grid icon
+          // Pinterest Arc Menu
           PinterestArcMenu(
             isOpen: _menuOpen,
-            onSelect: _openCategory,
-            anchorX: anchorX,
-            bottomOffset: kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom - 6,
+            onMaleTap: _onMaleSelect,
+            onFemaleTap: _onFemaleSelect,
           ),
         ],
       ),
 
+      // -----------------------------------------
+      // BOTTOM NAV BAR
+      // -----------------------------------------
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
@@ -118,9 +167,11 @@ class _HomePageState extends State<HomePage> {
         iconSize: 28,
         onTap: (index) {
           if (index == 2) {
+            // toggle menu
             setState(() => _menuOpen = !_menuOpen);
             return;
           }
+
           setState(() {
             _selectedIndex = index;
             _menuOpen = false;
