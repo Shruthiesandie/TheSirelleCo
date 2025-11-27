@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class PinterestArcMenu extends StatelessWidget {
+class PinterestArcMenu extends StatefulWidget {
   final bool isOpen;
   final VoidCallback onMaleTap;
   final VoidCallback onFemaleTap;
@@ -15,46 +15,120 @@ class PinterestArcMenu extends StatelessWidget {
   });
 
   @override
+  State<PinterestArcMenu> createState() => _PinterestArcMenuState();
+}
+
+class _PinterestArcMenuState extends State<PinterestArcMenu>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  late Animation<double> arcScale;
+  late Animation<double> maleSlide;
+  late Animation<double> femaleSlide;
+  late Animation<double> unisexSlide;
+  late Animation<double> fadeIn;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+
+    // Background arc growth
+    arcScale = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutQuad,
+    );
+
+    // Slight staggered icon slide up
+    maleSlide = Tween<double>(begin: 40, end: 0).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.2, 1, curve: Curves.easeOutBack)),
+    );
+    femaleSlide = Tween<double>(begin: 40, end: 0).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.3, 1, curve: Curves.easeOutBack)),
+    );
+    unisexSlide = Tween<double>(begin: 40, end: 0).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.4, 1, curve: Curves.easeOutBack)),
+    );
+
+    fadeIn = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.2, 1),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant PinterestArcMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isOpen) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AnimatedPositioned(
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOut,
-      bottom: isOpen ? 80 : -200,
+    return Positioned(
+      bottom: 90,
       left: 0,
       right: 0,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 300),
-        opacity: isOpen ? 1 : 0,
-        child: _arcMenu(context),
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          return Opacity(
+            opacity: fadeIn.value,
+            child: Transform.scale(
+              scale: arcScale.value,
+              child: _buildArcMenu(),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _arcMenu(BuildContext context) {
+  Widget _buildArcMenu() {
     return Center(
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          // ARC SHAPE
-          CustomPaint(
-            size: const Size(260, 150),
-            painter: ArcPainter(),
-          ),
-
-          // ICON BUTTONS
-          Positioned(
-            bottom: 55,
-            child: Row(
-              children: [
-                _circleButton(Icons.male, Colors.blue, onMaleTap),
-                const SizedBox(width: 30),
-                _circleButton(Icons.female, Colors.pink, onFemaleTap),
-                const SizedBox(width: 30),
-                _circleButton(Icons.transgender, Colors.purple, onUnisexTap),
-              ],
+      child: Container(
+        width: 260,
+        height: 140,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.92),
+          borderRadius: BorderRadius.circular(70),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            )
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Male
+            Transform.translate(
+              offset: Offset(-70, maleSlide.value),
+              child: _circleButton(Icons.male, Colors.blue, widget.onMaleTap),
             ),
-          ),
-        ],
+
+            // Female
+            Transform.translate(
+              offset: Offset(0, femaleSlide.value),
+              child: _circleButton(Icons.female, Colors.pink, widget.onFemaleTap),
+            ),
+
+            // Unisex
+            Transform.translate(
+              offset: Offset(70, unisexSlide.value),
+              child: _circleButton(Icons.transgender, Colors.purple, widget.onUnisexTap),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -62,40 +136,16 @@ class PinterestArcMenu extends StatelessWidget {
   Widget _circleButton(IconData icon, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: CircleAvatar(
-        radius: 28,
-        backgroundColor: Colors.white,
-        child: Icon(icon, size: 32, color: color),
+      child: AnimatedScale(
+        scale: widget.isOpen ? 1 : 0.001,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutBack,
+        child: CircleAvatar(
+          radius: 28,
+          backgroundColor: Colors.white,
+          child: Icon(icon, size: 32, color: color),
+        ),
       ),
     );
   }
-}
-
-class ArcPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12)
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-
-    // Arc curve
-    path.moveTo(0, size.height);
-    path.quadraticBezierTo(
-      size.width / 2,
-      0,
-      size.width,
-      size.height,
-    );
-    path.lineTo(size.width, size.height + 40);
-    path.lineTo(0, size.height + 40);
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
