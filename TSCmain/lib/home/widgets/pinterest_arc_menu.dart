@@ -30,15 +30,12 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
       reverseDuration: const Duration(milliseconds: 350),
     );
 
-    if (widget.isOpen) {
-      _ctrl.value = 1.0;
-    }
+    if (widget.isOpen) _ctrl.value = 1.0;
   }
 
   @override
   void didUpdateWidget(covariant PinterestArcMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (widget.isOpen) {
       _ctrl.forward();
     } else {
@@ -56,46 +53,58 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
         animation: _ctrl,
         builder: (context, _) {
           final t = _ctrl.value;
+
           return SizedBox(
             width: 260,
             height: lerpDouble(70, 170, t)!,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Background + blur arc
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: ArcPainter(progress: t),
+                // ------------------------------
+                // ARC (hidden completely when closed)
+                // ------------------------------
+                if (t > 0)
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: ArcPainter(progress: t),
+                    ),
                   ),
-                ),
 
-                // Male button
+                // ------------------------------
+                // MALE BUTTON
+                // ------------------------------
                 Positioned(
                   top: lerpDouble(60, 20, t)!,
                   left: lerpDouble(115, 45, t)!,
                   child: Opacity(
                     opacity: t,
                     child: Transform.scale(
-                      scale: lerpDouble(0.5, 1, t),
-                      child: _genderButton(Icons.male, Colors.blue, widget.onMaleTap),
+                      scale: lerpDouble(0.5, 1.0, t)!,
+                      child: _genderButton(
+                          Icons.male, Colors.blue, widget.onMaleTap),
                     ),
                   ),
                 ),
 
-                // Female button
+                // ------------------------------
+                // FEMALE BUTTON
+                // ------------------------------
                 Positioned(
                   top: lerpDouble(60, 20, t)!,
                   right: lerpDouble(115, 45, t)!,
                   child: Opacity(
                     opacity: t,
                     child: Transform.scale(
-                      scale: lerpDouble(0.5, 1, t),
-                      child: _genderButton(Icons.female, Colors.pink, widget.onFemaleTap),
+                      scale: lerpDouble(0.5, 1, t)!,
+                      child: _genderButton(
+                          Icons.female, Colors.pink, widget.onFemaleTap),
                     ),
                   ),
                 ),
 
-                // Center button (⚥)
+                // ------------------------------
+                // CENTER ⚥ BUTTON
+                // ------------------------------
                 Positioned(
                   bottom: 10,
                   child: Transform.scale(
@@ -108,9 +117,9 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
                         boxShadow: [
                           BoxShadow(
                             blurRadius: 15 * t,
-                            color: Colors.black.withOpacity(0.2 * t),
+                            color: Colors.black.withOpacity(0.20 * t),
                             offset: const Offset(0, 6),
-                          )
+                          ),
                         ],
                       ),
                       child: const Text(
@@ -145,17 +154,20 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
 }
 
 /// ---------------------------------------------------------------------------
-/// PINTEREST NOTCH ARC PAINTER (your final working version)
+/// FINAL PINTEREST ARC PAINTER (Arc hidden when closed)
 /// ---------------------------------------------------------------------------
 class ArcPainter extends CustomPainter {
-  final double progress; // 0 = closed, 1 = full bump
+  final double progress;
 
   ArcPainter({required this.progress});
 
   @override
   void paint(Canvas canvas, Size size) {
+    // 🔥 FIX: Arc is INVISIBLE when closed
+    if (progress == 0) return;
+
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.65 + (progress * 0.2))
+      ..color = Colors.white.withOpacity(0.75)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18)
       ..style = PaintingStyle.fill;
 
@@ -166,7 +178,7 @@ class ArcPainter extends CustomPainter {
     final double topY = lerpDouble(h - 40, h - 115, progress)!;
     final double cx = w / 2;
 
-    Path path = Path()
+    final Path path = Path()
       ..moveTo(0, h)
       ..lineTo(0, topY)
       ..lineTo(cx - bumpRadius, topY);
@@ -177,8 +189,6 @@ class ArcPainter extends CustomPainter {
         radius: Radius.circular(bumpRadius),
         clockwise: false,
       );
-    } else {
-      path.quadraticBezierTo(cx, topY - 4, cx + bumpRadius, topY);
     }
 
     path
@@ -186,7 +196,7 @@ class ArcPainter extends CustomPainter {
       ..lineTo(w, h)
       ..close();
 
-    canvas.drawShadow(path, Colors.black.withOpacity(0.2 * progress), 16, false);
+    canvas.drawShadow(path, Colors.black.withOpacity(0.18 * progress), 16, false);
     canvas.drawPath(path, paint);
   }
 
