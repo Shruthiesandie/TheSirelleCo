@@ -12,45 +12,50 @@ class _HomePageState extends State<HomePage> {
   int _selected = 0;
   bool _arcOpen = false;
 
-  // 🔥 MANUAL LOGO SIZE CONTROL —
-  //   Change this number ONLY to resize logo
-  double logoSize = 48; // <--- ADJUST HERE (30 to 80 recommended)
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white, // FULL WHITE TOP SAFE AREA
+      color: Colors.white, // FULL WHITE TOP
       child: SafeArea(
         top: true,
         bottom: false,
         child: Scaffold(
-          backgroundColor: const Color(0xFFFCEEEE), // aesthetic pink
+          backgroundColor: const Color(0xFFFCEEEE), // Pink bg
 
-          // ------------------- TOP BAR -------------------
+          // ---------------- TOP BAR ----------------
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(70),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               color: Colors.white,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Hamburger menu
+                  // LEFT ICON
                   IconButton(
                     icon: const Icon(Icons.menu, size: 28, color: Colors.black),
                     onPressed: () {},
                   ),
 
-                  // ⭐ CENTER LOGO WITH MANUAL SIZE CONTROL ⭐
-                  SizedBox(
-                    height: logoSize, // <--- CHANGE THIS TO RESIZE LOGO
-                    child: Image.asset(
-                      "assets/logo/logo.png",
-                      fit: BoxFit.contain,
+                  // ⭐ ⭐ FULL MANUAL LOGO CONTROL ⭐ ⭐
+                  Expanded(
+                    child: Transform.translate(
+                      offset: const Offset(110, 0),
+                      child: SizedBox(
+                        height: 80,
+                        width: 80,
+                        child: Container(
+                          padding: const EdgeInsets.only(left: 0),
+                          alignment: Alignment.centerLeft,
+                          child: Image.asset(
+                            "assets/logo/logo.png",
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
 
-                  // Search + Heart
+                  // RIGHT ICONS
                   Row(
                     children: [
                       IconButton(
@@ -70,14 +75,12 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // ------------------- PAGE BODY -------------------
+          // ---------------- BODY ----------------
           body: Stack(
             children: [
               const Center(
-                child: Text(
-                  "Home Page",
-                  style: TextStyle(fontSize: 22, color: Colors.black87),
-                ),
+                child: Text("Home Page",
+                    style: TextStyle(fontSize: 22, color: Colors.black87)),
               ),
 
               PinterestArcMenu(
@@ -89,16 +92,14 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
 
-          // ------------------- BOTTOM NAV -------------------
+          // ---------------- BOTTOM NAV ----------------
           bottomNavigationBar: _buildAestheticNavBar(),
         ),
       ),
     );
   }
 
-  // -------------------------------------------------------
-  // ⭐ RESTORED AESTHETIC BOTTOM NAV BAR
-  // -------------------------------------------------------
+  // Aesthetic Bottom Nav
   Widget _buildAestheticNavBar() {
     return Container(
       height: 74,
@@ -116,11 +117,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // icons row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -132,9 +131,8 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
 
-          // ⭐ Center PLUS floating button ⭐
           Positioned(
-            bottom: 16,
+            bottom: 10,
             child: GestureDetector(
               onTap: () => setState(() => _arcOpen = !_arcOpen),
               child: Container(
