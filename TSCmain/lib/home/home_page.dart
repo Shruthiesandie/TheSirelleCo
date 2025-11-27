@@ -9,21 +9,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _selected = 0;
   bool _arcOpen = false;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white, // FULL TOP AREA WHITE (safe-area included)
+      color: Colors.white, // FULL WHITE TOP SAFE AREA
       child: SafeArea(
         top: true,
         bottom: false,
         child: Scaffold(
-          backgroundColor: const Color(0xFFFCEEEE), // light pink background
+          backgroundColor: const Color(0xFFFCEEEE), // aesthetic pink
 
-          // ------------------------------
-          // TOP NAV BAR (WHITE)
-          // ------------------------------
+          // ------------------- TOP BAR -------------------
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(70),
             child: Container(
@@ -32,19 +31,13 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Hamburger menu
                   IconButton(
                     icon: const Icon(Icons.menu, size: 28, color: Colors.black),
                     onPressed: () {},
                   ),
 
-                  // Center logo
-                  Image.asset(
-                    "assets/logo/logo.png",
-                    height: 40,
-                  ),
+                  Image.asset("assets/logo/logo.png", height: 40),
 
-                  // Search + Heart
                   Row(
                     children: [
                       IconButton(
@@ -64,9 +57,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // ------------------------------
-          // BODY
-          // ------------------------------
+          // ------------------- PAGE BODY -------------------
           body: Stack(
             children: [
               const Center(
@@ -76,7 +67,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              // Arc Menu overlay
               PinterestArcMenu(
                 isOpen: _arcOpen,
                 onMaleTap: () {
@@ -92,61 +82,91 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
 
-          // ------------------------------
-          // BOTTOM NAV BAR
-          // ------------------------------
-          bottomNavigationBar: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: Offset(0, -2),
-                ),
-              ],
-            ),
-            child: BottomNavigationBar(
-              backgroundColor: Colors.white,
-              currentIndex: 2,
-              elevation: 0,
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: Colors.pinkAccent,
-              unselectedItemColor: Colors.grey,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
-              iconSize: 30,
+          // ------------------- BOTTOM NAV -------------------
+          bottomNavigationBar: _buildAestheticNavBar(),
+        ),
+      ),
+    );
+  }
 
-              onTap: (index) {
-                if (index == 2) {
-                  setState(() => _arcOpen = !_arcOpen);
-                }
+  // -------------------------------------------------------
+  // ⭐ RESTORED OLD AESTHETIC BOTTOM NAV BAR
+  // -------------------------------------------------------
+  Widget _buildAestheticNavBar() {
+    return Container(
+      height: 74,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(26),
+          topRight: Radius.circular(26),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 12,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+
+      // All icons including PLUS will be centered manually
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // The row behind
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _navIcon(Icons.home_filled, 0),
+              _navIcon(Icons.card_membership, 1),
+              const SizedBox(width: 60), // space for the FAB
+              _navIcon(Icons.shopping_cart, 3),
+              _navIcon(Icons.person, 4),
+            ],
+          ),
+
+          // CENTER PLUS BUTTON (Floating)
+          Positioned(
+            bottom: 16,
+            child: GestureDetector(
+              onTap: () {
+                setState(() => _arcOpen = !_arcOpen);
               },
-
-              items: const [
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.home_filled), label: ""),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.card_membership), label: ""),
-
-                /// PLUS ICON (CENTER BUTTON)
-                BottomNavigationBarItem(
-                  icon: CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Colors.pink,
-                    child: Icon(Icons.add, color: Colors.white, size: 30),
-                  ),
-                  label: "",
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: Colors.pinkAccent,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
-
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_cart), label: ""),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.person), label: ""),
-              ],
+                child: const Icon(Icons.add, size: 25, color: Colors.white),
+              ),
             ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _navIcon(IconData icon, int index) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selected = index;
+          _arcOpen = false;
+        });
+      },
+      child: Icon(
+        icon,
+        size: 28,
+        color: _selected == index ? Colors.pinkAccent : Colors.grey,
       ),
     );
   }
