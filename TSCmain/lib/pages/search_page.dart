@@ -18,20 +18,26 @@ class _SearchPageState extends State<SearchPage> {
     if (q.isEmpty) return;
 
     setState(() {
-      // remove duplicate (if any) then insert at top
       recentSearches.remove(q);
       recentSearches.insert(0, q);
-
-      // keep only latest 4
       if (recentSearches.length > 4) recentSearches.removeLast();
     });
 
     _controller.clear();
-    // Optionally: run a search action here
   }
 
   void _deleteSearch(String text) {
     setState(() => recentSearches.remove(text));
+  }
+
+  void _startVoiceSearch() {
+    // Later you can plug Google Speech API or iOS Speech
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("🎤 Voice search coming soon..."),
+        duration: Duration(seconds: 1),
+      ),
+    );
   }
 
   @override
@@ -60,7 +66,7 @@ class _SearchPageState extends State<SearchPage> {
             color: Colors.pinkAccent.withOpacity(0.18),
             blurRadius: 12,
             spreadRadius: 1,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -68,6 +74,8 @@ class _SearchPageState extends State<SearchPage> {
         children: [
           const Icon(Icons.search_rounded, color: Colors.black54, size: 24),
           const SizedBox(width: 10),
+
+          // TEXT FIELD
           Expanded(
             child: TextField(
               controller: _controller,
@@ -85,10 +93,24 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
           ),
+
+          // SUBMIT ARROW
           GestureDetector(
             onTap: () => _addSearch(_controller.text),
             child: const Icon(Icons.arrow_upward,
-                size: 22, color: Colors.pinkAccent),
+                size: 25, color: Colors.pinkAccent),
+          ),
+
+          const SizedBox(width: 10),
+
+          // 🎤 MICROPHONE BUTTON (ADDED HERE)
+          GestureDetector(
+            onTap: _startVoiceSearch,
+            child: const Icon(
+              Icons.mic_rounded,
+              size: 22,
+              color: Colors.black87,
+            ),
           ),
         ],
       ),
@@ -116,7 +138,6 @@ class _SearchPageState extends State<SearchPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Recent searches title
           const Padding(
             padding: EdgeInsets.only(left: 20, top: 20),
             child: Text(
@@ -131,7 +152,6 @@ class _SearchPageState extends State<SearchPage> {
 
           const SizedBox(height: 12),
 
-          // Dynamic recent searches chips
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: recentSearches.isEmpty
@@ -153,13 +173,7 @@ class _SearchPageState extends State<SearchPage> {
                           (text) => SearchChip(
                             text: text,
                             onDelete: () => _deleteSearch(text),
-                            onTap: () {
-                              // when user taps a recent search, re-run add/submit behavior
-                              // (moves it to top)
-                              _addSearch(text);
-                              // Optionally navigate to results page:
-                              // Navigator.pushNamed(context, '/searchResults', arguments: text);
-                            },
+                            onTap: () => _addSearch(text),
                           ),
                         )
                         .toList(),
@@ -168,8 +182,6 @@ class _SearchPageState extends State<SearchPage> {
 
           const SizedBox(height: 30),
 
-          // ---------- CENTERED EMPTY STATE ----------
-          // THIS IS WHAT I ADJUSTED: now EVERYTHING HERE IS CENTERED (icon + texts)
           Expanded(
             child: Center(
               child: Opacity(
@@ -177,7 +189,6 @@ class _SearchPageState extends State<SearchPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // floating circular icon
                     Container(
                       width: 140,
                       height: 140,
@@ -232,7 +243,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 }
 
-// ---------------- SEARCH CHIP WITH DELETE AND TAP ----------------
+// ---------------- SEARCH CHIP WITH DELETE & TAP ----------------
 class SearchChip extends StatelessWidget {
   final String text;
   final VoidCallback onDelete;
@@ -275,10 +286,7 @@ class SearchChip extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             GestureDetector(
-              onTap: () {
-                // stop propagation to parent GestureDetector by handling delete here
-                onDelete();
-              },
+              onTap: onDelete,
               child: const Icon(
                 Icons.close_rounded,
                 size: 18,
