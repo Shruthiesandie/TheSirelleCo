@@ -12,6 +12,10 @@ class _HomePageState extends State<HomePage> {
   int _selected = 0;
   bool _arcOpen = false;
 
+  // 🔥 MANUAL LOGO SIZE CONTROL —
+  //   Change this number ONLY to resize logo
+  double logoSize = 48; // <--- ADJUST HERE (30 to 80 recommended)
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -31,13 +35,22 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Hamburger menu
                   IconButton(
                     icon: const Icon(Icons.menu, size: 28, color: Colors.black),
                     onPressed: () {},
                   ),
 
-                  Image.asset("assets/logo/logo.png", height: 40),
+                  // ⭐ CENTER LOGO WITH MANUAL SIZE CONTROL ⭐
+                  SizedBox(
+                    height: logoSize, // <--- CHANGE THIS TO RESIZE LOGO
+                    child: Image.asset(
+                      "assets/logo/logo.png",
+                      fit: BoxFit.contain,
+                    ),
+                  ),
 
+                  // Search + Heart
                   Row(
                     children: [
                       IconButton(
@@ -69,15 +82,9 @@ class _HomePageState extends State<HomePage> {
 
               PinterestArcMenu(
                 isOpen: _arcOpen,
-                onMaleTap: () {
-                  setState(() => _arcOpen = false);
-                },
-                onFemaleTap: () {
-                  setState(() => _arcOpen = false);
-                },
-                onUnisexTap: () {
-                  setState(() => _arcOpen = false);
-                },
+                onMaleTap: () => setState(() => _arcOpen = false),
+                onFemaleTap: () => setState(() => _arcOpen = false),
+                onUnisexTap: () => setState(() => _arcOpen = false),
               ),
             ],
           ),
@@ -90,7 +97,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // -------------------------------------------------------
-  // ⭐ RESTORED OLD AESTHETIC BOTTOM NAV BAR
+  // ⭐ RESTORED AESTHETIC BOTTOM NAV BAR
   // -------------------------------------------------------
   Widget _buildAestheticNavBar() {
     return Container(
@@ -110,29 +117,26 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
 
-      // All icons including PLUS will be centered manually
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // The row behind
+          // icons row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _navIcon(Icons.home_filled, 0),
               _navIcon(Icons.card_membership, 1),
-              const SizedBox(width: 60), // space for the FAB
+              const SizedBox(width: 60),
               _navIcon(Icons.shopping_cart, 3),
               _navIcon(Icons.person, 4),
             ],
           ),
 
-          // CENTER PLUS BUTTON (Floating)
+          // ⭐ Center PLUS floating button ⭐
           Positioned(
             bottom: 16,
             child: GestureDetector(
-              onTap: () {
-                setState(() => _arcOpen = !_arcOpen);
-              },
+              onTap: () => setState(() => _arcOpen = !_arcOpen),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: const BoxDecoration(
@@ -146,7 +150,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.add, size: 25, color: Colors.white),
+                child: const Icon(Icons.add, size: 30, color: Colors.white),
               ),
             ),
           ),
