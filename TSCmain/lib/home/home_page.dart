@@ -12,6 +12,9 @@ class _HomePageState extends State<HomePage> {
   int _selected = 0;
   bool _arcOpen = false;
 
+  // ⭐ Added for hamburger menu to work
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -20,7 +23,34 @@ class _HomePageState extends State<HomePage> {
         top: true,
         bottom: false,
         child: Scaffold(
+          key: _scaffoldKey,  // ⭐ required for drawer
+
           backgroundColor: const Color(0xFFFCEEEE), // Pink bg
+
+          // ⭐ DRAWER ADDED — only thing changed
+          drawer: Drawer(
+            backgroundColor: Colors.white,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: const [
+                DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Colors.pinkAccent,
+                  ),
+                  child: Text(
+                    "Menu",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                    ),
+                  ),
+                ),
+                ListTile(title: Text("Profile")),
+                ListTile(title: Text("Settings")),
+                ListTile(title: Text("Orders")),
+              ],
+            ),
+          ),
 
           // ---------------- TOP BAR (curved now) ----------------
           appBar: PreferredSize(
@@ -34,10 +64,11 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: Row(
                   children: [
-                    // LEFT ICON
+                    // LEFT ICON — ⭐ now opens drawer
                     IconButton(
                       icon: const Icon(Icons.menu, size: 28, color: Colors.black),
-                      onPressed: () {},
+                      onPressed: () =>
+                          _scaffoldKey.currentState!.openDrawer(), // ⭐ updated
                     ),
 
                     // ⭐ FULL MANUAL LOGO CONTROL ⭐
@@ -64,12 +95,14 @@ class _HomePageState extends State<HomePage> {
                         IconButton(
                           icon: const Icon(Icons.search,
                               size: 26, color: Colors.black),
-                          onPressed: () {},
+                          onPressed: () =>
+                              Navigator.pushNamed(context, "/search"),
                         ),
                         IconButton(
                           icon: const Icon(Icons.favorite_border,
                               size: 26, color: Colors.black),
-                          onPressed: () {},
+                          onPressed: () =>
+                              Navigator.pushNamed(context, "/love"),
                         ),
                       ],
                     ),
@@ -163,6 +196,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // ---------------- UPDATED NAV ICON LOGIC ----------------
   Widget _navIcon(IconData icon, int index) {
     return GestureDetector(
       onTap: () {
@@ -170,6 +204,11 @@ class _HomePageState extends State<HomePage> {
           _selected = index;
           _arcOpen = false;
         });
+
+        if (index == 0) Navigator.pushNamed(context, "/home");
+        if (index == 1) Navigator.pushNamed(context, "/membership");
+        if (index == 3) Navigator.pushNamed(context, "/cart");
+        if (index == 4) Navigator.pushNamed(context, "/profile");
       },
       child: Icon(
         icon,
