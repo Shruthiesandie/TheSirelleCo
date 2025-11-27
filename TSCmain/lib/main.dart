@@ -1,16 +1,6 @@
 import 'package:flutter/material.dart';
-
-// Splash Screen
-import 'splash_screen.dart';
-
-// Home Page
-
-
-// 🔥 Add these imports
-import 'home/pages/search_page.dart';
-import 'home/pages/love_page.dart';
-import 'home/pages/allcategories_page.dart';
-
+import 'pages/home_page.dart';
+import 'pages/splash_screen.dart'; // If you have one
 
 void main() {
   runApp(const MyApp());
@@ -24,17 +14,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      // Start app with your custom splash
-      home: const SplashScreenPages(),
+      // Start at Splash Screen
+      home: const SplashScreen(),
 
-      // Navigation routes
+      // Declare all routes here
       routes: {
-        
-        '/search': (context) => SearchPage(),  // no const
-        '/love': (context) => LovePage(),
-        '/category/male': (ctx) => CategoryPage(category: 'male'),
-        '/category/female': (ctx) =>  CategoryPage(category: 'female'),
-        '/category/all': (ctx) =>  CategoryPage(category: 'all'),      // no const
+        "/home": (_) =>  HomePage(),
+        "/category/male": (_) =>  CategoryMalePage(),
+        "/category/female": (_) =>  CategoryFemalePage(),
+        "/category/unisex": (_) =>  CategoryUnisexPage(),
+        "/search": (_) =>  SearchPage(),
+        "/love": (_) =>  LovePage(),
       },
     );
   }
