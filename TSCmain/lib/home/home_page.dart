@@ -15,62 +15,66 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white, // FULL WHITE TOP
+      color: Colors.white,
       child: SafeArea(
         top: true,
         bottom: false,
         child: Scaffold(
           backgroundColor: const Color(0xFFFCEEEE), // Pink bg
 
-          // ---------------- TOP BAR ----------------
+          // ---------------- TOP BAR (curved now) ----------------
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(70),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              color: Colors.white,
-              child: Row(
-                children: [
-                  // LEFT ICON
-                  IconButton(
-                    icon: const Icon(Icons.menu, size: 28, color: Colors.black),
-                    onPressed: () {},
-                  ),
+            preferredSize: const Size.fromHeight(90),
+            child: ClipPath(
+              clipper: TopBarClipper(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                ),
+                child: Row(
+                  children: [
+                    // LEFT ICON
+                    IconButton(
+                      icon: const Icon(Icons.menu, size: 28, color: Colors.black),
+                      onPressed: () {},
+                    ),
 
-                  // ⭐ ⭐ FULL MANUAL LOGO CONTROL ⭐ ⭐
-                  Expanded(
-                    child: Transform.translate(
-                      offset: const Offset(110, 0),
-                      child: SizedBox(
-                        height: 80,
-                        width: 80,
-                        child: Container(
-                          padding: const EdgeInsets.only(left: 0),
-                          alignment: Alignment.centerLeft,
-                          child: Image.asset(
-                            "assets/logo/logo.png",
-                            fit: BoxFit.contain,
+                    // ⭐ FULL MANUAL LOGO CONTROL ⭐
+                    Expanded(
+                      child: Transform.translate(
+                        offset: const Offset(100, 0), // Move logo right
+                        child: SizedBox(
+                          height: 80,
+                          width: 80,
+                          child: Container(
+                            alignment: Alignment.centerLeft,
+                            child: Image.asset(
+                              "assets/logo/logo.png",
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
 
-                  // RIGHT ICONS
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.search,
-                            size: 26, color: Colors.black),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.favorite_border,
-                            size: 26, color: Colors.black),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                ],
+                    // RIGHT SIDE ICONS
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.search,
+                              size: 26, color: Colors.black),
+                          onPressed: () {},
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.favorite_border,
+                              size: 26, color: Colors.black),
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -79,8 +83,10 @@ class _HomePageState extends State<HomePage> {
           body: Stack(
             children: [
               const Center(
-                child: Text("Home Page",
-                    style: TextStyle(fontSize: 22, color: Colors.black87)),
+                child: Text(
+                  "Home Page",
+                  style: TextStyle(fontSize: 22, color: Colors.black87),
+                ),
               ),
 
               PinterestArcMenu(
@@ -99,7 +105,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Aesthetic Bottom Nav
+  // ---------------- Aesthetic Bottom Nav ----------------
   Widget _buildAestheticNavBar() {
     return Container(
       height: 74,
@@ -132,7 +138,7 @@ class _HomePageState extends State<HomePage> {
           ),
 
           Positioned(
-            bottom: 10,
+            bottom: 8,
             child: GestureDetector(
               onTap: () => setState(() => _arcOpen = !_arcOpen),
               child: Container(
@@ -172,4 +178,28 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+// ---------------- CURVED TOP BAR CLIPPER ----------------
+class TopBarClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    double curveHeight = 24;
+
+    Path path = Path()
+      ..lineTo(0, size.height - curveHeight)
+      ..quadraticBezierTo(
+        size.width / 2,
+        size.height + curveHeight,
+        size.width,
+        size.height - curveHeight,
+      )
+      ..lineTo(size.width, 0)
+      ..close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
