@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
 
                     Expanded(
                       child: Transform.translate(
-                        offset: const Offset(100, 0),
+                        offset: const Offset(20,0),
                         child: SizedBox(
                           height: 80,
                           width: 80,
