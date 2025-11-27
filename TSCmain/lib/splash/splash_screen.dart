@@ -13,7 +13,6 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    // Navigate to home after 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacementNamed(context, "/home");
     });
@@ -21,12 +20,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.white,
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9E1D9), // 🌸 Your color
       body: Center(
-        child: Text(
-          "SPLASH SCREEN",
-          style: TextStyle(fontSize: 26),
+        child: Image.asset(
+          "assets/splash/splash.png",
+          width: 450,   // increased size
+          height: 450,  // increased size
+          fit: BoxFit.contain,
         ),
       ),
     );
