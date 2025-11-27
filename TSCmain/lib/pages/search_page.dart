@@ -16,19 +16,25 @@ class _SearchPageState extends State<SearchPage> {
     if (query.trim().isEmpty) return;
 
     setState(() {
-      // Remove duplicate if exists
+      // Remove duplicates
       recentSearches.remove(query);
 
-      // Add new search to front
+      // Add new search to top
       recentSearches.insert(0, query);
 
-      // Limit to 4
+      // Keep only 4
       if (recentSearches.length > 4) {
         recentSearches.removeLast();
       }
     });
 
     _controller.clear();
+  }
+
+  void _deleteSearch(String text) {
+    setState(() {
+      recentSearches.remove(text);
+    });
   }
 
   @override
@@ -41,8 +47,8 @@ class _SearchPageState extends State<SearchPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon:
-              const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new,
+              color: Colors.black, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: _beautifulSearchBox(),
@@ -67,79 +73,82 @@ class _SearchPageState extends State<SearchPage> {
 
           const SizedBox(height: 12),
 
-          // ---------- DYNAMIC RECENT SEARCHES ----------
-          recentSearches.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.only(left: 20),
-                  child: Text(
-                    "No recent searches",
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.black54,
-                    ),
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: recentSearches
-                        .map((text) => SearchChip(text: text))
-                        .toList(),
-                  ),
-                ),
-
-          const SizedBox(height: 30),
-
-          // ---------- EMPTY STATE ----------
-          Expanded(
-            child: Center(
-              child: Opacity(
-                opacity: 0.8,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Floating circle
-                    Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12.withOpacity(0.05),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.search_rounded,
-                        size: 70,
-                        color: Colors.pinkAccent,
-                      ),
-                    ),
-                    const SizedBox(height: 25),
-                    const Text(
-                      "Start typing to search",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      "Find products, outfits & more",
+          // ---------- DYNAMIC RECENT SEARCH CHIPS ----------
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: recentSearches.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.only(left: 10),
+                    child: Text(
+                      "No recent searches",
                       style: TextStyle(
                         fontSize: 15,
                         color: Colors.black54,
                       ),
                     ),
-                  ],
-                ),
+                  )
+                : Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: recentSearches
+                        .map(
+                          (text) => SearchChip(
+                            text: text,
+                            onDelete: () => _deleteSearch(text),
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
+
+          const SizedBox(height: 30),
+
+          // ---------- EMPTY STATE ----------
+          Expanded(
+            child: Opacity(
+              opacity: 0.8,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Floating circle
+                  Container(
+                    width: 140,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12.withOpacity(0.05),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.search_rounded,
+                      size: 70,
+                      color: Colors.pinkAccent,
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                  const Text(
+                    "Start typing to search",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    "Find products, outfits & more",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -151,7 +160,7 @@ class _SearchPageState extends State<SearchPage> {
   // 🌸 BEAUTIFUL SEARCH BOX
   Widget _beautifulSearchBox() {
     return Container(
-      height: 45,
+      height: 35,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -187,14 +196,15 @@ class _SearchPageState extends State<SearchPage> {
                 border: InputBorder.none,
                 hintText: "Search something cute...",
                 hintStyle: TextStyle(
-                    color: Colors.black45,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400),
+                  color: Colors.black45,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
           ),
 
-          // Submit button (tiny pink arrow)
+          // Submit arrow
           GestureDetector(
             onTap: () => _addSearch(_controller.text),
             child: const Icon(Icons.arrow_upward,
@@ -206,16 +216,21 @@ class _SearchPageState extends State<SearchPage> {
   }
 }
 
-// ---------------- SEARCH CHIP ----------------
+// ---------------- SEARCH CHIP WITH DELETE BUTTON ----------------
 class SearchChip extends StatelessWidget {
   final String text;
+  final VoidCallback onDelete;
 
-  const SearchChip({super.key, required this.text});
+  const SearchChip({
+    super.key,
+    required this.text,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -227,13 +242,30 @@ class SearchChip extends StatelessWidget {
           ),
         ],
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.black87,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
+
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 6),
+
+          // ❌ DELETE BUTTON
+          GestureDetector(
+            onTap: onDelete,
+            child: const Icon(
+              Icons.close_rounded,
+              size: 18,
+              color: Colors.grey,
+            ),
+          ),
+        ],
       ),
     );
   }
