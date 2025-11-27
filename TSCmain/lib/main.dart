@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'splash/splash_screen.dart';
+
+// Pages
 import 'home/home_page.dart';
+import 'pages/membership_page.dart';
+import 'pages/cart_page.dart';
+import 'pages/profile_page.dart';
+import 'pages/search_page.dart';
+import 'pages/love_page.dart';
+import 'pages/allcategories_page.dart'; // optional if needed
 
 void main() {
   runApp(const MyApp());
@@ -14,10 +22,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
+      // Your splash screen stays the same
       home: const SplashScreen(),
 
+      // All app routes
       routes: {
         "/home": (_) => const HomePage(),
+        "/membership": (_) => const MembershipPage(),
+        "/cart": (_) => const CartPage(),
+        "/profile": (_) => const ProfilePage(),
+        "/search": (_) => const SearchPage(),
+        "/love": (_) => const LovePage(),
+        "/categories": (_) => const AllCategoriesPage(),
       },
     );
   }
