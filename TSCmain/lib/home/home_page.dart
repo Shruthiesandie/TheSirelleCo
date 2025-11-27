@@ -9,137 +9,144 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selected = 0;
   bool _arcOpen = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFCEEEE), // 💗 lighter pink background
+    return Container(
+      color: Colors.white, // FULL TOP AREA WHITE (safe-area included)
+      child: SafeArea(
+        top: true,
+        bottom: false,
+        child: Scaffold(
+          backgroundColor: const Color(0xFFFCEEEE), // light pink background
 
-      // ---------------- TOP NAV -----------------
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: SafeArea(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            color: Colors.white, // 🤍 top bar now pure white
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Icon(Icons.menu, size: 28, color: Colors.black),
+          // ------------------------------
+          // TOP NAV BAR (WHITE)
+          // ------------------------------
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(70),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              color: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Hamburger menu
+                  IconButton(
+                    icon: const Icon(Icons.menu, size: 28, color: Colors.black),
+                    onPressed: () {},
+                  ),
 
-                // Center logo
-                Image.asset(
-                  "assets/logo/logo.png",
-                  height: 40,
+                  // Center logo
+                  Image.asset(
+                    "assets/logo/logo.png",
+                    height: 40,
+                  ),
+
+                  // Search + Heart
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.search,
+                            size: 26, color: Colors.black),
+                        onPressed: () {},
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.favorite_border,
+                            size: 26, color: Colors.black),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ------------------------------
+          // BODY
+          // ------------------------------
+          body: Stack(
+            children: [
+              const Center(
+                child: Text(
+                  "Home Page",
+                  style: TextStyle(fontSize: 22, color: Colors.black87),
+                ),
+              ),
+
+              // Arc Menu overlay
+              PinterestArcMenu(
+                isOpen: _arcOpen,
+                onMaleTap: () {
+                  setState(() => _arcOpen = false);
+                },
+                onFemaleTap: () {
+                  setState(() => _arcOpen = false);
+                },
+                onUnisexTap: () {
+                  setState(() => _arcOpen = false);
+                },
+              ),
+            ],
+          ),
+
+          // ------------------------------
+          // BOTTOM NAV BAR
+          // ------------------------------
+          bottomNavigationBar: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 6,
+                  offset: Offset(0, -2),
+                ),
+              ],
+            ),
+            child: BottomNavigationBar(
+              backgroundColor: Colors.white,
+              currentIndex: 2,
+              elevation: 0,
+              type: BottomNavigationBarType.fixed,
+              selectedItemColor: Colors.pinkAccent,
+              unselectedItemColor: Colors.grey,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              iconSize: 30,
+
+              onTap: (index) {
+                if (index == 2) {
+                  setState(() => _arcOpen = !_arcOpen);
+                }
+              },
+
+              items: const [
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.home_filled), label: ""),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.card_membership), label: ""),
+
+                /// PLUS ICON (CENTER BUTTON)
+                BottomNavigationBarItem(
+                  icon: CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Colors.pink,
+                    child: Icon(Icons.add, color: Colors.white, size: 30),
+                  ),
+                  label: "",
                 ),
 
-                Row(
-                  children: const [
-                    Icon(Icons.search, size: 26, color: Colors.black),
-                    SizedBox(width: 18),
-                    Icon(Icons.favorite_border, size: 26, color: Colors.black),
-                  ],
-                ),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.shopping_cart), label: ""),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.person), label: ""),
               ],
             ),
           ),
         ),
-      ),
-
-      // ---------------- BODY + ARC -----------------
-      body: Stack(
-        children: [
-          const Center(
-            child: Text(
-              "Home Page",
-              style: TextStyle(fontSize: 22, color: Colors.black87),
-            ),
-          ),
-
-          PinterestArcMenu(
-            isOpen: _arcOpen,
-            onMaleTap: () {},
-            onFemaleTap: () {},
-            onUnisexTap: () {},
-          ),
-        ],
-      ),
-
-      // ---------------- BOTTOM NAV -----------------
-      bottomNavigationBar: _buildAestheticNavBar(),
-    );
-  }
-
-  Widget _buildAestheticNavBar() {
-    return Container(
-      height: 70,
-      decoration: const BoxDecoration(
-        color: Colors.white, // 🤍 bottom bar white
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(26),
-          topRight: Radius.circular(26),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 12,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _navIcon(Icons.home, 0),
-          _navIcon(Icons.card_membership, 1),
-
-          // PLUS BUTTON
-          GestureDetector(
-            onTap: () {
-              setState(() => _arcOpen = !_arcOpen);
-            },
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: Colors.pinkAccent,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8,
-                    offset: Offset(0, 3),
-                  )
-                ],
-              ),
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 28,
-              ),
-            ),
-          ),
-
-          _navIcon(Icons.shopping_cart, 3),
-          _navIcon(Icons.person, 4),
-        ],
-      ),
-    );
-  }
-
-  Widget _navIcon(IconData icon, int index) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selected = index;
-          _arcOpen = false;
-        });
-      },
-      child: Icon(
-        icon,
-        size: 28,
-        color: _selected == index ? Colors.pinkAccent : Colors.grey,
       ),
     );
   }
