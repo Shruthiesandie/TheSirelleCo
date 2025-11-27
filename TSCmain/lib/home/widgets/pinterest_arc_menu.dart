@@ -7,6 +7,7 @@ class PinterestArcMenu extends StatefulWidget {
   final VoidCallback onMaleTap;
   final VoidCallback onFemaleTap;
 
+  /// Keep constructor identical so HomePage doesn't need changes.
   const PinterestArcMenu({
     super.key,
     required this.isOpen,
@@ -30,18 +31,16 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
 
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 560),
       reverseDuration: const Duration(milliseconds: 420),
     );
 
-    // main curve (easeOutBack gives a springy pop)
     _animCurve = CurvedAnimation(
       parent: _ctrl,
       curve: Curves.easeOutBack,
       reverseCurve: Curves.easeInBack,
     );
 
-    // subtle pulse for center button when open: repeats for as long as open
     _centerPulse = Tween<double>(begin: 1.0, end: 1.06).animate(
       CurvedAnimation(
         parent: _ctrl,
@@ -49,7 +48,7 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
       ),
     );
 
-    // start in correct position based on initial value
+    // start in correct state
     if (widget.isOpen) {
       _ctrl.value = 1.0;
     } else {
@@ -75,25 +74,24 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
     super.dispose();
   }
 
-  // Helper to compute curved progress with slight extras for nicer motion
-  double _progress(double t) => _animCurve.value;
+  double _progress() => _animCurve.value;
 
   @override
   Widget build(BuildContext context) {
-    // Positioned area (keeps centered above bottom nav)
+    // The whole positioned area above bottom nav
     return Positioned(
-      bottom: 50,
+      bottom: 75, // moved up for a more visible arc
       left: 0,
       right: 0,
       child: SizedBox(
-        height: 180,
+        height: 220, // increased to allow larger arc
         child: AnimatedBuilder(
           animation: _ctrl,
-          builder: (context, child) {
-            final t = _progress(_ctrl.value);
-            // width/height of arc container morph
+          builder: (context, _) {
+            final double t = _progress(); // 0..1
+            // morph sizes
             final double width = lerpDouble(220, 300, t)!;
-            final double height = lerpDouble(60, 150, t)!;
+            final double height = lerpDouble(70, 190, t)!;
             final double topRadius = lerpDouble(30, 40, t)!;
 
             return Center(
@@ -103,7 +101,7 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Blur + shadow background (glass-like)
+                    // Frosted blur + white layer to make arc visible
                     Positioned.fill(
                       child: ClipRRect(
                         borderRadius: BorderRadius.vertical(
@@ -111,57 +109,61 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
                           bottom: const Radius.circular(30),
                         ),
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: lerpDouble(0, 6, t)!, sigmaY: lerpDouble(0, 6, t)!),
+                          filter: ImageFilter.blur(
+                            sigmaX: lerpDouble(0, 16, t)!,
+                            sigmaY: lerpDouble(0, 16, t)!,
+                          ),
                           child: Container(
-                            // Transparent layer to allow blur to show
-                            color: Colors.white.withOpacity(lerpDouble(0.0, 0.20, t)!),
+                            color: Colors.white.withOpacity(lerpDouble(0.15, 0.55, t)!),
                           ),
                         ),
                       ),
                     ),
 
-                    // Soft shadow (below arc)
+                    // Soft shadow under the arc
                     Positioned(
-                      bottom: -4,
+                      bottom: -6,
                       child: Opacity(
-                        opacity: lerpDouble(0.0, 0.22, t)!,
+                        opacity: lerpDouble(0.0, 0.28, t)!,
                         child: Container(
-                          width: width * 0.92,
-                          height: 30,
+                          width: width * 0.94,
+                          height: 38,
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                         ),
                       ),
                     ),
 
-                    // Painted arc shape (morphing using t)
+                    // The morphing painted arc (top bump + rounded sides)
                     Positioned.fill(
                       child: CustomPaint(
                         painter: _MorphArcPainter(progress: t),
                       ),
                     ),
 
-                    // Male button -> left along curved path
-                    _animatedButton(
+                    // Male button (animated)
+                    _buildAnimatedMenuButton(
                       progress: t,
+                      parentWidth: width,
                       side: _ArcSide.left,
                       icon: Icons.male,
                       color: Colors.blue,
                       onTap: widget.onMaleTap,
                     ),
 
-                    // Female button -> right along curved path
-                    _animatedButton(
+                    // Female button (animated)
+                    _buildAnimatedMenuButton(
                       progress: t,
+                      parentWidth: width,
                       side: _ArcSide.right,
                       icon: Icons.female,
                       color: Colors.pink,
                       onTap: widget.onFemaleTap,
                     ),
 
-                    // CENTER button (⚥) - pulsates when open
+                    // Center button = ⚥ (pulses when open)
                     Positioned(
                       bottom: lerpDouble(6, 18, t),
                       child: Transform.scale(
@@ -179,14 +181,12 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
     );
   }
 
-  // center circle showing ⚥
   Widget _centerButton(double progress) {
-    // progress used to slightly rotate/pulse if desired
-    final double scale = lerpDouble(1.0, 1.02, progress)!;
+    // visually pleasing gradient for the center control
     return GestureDetector(
       onTap: () {
-        // We leave center tap empty because HomePage toggles _menuOpen via bottom nav.
-        // If you want center to toggle as well, send an onCenterTap callback and call it here.
+        // intentionally left empty so HomePage (bottom nav) remains the source of truth.
+        // If you'd like the center to toggle too, we can add an onCenterTap callback.
       },
       child: Container(
         padding: const EdgeInsets.all(14),
@@ -211,7 +211,7 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
           ],
         ),
         child: Transform.scale(
-          scale: scale,
+          scale: lerpDouble(1.0, 1.02, progress)!,
           child: const Text(
             "⚥",
             style: TextStyle(
@@ -225,31 +225,33 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
     );
   }
 
-  // builds animated male/female buttons that move out on a curved path
-  Widget _animatedButton({
+  Widget _buildAnimatedMenuButton({
     required double progress,
+    required double parentWidth,
     required _ArcSide side,
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
   }) {
-    // center position (where buttons start) - relative center x = 0
-    // target offsets in px
-    final double targetX = side == _ArcSide.left ? -72 : 72;
-    final double targetY = -18; // raised along arc
-
-    // curve for motion - gives springy feeling using easeOutBack
+    // target positions relative to center
+    final double targetX = side == _ArcSide.left ? -58 : 58; // slightly closer
+    final double targetY = -36; // raise higher on arc
+    // eased movement for more springy feel
     final double eased = Curves.easeOutBack.transform(progress.clamp(0.0, 1.0));
-
     final double x = lerpDouble(0, targetX, eased)!;
     final double y = lerpDouble(8, targetY, eased)!;
     final double scale = lerpDouble(0.6, 1.0, progress)!;
     final double opacity = lerpDouble(0.0, 1.0, progress)!;
 
+    // center of container (left coordinate reference)
+    final double centerX = parentWidth / 2;
+
+    // left coordinate for the button (so both sides use same calculation)
+    final double left = centerX + x - 26; // minus radius
+
     return Positioned(
       bottom: 34 + y,
-      left: (side == _ArcSide.left) ? ( (150 / 2) + x - 26 ) : null,
-      right: (side == _ArcSide.right) ? ( (150 / 2) - x - 26 ) : null,
+      left: left,
       child: Opacity(
         opacity: opacity,
         child: Transform.scale(
@@ -268,48 +270,48 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
   }
 }
 
-// small enum to help layout left/right
+/// small enum to help side direction
 enum _ArcSide { left, right }
 
-// -----------------------------------------------------------------------------
-// CUSTOM PAINTER: morphs the arc shape based on a progress value (0..1)
-// -----------------------------------------------------------------------------
+/// Custom painter that morphs a rounded top container with a center bump.
+/// progress = 0 (closed/flat) -> 1 (open/tall bump)
 class _MorphArcPainter extends CustomPainter {
-  final double progress; // 0 = closed (flat), 1 = open (tall curved)
+  final double progress;
 
   _MorphArcPainter({required this.progress});
 
   @override
   void paint(Canvas canvas, Size size) {
-    // we'll draw a rounded top container with a subtle center bump when open
     final paint = Paint()..color = Colors.white;
     final double w = size.width;
     final double h = size.height;
 
-    // control values derived from progress
-    final double topCurveDepth = lerpDouble(6, 46, progress)!; // how deep the curve dips up
-    final double centerBumpWidth = lerpDouble(0, w * 0.42, progress)!;
-    final double centerBumpHeight = lerpDouble(0, 36, progress)!;
+    final double topCurveDepth = lerpDouble(10, 70, progress)!;
+    final double centerBumpWidth = lerpDouble(0, w * 0.58, progress)!;
+    final double centerBumpHeight = lerpDouble(0, 62, progress)!;
 
     final Path path = Path();
 
-    // start bottom-left
+    // bottom-left
     path.moveTo(0, h);
-    // left up to near top-left rounded
+
+    // left vertical up to top region (morph)
     path.lineTo(0, lerpDouble(h - 30, 18, progress)!);
 
-    // left top corner curve to a central bump, then to right top corner
-    final double leftControlX = w * 0.25;
-    final double rightControlX = w * 0.75;
+    // left control and curve towards center left
+    final double leftControlX = w * 0.20;
+    final double rightControlX = w * 0.80;
     final double topY = lerpDouble(h - 30, 18 - topCurveDepth / 2, progress)!;
 
-    // Left top curve to near center-left
-    path.quadraticBezierTo(leftControlX * (1 - progress), topY - topCurveDepth * (progress * 0.6),
-        (w - centerBumpWidth) / 2, topY);
+    path.quadraticBezierTo(
+      leftControlX * (1 - progress),
+      topY - topCurveDepth * (progress * 0.6),
+      (w - centerBumpWidth) / 2,
+      topY,
+    );
 
-    // center bump (if progress > 0)
+    // center bump when open
     if (progress > 0.01) {
-      // left bump curve upward
       path.quadraticBezierTo(
         (w - centerBumpWidth) / 2 + centerBumpWidth * 0.12,
         topY - centerBumpHeight,
@@ -317,7 +319,6 @@ class _MorphArcPainter extends CustomPainter {
         topY - centerBumpHeight * 0.95,
       );
 
-      // right bump curve downward to right side
       path.quadraticBezierTo(
         (w + centerBumpWidth) / 2 - centerBumpWidth * 0.12,
         topY - centerBumpHeight,
@@ -325,24 +326,31 @@ class _MorphArcPainter extends CustomPainter {
         topY,
       );
     } else {
-      // small gentle arc when closed
+      // gentle arc when closed
       path.quadraticBezierTo(w / 2, topY - 6 * progress, w, topY);
     }
 
-    // right top corner down to bottom-right
-    path.quadraticBezierTo(rightControlX + (w * (progress * 0.03)), topY + (topCurveDepth * (0.2 * progress)),
-        w, lerpDouble(h - 30, 18, progress)!);
+    // right top to right side
+    path.quadraticBezierTo(
+      rightControlX + (w * (progress * 0.03)),
+      topY + (topCurveDepth * (0.2 * progress)),
+      w,
+      lerpDouble(h - 30, 18, progress)!,
+    );
 
+    // close to bottom-right
     path.lineTo(w, h);
     path.close();
 
-    // shadow under the path: drawShadow
-    canvas.drawShadow(path, Colors.black.withOpacity(0.2), 12 * progress, false);
+    // shadow under the path
+    if (progress > 0.01) {
+      canvas.drawShadow(path, Colors.black.withOpacity(0.22), 14 * progress, false);
+    }
 
     // main fill
     canvas.drawPath(path, paint);
 
-    // subtle border line
+    // subtle border
     final border = Paint()
       ..color = Colors.black.withOpacity(0.06 * progress)
       ..style = PaintingStyle.stroke
