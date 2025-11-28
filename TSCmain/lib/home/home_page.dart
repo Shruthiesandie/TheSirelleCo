@@ -12,7 +12,10 @@ class _HomePageState extends State<HomePage> {
   int _selected = 0;
   bool _arcOpen = false;
 
-  // ⭐ Added for hamburger menu to work
+  // ⭐ NEW — store selected category for plus icon
+  String _selectedCategory = "none";  
+  // values: none, male, female, unisex
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -23,11 +26,10 @@ class _HomePageState extends State<HomePage> {
         top: true,
         bottom: false,
         child: Scaffold(
-          key: _scaffoldKey,  // ⭐ required for drawer
+          key: _scaffoldKey,
 
-          backgroundColor: const Color(0xFFFCEEEE), // Pink bg
+          backgroundColor: const Color(0xFFFCEEEE),
 
-          // ⭐ DRAWER ADDED — only thing changed
           drawer: Drawer(
             backgroundColor: Colors.white,
             child: ListView(
@@ -52,29 +54,23 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // ---------------- TOP BAR (curved now) ----------------
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90),
             child: ClipPath(
               clipper: TopBarClipper(),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                ),
+                color: Colors.white,
                 child: Row(
                   children: [
-                    // LEFT ICON — ⭐ now opens drawer
                     IconButton(
                       icon: const Icon(Icons.menu, size: 28, color: Colors.black),
-                      onPressed: () =>
-                          _scaffoldKey.currentState!.openDrawer(), // ⭐ updated
+                      onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                     ),
 
-                    // ⭐ FULL MANUAL LOGO CONTROL ⭐
                     Expanded(
                       child: Transform.translate(
-                        offset: const Offset(100, 0), // Move logo right
+                        offset: const Offset(100, 0),
                         child: SizedBox(
                           height: 80,
                           width: 80,
@@ -89,7 +85,6 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
-                    // RIGHT SIDE ICONS
                     Row(
                       children: [
                         IconButton(
@@ -112,7 +107,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // ---------------- BODY ----------------
           body: Stack(
             children: [
               const Center(
@@ -122,23 +116,37 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
+              // ⭐ UPDATE arc menu taps to change selected category
               PinterestArcMenu(
                 isOpen: _arcOpen,
-                onMaleTap: () => setState(() => _arcOpen = false),
-                onFemaleTap: () => setState(() => _arcOpen = false),
-                onUnisexTap: () => setState(() => _arcOpen = false),
+                onMaleTap: () {
+                  setState(() {
+                    _arcOpen = false;
+                    _selectedCategory = "male"; // ⭐ NEW
+                  });
+                },
+                onFemaleTap: () {
+                  setState(() {
+                    _arcOpen = false;
+                    _selectedCategory = "female"; // ⭐ NEW
+                  });
+                },
+                onUnisexTap: () {
+                  setState(() {
+                    _arcOpen = false;
+                    _selectedCategory = "unisex"; // ⭐ NEW
+                  });
+                },
               ),
             ],
           ),
 
-          // ---------------- BOTTOM NAV ----------------
           bottomNavigationBar: _buildAestheticNavBar(),
         ),
       ),
     );
   }
 
-  // ---------------- Aesthetic Bottom Nav ----------------
   Widget _buildAestheticNavBar() {
     return Container(
       height: 74,
@@ -174,6 +182,7 @@ class _HomePageState extends State<HomePage> {
             bottom: 8,
             child: GestureDetector(
               onTap: () => setState(() => _arcOpen = !_arcOpen),
+
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: const BoxDecoration(
@@ -187,7 +196,19 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.add, size: 30, color: Colors.white),
+
+                // ⭐ DYNAMIC ICON BASED ON SELECTED CATEGORY
+                child: Icon(
+                  _selectedCategory == "male"
+                      ? Icons.male
+                      : _selectedCategory == "female"
+                          ? Icons.female
+                          : _selectedCategory == "unisex"
+                              ? Icons.transgender   // ⚥ unisex symbol
+                              : Icons.add,          // default plus
+                  size: 30,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -196,7 +217,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ---------------- UPDATED NAV ICON LOGIC ----------------
   Widget _navIcon(IconData icon, int index) {
     return GestureDetector(
       onTap: () {
@@ -219,7 +239,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// ---------------- CURVED TOP BAR CLIPPER ----------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -240,5 +259,5 @@ class TopBarClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
