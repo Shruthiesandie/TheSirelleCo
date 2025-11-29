@@ -1,3 +1,4 @@
+import 'dart:async';   // ✅ FIXED (needed for Timer)
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,19 +14,32 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   Artboard? _artboard;
 
-  // Animations (direct control)
-  RiveAnimationController? idleLook;
-  RiveAnimationController? lookLeft;
-  RiveAnimationController? lookRight;
-  RiveAnimationController? eyeCover;
-  RiveAnimationController? successAnim;
-  RiveAnimationController? failAnim;
+  // Animations
+  SimpleAnimation? idleLookAround;
+  SimpleAnimation? idle;
+  SimpleAnimation? lookLeft;
+  SimpleAnimation? lookRight;
+  SimpleAnimation? eyeCover;
+  SimpleAnimation? successAnim;
+  SimpleAnimation? failAnim;
+
+  // Store animation names manually (Rive 0.12.x doesn't expose them)
+  final String idleLookAroundName = "idle_look_around";
+  final String idleName = "idle";
+  final String leftName = "look_left";
+  final String rightName = "look_right";
+  final String eyeCoverName = "eye_cover";
+  final String successName = "success";
+  final String failName = "fail";
 
   final _email = TextEditingController();
   final _password = TextEditingController();
 
   late String _testUser;
   late String _testPass;
+
+  Timer? idleTimer;
+  bool inPassword = false;
 
   @override
   void initState() {
@@ -40,70 +54,84 @@ class _LoginPageState extends State<LoginPage> {
     _testPass = (r.nextInt(9000) + 1000).toString();
   }
 
+  // ----------------------------------------------------
+  // LOAD RIVE + FIRST ANIMATION
   void _loadRive() async {
     final data = await rootBundle.load("assets/animation/login_character.riv");
     final file = RiveFile.import(data);
-
     final artboard = file.mainArtboard;
 
-    // Create controllers for each animation
-    idleLook = SimpleAnimation("idle_look_around");
-    lookLeft = SimpleAnimation("look_left", autoplay: false);
-    lookRight = SimpleAnimation("look_right", autoplay: false);
-    eyeCover = SimpleAnimation("eye_cover", autoplay: false);
-    successAnim = SimpleAnimation("success", autoplay: false);
-    failAnim = SimpleAnimation("fail", autoplay: false);
+    // Create animation controllers
+    idleLookAround = SimpleAnimation(idleLookAroundName, autoplay: false);
+    idle = SimpleAnimation(idleName, autoplay: false);
+    lookLeft = SimpleAnimation(leftName, autoplay: false);
+    lookRight = SimpleAnimation(rightName, autoplay: false);
+    eyeCover = SimpleAnimation(eyeCoverName, autoplay: false);
+    successAnim = SimpleAnimation(successName, autoplay: false);
+    failAnim = SimpleAnimation(failName, autoplay: false);
 
-    artboard.addController(idleLook!);
+    // Play idle look around first
+    artboard.addController(idleLookAround!);
+    idleLookAround!.isActive = true;
 
     setState(() => _artboard = artboard);
+
+    // After 2 sec → switch to idle
+    Future.delayed(const Duration(seconds: 2), () {
+      _play(idleName);
+    });
   }
 
   // ----------------------------------------------------
-  // FORCE PLAY ANIMATION
-  void play(RiveAnimationController? controller) {
-    if (controller == null || _artboard == null) return;
-    _artboard!.addController(controller);
-    controller.isActive = true;
+  // FORCE PLAY ANIMATION (BY NAME)
+  void _play(String animName) {
+    if (_artboard == null) return;
+
+    SimpleAnimation newAnim = SimpleAnimation(animName, autoplay: false);
+
+    // Restart existing animation (clean start)
+    _artboard!.addController(newAnim);
+    newAnim.isActive = true;
+
+    // Assign back to correct variable
+    if (animName == idleLookAroundName) idleLookAround = newAnim;
+    if (animName == idleName) idle = newAnim;
+    if (animName == leftName) lookLeft = newAnim;
+    if (animName == rightName) lookRight = newAnim;
+    if (animName == eyeCoverName) eyeCover = newAnim;
+    if (animName == successName) successAnim = newAnim;
+    if (animName == failName) failAnim = newAnim;
   }
 
   // ----------------------------------------------------
+  // LOGIN LOGIC
   void _attemptLogin() {
-    final username = _email.text.trim();
-    final password = _password.text.trim();
+    inPassword = false;
 
-    idleLook?.isActive = false;
-
-    if (username == _testUser && password == _testPass) {
-      play(successAnim);
+    if (_email.text.trim() == _testUser &&
+        _password.text.trim() == _testPass) {
+      _play(successName);
 
       Future.delayed(const Duration(milliseconds: 900), () {
         Navigator.pushReplacementNamed(context, "/home");
       });
     } else {
-      play(failAnim);
-    }
+      _play(failName);
 
-    Future.delayed(const Duration(seconds: 2), () {
-      play(idleLook);
-    });
+      Future.delayed(const Duration(seconds: 2), () {
+        _play(idleName);
+      });
+    }
   }
 
   // ----------------------------------------------------
-  // FIXED: Eye-cover should play every time user taps password
-  void _playEyeCover() {
-    if (_artboard == null) return;
-
-    // Remove previous controller so animation restarts
-    if (eyeCover != null) {
-      _artboard!.removeController(eyeCover!);
-    }
-
-    // Recreate fresh controller → ensures replay
-    eyeCover = SimpleAnimation("eye_cover", autoplay: false);
-
-    // Play it
-    play(eyeCover);
+  void _restartIdleTimer() {
+    idleTimer?.cancel();
+    idleTimer = Timer(const Duration(seconds: 4), () {
+      if (!inPassword) {
+        _play(idleLookAroundName);
+      }
+    });
   }
 
   // ----------------------------------------------------
@@ -131,7 +159,8 @@ class _LoginPageState extends State<LoginPage> {
                           const Icon(Icons.info_outline, color: Colors.pink),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text("username: $_testUser   password: $_testPass"),
+                            child: Text(
+                                "username: $_testUser   password: $_testPass"),
                           ),
                           TextButton(
                             onPressed: () {
@@ -151,29 +180,44 @@ class _LoginPageState extends State<LoginPage> {
                   // USERNAME
                   TextField(
                     controller: _email,
-                    onChanged: (value) {
-                      if (value.length % 2 == 0) {
-                        play(lookLeft);
-                      } else {
-                        play(lookRight);
+                    onTap: () {
+                      inPassword = false;
+                      _play(idleName);
+                      _restartIdleTimer();
+                    },
+                    onChanged: (val) {
+                      if (val.isNotEmpty) {
+                        if (val.length % 2 == 0) {
+                          _play(leftName);
+                        } else {
+                          _play(rightName);
+                        }
                       }
+                      _restartIdleTimer();
                     },
                     decoration: _box("Username"),
                   ),
 
                   const SizedBox(height: 14),
 
-                  // PASSWORD — FIX APPLIED HERE
+                  // PASSWORD
                   TextField(
                     controller: _password,
                     obscureText: true,
-                    onTap: _playEyeCover, // 👈 FIXED — always replays
+                    onTap: () {
+                      inPassword = true;
+                      _play(eyeCoverName);
+                    },
+                    onChanged: (_) {
+                      inPassword = true;
+                      _play(eyeCoverName);
+                    },
                     decoration: _box("Password"),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // BUTTON
+                  // LOGIN BUTTON
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -187,10 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: const Text(
                         "Login",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),
                   ),
@@ -201,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // RIVE BOTTOM CHARACTER
+          // RIVE CHARACTER
           Align(
             alignment: Alignment.bottomCenter,
             child: SizedBox(
@@ -210,7 +251,7 @@ class _LoginPageState extends State<LoginPage> {
                   ? const Center(child: CircularProgressIndicator())
                   : Rive(artboard: _artboard!, fit: BoxFit.contain),
             ),
-          ),
+          )
         ],
       ),
     );
@@ -225,7 +266,8 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 }
