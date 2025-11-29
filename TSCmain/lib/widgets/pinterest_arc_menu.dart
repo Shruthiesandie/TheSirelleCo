@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class PinterestArcMenu extends StatefulWidget {
@@ -20,57 +21,56 @@ class PinterestArcMenu extends StatefulWidget {
 
 class _PinterestArcMenuState extends State<PinterestArcMenu>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late AnimationController controller;
 
   late Animation<double> arcScale;
-  late Animation<double> maleSlide;
-  late Animation<double> femaleSlide;
-  late Animation<double> unisexSlide;
-  late Animation<double> fadeIn;
+  late Animation<double> opacity;
+  late Animation<double> maleAnim;
+  late Animation<double> femaleAnim;
+  late Animation<double> unisexAnim;
 
   @override
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
+    controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 450),
+      duration: const Duration(milliseconds: 650),
     );
 
-    // Background arc animation
     arcScale = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutQuad,
+      parent: controller,
+      curve: Curves.easeOutExpo,
     );
 
-    // Slightly staggered icon slide
-    maleSlide = Tween<double>(begin: 40, end: 0).animate(
-      CurvedAnimation(
-          parent: _controller,
-          curve: const Interval(0.2, 1, curve: Curves.easeOutBack)),
-    );
-    femaleSlide = Tween<double>(begin: 40, end: 0).animate(
-      CurvedAnimation(
-          parent: _controller,
-          curve: const Interval(0.3, 1, curve: Curves.easeOutBack)),
-    );
-    unisexSlide = Tween<double>(begin: 40, end: 0).animate(
-      CurvedAnimation(
-          parent: _controller,
-          curve: const Interval(0.4, 1, curve: Curves.easeOutBack)),
+    opacity = CurvedAnimation(
+      parent: controller,
+      curve: const Interval(0.15, 1, curve: Curves.easeOut),
     );
 
-    fadeIn = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.2, 1),
+    maleAnim = CurvedAnimation(
+      parent: controller,
+      curve: const Interval(0.25, 1, curve: Curves.elasticOut),
+    );
+
+    femaleAnim = CurvedAnimation(
+      parent: controller,
+      curve: const Interval(0.35, 1, curve: Curves.elasticOut),
+    );
+
+    unisexAnim = CurvedAnimation(
+      parent: controller,
+      curve: const Interval(0.45, 1, curve: Curves.elasticOut),
     );
   }
 
   @override
-  void didUpdateWidget(covariant PinterestArcMenu oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    widget.isOpen ? _controller.forward() : _controller.reverse();
+  void didUpdateWidget(covariant PinterestArcMenu old) {
+    super.didUpdateWidget(old);
+    widget.isOpen ? controller.forward() : controller.reverse();
   }
+
+  double clamp(double v) => v.clamp(0.0, 1.0);
 
   @override
   Widget build(BuildContext context) {
@@ -79,13 +79,13 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
       left: 0,
       right: 0,
       child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
+        animation: controller,
+        builder: (_, __) {
           return Opacity(
-            opacity: fadeIn.value,
+            opacity: clamp(opacity.value),
             child: Transform.scale(
               scale: arcScale.value,
-              child: _buildArcMenu(),
+              child: _glassArc(),
             ),
           );
         },
@@ -93,140 +93,175 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
     );
   }
 
-  // ------------------------------------------------------------
-  // GLASS ARC MENU (Upgraded)
-  // ------------------------------------------------------------
-  Widget _buildArcMenu() {
+  // ---------------------------------------------------------------------------
+  // 🔮 GLASS ARC
+  // ---------------------------------------------------------------------------
+  Widget _glassArc() {
     return Center(
       child: Container(
         width: 260,
-        height: 140,
+        height: 145,
         decoration: BoxDecoration(
-          // Glassmorphism
-          color: Colors.white.withOpacity(0.55),
           borderRadius: BorderRadius.circular(70),
-          border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.2),
+          gradient: LinearGradient(
+            colors: [
+              Colors.white.withOpacity(0.55),
+              Colors.white.withOpacity(0.18),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.45),
+            width: 1.4,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.pinkAccent.withOpacity(0.10),
-              blurRadius: 28,
-              offset: const Offset(0, 12),
+              color: Colors.pinkAccent.withOpacity(0.20),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
             ),
-            BoxShadow(
-              color: Colors.white.withOpacity(0.7),
+            const BoxShadow(
+              color: Colors.white,
               blurRadius: 6,
-              offset: const Offset(-2, -2),
+              spreadRadius: -2,
+              offset: Offset(-2, -2),
             ),
           ],
         ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(70),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                _softGlow(),
 
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Floating highlight behind icons
-            _floatingGlow(-70, Colors.blueAccent),
-            _floatingGlow(0, Colors.pinkAccent),
-            _floatingGlow(70, Colors.purpleAccent),
-
-            // Male
-            Transform.translate(
-              offset: Offset(-70, maleSlide.value),
-              child: _circleButton(
-                Icons.male,
-                const LinearGradient(
-                  colors: [Color(0xFF64B5F6), Color(0xFF1976D2)],
+                _menuButton(
+                  -70,
+                  maleAnim,
+                  Icons.male,
+                  [Color(0xFF6EC6FF), Color(0xFF0277BD)],
+                  widget.onMaleTap,
                 ),
-                widget.onMaleTap,
-              ),
-            ),
 
-            // Female
-            Transform.translate(
-              offset: Offset(0, femaleSlide.value),
-              child: _circleButton(
-                Icons.female,
-                const LinearGradient(
-                  colors: [Color(0xFFFF80AB), Color(0xFFE91E63)],
+                _menuButton(
+                  0,
+                  femaleAnim,
+                  Icons.female,
+                  [Color(0xFFFF8ECF), Color(0xFFD81B60)],
+                  widget.onFemaleTap,
                 ),
-                widget.onFemaleTap,
-              ),
-            ),
 
-            // Unisex
-            Transform.translate(
-              offset: Offset(70, unisexSlide.value),
-              child: _circleButton(
-                Icons.transgender,
-                const LinearGradient(
-                  colors: [Color(0xFFCE93D8), Color(0xFF8E24AA)],
+                _menuButton(
+                  70,
+                  unisexAnim,
+                  Icons.transgender,
+                  [Color(0xFFD1A2FF), Color(0xFF8E24AA)],
+                  widget.onUnisexTap,
                 ),
-                widget.onUnisexTap,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  // ------------------------------------------------------------
-  // ICON BUTTON WITH GLOW + GRADIENT (Upgraded)
-  // ------------------------------------------------------------
-  Widget _circleButton(
-      IconData icon, Gradient gradient, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedScale(
-        scale: widget.isOpen ? 1 : 0.001,
-        duration: const Duration(milliseconds: 420),
-        curve: Curves.easeOutBack,
-        child: Container(
-          width: 58,
-          height: 58,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: gradient,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.18),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-              BoxShadow(
-                color: Colors.white.withOpacity(0.4),
-                blurRadius: 4,
-                offset: const Offset(-2, -2),
-              ),
-            ],
+                _lightSweep(),
+              ],
+            ),
           ),
-          child: Icon(icon, size: 30, color: Colors.white),
         ),
       ),
     );
   }
 
-  // ------------------------------------------------------------
-  // FLOATING GLOW BEHIND EACH ICON
-  // ------------------------------------------------------------
-  Widget _floatingGlow(double xOffset, Color color) {
-    return Positioned(
-      left: 130 + xOffset,
-      top: 40,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (_, __) {
-          return Opacity(
-            opacity: fadeIn.value * 0.5,
+  // ---------------------------------------------------------------------------
+  // ✨ Ambient Glow
+  // ---------------------------------------------------------------------------
+  Widget _softGlow() {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (_, __) => Opacity(
+        opacity: clamp(opacity.value * 0.7),
+        child: Container(
+          width: 260,
+          height: 145,
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              colors: [
+                Colors.pinkAccent.withOpacity(0.18),
+                Colors.transparent,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 💫 Light Sweep (shimmer)
+  // ---------------------------------------------------------------------------
+  Widget _lightSweep() {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (_, __) {
+        double pos = arcScale.value;
+        return Positioned(
+          left: 260 * pos - 260,
+          child: Container(
+            width: 80,
+            height: 150,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withOpacity(0),
+                  Colors.white.withOpacity(0.22 * clamp(opacity.value)),
+                  Colors.white.withOpacity(0),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 🟣 Premium Animated Menu Button
+  // ---------------------------------------------------------------------------
+  Widget _menuButton(double x, Animation<double> anim, IconData icon,
+      List<Color> colors, VoidCallback onTap) {
+    return Transform.translate(
+      offset: Offset(x, (1 - anim.value) * 55),
+      child: Opacity(
+        opacity: clamp(anim.value),
+        child: GestureDetector(
+          onTap: onTap,
+          child: AnimatedScale(
+            scale: clamp(anim.value),
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.elasticOut,
             child: Container(
-              width: 46,
-              height: 46,
+              width: 62,
+              height: 62,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color.withOpacity(0.20),
+                gradient: LinearGradient(
+                  colors: colors,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.last.withOpacity(0.35),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
+              child: Icon(icon, size: 32, color: Colors.white),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
