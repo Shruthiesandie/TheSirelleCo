@@ -14,18 +14,16 @@ class _LoginPageState extends State<LoginPage> {
   Artboard? _riveArtboard;
   StateMachineController? _controller;
 
-  // 🔥 Rive Inputs
+  // Rive inputs
   SMIBool? _isFocus;
-  SMIBool? _IsPassword;
+  SMIBool? _isPassword;          // fixed naming
   SMITrigger? _successTrigger;
   SMITrigger? _failTrigger;
   SMINumber? _eyeTrack;
 
-  // Controllers
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
 
-  // Test temporary credentials
   late String _testUser;
   late String _testPass;
 
@@ -43,30 +41,37 @@ class _LoginPageState extends State<LoginPage> {
     _testPass = (r.nextInt(9000) + 1000).toString();
   }
 
-  // Load rive file and state machine
+  // Load Rive file correctly
   Future<void> _loadRive() async {
-    final data = await rootBundle.load("assets/animations/login_character.riv");
-    final file = RiveFile.import(data);
+    try {
+      final data = await rootBundle.load("assets/animations/login_character.riv");
+      final file = RiveFile.import(data);
+      final artboard = file.mainArtboard;
 
-    final artboard = file.mainArtboard;
+      _controller = StateMachineController.fromArtboard(
+        artboard,
+        "State Machine 1",
+      );
 
-    _controller = StateMachineController.fromArtboard(
-      artboard,
-      "State Machine 1",
-    );
+      if (_controller == null) {
+        debugPrint("❌ Could not load State Machine!");
+        return;
+      }
 
-    if (_controller != null) {
       artboard.addController(_controller!);
 
-      // Inputs EXACTLY as shown in your screenshot
+      // get inputs EXACTLY
       _isFocus = _controller!.findInput("isFocus") as SMIBool?;
-      _IsPassword = _controller!.findInput("IsPassword") as SMIBool?;
+      _isPassword = _controller!.findInput("IsPassword") as SMIBool?;
       _successTrigger = _controller!.findInput("login_success") as SMITrigger?;
       _failTrigger = _controller!.findInput("login_fail") as SMITrigger?;
       _eyeTrack = _controller!.findInput("eye_track") as SMINumber?;
-    }
 
-    setState(() => _riveArtboard = artboard);
+      setState(() => _riveArtboard = artboard);
+
+    } catch (e) {
+      debugPrint("Rive Load Error: $e");
+    }
   }
 
   // ---------------- LOGIN LOGIC ----------------
@@ -82,14 +87,13 @@ class _LoginPageState extends State<LoginPage> {
       });
     } else {
       _failTrigger?.fire();
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Incorrect username or password")),
       );
     }
   }
 
-  // ---------------- WIDGET BUILD ----------------
+  // ---------------- UI ----------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,12 +104,13 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              // Your logo (unchanged)
+
+              // Logo
               Image.asset("assets/logo/logo.png", height: 60),
 
               const SizedBox(height: 10),
 
-              // ---------------- RIVE CHARACTER ----------------
+              // Rive animation
               SizedBox(
                 height: 260,
                 child: _riveArtboard == null
@@ -122,15 +127,15 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 14),
 
-              // ---------- TEMP CREDENTIAL BOX ----------
+              // TEST CREDENTIALS
               Card(
                 elevation: 2,
                 color: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 10),
                   child: Row(
                     children: [
                       const Icon(Icons.info_outline,
@@ -145,11 +150,9 @@ class _LoginPageState extends State<LoginPage> {
                       TextButton(
                         onPressed: () {
                           Clipboard.setData(
-                            ClipboardData(text: "$_testUser:$_testPass"),
-                          );
+                              ClipboardData(text: "$_testUser:$_testPass"));
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Copied!")),
-                          );
+                              const SnackBar(content: Text("Copied!")));
                         },
                         child: const Text("Copy"),
                       )
@@ -160,13 +163,17 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 22),
 
-              // ---------------- USERNAME FIELD ----------------
+              // Username field
               TextField(
                 controller: _email,
-                onTap: () => _isFocus?.value = true,
+                onTap: () {
+                  _isFocus?.value = true;
+                  _isPassword?.value = false;
+                },
                 onChanged: (v) {
-                  _IsPassword?.value = false;
-                  _eyeTrack?.value = v.length * 2.0; // optional
+                  if (_eyeTrack != null) {
+                    _eyeTrack!.value = v.length.toDouble();
+                  }
                 },
                 decoration: InputDecoration(
                   hintText: "Username",
@@ -183,16 +190,13 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 14),
 
-              // ---------------- PASSWORD FIELD ----------------
+              // Password field
               TextField(
                 controller: _password,
                 obscureText: true,
                 onTap: () {
                   _isFocus?.value = false;
-                  _IsPassword?.value = true; // covers eyes
-                },
-                onChanged: (v) {
-                  _IsPassword?.value = true;
+                  _isPassword?.value = true;
                 },
                 decoration: InputDecoration(
                   hintText: "Password",
@@ -209,7 +213,7 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 20),
 
-              // ---------------- LOGIN BUTTON ----------------
+              // Login button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -224,10 +228,9 @@ class _LoginPageState extends State<LoginPage> {
                   child: const Text(
                     "Login",
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white),
                   ),
                 ),
               ),
