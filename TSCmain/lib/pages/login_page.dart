@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _loadRive() async {
     try {
-      final data = await rootBundle.load("assets/animations/login_character.riv");
+      final data = await rootBundle.load("assets/animation/login_character.riv");
       final file = RiveFile.import(data);
       final artboard = file.mainArtboard;
 
