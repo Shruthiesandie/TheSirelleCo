@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
   // ----------------------------------------------------
   // FORCE PLAY ANIMATION
   void play(RiveAnimationController? controller) {
-    if (controller == null) return;
+    if (controller == null || _artboard == null) return;
     _artboard!.addController(controller);
     controller.isActive = true;
   }
@@ -72,7 +72,6 @@ class _LoginPageState extends State<LoginPage> {
     final username = _email.text.trim();
     final password = _password.text.trim();
 
-    // Remove idle so we can play success / fail cleanly
     idleLook?.isActive = false;
 
     if (username == _testUser && password == _testPass) {
@@ -85,10 +84,26 @@ class _LoginPageState extends State<LoginPage> {
       play(failAnim);
     }
 
-    // After 2 seconds return to idle
     Future.delayed(const Duration(seconds: 2), () {
       play(idleLook);
     });
+  }
+
+  // ----------------------------------------------------
+  // FIXED: Eye-cover should play every time user taps password
+  void _playEyeCover() {
+    if (_artboard == null) return;
+
+    // Remove previous controller so animation restarts
+    if (eyeCover != null) {
+      _artboard!.removeController(eyeCover!);
+    }
+
+    // Recreate fresh controller → ensures replay
+    eyeCover = SimpleAnimation("eye_cover", autoplay: false);
+
+    // Play it
+    play(eyeCover);
   }
 
   // ----------------------------------------------------
@@ -148,11 +163,11 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 14),
 
-                  // PASSWORD
+                  // PASSWORD — FIX APPLIED HERE
                   TextField(
                     controller: _password,
                     obscureText: true,
-                    onTap: () => play(eyeCover),
+                    onTap: _playEyeCover, // 👈 FIXED — always replays
                     decoration: _box("Password"),
                   ),
 
@@ -186,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // RIVE ANIMATION
+          // RIVE BOTTOM CHARACTER
           Align(
             alignment: Alignment.bottomCenter,
             child: SizedBox(
