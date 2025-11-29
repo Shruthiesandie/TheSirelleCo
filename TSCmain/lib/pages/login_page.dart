@@ -1,3 +1,24 @@
+// lib/pages/login_page.dart
+//
+// Full, ready-to-paste login page that uses your Rive state machine
+// (State Machine 1) and inputs found in your screenshot:
+//
+// Inputs used:
+//   - isFocus      (Bool)
+//   - isPassword   (Bool)
+//   - login_success (Trigger)
+//   - login_fail    (Trigger)
+//   - eye_track     (Number)  <-- optional, we'll update it as the user types
+//
+// Rive file assumed at: assets/animations/login_character.riv
+// Make sure pubspec.yaml includes that asset and rive dependency.
+//
+// Keeps the same aesthetic as your previous version and:
+//  - fires login_success/login_fail triggers on attempts
+//  - toggles isFocus & isPassword based on text field focus
+//  - sets eye_track number while typing (small demo)
+//  - navigates to "/home" on success
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,15 +32,24 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  // Rive
   Artboard? _riveArtboard;
-  late SimpleAnimation _idleAnim;
-  late SimpleAnimation _successAnim;
-  late SimpleAnimation _failAnim;
+  StateMachineController? _controller;
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  // State machine inputs (we'll wire these after controller is created)
+  late SMITrigger _successTrigger;
+  late SMITrigger _failTrigger;
+  late SMIBool _isFocus;
+  late SMIBool _isPassword;
+  SMINumber? _eyeTrack; // optional
 
-  // generated test credentials
+  // Text controllers & focus nodes
+  final TextEditingController _userCtrl = TextEditingController();
+  final TextEditingController _passCtrl = TextEditingController();
+  final FocusNode _userFocus = FocusNode();
+  final FocusNode _passFocus = FocusNode();
+
+  // Generated test credentials
   late String _testUsername;
   late String _testPassword;
 
@@ -28,18 +58,49 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _generateTestCredentials();
     _loadRive();
+
+    // focus listeners to toggle isFocus/isPassword
+    _userFocus.addListener(() {
+      if (_isFocus != null) {
+        // if controller not ready yet, ignore
+        try {
+          _isFocus.value = _userFocus.hasFocus || _passFocus.hasFocus;
+        } catch (_) {}
+      }
+      // also set eye_track to center when not typing
+      _updateEyeTrack();
+    });
+
+    _passFocus.addListener(() {
+      if (_isFocus != null && _isPassword != null) {
+        try {
+          _isFocus.value = _userFocus.hasFocus || _passFocus.hasFocus;
+          _isPassword.value = _passFocus.hasFocus;
+        } catch (_) {}
+      }
+      _updateEyeTrack();
+    });
+
+    // while typing update the eye track (small demo to make bird look)
+    _userCtrl.addListener(() => _updateEyeTrackFromText(_userCtrl.text));
+    _passCtrl.addListener(() => _updateEyeTrackFromText(_passCtrl.text));
+  }
+
+  @override
+  void dispose() {
+    _userCtrl.dispose();
+    _passCtrl.dispose();
+    _userFocus.dispose();
+    _passFocus.dispose();
+    super.dispose();
   }
 
   void _generateTestCredentials() {
     final rnd = Random();
-    final u = "user${rnd.nextInt(900) + 100}";
-    final p = "${rnd.nextInt(9000) + 1000}";
+    final u = "user${rnd.nextInt(900) + 100}"; // e.g. user564
+    final p = "${rnd.nextInt(9000) + 1000}"; // 4-digit like 6106
     _testUsername = u;
     _testPassword = p;
-
-    // prefill the fields with empty to force user entry; optionally prefill for quick test:
-    // _emailController.text = _testUsername;
-    // _passwordController.text = _testPassword;
   }
 
   Future<void> _loadRive() async {
@@ -48,74 +109,110 @@ class _LoginPageState extends State<LoginPage> {
       final file = RiveFile.import(data);
       final artboard = file.mainArtboard;
 
-      // Animation names inside the Rive file must match these names:
-      // "idle", "success", "fail"
-      // If your file uses different names, change them below.
-      _idleAnim = SimpleAnimation('idle');
-      _successAnim = SimpleAnimation('success');
-      _failAnim = SimpleAnimation('fail');
+      // create controller for the state machine named exactly "State Machine 1"
+      final controller = StateMachineController.fromArtboard(artboard, 'State Machine 1');
+      if (controller == null) {
+        // State machine not found — fall back to idle display
+        artboard.addController(SimpleAnimation('idle'));
+        setState(() => _riveArtboard = artboard);
+        return;
+      }
 
-      artboard.addController(_idleAnim);
-      setState(() => _riveArtboard = artboard);
+      artboard.addController(controller);
+      // find inputs
+      // wrap each find with try/catch; if a name differs the app won't crash
+      try {
+        _isFocus = controller.findInput('isFocus') as SMIBool;
+      } catch (_) {
+        // create dummy if not found (prevents null errors)
+        _isFocus = SMIBool(false);
+      }
+      try {
+        _isPassword = controller.findInput('isPassword') as SMIBool;
+      } catch (_) {
+        _isPassword = SMIBool(false);
+      }
+      try {
+        _successTrigger = controller.findInput('login_success') as SMITrigger;
+      } catch (_) {
+        // fallback dummy
+        _successTrigger = SMITrigger();
+      }
+      try {
+        _failTrigger = controller.findInput('login_fail') as SMITrigger;
+      } catch (_) {
+        _failTrigger = SMITrigger();
+      }
+      try {
+        _eyeTrack = controller.findInput('eye_track') as SMINumber;
+      } catch (_) {
+        _eyeTrack = null;
+      }
+
+      // initialize focus booleans to current focus state
+      _isFocus.value = _userFocus.hasFocus || _passFocus.hasFocus;
+      _isPassword.value = _passFocus.hasFocus;
+
+      setState(() {
+        _riveArtboard = artboard;
+        _controller = controller;
+      });
     } catch (e) {
-      // If Rive fails to load, log error and continue (UI will still be usable)
-      debugPrint("Rive load error: $e");
+      debugPrint('Rive load error: $e');
+      // not fatal — keep UI usable
     }
   }
 
-  void _playSuccessThenGoHome() {
-    if (_riveArtboard == null) return;
-    // remove idle and play success
-    _riveArtboard!.removeController(_idleAnim);
-    _riveArtboard!.addController(_successAnim);
-
-    // after animation, go to home
-    Future.delayed(const Duration(milliseconds: 900), () {
-      // restore idle for next time
-      _riveArtboard!..removeController(_successAnim);
-      _riveArtboard!..addController(_idleAnim);
-
-      // Navigate to home
-      Navigator.pushReplacementNamed(context, "/home");
-    });
+  // Small helper: update eye track from typing length (demo)
+  void _updateEyeTrackFromText(String text) {
+    if (_eyeTrack == null) return;
+    // map text length to [-20..20] for example
+    final len = text.length.clamp(0, 20);
+    final value = (len / 20.0) * 40 - 20; // [-20..20]
+    try {
+      _eyeTrack!.value = value;
+    } catch (_) {}
   }
 
-  void _playFailThenIdle() {
-    if (_riveArtboard == null) return;
-    _riveArtboard!.removeController(_idleAnim);
-    _riveArtboard!.addController(_failAnim);
-
-    Future.delayed(const Duration(milliseconds: 900), () {
-      _riveArtboard!..removeController(_failAnim);
-      _riveArtboard!..addController(_idleAnim);
-    });
+  void _updateEyeTrack() {
+    if (_eyeTrack == null) return;
+    try {
+      _eyeTrack!.value = 0;
+    } catch (_) {}
   }
 
+  // Called when user presses Login
   void _attemptLogin() {
-    final inputUser = _emailController.text.trim();
-    final inputPass = _passwordController.text.trim();
+    final inputUser = _userCtrl.text.trim();
+    final inputPass = _passCtrl.text.trim();
 
+    // micro delay so user can see reaction
     if (inputUser == _testUsername && inputPass == _testPassword) {
-      _playSuccessThenGoHome();
+      // success
+      try {
+        _successTrigger.fire();
+      } catch (_) {}
+      // wait a bit to let animation play then navigate
+      Future.delayed(const Duration(milliseconds: 900), () {
+        // navigate to home (replace)
+        if (mounted) Navigator.pushReplacementNamed(context, "/home");
+      });
     } else {
-      _playFailThenIdle();
-      // Optionally show snack bar message
+      // fail
+      try {
+        _failTrigger.fire();
+      } catch (_) {}
+      // also show small message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Incorrect credentials")),
+        const SnackBar(content: Text('Incorrect credentials')),
       );
     }
   }
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Widget _riveWidget() {
+  // Rive widget area
+  Widget _riveArea() {
     if (_riveArtboard == null) {
-      // placeholder while rive loads
+      // placeholder circle
       return SizedBox(
         height: 220,
         child: Center(
@@ -152,15 +249,15 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: [
               const SizedBox(height: 8),
-              // Logo at top (keeps your existing logo)
+              // keep existing logo
               Image.asset('assets/logo/logo.png', height: 60),
-              const SizedBox(height: 8),
 
-              // Rive area
-              _riveWidget(),
+              const SizedBox(height: 8),
+              // Rive artboard
+              _riveArea(),
               const SizedBox(height: 12),
 
-              // Show test credentials for quick demo (remove in production)
+              // Test credentials card (for quick test)
               Card(
                 color: Colors.white,
                 elevation: 2,
@@ -179,7 +276,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          // copy for convenience
                           Clipboard.setData(ClipboardData(text: '$_testUsername:$_testPassword'));
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied credentials')));
                         },
@@ -192,9 +288,10 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 18),
 
-              // Email input
+              // Username
               TextField(
-                controller: _emailController,
+                controller: _userCtrl,
+                focusNode: _userFocus,
                 decoration: InputDecoration(
                   hintText: "Username",
                   filled: true,
@@ -202,13 +299,16 @@ class _LoginPageState extends State<LoginPage> {
                   contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
+                textInputAction: TextInputAction.next,
+                onSubmitted: (_) => _passFocus.requestFocus(),
               ),
 
               const SizedBox(height: 12),
 
-              // Password input
+              // Password
               TextField(
-                controller: _passwordController,
+                controller: _passCtrl,
+                focusNode: _passFocus,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: "Password",
@@ -217,6 +317,7 @@ class _LoginPageState extends State<LoginPage> {
                   contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
+                onSubmitted: (_) => _attemptLogin(),
               ),
 
               const SizedBox(height: 18),
@@ -238,7 +339,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () {
-                  // optional: navigate to signup or show note
+                  // placeholder for create account
                 },
                 child: const Text("Create an account", style: TextStyle(color: Colors.black87)),
               ),
