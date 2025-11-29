@@ -11,18 +11,18 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  Artboard? _riveArtboard;
-  StateMachineController? _controller;
+  Artboard? _artboard;
 
-  // Rive Inputs
-  SMIBool? _isFocus;
-  SMIBool? _isPassword;
-  SMITrigger? _successTrigger;
-  SMITrigger? _failTrigger;
-  SMINumber? _eyeTrack;
+  // Animations (direct control)
+  RiveAnimationController? idleLook;
+  RiveAnimationController? lookLeft;
+  RiveAnimationController? lookRight;
+  RiveAnimationController? eyeCover;
+  RiveAnimationController? successAnim;
+  RiveAnimationController? failAnim;
 
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
 
   late String _testUser;
   late String _testPass;
@@ -40,98 +40,88 @@ class _LoginPageState extends State<LoginPage> {
     _testPass = (r.nextInt(9000) + 1000).toString();
   }
 
-  Future<void> _loadRive() async {
-    try {
-      final data = await rootBundle.load("assets/animation/login_character.riv");
-      final file = RiveFile.import(data);
-      final artboard = file.mainArtboard;
+  void _loadRive() async {
+    final data = await rootBundle.load("assets/animation/login_character.riv");
+    final file = RiveFile.import(data);
 
-      _controller = StateMachineController.fromArtboard(
-        artboard,
-        "State Machine 1",
-      );
+    final artboard = file.mainArtboard;
 
-      if (_controller != null) {
-        artboard.addController(_controller!);
+    // Create controllers for each animation
+    idleLook = SimpleAnimation("idle_look_around");
+    lookLeft = SimpleAnimation("look_left", autoplay: false);
+    lookRight = SimpleAnimation("look_right", autoplay: false);
+    eyeCover = SimpleAnimation("eye_cover", autoplay: false);
+    successAnim = SimpleAnimation("success", autoplay: false);
+    failAnim = SimpleAnimation("fail", autoplay: false);
 
-        _isFocus = _controller!.findInput("isFocus") as SMIBool?;
-        _isPassword = _controller!.findInput("IsPassword") as SMIBool?;
-        _successTrigger = _controller!.findInput("login_success") as SMITrigger?;
-        _failTrigger = _controller!.findInput("login_fail") as SMITrigger?;
-        _eyeTrack = _controller!.findInput("eye_track") as SMINumber?;
-      }
+    artboard.addController(idleLook!);
 
-      setState(() => _riveArtboard = artboard);
-    } catch (e) {
-      debugPrint("Rive error: $e");
-    }
+    setState(() => _artboard = artboard);
   }
 
-  // ---------------- LOGIN LOGIC ----------------
+  // ----------------------------------------------------
+  // FORCE PLAY ANIMATION
+  void play(RiveAnimationController? controller) {
+    if (controller == null) return;
+    _artboard!.addController(controller);
+    controller.isActive = true;
+  }
+
+  // ----------------------------------------------------
   void _attemptLogin() {
     final username = _email.text.trim();
     final password = _password.text.trim();
 
+    // Remove idle so we can play success / fail cleanly
+    idleLook?.isActive = false;
+
     if (username == _testUser && password == _testPass) {
-      _successTrigger?.fire();
+      play(successAnim);
 
       Future.delayed(const Duration(milliseconds: 900), () {
         Navigator.pushReplacementNamed(context, "/home");
       });
     } else {
-      _failTrigger?.fire();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Incorrect username or password")),
-      );
+      play(failAnim);
     }
+
+    // After 2 seconds return to idle
+    Future.delayed(const Duration(seconds: 2), () {
+      play(idleLook);
+    });
   }
 
+  // ----------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFCEEEE),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // -------------------- MAIN FORM --------------------
-            SingleChildScrollView(
+      body: Stack(
+        children: [
+          SafeArea(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 30),
-
-                  // Your Logo
                   Image.asset("assets/logo/logo.png", height: 60),
-
                   const SizedBox(height: 20),
 
-                  // Test Credentials Box
+                  // TEST BOX
                   Card(
-                    color: Colors.white,
-                    elevation: 1,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
                     child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const EdgeInsets.all(14),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline,
-                              color: Colors.pinkAccent),
+                          const Icon(Icons.info_outline, color: Colors.pink),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(
-                              "username: $_testUser   password: $_testPass",
-                              style: const TextStyle(fontSize: 14),
-                            ),
+                            child: Text("username: $_testUser   password: $_testPass"),
                           ),
                           TextButton(
                             onPressed: () {
                               Clipboard.setData(
-                                  ClipboardData(text: "$_testUser:$_testPass"));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Copied!")),
+                                ClipboardData(text: "$_testUser:$_testPass"),
                               );
                             },
                             child: const Text("Copy"),
@@ -143,54 +133,32 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 30),
 
-                  // Username
+                  // USERNAME
                   TextField(
                     controller: _email,
-                    onTap: () {
-                      _isFocus?.value = true;
-                      _isPassword?.value = false;
-                    },
                     onChanged: (value) {
-                      _eyeTrack?.value = value.length.toDouble();
+                      if (value.length % 2 == 0) {
+                        play(lookLeft);
+                      } else {
+                        play(lookRight);
+                      }
                     },
-                    decoration: InputDecoration(
-                      hintText: "Username",
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    ),
+                    decoration: _box("Username"),
                   ),
 
                   const SizedBox(height: 14),
 
-                  // Password
+                  // PASSWORD
                   TextField(
                     controller: _password,
                     obscureText: true,
-                    onTap: () {
-                      _isFocus?.value = false;
-                      _isPassword?.value = true; // Eye cover
-                    },
-                    decoration: InputDecoration(
-                      hintText: "Password",
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    ),
+                    onTap: () => play(eyeCover),
+                    decoration: _box("Password"),
                   ),
 
                   const SizedBox(height: 20),
 
+                  // BUTTON
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -206,44 +174,43 @@ class _LoginPageState extends State<LoginPage> {
                         "Login",
                         style: TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.w600,
                           fontSize: 16,
                         ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text("Create an account"),
-                  ),
-
-                  const SizedBox(height: 200), // Make space for animation
+                  const SizedBox(height: 200),
                 ],
               ),
             ),
+          ),
 
-            // -------------------- RIVE AT BOTTOM --------------------
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: SizedBox(
-                height: 260,
-                child: _riveArtboard == null
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.pinkAccent,
-                        ),
-                      )
-                    : Rive(
-                        artboard: _riveArtboard!,
-                        fit: BoxFit.contain,
-                      ),
-              ),
-            )
-          ],
-        ),
+          // RIVE ANIMATION
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(
+              height: 260,
+              child: _artboard == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : Rive(artboard: _artboard!, fit: BoxFit.contain),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  InputDecoration _box(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 }
