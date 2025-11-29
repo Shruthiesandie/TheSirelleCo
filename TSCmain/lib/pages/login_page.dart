@@ -24,7 +24,9 @@ class _LoginPageState extends State<LoginPage> {
   Timer? idleTimer;
 
   bool inPassword = false;
-  bool isIntroPlaying = false; // ⭐ prevents interrupting intro animation
+  bool isIntroPlaying = false;
+
+  double characterOpacity = 0;  // ⭐ For smooth fade-in
 
   final _email = TextEditingController();
   final _password = TextEditingController();
@@ -46,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // ----------------------------------------------------
-  // LOAD RIVE + START INTRO ANIMATION
+  // LOAD RIVE + FADE-IN + INTRO
   void _loadRive() async {
     final data = await rootBundle.load("assets/animation/login_character.riv");
     final file = RiveFile.import(data);
@@ -60,14 +62,19 @@ class _LoginPageState extends State<LoginPage> {
     successAnim = SimpleAnimation("success", autoplay: false);
     failAnim = SimpleAnimation("fail", autoplay: false);
 
-    // Start intro animation (idle look around)
+    // Start intro animation
     isIntroPlaying = true;
     artboard.addController(idleLookAround);
     idleLookAround.isActive = true;
 
     setState(() => _artboard = artboard);
 
-    // After intro completes → go idle
+    // ⭐ Smooth fade-in
+    Future.delayed(const Duration(milliseconds: 100), () {
+      setState(() => characterOpacity = 1);
+    });
+
+    // After intro → idle
     Future.delayed(const Duration(seconds: 2), () {
       isIntroPlaying = false;
       _play("idle");
@@ -77,11 +84,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // ----------------------------------------------------
-  // PLAY ANY ANIMATION BY NAME (always restarts clean)
+  // PLAY ANY ANIMATION BY NAME
   void _play(String name) {
     if (_artboard == null) return;
 
-    // Block playing if intro animation is still running
     if (isIntroPlaying) return;
 
     final anim = SimpleAnimation(name, autoplay: false);
@@ -96,16 +102,20 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // ----------------------------------------------------
-  // AUTO IDLE TRIGGER (5 seconds)
+  // FIX: IDLE-LOOK-AROUND SHOULD PLAY AFTER 5 SEC
   void _restartIdleTimer() {
     idleTimer?.cancel();
     idleTimer = Timer(const Duration(seconds: 5), () {
       if (!inPassword) {
-        // Play full intro again
         isIntroPlaying = true;
-        _play("idle_look_around");
 
-        // After intro finishes → idle
+        // ⭐ Directly add controller (DON’T use _play, it blocks intro!)
+        final intro = SimpleAnimation("idle_look_around", autoplay: false);
+        _artboard!.addController(intro);
+        intro.isActive = true;
+        idleLookAround = intro;
+
+        // After intro finishes → go idle
         Future.delayed(const Duration(seconds: 2), () {
           isIntroPlaying = false;
           _play("idle");
@@ -115,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // ----------------------------------------------------
-  // LOGIN LOGIC
+  // LOGIN
   void _attemptLogin() {
     inPassword = false;
     idleTimer?.cancel();
@@ -152,7 +162,6 @@ class _LoginPageState extends State<LoginPage> {
                   Image.asset("assets/logo/logo.png", height: 60),
                   const SizedBox(height: 20),
 
-                  // Username + Password info card
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(14),
@@ -179,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 30),
 
-                  // USERNAME FIELD — NO ANIMATIONS HERE
+                  // USERNAME FIELD
                   TextField(
                     controller: _email,
                     onTap: () {
@@ -195,18 +204,18 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 14),
 
-                  // PASSWORD FIELD — ONLY TAP PLAYS EYE COVER
+                  // PASSWORD — ONLY TAP PLAYS EYE COVER
                   TextField(
                     controller: _password,
                     obscureText: true,
                     onTap: () {
                       inPassword = true;
-                      _play("eye_cover"); // only on tap
+                      _play("eye_cover");
                       _restartIdleTimer();
                     },
                     onChanged: (_) {
                       inPassword = true;
-                      _restartIdleTimer(); // typing does NOT play animation
+                      _restartIdleTimer(); // NO animation here
                     },
                     decoration: _box("Password"),
                   ),
@@ -226,8 +235,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: const Text(
                         "Login",
-                        style:
-                            TextStyle(color: Colors.white, fontSize: 16),
+                        style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),
                   ),
@@ -238,14 +246,18 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // RIVE CHARACTER
+          // ⭐ SMOOTH FADE-IN CHARACTER
           Align(
             alignment: Alignment.bottomCenter,
-            child: SizedBox(
-              height: 260,
-              child: _artboard == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : Rive(artboard: _artboard!, fit: BoxFit.contain),
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 600),
+              opacity: characterOpacity,
+              child: SizedBox(
+                height: 260,
+                child: _artboard == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : Rive(artboard: _artboard!, fit: BoxFit.contain),
+              ),
             ),
           ),
         ],
