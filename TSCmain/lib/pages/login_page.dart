@@ -1,9 +1,14 @@
+// ------------------------------------------------------------
+// PART 1 — Imports, Variables, Rive Loading, Parallax, Eye Follow
+// ------------------------------------------------------------
+
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// IMPORTANT: Prefix Flutter gradients to avoid Rive conflicts
+// Fix gradient naming conflicts with Rive
 import 'package:flutter/painting.dart' as fg;
 
 import 'package:rive/rive.dart';
@@ -16,10 +21,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage>
-    with TickerProviderStateMixin { // <--- changed to TickerProviderStateMixin
+    with TickerProviderStateMixin {
   Artboard? _artboard;
 
-  // Rive animations
+  // ---------------- RIVE ANIMATIONS ----------------
   late SimpleAnimation idleLookAround;
   late SimpleAnimation idle;
   late SimpleAnimation eyeCover;
@@ -27,36 +32,51 @@ class _LoginPageState extends State<LoginPage>
   late SimpleAnimation failAnim;
 
   Timer? idleTimer;
-
   bool inPassword = false;
   bool introPlaying = false;
   double characterOpacity = 0;
 
-  // Page fade-in animation
+  // Parallax movement
+  double tiltX = 0;
+  double tiltY = 0;
+  final double maxTilt = 10;
+
+  // Eye follow using look_left + look_right
+  String lastLook = "center";
+  double eyeTriggerCooldown = 0;
+
+  // Page fade animation
   late AnimationController pageController;
   late Animation<double> pageFade;
 
-  // Background animation controller
+  // Background animation
   late AnimationController bgController;
+
+  // Hardcoded login
+  final String hardUser = "user123";
+  final String hardPass = "4321";
 
   final _email = TextEditingController();
   final _password = TextEditingController();
 
-  // Hardcoded credentials
-  final String hardUser = "user123";
-  final String hardPass = "4321";
-
+  // ------------------------------------------------------------
+  // INIT
+  // ------------------------------------------------------------
   @override
   void initState() {
     super.initState();
 
+    // Page fade animation
     pageController =
         AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
     pageFade = CurvedAnimation(parent: pageController, curve: Curves.easeOutCubic);
     pageController.forward();
 
-    bgController = AnimationController(vsync: this, duration: const Duration(seconds: 6))
-      ..repeat();
+    // Background waves controller
+    bgController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat();
 
     _loadRive();
   }
@@ -71,8 +91,9 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
-  // ----------------------------------------------------
-  // LOAD RIVE
+  // ------------------------------------------------------------
+  // LOAD RIVE FILE
+  // ------------------------------------------------------------
   void _loadRive() async {
     final data = await rootBundle.load("assets/animation/login_character.riv");
     final file = RiveFile.import(data);
@@ -86,15 +107,21 @@ class _LoginPageState extends State<LoginPage>
 
     _artboard = artboard;
 
+    // Smooth fade-in
     Future.delayed(const Duration(milliseconds: 80), () {
       setState(() => characterOpacity = 1);
     });
 
+    // Play intro
     _playIntroOnce();
+
+    // Idle detection timer
     _restartIdleTimer();
   }
 
-  // INTRO PLAY ONCE
+  // ------------------------------------------------------------
+  // INTRO PLAYS FULLY
+  // ------------------------------------------------------------
   void _playIntroOnce() {
     if (_artboard == null) return;
 
@@ -104,7 +131,7 @@ class _LoginPageState extends State<LoginPage>
     _artboard!.addController(idleLookAround);
     idleLookAround.isActive = true;
 
-    final dur = idleLookAround.instance?.animation.durationSeconds ?? 2.0;
+    double dur = idleLookAround.instance?.animation.durationSeconds ?? 2;
 
     Future.delayed(Duration(milliseconds: (dur * 1000).toInt()), () {
       if (!mounted) return;
@@ -113,17 +140,18 @@ class _LoginPageState extends State<LoginPage>
     });
   }
 
-  // LOOP idle_look_around UNTIL USER INTERACTS
+  // ------------------------------------------------------------
+  // LOOP idle_look_around WHEN USER IS INACTIVE
+  // ------------------------------------------------------------
   void _loopIdleLook() {
     if (_artboard == null) return;
-
     introPlaying = true;
 
     idleLookAround = SimpleAnimation("idle_look_around", autoplay: false);
     _artboard!.addController(idleLookAround);
     idleLookAround.isActive = true;
 
-    final dur = idleLookAround.instance?.animation.durationSeconds ?? 2.0;
+    double dur = idleLookAround.instance?.animation.durationSeconds ?? 2;
 
     Future.delayed(Duration(milliseconds: (dur * 1000).toInt()), () {
       if (!mounted) return;
@@ -136,7 +164,9 @@ class _LoginPageState extends State<LoginPage>
     });
   }
 
-  // PLAY RIVE ANIMATION
+  // ------------------------------------------------------------
+  // PLAY ANY RIVE ANIMATION
+  // ------------------------------------------------------------
   void _play(String name) {
     if (_artboard == null) return;
     if (introPlaying) return;
@@ -146,7 +176,9 @@ class _LoginPageState extends State<LoginPage>
     anim.isActive = true;
   }
 
-  // RESTART IDLE TIMER
+  // ------------------------------------------------------------
+  // INACTIVITY IDLE TIMER
+  // ------------------------------------------------------------
   void _restartIdleTimer() {
     idleTimer?.cancel();
     idleTimer = Timer(const Duration(seconds: 5), () {
@@ -156,7 +188,9 @@ class _LoginPageState extends State<LoginPage>
     });
   }
 
+  // ------------------------------------------------------------
   // LOGIN LOGIC
+  // ------------------------------------------------------------
   void _attemptLogin() {
     inPassword = false;
     introPlaying = false;
@@ -166,370 +200,265 @@ class _LoginPageState extends State<LoginPage>
         _password.text.trim() == hardPass) {
       _play("success");
 
-      Future.delayed(const Duration(milliseconds: 900), () {
+      Future.delayed(const Duration(milliseconds: 800), () {
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, "/home");
       });
     } else {
       _play("fail");
-
       Future.delayed(const Duration(seconds: 2), () => _play("idle"));
     }
   }
 
-  // Button press feedback
-  double _pressScale = 1.0;
-  void _onButtonDown() => setState(() => _pressScale = 0.98);
-  void _onButtonUp() => setState(() => _pressScale = 1.0);
+  // ------------------------------------------------------------
+  // PARALLAX + EYE FOLLOW
+  // ------------------------------------------------------------
+  void _onPointerMove(Offset pos, Size size) {
+    // Parallax tilt
+    final dx = (pos.dx - size.width / 2) / (size.width / 2);
+    final dy = (pos.dy - size.height / 2) / (size.height / 2);
 
-  // ----------------------------------------------------
+    setState(() {
+      tiltX = dy * maxTilt;
+      tiltY = dx * maxTilt;
+    });
+
+    // Eye follow trigger (avoid spam)
+    final now = DateTime.now().millisecondsSinceEpoch / 1000;
+    if (now - eyeTriggerCooldown < 0.25) return;
+    eyeTriggerCooldown = now;
+
+    if (dx < -0.15 && lastLook != "left") {
+      lastLook = "left";
+      _play("look_left");
+    } else if (dx > 0.15 && lastLook != "right") {
+      lastLook = "right";
+      _play("look_right");
+    }
+  }
+
+  void _resetTilt() {
+    animateSpring(() {
+      tiltX = 0;
+      tiltY = 0;
+    });
+  }
+
+  void animateSpring(VoidCallback update) {
+    const duration = Duration(milliseconds: 350);
+    late AnimationController c;
+    c = AnimationController(vsync: this, duration: duration)
+      ..addListener(() => setState(update))
+      ..forward().whenComplete(() => c.dispose());
+  }
+
+  // ------------------------------------------------------------
+  // PART 2 — UI Layout, Glass Card, Input Fields, Buttons
+  // ------------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
+    final size = MediaQuery.of(context).size;
 
     return FadeTransition(
       opacity: pageFade,
       child: Scaffold(
         backgroundColor: const Color(0xFFFAF5F7),
-        body: Stack(
-          children: [
-            // BACKGROUND: Waves + Blobs
-            Positioned.fill(
-              child: AnimatedBuilder(
-                animation: bgController,
-                builder: (_, __) {
-                  return CustomPaint(
+        body: Listener(
+          onPointerHover: (e) => _onPointerMove(e.position, size),
+          onPointerMove: (e) => _onPointerMove(e.position, size),
+          onPointerUp: (_) => _resetTilt(),
+          onPointerCancel: (_) => _resetTilt(),
+          child: Stack(
+            children: [
+              // Background waves
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: bgController,
+                  builder: (_, __) => CustomPaint(
                     painter: _WavesPainter(bgController.value),
-                    child: Stack(
-                      children: [
-                        _floatingBlob(
-                          leftFactor: 0.05,
-                          topFactor: 0.08,
-                          size: w * 0.42,
-                          color: const Color(0xFFFFE6F0),
-                          offsetPhase: bgController.value,
-                          blur: 60,
-                        ),
-                        _floatingBlob(
-                          leftFactor: 0.65,
-                          topFactor: 0.12,
-                          size: w * 0.36,
-                          color: const Color(0xFFEDD6FF),
-                          offsetPhase: (bgController.value + 0.35) % 1,
-                          blur: 40,
-                        ),
-                        _floatingBlob(
-                          leftFactor: 0.28,
-                          topFactor: 0.62,
-                          size: w * 0.5,
-                          color: const Color(0xFFFFD7E8),
-                          offsetPhase: (bgController.value + 0.6) % 1,
-                          blur: 80,
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                  ),
+                ),
               ),
-            ),
 
-            // MAIN CONTENT
-            SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 30),
-                  child: Column(
+              // Floating orbs
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Stack(
                     children: [
-                      const SizedBox(height: 4),
-                      _buildHeader(),
-                      const SizedBox(height: 28),
-
-                      _buildGlassCard(),
-
-                      const SizedBox(height: 30),
-                      Text(
-                        "Secure login • Animated character powered by Rive",
-                        style: TextStyle(
-                          color: Colors.black.withOpacity(0.45),
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 90),
+                      _orb(0.12, 0.18, 90, Colors.pinkAccent.withOpacity(0.15)),
+                      _orb(0.78, 0.12, 110, Colors.purpleAccent.withOpacity(0.18)),
+                      _orb(0.30, 0.70, 150, Colors.pink.withOpacity(0.12)),
+                      _orb(0.65, 0.55, 100, Colors.purple.withOpacity(0.14)),
                     ],
                   ),
                 ),
               ),
-            ),
 
-            // CHARACTER
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 600),
-                opacity: characterOpacity,
-                child: Container(
-                  height: 260,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    gradient: fg.LinearGradient(
-                      colors: [
-                        Colors.pinkAccent.withOpacity(0.1),
-                        Color(0xFFB97BFF).withOpacity(0.08),
+              // Main content
+              SafeArea(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 30),
+                    child: Column(
+                      children: [
+                        _header(),
+                        const SizedBox(height: 28),
+                        _glassCard(),
+                        const SizedBox(height: 120),
                       ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.pinkAccent.withOpacity(0.12),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
                   ),
-                  child: _artboard == null
-                      ? const Center(child: CircularProgressIndicator())
-                      : Rive(artboard: _artboard!, fit: BoxFit.contain),
                 ),
               ),
-            ),
-          ],
+
+              // Character (Tilt + Rive)
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 600),
+                  opacity: characterOpacity,
+                  child: Transform(
+                    transform: Matrix4.identity()
+                      ..rotateX(tiltX * pi / 180)
+                      ..rotateY(tiltY * pi / 180),
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      height: 260,
+                      child: _artboard == null
+                          ? const Center(child: CircularProgressIndicator())
+                          : Rive(
+                              artboard: _artboard!,
+                              fit: BoxFit.contain,
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // HEADER
-  Widget _buildHeader() {
+  // ------------------------------------------------------------
+  // HEADER TITLE
+  // ------------------------------------------------------------
+  Widget _header() {
     return Column(
       children: [
         Text(
           "Welcome Back",
           style: TextStyle(
-            fontSize: 34,
+            fontSize: 36,
             fontWeight: FontWeight.w800,
             color: Colors.pink.shade700,
             shadows: [
               Shadow(
-                color: Colors.pink.shade100.withOpacity(0.8),
-                blurRadius: 12,
+                color: Colors.pink.shade200.withOpacity(0.35),
+                blurRadius: 16,
                 offset: const Offset(0, 6),
-              ),
+              )
             ],
           ),
         ),
-        const SizedBox(height: 6),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 10,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.pinkAccent,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              "Sign in to continue",
-              style: TextStyle(color: Colors.black54),
-            ),
-          ],
+        const SizedBox(height: 8),
+        Text(
+          "Sign in to continue",
+          style: TextStyle(
+            color: Colors.black54,
+            fontSize: 16,
+          ),
         ),
       ],
     );
   }
 
+  // ------------------------------------------------------------
   // GLASS CARD
-  Widget _buildGlassCard() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // Glow behind
-        Positioned(
-          top: -30,
-          right: -40,
-          child: Container(
-            width: 160,
-            height: 160,
-            decoration: BoxDecoration(
-              gradient: fg.RadialGradient(
-                colors: [
-                  Colors.pinkAccent.withOpacity(0.12),
-                  Colors.transparent,
-                ],
-              ),
-              shape: BoxShape.circle,
-            ),
+  // ------------------------------------------------------------
+  Widget _glassCard() {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.65),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white.withOpacity(0.15)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 25,
+            offset: const Offset(0, 14),
           ),
-        ),
-
-        // Card
-        Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.65),
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: Colors.white.withOpacity(0.16)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 18,
-                offset: const Offset(0, 10),
-              ),
-            ],
+        ],
+      ),
+      child: Column(
+        children: [
+          _inputField(
+            controller: _email,
+            hint: "Username",
+            icon: Icons.person,
+            onTap: () {
+              introPlaying = false;
+              inPassword = false;
+              _play("idle");
+              _restartIdleTimer();
+            },
+            onChanged: (_) {
+              introPlaying = false;
+              _restartIdleTimer();
+            },
           ),
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Sign in",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.pink.shade600,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
 
-              _inputField(
-                controller: _email,
-                hint: "Username",
-                prefix: Icons.person,
-                onTap: () {
-                  introPlaying = false;
-                  inPassword = false;
-                  _play("idle");
-                  _restartIdleTimer();
-                },
-                onChanged: (_) {
-                  introPlaying = false;
-                  _restartIdleTimer();
-                },
-              ),
+          const SizedBox(height: 20),
 
-              const SizedBox(height: 16),
-
-              _inputField(
-                controller: _password,
-                hint: "Password",
-                prefix: Icons.lock,
-                obscure: true,
-                onTap: () {
-                  introPlaying = false;
-                  inPassword = true;
-                  _play("eye_cover");
-                  _restartIdleTimer();
-                },
-                onChanged: (_) {
-                  introPlaying = false;
-                  inPassword = true;
-                  _restartIdleTimer();
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: Listener(
-                      onPointerDown: (_) => _onButtonDown(),
-                      onPointerUp: (_) => _onButtonUp(),
-                      child: GestureDetector(
-                        onTap: _attemptLogin,
-                        child: AnimatedScale(
-                          duration: const Duration(milliseconds: 120),
-                          scale: _pressScale,
-                          child: Container(
-                            height: 54,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              gradient: fg.LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  const Color(0xFFFF6FAF),
-                                  const Color(0xFFB97BFF),
-                                ],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color:
-                                      const Color(0xFFFF6FAF).withOpacity(0.28),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: const Center(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.login, color: Colors.white),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    "Login",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.6,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    height: 54,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.white.withOpacity(0.06)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        "Help",
-                        style: TextStyle(color: Colors.pink.shade700),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ],
+          _inputField(
+            controller: _password,
+            hint: "Password",
+            icon: Icons.lock,
+            obscure: true,
+            onTap: () {
+              introPlaying = false;
+              inPassword = true;
+              _play("eye_cover");
+              _restartIdleTimer();
+            },
+            onChanged: (_) {
+              introPlaying = false;
+              inPassword = true;
+              _restartIdleTimer();
+            },
           ),
-        ),
-      ],
+
+          const SizedBox(height: 28),
+
+          _loginButton(),
+        ],
+      ),
     );
   }
 
+  // ------------------------------------------------------------
   // INPUT FIELD
+  // ------------------------------------------------------------
   Widget _inputField({
     required TextEditingController controller,
     required String hint,
+    required IconData icon,
     bool obscure = false,
-    IconData? prefix,
     Function()? onTap,
     Function(String)? onChanged,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            blurRadius: 14,
+            offset: const Offset(0, 7),
           )
         ],
       ),
@@ -539,16 +468,14 @@ class _LoginPageState extends State<LoginPage>
         onTap: onTap,
         onChanged: onChanged,
         decoration: InputDecoration(
-          prefixIcon:
-              prefix != null ? Icon(prefix, color: Colors.pink.shade400) : null,
           hintText: hint,
-          hintStyle: const TextStyle(color: Colors.black54),
+          prefixIcon: Icon(icon, color: Colors.pink.shade400),
           filled: true,
           fillColor: Colors.white,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
         ),
@@ -556,130 +483,179 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  // FLOATING BLOB
-  Widget _floatingBlob({
-    required double leftFactor,
-    required double topFactor,
-    required double size,
-    required Color color,
-    required double offsetPhase,
-    required double blur,
-  }) {
-    final dx = sin(offsetPhase * 2 * pi) * 18;
-    final dy = cos(offsetPhase * 2 * pi) * 10;
+  // ------------------------------------------------------------
+  // LOGIN BUTTON
+  // ------------------------------------------------------------
+  double _press = 1.0;
 
-    return Positioned(
-      left: leftFactor * MediaQuery.of(context).size.width + dx,
-      top: topFactor * MediaQuery.of(context).size.height + dy,
-      child: Transform.translate(
-        offset: Offset(dx * 0.2, dy * 0.2),
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            gradient: fg.LinearGradient(
-              colors: [
-                color.withOpacity(0.95),
-                color.withOpacity(0.7),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(size * 0.5),
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.25),
-                blurRadius: blur,
-                spreadRadius: 6,
+  Widget _loginButton() {
+    return Listener(
+      onPointerDown: (_) => setState(() => _press = 0.96),
+      onPointerUp: (_) => setState(() => _press = 1.0),
+      child: GestureDetector(
+        onTap: _attemptLogin,
+        child: AnimatedScale(
+          scale: _press,
+          duration: const Duration(milliseconds: 140),
+          curve: Curves.easeOut,
+          child: Container(
+            height: 55,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: fg.LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.pinkAccent,
+                  const Color(0xFFB97BFF),
+                ],
               ),
-            ],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.pinkAccent.withOpacity(0.28),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                )
+              ],
+            ),
+            child: const Center(
+              child: Text(
+                "Login",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
+
+  // ------------------------------------------------------------
+  // FLOATING ORBS
+  // ------------------------------------------------------------
+  Widget _orb(double x, double y, double size, Color color) {
+    return Positioned(
+      left: x * MediaQuery.of(context).size.width,
+      top: y * MediaQuery.of(context).size.height,
+      child: AnimatedBuilder(
+        animation: bgController,
+        builder: (_, __) {
+          final t = bgController.value;
+          final dx = sin(t * 2 * pi) * 10;
+          final dy = cos(t * 2 * pi) * 10;
+
+          return Transform.translate(
+            offset: Offset(dx, dy),
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
-// WAVES PAINTER
+// ------------------------------------------------------------
+// BACKGROUND WAVES PAINTER
+// ------------------------------------------------------------
 class _WavesPainter extends CustomPainter {
   final double t;
   _WavesPainter(this.t);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
+    final rect = Offset.zero & size;
 
-    // BG gradient
-    final fg.Gradient bgGrad = fg.LinearGradient(
+    final fg.Gradient base = fg.LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [
-        const Color(0xFFFFF3F8),
-        const Color(0xFFFFEAF4),
-        const Color(0xFFF3E8FF),
+      colors: const [
+        Color(0xFFFFF3F8),
+        Color(0xFFFFEAF4),
+        Color(0xFFF3E8FF),
       ],
     );
-    final Paint bgPaint = Paint()..shader = bgGrad.createShader(rect);
-    canvas.drawRect(rect, bgPaint);
 
-    Path makeWave(double yOffset, double amp, double phase, double stretch) {
-      Path p = Path();
-      p.moveTo(0, size.height);
-      for (double x = 0; x <= size.width; x += 8) {
-        double fx = (x / size.width) * 2 * pi * stretch;
-        double y = yOffset + sin(fx + phase) * amp;
-        p.lineTo(x, y);
+    final paint = Paint()..shader = base.createShader(rect);
+    canvas.drawRect(rect, paint);
+
+    Path _wave(double yOffset, double amp, double speed, double stretch) {
+      final path = Path();
+      path.moveTo(0, size.height);
+
+      for (double x = 0; x <= size.width; x += 6) {
+        double nx = (x / size.width) * 2 * pi * stretch;
+        double y = yOffset + sin(nx + t * speed * 2 * pi) * amp;
+        path.lineTo(x, y);
       }
-      p.lineTo(size.width, size.height);
-      return p;
+
+      path.lineTo(size.width, size.height);
+      path.close();
+      return path;
     }
 
-    double phase = t * 2 * pi;
+    // Wave layers
+    canvas.drawPath(
+      _wave(size.height * 0.78, 22, 1.0, 1.0),
+      Paint()
+        ..shader = fg.LinearGradient(
+          colors: [
+            const Color(0xFFFFC9E6).withOpacity(0.95),
+            const Color(0xFFFFF0FB).withOpacity(0.7),
+          ],
+        ).createShader(rect)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14),
+    );
 
-    // Wave 1
-    Paint p1 = Paint()
-      ..shader = fg.LinearGradient(
-        colors: [
-          const Color(0xFFFFC9E6).withOpacity(0.98),
-          const Color(0xFFFFF0FB).withOpacity(0.7),
-        ],
-      ).createShader(rect)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
-    canvas.drawPath(makeWave(size.height * 0.78, 22, phase * 1.0, 1.0), p1);
+    canvas.drawPath(
+      _wave(size.height * 0.86, 30, 0.6, 1.3),
+      Paint()
+        ..shader = fg.LinearGradient(
+          colors: [
+            const Color(0xFFDFB7FF).withOpacity(0.9),
+            const Color(0xFFFDEBFF).withOpacity(0.65),
+          ],
+        ).createShader(rect)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20),
+    );
 
-    // Wave 2
-    Paint p2 = Paint()
-      ..shader = fg.LinearGradient(
-        colors: [
-          const Color(0xFFDFB7FF).withOpacity(0.9),
-          const Color(0xFFFDEBFF).withOpacity(0.65),
-        ],
-      ).createShader(rect)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
-    canvas.drawPath(makeWave(size.height * 0.86, 30, phase * 0.6, 1.2), p2);
-
-    // Wave 3
-    Paint p3 = Paint()
-      ..shader = fg.LinearGradient(
-        colors: [
-          const Color(0xFFFFF5F9).withOpacity(0.6),
-          const Color(0xFFFAF0FF).withOpacity(0.5),
-        ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ).createShader(rect);
-    canvas.drawPath(makeWave(size.height * 0.92, 16, phase * 1.4, 0.8), p3);
+    canvas.drawPath(
+      _wave(size.height * 0.92, 16, 1.3, 0.8),
+      Paint()
+        ..shader = fg.LinearGradient(
+          colors: [
+            const Color(0xFFFFF5F9).withOpacity(0.55),
+            const Color(0xFFFAF0FF).withOpacity(0.45),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ).createShader(rect),
+    );
   }
 
   @override
-  bool shouldRepaint(covariant _WavesPainter oldDelegate) => oldDelegate.t != t;
+  bool shouldRepaint(covariant _WavesPainter oldDelegate) =>
+      oldDelegate.t != t;
 }
 
+// ------------------------------------------------------------
+// END OF FILE — Hardcoded Credentials
+// ------------------------------------------------------------
 /*
-──────────────────────────────────────────────────────
-Hardcoded Login Credentials (as requested):
+────────────────────────────────────────────
+Hardcoded Login Credentials:
 
 USERNAME: user123
 PASSWORD: 4321
-──────────────────────────────────────────────────────
+────────────────────────────────────────────
 */
