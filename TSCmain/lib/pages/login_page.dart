@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // ----------------------------------------------------
-  // LOAD RIVE + SMOOTH FADE + INTRO LOGIC
+  // LOAD RIVE + FADE-IN + PLAY INTRO ONE TIME
   void _loadRive() async {
     final data = await rootBundle.load("assets/animation/login_character.riv");
     final file = RiveFile.import(data);
@@ -62,38 +62,65 @@ class _LoginPageState extends State<LoginPage> {
 
     _artboard = artboard;
 
-    setState(() => characterOpacity = 1);
+    // Fade in character smoothly
+    Future.delayed(Duration(milliseconds: 80), () {
+      setState(() => characterOpacity = 1);
+    });
 
-    // ⭐ Start intro smoothly and fully
-    _playIdleLookFull();
+    // Play one-time intro fully
+    _playIntroOnce();
 
+    // Start idle inactivity timer
     _restartIdleTimer();
   }
 
   // ----------------------------------------------------
-  // NEW: PLAY idle_look_around FULLY (never interrupt)
-  void _playIdleLookFull() {
+  // ON APP START: Play intro fully ONCE
+  void _playIntroOnce() {
     if (_artboard == null) return;
 
     introPlaying = true;
 
-    // Create fresh controller
     idleLookAround = SimpleAnimation("idle_look_around", autoplay: false);
     _artboard!.addController(idleLookAround);
     idleLookAround.isActive = true;
 
-    // Get real animation duration
     final dur = idleLookAround.instance?.animation.durationSeconds ?? 2.0;
 
-    // After animation completes → idle
     Future.delayed(Duration(milliseconds: (dur * 1000).toInt()), () {
+      if (!mounted) return;
       introPlaying = false;
       _play("idle");
     });
   }
 
   // ----------------------------------------------------
-  // PLAY ANY ANIMATION EXCEPT intro
+  // LOOP idle_look_around continuously until user interacts
+  void _loopIdleLook() {
+    if (_artboard == null) return;
+
+    introPlaying = true;
+
+    idleLookAround = SimpleAnimation("idle_look_around", autoplay: false);
+    _artboard!.addController(idleLookAround);
+    idleLookAround.isActive = true;
+
+    final dur = idleLookAround.instance?.animation.durationSeconds ?? 2.0;
+
+    Future.delayed(Duration(milliseconds: (dur * 1000).toInt()), () {
+      if (!mounted) return;
+
+      // If user still hasn't interacted → loop again
+      if (introPlaying) {
+        _loopIdleLook();
+      } else {
+        _play("idle");
+      }
+    });
+  }
+
+  // ----------------------------------------------------
+  // PLAY AN ANIMATION (blocked if intro looping)
   void _play(String name) {
     if (_artboard == null) return;
     if (introPlaying) return;
@@ -109,12 +136,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // ----------------------------------------------------
-  // FIXED: RUN FULL IDLE LOOK EVERY 5 SECONDS
+  // START IDLE AFTER 5 SECONDS OF INACTIVITY
   void _restartIdleTimer() {
     idleTimer?.cancel();
     idleTimer = Timer(const Duration(seconds: 5), () {
       if (!inPassword) {
-        _playIdleLookFull();  // ⭐ full animation
+        _loopIdleLook();  // ⭐ Loop idle_look_around continuously
       }
     });
   }
@@ -122,6 +149,7 @@ class _LoginPageState extends State<LoginPage> {
   // ----------------------------------------------------
   void _attemptLogin() {
     inPassword = false;
+    introPlaying = false; // Stop looping idle-look
     idleTimer?.cancel();
 
     if (_email.text.trim() == _testUser &&
@@ -165,8 +193,8 @@ class _LoginPageState extends State<LoginPage> {
                           const Icon(Icons.info_outline, color: Colors.pink),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(
-                                "username: $_testUser   password: $_testPass"),
+                            child:
+                                Text("username: $_testUser   password: $_testPass"),
                           ),
                           TextButton(
                             onPressed: () {
@@ -187,11 +215,15 @@ class _LoginPageState extends State<LoginPage> {
                   TextField(
                     controller: _email,
                     onTap: () {
+                      introPlaying = false; // ⭐ Stop looping
                       inPassword = false;
                       _play("idle");
                       _restartIdleTimer();
                     },
-                    onChanged: (_) => _restartIdleTimer(),
+                    onChanged: (_) {
+                      introPlaying = false; // ⭐ Stop looping
+                      _restartIdleTimer();
+                    },
                     decoration: _box("Username"),
                   ),
 
@@ -202,11 +234,13 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _password,
                     obscureText: true,
                     onTap: () {
+                      introPlaying = false; // ⭐ Stop looping
                       inPassword = true;
                       _play("eye_cover");
                       _restartIdleTimer();
                     },
                     onChanged: (_) {
+                      introPlaying = false; // ⭐ Stop looping
                       inPassword = true;
                       _restartIdleTimer();
                     },
@@ -221,7 +255,8 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: _attemptLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.pinkAccent,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -242,7 +277,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // CHARACTER WITH FADE-IN
+          // CHARACTER WITH SMOOTH FADE-IN
           Align(
             alignment: Alignment.bottomCenter,
             child: AnimatedOpacity(
