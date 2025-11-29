@@ -21,6 +21,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  rive: ^0.12.4
 
   flutter_lints: ^6.0.0
 
@@ -30,3 +31,4 @@ flutter:
     - .env
     - assets/splash/splash.png
     - assets/logo/logo.png
+    - assets/animation/login_character.riv
