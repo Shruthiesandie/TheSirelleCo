@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
 
-  bool _isEyeCovered = false;
+  bool _eyeClosed = false;
 
   late String _testUser;
   late String _testPass;
@@ -42,7 +42,6 @@ class _LoginPageState extends State<LoginPage> {
     _testPass = (r.nextInt(9000) + 1000).toString();
   }
 
-  // SAFE PLAY HELP
   void play(SimpleAnimation anim) {
     anim.isActive = false;
     anim.isActive = true;
@@ -54,26 +53,25 @@ class _LoginPageState extends State<LoginPage> {
     final file = RiveFile.import(data);
     final artboard = file.mainArtboard;
 
-    // Create animations
     introAnim = SimpleAnimation("Intro", autoplay: false);
-    idleAnim = SimpleAnimation("look_idle", autoplay: false);
+    idleAnim = SimpleAnimation("idle", autoplay: false);
     lookLeft = SimpleAnimation("look_left", autoplay: false);
     lookRight = SimpleAnimation("look_right", autoplay: false);
     eyeCover = SimpleAnimation("eye_cover", autoplay: false);
     successAnim = SimpleAnimation("success", autoplay: false);
     failAnim = SimpleAnimation("fail", autoplay: false);
 
-    // First animation → INTRO
+    // Play intro once when app loads
     artboard.addController(introAnim);
 
-    introAnim.onCompleted = () {
+    // 🔥 Since callback not supported, use timer equal to intro duration
+    Future.delayed(const Duration(milliseconds: 1800), () {
       play(idleAnim);
-    };
+    });
 
     setState(() => _artboard = artboard);
   }
 
-  // LOGIN
   void _attemptLogin() {
     String user = _email.text.trim();
     String pass = _password.text.trim();
@@ -114,7 +112,8 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                                "username: $_testUser   password: $_testPass"),
+                              "username: $_testUser   password: $_testPass",
+                            ),
                           ),
                           TextButton(
                             onPressed: () {
@@ -127,17 +126,18 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 30),
 
-                  // USERNAME
+                  // USERNAME FIELD
                   TextField(
                     controller: _email,
                     onTap: () {
-                      _isEyeCovered = false;
+                      _eyeClosed = false;
                       play(idleAnim);
                     },
                     onChanged: (value) {
-                      if (!_isEyeCovered) {
+                      if (!_eyeClosed) {
                         if (value.length % 2 == 0) {
                           play(lookLeft);
                         } else {
@@ -150,16 +150,16 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 14),
 
-                  // PASSWORD
+                  // PASSWORD FIELD
                   TextField(
                     controller: _password,
                     obscureText: true,
                     onTap: () {
-                      _isEyeCovered = true;
+                      _eyeClosed = true;
                       play(eyeCover);
                     },
                     onChanged: (_) {
-                      _isEyeCovered = true;
+                      _eyeClosed = true;
                       play(eyeCover);
                     },
                     decoration: _box("Password"),
@@ -178,27 +178,26 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: const Text("Login",
-                          style: TextStyle(color: Colors.white, fontSize: 16)),
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
                     ),
                   ),
+
                   const SizedBox(height: 200),
                 ],
               ),
             ),
           ),
 
-          // RIVE ANIMATION
           Align(
             alignment: Alignment.bottomCenter,
             child: SizedBox(
               height: 260,
               child: _artboard == null
                   ? const Center(child: CircularProgressIndicator())
-                  : Rive(
-                      artboard: _artboard!,
-                      fit: BoxFit.contain,
-                    ),
+                  : Rive(artboard: _artboard!, fit: BoxFit.contain),
             ),
           ),
         ],
