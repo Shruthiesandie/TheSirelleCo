@@ -62,10 +62,11 @@ class _LoginPageState extends State<LoginPage> {
 
     art.addController(intro);
 
-    // When intro finishes → start idle
-    intro.completed.listen((_) {
+    // ---------------- FIX (correct for Rive 0.12.x) ----------------
+    intro.instance?.animation.onStop = () {
       _play(idleLook);
-    });
+    };
+    // ---------------------------------------------------------------
 
     setState(() => _artboard = art);
 
@@ -76,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
   // ---------------- ANIMATION HELPER ----------------
   void _play(SimpleAnimation anim) {
     anim.isActive = false; // reset
-    _artboard!.addController(anim);
+    _artboard?.addController(anim);
     anim.isActive = true;
   }
 
