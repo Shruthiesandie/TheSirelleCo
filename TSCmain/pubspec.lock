@@ -217,7 +217,7 @@ packages:
     source: hosted
     version: "2.1.8"
   rive:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: rive
       sha256: ae75a6e9cfbf146630bfb1feba97ee582d935508be6b362e4bd197b9c55a6dd3

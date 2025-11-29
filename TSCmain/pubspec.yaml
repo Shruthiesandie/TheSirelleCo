@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  rive: ^0.12.4
 
   cupertino_icons: ^1.0.8
 
@@ -21,7 +22,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  rive: ^0.12.4
+  
 
   flutter_lints: ^6.0.0
 

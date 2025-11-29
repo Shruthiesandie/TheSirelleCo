@@ -8,7 +8,9 @@ import 'pages/cart_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/search_page.dart';
 import 'pages/love_page.dart';
-import 'pages/allcategories_page.dart'; // optional if needed
+import 'pages/allcategories_page.dart';
+import 'pages/login_page.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -34,6 +36,7 @@ class MyApp extends StatelessWidget {
         "/search": (_) => const SearchPage(),
         "/love": (_) => const LovePage(),
         "/categories": (_) => const AllCategoriesPage(),
+        "/login": (_) => LoginPage(),   
       },
     );
   }
