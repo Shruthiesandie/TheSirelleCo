@@ -12,9 +12,8 @@ class _HomePageState extends State<HomePage> {
   int _selected = 0;
   bool _arcOpen = false;
 
-  // ⭐ NEW — store selected category for plus icon
-  String _selectedCategory = "none";  
-  // values: none, male, female, unisex
+  // selected category for center button icon
+  String _selectedCategory = "none";     
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -30,44 +29,28 @@ class _HomePageState extends State<HomePage> {
 
           backgroundColor: const Color(0xFFFCEEEE),
 
-          drawer: Drawer(
-            backgroundColor: Colors.white,
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: const [
-                DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Colors.pinkAccent,
-                  ),
-                  child: Text(
-                    "Menu",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                    ),
-                  ),
-                ),
-                ListTile(title: Text("Profile")),
-                ListTile(title: Text("Settings")),
-                ListTile(title: Text("Orders")),
-              ],
-            ),
-          ),
+          // -------------------------- DRAWER --------------------------
+          drawer: _buildModernDrawer(),
 
+          // -------------------------- APP BAR --------------------------
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90),
             child: ClipPath(
               clipper: TopBarClipper(),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                color: Colors.white,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                ),
                 child: Row(
                   children: [
+                    // MENU BUTTON
                     IconButton(
                       icon: const Icon(Icons.menu, size: 28, color: Colors.black),
                       onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                     ),
 
+                    // LOGO (Position unchanged!)
                     Expanded(
                       child: Transform.translate(
                         offset: const Offset(100, 0),
@@ -85,20 +68,12 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
+                    // ACTION BUTTONS
                     Row(
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.search,
-                              size: 26, color: Colors.black),
-                          onPressed: () =>
-                              Navigator.pushNamed(context, "/search"),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.favorite_border,
-                              size: 26, color: Colors.black),
-                          onPressed: () =>
-                              Navigator.pushNamed(context, "/love"),
-                        ),
+                        _circleIcon(Icons.search, "/search"),
+                        const SizedBox(width: 6),
+                        _circleIcon(Icons.favorite_border, "/love"),
                       ],
                     ),
                   ],
@@ -107,66 +82,204 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
+          // -------------------------- BODY --------------------------
           body: Stack(
             children: [
+              // Center Text
               const Center(
                 child: Text(
                   "Home Page",
-                  style: TextStyle(fontSize: 22, color: Colors.black87),
+                  style: TextStyle(
+                    fontSize: 22,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
 
-              // ⭐ UPDATE arc menu taps to change selected category
+              // Pinterest Arc Menu
               PinterestArcMenu(
                 isOpen: _arcOpen,
                 onMaleTap: () {
                   setState(() {
                     _arcOpen = false;
-                    _selectedCategory = "male"; // ⭐ NEW
+                    _selectedCategory = "male";
                   });
                 },
                 onFemaleTap: () {
                   setState(() {
                     _arcOpen = false;
-                    _selectedCategory = "female"; // ⭐ NEW
+                    _selectedCategory = "female";
                   });
                 },
                 onUnisexTap: () {
                   setState(() {
                     _arcOpen = false;
-                    _selectedCategory = "unisex"; // ⭐ NEW
+                    _selectedCategory = "unisex";
                   });
                 },
               ),
             ],
           ),
 
+          // -------------------------- BOTTOM NAV --------------------------
           bottomNavigationBar: _buildAestheticNavBar(),
         ),
       ),
     );
   }
 
+  // **********************************************************************
+  // MODERN DRAWER — with gradient header + bottom logout button
+  // **********************************************************************
+  Widget _buildModernDrawer() {
+    return Drawer(
+      backgroundColor: Colors.white,
+      child: Column(
+        children: [
+          // HEADER
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(28),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFFF6FAF),
+                  Color(0xFFB97BFF),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: const Align(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                "Menu",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // MENU OPTIONS
+          _drawerItem(Icons.person, "Profile"),
+          _drawerItem(Icons.settings, "Settings"),
+          _drawerItem(Icons.receipt_long, "Orders"),
+
+          const Spacer(),
+
+          // LOGOUT BUTTON
+          Padding(
+            padding: const EdgeInsets.only(bottom: 22),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushReplacementNamed(context, "/login");
+              },
+              child: Container(
+                width: 160,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.pinkAccent,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pinkAccent.withOpacity(0.35),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    )
+                  ],
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.logout, color: Colors.white, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      "Logout",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _drawerItem(IconData icon, String label) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.pink.shade400),
+      title: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      onTap: () {},
+    );
+  }
+
+  // **********************************************************************
+  // MODERN ROUND ACTION BUTTONS FOR APPBAR
+  // **********************************************************************
+  Widget _circleIcon(IconData icon, String route) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, route),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: Icon(icon, size: 22, color: Colors.black),
+      ),
+    );
+  }
+
+  // **********************************************************************
+  // MODERN BOTTOM NAV BAR (unchanged structure, improved look)
+  // **********************************************************************
   Widget _buildAestheticNavBar() {
     return Container(
       height: 74,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(26),
           topRight: Radius.circular(26),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 12,
-            offset: Offset(0, -2),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
           ),
         ],
       ),
+
       child: Stack(
         alignment: Alignment.center,
         children: [
+          // ICON ROW
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -178,34 +291,38 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
 
+          // CENTER FLOATING BUTTON
           Positioned(
             bottom: 8,
             child: GestureDetector(
               onTap: () => setState(() => _arcOpen = !_arcOpen),
-
               child: Container(
                 padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  color: Colors.pinkAccent,
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFFF6FAF),
+                      Color(0xFFB97BFF),
+                    ],
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
+                      color: Colors.pinkAccent.withOpacity(0.35),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
 
-                // ⭐ DYNAMIC ICON BASED ON SELECTED CATEGORY
                 child: Icon(
                   _selectedCategory == "male"
                       ? Icons.male
                       : _selectedCategory == "female"
                           ? Icons.female
                           : _selectedCategory == "unisex"
-                              ? Icons.transgender   // ⚥ unisex symbol
-                              : Icons.add,          // default plus
+                              ? Icons.transgender
+                              : Icons.add,
                   size: 30,
                   color: Colors.white,
                 ),
@@ -218,6 +335,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _navIcon(IconData icon, int index) {
+    bool selected = _selected == index;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -233,7 +352,7 @@ class _HomePageState extends State<HomePage> {
       child: Icon(
         icon,
         size: 28,
-        color: _selected == index ? Colors.pinkAccent : Colors.grey,
+        color: selected ? Colors.pinkAccent : Colors.grey,
       ),
     );
   }
@@ -244,7 +363,7 @@ class TopBarClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     double curveHeight = 24;
 
-    Path path = Path()
+    return Path()
       ..lineTo(0, size.height - curveHeight)
       ..quadraticBezierTo(
         size.width / 2,
@@ -254,8 +373,6 @@ class TopBarClipper extends CustomClipper<Path> {
       )
       ..lineTo(size.width, 0)
       ..close();
-
-    return path;
   }
 
   @override
