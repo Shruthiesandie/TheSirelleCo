@@ -13,14 +13,13 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   Artboard? _artboard;
 
-  // Animation controllers
-  late RiveAnimationController introAnim;
-  late RiveAnimationController idleAnim;
-  late RiveAnimationController lookLeft;
-  late RiveAnimationController lookRight;
-  late RiveAnimationController eyeCover;
-  late RiveAnimationController successAnim;
-  late RiveAnimationController failAnim;
+  late SimpleAnimation introAnim;
+  late SimpleAnimation idleAnim;
+  late SimpleAnimation lookLeft;
+  late SimpleAnimation lookRight;
+  late SimpleAnimation eyeCover;
+  late SimpleAnimation successAnim;
+  late SimpleAnimation failAnim;
 
   final _email = TextEditingController();
   final _password = TextEditingController();
@@ -37,18 +36,17 @@ class _LoginPageState extends State<LoginPage> {
     _loadRive();
   }
 
-  // Generate temporary login credentials
   void _generateCredentials() {
     final r = Random();
     _testUser = "user${r.nextInt(900) + 100}";
     _testPass = (r.nextInt(9000) + 1000).toString();
   }
 
-  // Play an animation safely
-  void play(RiveAnimationController controller) {
-    controller.isActive = false;
-    controller.isActive = true;
-    _artboard?.addController(controller);
+  // SAFE PLAY HELP
+  void play(SimpleAnimation anim) {
+    anim.isActive = false;
+    anim.isActive = true;
+    _artboard?.addController(anim);
   }
 
   Future<void> _loadRive() async {
@@ -56,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
     final file = RiveFile.import(data);
     final artboard = file.mainArtboard;
 
-    // Create controllers
+    // Create animations
     introAnim = SimpleAnimation("Intro", autoplay: false);
     idleAnim = SimpleAnimation("look_idle", autoplay: false);
     lookLeft = SimpleAnimation("look_left", autoplay: false);
@@ -65,27 +63,26 @@ class _LoginPageState extends State<LoginPage> {
     successAnim = SimpleAnimation("success", autoplay: false);
     failAnim = SimpleAnimation("fail", autoplay: false);
 
-    // Play intro first
+    // First animation → INTRO
     artboard.addController(introAnim);
 
-    // When intro ends → switch to idle
-    introAnim.instance!.animation.onStop = () {
+    introAnim.onCompleted = () {
       play(idleAnim);
     };
 
     setState(() => _artboard = artboard);
   }
 
-  // LOGIN LOGIC
+  // LOGIN
   void _attemptLogin() {
     String user = _email.text.trim();
     String pass = _password.text.trim();
 
-    play(idleAnim); // reset before playing new animations
+    play(idleAnim);
 
     if (user == _testUser && pass == _testPass) {
       play(successAnim);
-      Future.delayed(const Duration(milliseconds: 1000), () {
+      Future.delayed(const Duration(milliseconds: 900), () {
         Navigator.pushReplacementNamed(context, "/home");
       });
     } else {
@@ -99,7 +96,6 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: const Color(0xFFFCEEEE),
       body: Stack(
         children: [
-          // ---------- FORM ----------
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -117,13 +113,13 @@ class _LoginPageState extends State<LoginPage> {
                           const Icon(Icons.info_outline, color: Colors.pink),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text("username: $_testUser   password: $_testPass"),
+                            child: Text(
+                                "username: $_testUser   password: $_testPass"),
                           ),
                           TextButton(
                             onPressed: () {
                               Clipboard.setData(
-                                ClipboardData(text: "$_testUser:$_testPass"),
-                              );
+                                  ClipboardData(text: "$_testUser:$_testPass"));
                             },
                             child: const Text("Copy"),
                           )
@@ -131,14 +127,12 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 30),
 
-                  // ---------- USERNAME ----------
+                  // USERNAME
                   TextField(
                     controller: _email,
                     onTap: () {
-                      // User switched away from password → open eyes
                       _isEyeCovered = false;
                       play(idleAnim);
                     },
@@ -156,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 14),
 
-                  // ---------- PASSWORD ----------
+                  // PASSWORD
                   TextField(
                     controller: _password,
                     obscureText: true,
@@ -164,9 +158,9 @@ class _LoginPageState extends State<LoginPage> {
                       _isEyeCovered = true;
                       play(eyeCover);
                     },
-                    onChanged: (value) {
+                    onChanged: (_) {
                       _isEyeCovered = true;
-                      play(eyeCover); // keep eyes closed while typing
+                      play(eyeCover);
                     },
                     decoration: _box("Password"),
                   ),
@@ -184,20 +178,17 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: const Text(
-                        "Login",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
+                      child: const Text("Login",
+                          style: TextStyle(color: Colors.white, fontSize: 16)),
                     ),
                   ),
-
                   const SizedBox(height: 200),
                 ],
               ),
             ),
           ),
 
-          // ---------- RIVE ANIMATION ----------
+          // RIVE ANIMATION
           Align(
             alignment: Alignment.bottomCenter,
             child: SizedBox(
@@ -224,7 +215,8 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 }
