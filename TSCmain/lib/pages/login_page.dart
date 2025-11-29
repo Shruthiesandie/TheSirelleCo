@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,26 +13,19 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   Artboard? _artboard;
 
-  // Rive state machine controller + triggers
-  StateMachineController? controller;
-
-  SMITrigger? trigIntro;
-  SMITrigger? trigIdle;
-  SMITrigger? trigLookLeft;
-  SMITrigger? trigLookRight;
-  SMITrigger? trigEyeCover;
-  SMITrigger? trigSuccess;
-  SMITrigger? trigFail;
-
-  Timer? _idleTimer;
+  // Animations (direct control)
+  RiveAnimationController? idleLook;
+  RiveAnimationController? lookLeft;
+  RiveAnimationController? lookRight;
+  RiveAnimationController? eyeCover;
+  RiveAnimationController? successAnim;
+  RiveAnimationController? failAnim;
 
   final _email = TextEditingController();
   final _password = TextEditingController();
 
   late String _testUser;
   late String _testPass;
-
-  bool _isInPassword = false;
 
   @override
   void initState() {
@@ -48,82 +40,73 @@ class _LoginPageState extends State<LoginPage> {
     _testPass = (r.nextInt(9000) + 1000).toString();
   }
 
-  // ---------------- RIVE LOAD ----------------
   void _loadRive() async {
-    final data =
-        await rootBundle.load("assets/animation/login_character.riv");
+    final data = await rootBundle.load("assets/animation/login_character.riv");
     final file = RiveFile.import(data);
-    final art = file.mainArtboard;
 
-    // Load state machine
-    controller =
-        StateMachineController.fromArtboard(art, "State Machine 1");
+    final artboard = file.mainArtboard;
 
-    if (controller != null) {
-      art.addController(controller!);
+    // Create controllers for each animation
+    idleLook = SimpleAnimation("idle_look_around");
+    lookLeft = SimpleAnimation("look_left", autoplay: false);
+    lookRight = SimpleAnimation("look_right", autoplay: false);
+    eyeCover = SimpleAnimation("eye_cover", autoplay: false);
+    successAnim = SimpleAnimation("success", autoplay: false);
+    failAnim = SimpleAnimation("fail", autoplay: false);
 
-      trigIntro =
-          controller!.findInput<bool>("trigger_intro") as SMITrigger?;
-      trigIdle =
-          controller!.findInput<bool>("trigger_idle") as SMITrigger?;
-      trigLookLeft = controller!
-          .findInput<bool>("trigger_look_left") as SMITrigger?;
-      trigLookRight = controller!
-          .findInput<bool>("trigger_look_right") as SMITrigger?;
-      trigEyeCover = controller!
-          .findInput<bool>("trigger_eye_cover") as SMITrigger?;
-      trigSuccess =
-          controller!.findInput<bool>("trigger_success") as SMITrigger?;
-      trigFail =
-          controller!.findInput<bool>("trigger_fail") as SMITrigger?;
-    }
+    artboard.addController(idleLook!);
 
-    setState(() => _artboard = art);
-
-    // Start intro animation
-    trigIntro?.fire();
-
-    _startIdleTimer();
+    setState(() => _artboard = artboard);
   }
 
-  // ---------------- ANIMATION HELPER ----------------
-  void _play(SMITrigger? trig) {
-    trig?.fire();
+  // ----------------------------------------------------
+  // FORCE PLAY ANIMATION
+  void play(RiveAnimationController? controller) {
+    if (controller == null || _artboard == null) return;
+    _artboard!.addController(controller);
+    controller.isActive = true;
   }
 
-  // ---------------- IDLE TIMER ----------------
-  void _startIdleTimer() {
-    _idleTimer?.cancel();
-    _idleTimer = Timer(const Duration(seconds: 5), () {
-      if (!_isInPassword) {
-        _play(trigIdle);
-      }
-    });
-  }
-
-  // ---------------- LOGIN LOGIC ----------------
+  // ----------------------------------------------------
   void _attemptLogin() {
-    _idleTimer?.cancel();
-
     final username = _email.text.trim();
     final password = _password.text.trim();
 
+    idleLook?.isActive = false;
+
     if (username == _testUser && password == _testPass) {
-      _play(trigSuccess);
+      play(successAnim);
 
       Future.delayed(const Duration(milliseconds: 900), () {
         Navigator.pushReplacementNamed(context, "/home");
       });
     } else {
-      _play(trigFail);
-
-      Future.delayed(const Duration(seconds: 2), () {
-        _play(trigIdle);
-      });
+      play(failAnim);
     }
+
+    Future.delayed(const Duration(seconds: 2), () {
+      play(idleLook);
+    });
   }
 
-  // ---------------- BUILD UI ----------------
+  // ----------------------------------------------------
+  // FIXED: Eye-cover should play every time user taps password
+  void _playEyeCover() {
+    if (_artboard == null) return;
+
+    // Remove previous controller so animation restarts
+    if (eyeCover != null) {
+      _artboard!.removeController(eyeCover!);
+    }
+
+    // Recreate fresh controller → ensures replay
+    eyeCover = SimpleAnimation("eye_cover", autoplay: false);
+
+    // Play it
+    play(eyeCover);
+  }
+
+  // ----------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,6 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                   Image.asset("assets/logo/logo.png", height: 60),
                   const SizedBox(height: 20),
 
+                  // TEST BOX
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(14),
@@ -147,13 +131,13 @@ class _LoginPageState extends State<LoginPage> {
                           const Icon(Icons.info_outline, color: Colors.pink),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(
-                                "username: $_testUser   password: $_testPass"),
+                            child: Text("username: $_testUser   password: $_testPass"),
                           ),
                           TextButton(
                             onPressed: () {
-                              Clipboard.setData(ClipboardData(
-                                  text: "$_testUser:$_testPass"));
+                              Clipboard.setData(
+                                ClipboardData(text: "$_testUser:$_testPass"),
+                              );
                             },
                             child: const Text("Copy"),
                           )
@@ -164,48 +148,32 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 30),
 
-                  // USERNAME FIELD
+                  // USERNAME
                   TextField(
                     controller: _email,
-                    onTap: () {
-                      _isInPassword = false;
-                      _play(trigIdle);
-                      _startIdleTimer();
-                    },
                     onChanged: (value) {
-                      if (value.isNotEmpty) {
-                        if (value.length % 2 == 0) {
-                          _play(trigLookLeft);
-                        } else {
-                          _play(trigLookRight);
-                        }
+                      if (value.length % 2 == 0) {
+                        play(lookLeft);
+                      } else {
+                        play(lookRight);
                       }
-                      _startIdleTimer();
                     },
                     decoration: _box("Username"),
                   ),
 
                   const SizedBox(height: 14),
 
-                  // PASSWORD FIELD
+                  // PASSWORD — FIX APPLIED HERE
                   TextField(
                     controller: _password,
                     obscureText: true,
-                    onTap: () {
-                      _isInPassword = true;
-                      _play(trigEyeCover);
-                      _startIdleTimer();
-                    },
-                    onChanged: (_) {
-                      _isInPassword = true;
-                      _play(trigEyeCover);
-                      _startIdleTimer();
-                    },
+                    onTap: _playEyeCover, // 👈 FIXED — always replays
                     decoration: _box("Password"),
                   ),
 
                   const SizedBox(height: 20),
 
+                  // BUTTON
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -219,8 +187,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: const Text(
                         "Login",
-                        style:
-                            TextStyle(color: Colors.white, fontSize: 16),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
@@ -231,17 +201,14 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // RIVE CHARACTER
+          // RIVE BOTTOM CHARACTER
           Align(
             alignment: Alignment.bottomCenter,
             child: SizedBox(
               height: 260,
               child: _artboard == null
                   ? const Center(child: CircularProgressIndicator())
-                  : Rive(
-                      artboard: _artboard!,
-                      fit: BoxFit.contain,
-                    ),
+                  : Rive(artboard: _artboard!, fit: BoxFit.contain),
             ),
           ),
         ],
@@ -258,8 +225,7 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
       ),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 }
