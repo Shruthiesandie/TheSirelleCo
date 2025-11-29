@@ -37,21 +37,27 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
       duration: const Duration(milliseconds: 450),
     );
 
-    // Background arc growth
+    // Background arc animation
     arcScale = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutQuad,
     );
 
-    // Slight staggered icon slide up
+    // Slightly staggered icon slide
     maleSlide = Tween<double>(begin: 40, end: 0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.2, 1, curve: Curves.easeOutBack)),
+      CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.2, 1, curve: Curves.easeOutBack)),
     );
     femaleSlide = Tween<double>(begin: 40, end: 0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.3, 1, curve: Curves.easeOutBack)),
+      CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.3, 1, curve: Curves.easeOutBack)),
     );
     unisexSlide = Tween<double>(begin: 40, end: 0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.4, 1, curve: Curves.easeOutBack)),
+      CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.4, 1, curve: Curves.easeOutBack)),
     );
 
     fadeIn = CurvedAnimation(
@@ -63,11 +69,7 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
   @override
   void didUpdateWidget(covariant PinterestArcMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isOpen) {
-      _controller.forward();
-    } else {
-      _controller.reverse();
-    }
+    widget.isOpen ? _controller.forward() : _controller.reverse();
   }
 
   @override
@@ -91,41 +93,75 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
     );
   }
 
+  // ------------------------------------------------------------
+  // GLASS ARC MENU (Upgraded)
+  // ------------------------------------------------------------
   Widget _buildArcMenu() {
     return Center(
       child: Container(
         width: 260,
         height: 140,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.92),
+          // Glassmorphism
+          color: Colors.white.withOpacity(0.55),
           borderRadius: BorderRadius.circular(70),
+          border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            )
+              color: Colors.pinkAccent.withOpacity(0.10),
+              blurRadius: 28,
+              offset: const Offset(0, 12),
+            ),
+            BoxShadow(
+              color: Colors.white.withOpacity(0.7),
+              blurRadius: 6,
+              offset: const Offset(-2, -2),
+            ),
           ],
         ),
+
         child: Stack(
           alignment: Alignment.center,
           children: [
+            // Floating highlight behind icons
+            _floatingGlow(-70, Colors.blueAccent),
+            _floatingGlow(0, Colors.pinkAccent),
+            _floatingGlow(70, Colors.purpleAccent),
+
             // Male
             Transform.translate(
               offset: Offset(-70, maleSlide.value),
-              child: _circleButton(Icons.male, Colors.blue, widget.onMaleTap),
+              child: _circleButton(
+                Icons.male,
+                const LinearGradient(
+                  colors: [Color(0xFF64B5F6), Color(0xFF1976D2)],
+                ),
+                widget.onMaleTap,
+              ),
             ),
 
             // Female
             Transform.translate(
               offset: Offset(0, femaleSlide.value),
-              child: _circleButton(Icons.female, Colors.pink, widget.onFemaleTap),
+              child: _circleButton(
+                Icons.female,
+                const LinearGradient(
+                  colors: [Color(0xFFFF80AB), Color(0xFFE91E63)],
+                ),
+                widget.onFemaleTap,
+              ),
             ),
 
             // Unisex
             Transform.translate(
               offset: Offset(70, unisexSlide.value),
-              child: _circleButton(Icons.transgender, Colors.purple, widget.onUnisexTap),
+              child: _circleButton(
+                Icons.transgender,
+                const LinearGradient(
+                  colors: [Color(0xFFCE93D8), Color(0xFF8E24AA)],
+                ),
+                widget.onUnisexTap,
+              ),
             ),
           ],
         ),
@@ -133,18 +169,64 @@ class _PinterestArcMenuState extends State<PinterestArcMenu>
     );
   }
 
-  Widget _circleButton(IconData icon, Color color, VoidCallback onTap) {
+  // ------------------------------------------------------------
+  // ICON BUTTON WITH GLOW + GRADIENT (Upgraded)
+  // ------------------------------------------------------------
+  Widget _circleButton(
+      IconData icon, Gradient gradient, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedScale(
         scale: widget.isOpen ? 1 : 0.001,
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 420),
         curve: Curves.easeOutBack,
-        child: CircleAvatar(
-          radius: 28,
-          backgroundColor: Colors.white,
-          child: Icon(icon, size: 32, color: color),
+        child: Container(
+          width: 58,
+          height: 58,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: gradient,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.18),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+              BoxShadow(
+                color: Colors.white.withOpacity(0.4),
+                blurRadius: 4,
+                offset: const Offset(-2, -2),
+              ),
+            ],
+          ),
+          child: Icon(icon, size: 30, color: Colors.white),
         ),
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // FLOATING GLOW BEHIND EACH ICON
+  // ------------------------------------------------------------
+  Widget _floatingGlow(double xOffset, Color color) {
+    return Positioned(
+      left: 130 + xOffset,
+      top: 40,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (_, __) {
+          return Opacity(
+            opacity: fadeIn.value * 0.5,
+            child: Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color.withOpacity(0.20),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
