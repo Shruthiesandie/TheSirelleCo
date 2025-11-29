@@ -13,7 +13,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   Artboard? _artboard;
 
-  // Animations (direct control)
+  // Animations
   RiveAnimationController? idleLook;
   RiveAnimationController? lookLeft;
   RiveAnimationController? lookRight;
@@ -26,6 +26,8 @@ class _LoginPageState extends State<LoginPage> {
 
   late String _testUser;
   late String _testPass;
+
+  bool _isTypingPassword = false;
 
   @override
   void initState() {
@@ -46,7 +48,6 @@ class _LoginPageState extends State<LoginPage> {
 
     final artboard = file.mainArtboard;
 
-    // Create controllers for each animation
     idleLook = SimpleAnimation("idle_look_around");
     lookLeft = SimpleAnimation("look_left", autoplay: false);
     lookRight = SimpleAnimation("look_right", autoplay: false);
@@ -59,54 +60,63 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _artboard = artboard);
   }
 
-  // ----------------------------------------------------
-  // FORCE PLAY ANIMATION
-  void play(RiveAnimationController? controller) {
-    if (controller == null || _artboard == null) return;
-    _artboard!.addController(controller);
-    controller.isActive = true;
+  // PLAY ANY ANIMATION
+  void play(RiveAnimationController? c) {
+    if (_artboard == null || c == null) return;
+    _artboard!.addController(c);
+    c.isActive = true;
   }
 
-  // ----------------------------------------------------
-  void _attemptLogin() {
+  // ------------------------------------------
+  // 👁️ KEEP EYES COVERED WHILE TYPING PASSWORD
+  // ------------------------------------------
+  void _startEyeCover() {
+    _isTypingPassword = true;
+
+    // recreate so animation restarts every time
+    if (eyeCover != null) _artboard?.removeController(eyeCover!);
+    eyeCover = SimpleAnimation("eye_cover", autoplay: false);
+
+    play(eyeCover);
+  }
+
+  void _stopEyeCover() {
+    _isTypingPassword = false;
+    // Simply stop eye-cover, idle will take over
+    idleLook?.isActive = true;
+  }
+
+  // ------------------------------------------
+  // LOGIN LOGIC
+  // ------------------------------------------
+  void _attemptLogin() async {
     final username = _email.text.trim();
     final password = _password.text.trim();
+
+    _stopEyeCover(); // open eyes before playing success/fail
 
     idleLook?.isActive = false;
 
     if (username == _testUser && password == _testPass) {
       play(successAnim);
 
-      Future.delayed(const Duration(milliseconds: 900), () {
-        Navigator.pushReplacementNamed(context, "/home");
-      });
+      await Future.delayed(const Duration(milliseconds: 900));
+
+      // restore idle
+      play(idleLook);
+
+      Navigator.pushReplacementNamed(context, "/home");
     } else {
       play(failAnim);
-    }
 
-    Future.delayed(const Duration(seconds: 2), () {
+      await Future.delayed(const Duration(milliseconds: 900));
+
+      // restore idle
       play(idleLook);
-    });
-  }
-
-  // ----------------------------------------------------
-  // FIXED: Eye-cover should play every time user taps password
-  void _playEyeCover() {
-    if (_artboard == null) return;
-
-    // Remove previous controller so animation restarts
-    if (eyeCover != null) {
-      _artboard!.removeController(eyeCover!);
     }
-
-    // Recreate fresh controller → ensures replay
-    eyeCover = SimpleAnimation("eye_cover", autoplay: false);
-
-    // Play it
-    play(eyeCover);
   }
 
-  // ----------------------------------------------------
+  // ------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,7 +132,6 @@ class _LoginPageState extends State<LoginPage> {
                   Image.asset("assets/logo/logo.png", height: 60),
                   const SizedBox(height: 20),
 
-                  // TEST BOX
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(14),
@@ -152,10 +161,12 @@ class _LoginPageState extends State<LoginPage> {
                   TextField(
                     controller: _email,
                     onChanged: (value) {
-                      if (value.length % 2 == 0) {
-                        play(lookLeft);
-                      } else {
-                        play(lookRight);
+                      if (!_isTypingPassword) {
+                        if (value.length % 2 == 0) {
+                          play(lookLeft);
+                        } else {
+                          play(lookRight);
+                        }
                       }
                     },
                     decoration: _box("Username"),
@@ -163,17 +174,18 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 14),
 
-                  // PASSWORD — FIX APPLIED HERE
+                  // PASSWORD
                   TextField(
                     controller: _password,
                     obscureText: true,
-                    onTap: _playEyeCover, // 👈 FIXED — always replays
+                    onTap: _startEyeCover, // 👁️ CLOSE EYES
+                    onChanged: (_) => _startEyeCover(), // keep eyes covered
+                    onEditingComplete: _stopEyeCover,
                     decoration: _box("Password"),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // BUTTON
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -201,7 +213,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // RIVE BOTTOM CHARACTER
+          // RIVE CHARACTER
           Align(
             alignment: Alignment.bottomCenter,
             child: SizedBox(
