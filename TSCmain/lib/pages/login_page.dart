@@ -13,21 +13,22 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   Artboard? _artboard;
 
-  // Animations (direct control)
-  RiveAnimationController? introAnim;
-  RiveAnimationController? idleAnim;
-  RiveAnimationController? lookLeft;
-  RiveAnimationController? eyeCover;
-  RiveAnimationController? successAnim;
-  RiveAnimationController? failAnim;
+  // Animation controllers
+  late RiveAnimationController introAnim;
+  late RiveAnimationController idleAnim;
+  late RiveAnimationController lookLeft;
+  late RiveAnimationController lookRight;
+  late RiveAnimationController eyeCover;
+  late RiveAnimationController successAnim;
+  late RiveAnimationController failAnim;
 
   final _email = TextEditingController();
   final _password = TextEditingController();
 
+  bool _isEyeCovered = false;
+
   late String _testUser;
   late String _testPass;
-
-  bool _isEyeCovered = false;
 
   @override
   void initState() {
@@ -36,63 +37,60 @@ class _LoginPageState extends State<LoginPage> {
     _loadRive();
   }
 
+  // Generate temporary login credentials
   void _generateCredentials() {
     final r = Random();
     _testUser = "user${r.nextInt(900) + 100}";
     _testPass = (r.nextInt(9000) + 1000).toString();
   }
 
-  void _loadRive() async {
+  // Play an animation safely
+  void play(RiveAnimationController controller) {
+    controller.isActive = false;
+    controller.isActive = true;
+    _artboard?.addController(controller);
+  }
+
+  Future<void> _loadRive() async {
     final data = await rootBundle.load("assets/animation/login_character.riv");
     final file = RiveFile.import(data);
     final artboard = file.mainArtboard;
 
-    // Match EXACT animation names from your screenshot
-    introAnim = SimpleAnimation("Intro", autoplay: true);
-    idleAnim = SimpleAnimation("look_idle");
+    // Create controllers
+    introAnim = SimpleAnimation("Intro", autoplay: false);
+    idleAnim = SimpleAnimation("look_idle", autoplay: false);
     lookLeft = SimpleAnimation("look_left", autoplay: false);
+    lookRight = SimpleAnimation("look_right", autoplay: false);
     eyeCover = SimpleAnimation("eye_cover", autoplay: false);
     successAnim = SimpleAnimation("success", autoplay: false);
     failAnim = SimpleAnimation("fail", autoplay: false);
 
     // Play intro first
-    artboard.addController(introAnim!);
+    artboard.addController(introAnim);
 
-    // When intro finishes → switch to idle
-    introAnim!.isActiveChanged.addListener(() {
-      if (!introAnim!.isActive) {
-        artboard.addController(idleAnim!);
-      }
-    });
+    // When intro ends → switch to idle
+    introAnim.instance!.animation.onStop = () {
+      play(idleAnim);
+    };
 
     setState(() => _artboard = artboard);
   }
 
-  // Helper: force play vibration controller
-  void play(RiveAnimationController? cont) {
-    if (cont == null || _artboard == null) return;
-    cont.isActive = false;
-    _artboard!.addController(cont);
-    cont.isActive = true;
-  }
-
-  // ---------------- LOGIN LOGIC ----------------
+  // LOGIN LOGIC
   void _attemptLogin() {
-    idleAnim?.isActive = false;
+    String user = _email.text.trim();
+    String pass = _password.text.trim();
 
-    if (_email.text.trim() == _testUser &&
-        _password.text.trim() == _testPass) {
+    play(idleAnim); // reset before playing new animations
+
+    if (user == _testUser && pass == _testPass) {
       play(successAnim);
-      Future.delayed(const Duration(milliseconds: 900), () {
+      Future.delayed(const Duration(milliseconds: 1000), () {
         Navigator.pushReplacementNamed(context, "/home");
       });
     } else {
       play(failAnim);
     }
-
-    Future.delayed(const Duration(seconds: 2), () {
-      play(idleAnim);
-    });
   }
 
   @override
@@ -101,6 +99,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: const Color(0xFFFCEEEE),
       body: Stack(
         children: [
+          // ---------- FORM ----------
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -118,14 +117,12 @@ class _LoginPageState extends State<LoginPage> {
                           const Icon(Icons.info_outline, color: Colors.pink),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(
-                                "username: $_testUser   password: $_testPass"),
+                            child: Text("username: $_testUser   password: $_testPass"),
                           ),
                           TextButton(
                             onPressed: () {
                               Clipboard.setData(
-                                ClipboardData(
-                                    text: "$_testUser:$_testPass"),
+                                ClipboardData(text: "$_testUser:$_testPass"),
                               );
                             },
                             child: const Text("Copy"),
@@ -137,15 +134,21 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 30),
 
-                  // USERNAME
+                  // ---------- USERNAME ----------
                   TextField(
                     controller: _email,
                     onTap: () {
+                      // User switched away from password → open eyes
                       _isEyeCovered = false;
+                      play(idleAnim);
                     },
                     onChanged: (value) {
                       if (!_isEyeCovered) {
-                        play(lookLeft);
+                        if (value.length % 2 == 0) {
+                          play(lookLeft);
+                        } else {
+                          play(lookRight);
+                        }
                       }
                     },
                     decoration: _box("Username"),
@@ -153,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 14),
 
-                  // PASSWORD
+                  // ---------- PASSWORD ----------
                   TextField(
                     controller: _password,
                     obscureText: true,
@@ -161,8 +164,9 @@ class _LoginPageState extends State<LoginPage> {
                       _isEyeCovered = true;
                       play(eyeCover);
                     },
-                    onChanged: (v) {
+                    onChanged: (value) {
                       _isEyeCovered = true;
+                      play(eyeCover); // keep eyes closed while typing
                     },
                     decoration: _box("Password"),
                   ),
@@ -182,26 +186,28 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: const Text(
                         "Login",
-                        style:
-                            TextStyle(color: Colors.white, fontSize: 16),
+                        style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 180),
+                  const SizedBox(height: 200),
                 ],
               ),
             ),
           ),
 
-          // RIVE BUNNY
+          // ---------- RIVE ANIMATION ----------
           Align(
             alignment: Alignment.bottomCenter,
             child: SizedBox(
-              height: 280,
+              height: 260,
               child: _artboard == null
-                  ? const CircularProgressIndicator()
-                  : Rive(artboard: _artboard!, fit: BoxFit.contain),
+                  ? const Center(child: CircularProgressIndicator())
+                  : Rive(
+                      artboard: _artboard!,
+                      fit: BoxFit.contain,
+                    ),
             ),
           ),
         ],
@@ -218,8 +224,7 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
       ),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 }
