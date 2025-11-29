@@ -14,15 +14,15 @@ class _LoginPageState extends State<LoginPage> {
   Artboard? _riveArtboard;
   StateMachineController? _controller;
 
-  // Rive inputs
+  // Rive Inputs
   SMIBool? _isFocus;
   SMIBool? _isPassword;
   SMITrigger? _successTrigger;
   SMITrigger? _failTrigger;
   SMINumber? _eyeTrack;
 
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
 
   late String _testUser;
   late String _testPass;
@@ -51,15 +51,19 @@ class _LoginPageState extends State<LoginPage> {
         "State Machine 1",
       );
 
-      if (_controller != null) {
-        artboard.addController(_controller!);
-
-        _isFocus = _controller!.findInput("isFocus") as SMIBool?;
-        _isPassword = _controller!.findInput("IsPassword") as SMIBool?;
-        _successTrigger = _controller!.findInput("login_success") as SMITrigger?;
-        _failTrigger = _controller!.findInput("login_fail") as SMITrigger?;
-        _eyeTrack = _controller!.findInput("eye_track") as SMINumber?;
+      if (_controller == null) {
+        debugPrint("❌ STATE MACHINE NOT FOUND");
+        return;
       }
+
+      artboard.addController(_controller!);
+
+      // collect inputs
+      _isFocus = _controller!.findInput("isFocus") as SMIBool?;
+      _isPassword = _controller!.findInput("IsPassword") as SMIBool?;
+      _successTrigger = _controller!.findInput("login_success") as SMITrigger?;
+      _failTrigger = _controller!.findInput("login_fail") as SMITrigger?;
+      _eyeTrack = _controller!.findInput("eye_track") as SMINumber?;
 
       setState(() => _riveArtboard = artboard);
     } catch (e) {
@@ -68,18 +72,16 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _attemptLogin() {
-    final user = _email.text.trim();
-    final pass = _password.text.trim();
+    final u = _email.text.trim();
+    final p = _password.text.trim();
 
-    if (user == _testUser && pass == _testPass) {
+    if (u == _testUser && p == _testPass) {
       _successTrigger?.fire();
-
-      Future.delayed(const Duration(milliseconds: 900), () {
+      Future.delayed(const Duration(milliseconds: 1000), () {
         Navigator.pushReplacementNamed(context, "/home");
       });
     } else {
       _failTrigger?.fire();
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Incorrect username or password")),
       );
@@ -90,26 +92,26 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFCEEEE),
-
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 20),
 
-            // Logo
-            Image.asset("assets/logo/logo.png", height: 60),
+            // logo
+            Image.asset("assets/logo/logo.png", height: 55),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
 
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // -------- TEST CREDENTIALS CARD --------
+                    // Test credentials
                     Card(
-                      elevation: 2,
                       color: Colors.white,
+                      elevation: 1,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       child: Padding(
@@ -128,13 +130,11 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             TextButton(
                               onPressed: () {
-                                Clipboard.setData(
-                                  ClipboardData(
-                                      text: "$_testUser:$_testPass"),
+                                Clipboard.setData(ClipboardData(
+                                    text: "$_testUser:$_testPass"));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Copied!")),
                                 );
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(const SnackBar(
-                                        content: Text("Copied!")));
                               },
                               child: const Text("Copy"),
                             )
@@ -143,9 +143,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
 
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 30),
 
-                    // -------- USERNAME FIELD --------
+                    // Username
                     TextField(
                       controller: _email,
                       onTap: () {
@@ -153,9 +153,7 @@ class _LoginPageState extends State<LoginPage> {
                         _isPassword?.value = false;
                       },
                       onChanged: (v) {
-                        if (_eyeTrack != null) {
-                          _eyeTrack!.value = v.length.toDouble();
-                        }
+                        _eyeTrack?.value = v.length.toDouble();
                       },
                       decoration: InputDecoration(
                         hintText: "Username",
@@ -165,19 +163,20 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 14, horizontal: 16),
                       ),
                     ),
 
                     const SizedBox(height: 14),
 
-                    // -------- PASSWORD FIELD --------
+                    // Password
                     TextField(
                       controller: _password,
                       obscureText: true,
                       onTap: () {
                         _isFocus?.value = false;
+                        _isPassword?.value = true;
+                      },
+                      onChanged: (_) {
                         _isPassword?.value = true;
                       },
                       decoration: InputDecoration(
@@ -188,46 +187,36 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 14, horizontal: 16),
                       ),
                     ),
 
                     const SizedBox(height: 20),
 
-                    // -------- LOGIN BUTTON --------
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: _attemptLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.pinkAccent,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         child: const Text(
                           "Login",
                           style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white),
+                              fontSize: 16, color: Colors.white, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 12),
-
+                    const SizedBox(height: 10),
                     TextButton(
                       onPressed: () {},
-                      child: const Text(
-                        "Create an account",
-                        style: TextStyle(color: Colors.black87),
-                      ),
+                      child: const Text("Create an account",
+                          style: TextStyle(color: Colors.black87)),
                     ),
-
-                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -235,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
 
             // ---------------- RIVE AT BOTTOM ----------------
             SizedBox(
-              height: 240,
+              height: 200,
               child: _riveArtboard == null
                   ? const Center(
                       child: CircularProgressIndicator(
