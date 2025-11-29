@@ -16,7 +16,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin { // <--- changed to TickerProviderStateMixin
   Artboard? _artboard;
 
   // Rive animations
@@ -600,7 +600,6 @@ class _LoginPageState extends State<LoginPage>
   }
 }
 
-// ----------------------------------------------------
 // WAVES PAINTER
 class _WavesPainter extends CustomPainter {
   final double t;
