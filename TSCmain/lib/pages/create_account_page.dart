@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_underscores, curly_braces_in_flow_control_structures
+
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -34,7 +36,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
   final ImagePicker _picker = ImagePicker();
 
   // Country
-  Country _country = Country.parse("IN")!;
+  Country _country = Country.parse("IN");
 
   // Gender
   final List<String> _genderOptions = ["Male", "Female", "Other"];
@@ -187,9 +189,9 @@ class _CreateAccountPageState extends State<CreateAccountPage>
   void _updateStrength() {
     final p = _passwordCtrl.text;
 
-    if (p.isEmpty)
+    if (p.isEmpty) {
       _strengthColor = Colors.transparent;
-    else if (p.length < 6)
+    } else if (p.length < 6)
       _strengthColor = Colors.red;
     else if (p.length < 10)
       _strengthColor = Colors.orange;
@@ -338,6 +340,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                               width: 110,
                               height: 44,
                               decoration: BoxDecoration(
+                                // ignore: deprecated_member_use
                                 color: Colors.pinkAccent.withOpacity(0.35),
                                 borderRadius: BorderRadius.circular(999),
                               ),
