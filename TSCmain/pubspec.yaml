@@ -11,6 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
   rive: ^0.12.4
+  image_picker: ^1.0.7
+  country_picker: ^2.0.21
+  shimmer: ^3.0.0
 
   cupertino_icons: ^1.0.8
 
