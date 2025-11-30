@@ -1,5 +1,5 @@
 // create_account_page.dart
-// FINAL — CLEAN — UPDATED — NO OVERFLOW — YOUR EXACT LAYOUT
+// FINAL FULL VERSION WITH GENDER ICON + RED BORDER + ANIMATION
 // ------------------------------------------------------------------------------
 
 import 'dart:io';
@@ -37,21 +37,23 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   final ImagePicker _picker = ImagePicker();
 
   // Country
-  Country _country = Country.parse("IN");
+  Country _country = Country.parse("IN")!;
 
-  // Gender Dropdown
+  // Gender dropdown
   final List<String> _genderOptions = [
     "Male", "Female", "Other", "Prefer not to say"
   ];
   String? _selectedGender;
 
-  // UI States
+  bool _attemptSubmit = false;   // 🔥 needed for red border
+
+  // UI states
   bool _obscure = true;
   bool _obscureConfirm = true;
   bool _agree = false;
   Color _strengthColor = Colors.transparent;
 
-  // Tilt UI effect
+  // Tilt effect
   double _tiltX = 0;
   double _tiltY = 0;
 
@@ -76,7 +78,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // ------------------------------------------------------------------
-  // Avatar Picker
+  // Avatar picker
   // ------------------------------------------------------------------
   Future<void> _pickAvatar(ImageSource src) async {
     final picked = await _picker.pickImage(source: src, imageQuality: 85);
@@ -107,7 +109,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
             ),
             if (_avatar != null)
               ListTile(
-                leading: const Icon(Icons.delete_forever),
+                leading: const Icon(Icons.delete),
                 title: const Text('Remove'),
                 onTap: () {
                   Navigator.pop(c);
@@ -159,9 +161,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     final raw = _phoneCtrl.text.replaceAll(RegExp(r'\D'), '');
     String f;
 
-    if (raw.length <= 3) {
-      f = raw;
-    } else if (raw.length <= 6) f = "${raw.substring(0, 3)} ${raw.substring(3)}";
+    if (raw.length <= 3) f = raw;
+    else if (raw.length <= 6) f = "${raw.substring(0, 3)} ${raw.substring(3)}";
     else if (raw.length <= 10) {
       f = "${raw.substring(0, 3)} ${raw.substring(3, 6)} ${raw.substring(6)}";
     } else f = raw;
@@ -179,9 +180,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   // ------------------------------------------------------------------
   void _updateStrength() {
     String p = _passwordCtrl.text;
-    if (p.isEmpty) {
-      _strengthColor = Colors.transparent;
-    } else if (p.length < 6) _strengthColor = Colors.red;
+    if (p.isEmpty) _strengthColor = Colors.transparent;
+    else if (p.length < 6) _strengthColor = Colors.red;
     else if (p.length < 10) _strengthColor = Colors.orange;
     else _strengthColor = Colors.green;
 
@@ -193,10 +193,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   // ------------------------------------------------------------------
   void _scrollTo(GlobalKey key) async {
     if (key.currentContext == null) return;
-    await Scrollable.ensureVisible(
-      key.currentContext!,
-      duration: const Duration(milliseconds: 350),
-    );
+    await Scrollable.ensureVisible(key.currentContext!,
+        duration: const Duration(milliseconds: 350));
   }
 
   void _err(String msg) {
@@ -205,6 +203,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   void _submit() {
+    _attemptSubmit = true;
+
     if (_firstCtrl.text.isEmpty) {
       _scrollTo(_firstKey);
       return _err("Enter first name");
@@ -221,6 +221,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       return _err("Passwords do not match");
     }
     if (_selectedGender == null) {
+      setState(() {}); // redraw red border
       return _err("Select gender");
     }
     if (!_agree) {
@@ -251,33 +252,72 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       });
 
   // ------------------------------------------------------------------
-  // Gender Dropdown (FIXED — No Overflow)
+  // Gender Dropdown — WITH ICON + ANIMATION + RED BORDER
   // ------------------------------------------------------------------
   Widget _genderDropdown() {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.pink.shade200, width: 1.4),
+        border: Border.all(
+          color: _selectedGender == null && _attemptSubmit
+              ? Colors.red.shade400
+              : Colors.grey.shade300,
+        ),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          isExpanded: true,   // FIXES OVERFLOW
+          isExpanded: true,
           value: _selectedGender,
-          hint: const Text("Select Gender"),
+          hint: Row(
+            children: [
+              Icon(Icons.person_outline, color: Colors.pink.shade300),
+              const SizedBox(width: 10),
+              const Text("Gender"),
+            ],
+          ),
           icon: Icon(Icons.keyboard_arrow_down, color: Colors.pink.shade300),
+
+          // animated selected item
+          selectedItemBuilder: (context) {
+            return _genderOptions.map((gender) {
+              return Row(
+                children: [
+                  Icon(Icons.person_outline, color: Colors.pink.shade300),
+                  const SizedBox(width: 10),
+                  Text(gender),
+                ],
+              );
+            }).toList();
+          },
+
+          // dropdown list with animation
           items: _genderOptions.map((gender) {
             return DropdownMenuItem(
               value: gender,
-              child: Text(
-                gender,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.8, end: 1.0),
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutBack,
+                builder: (context, scale, child) =>
+                    Transform.scale(scale: scale, child: child),
+                child: Text(
+                  gender,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
               ),
             );
           }).toList(),
-          onChanged: (v) => setState(() => _selectedGender = v),
+
+          onChanged: (value) {
+            setState(() {
+              _selectedGender = value;
+              _attemptSubmit = false;
+            });
+          },
         ),
       ),
     );
@@ -536,7 +576,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                                 Container(
                                   width: 12,
                                   height: 12,
-                                  margin: const EdgeInsets.only(right: 10),
+                                  margin:
+                                      const EdgeInsets.only(right: 10),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: _strengthColor,
@@ -547,8 +588,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                                       setState(() => _obscure = !_obscure),
                                   child: const Padding(
                                     padding: EdgeInsets.only(right: 8),
-                                    child:
-                                        Icon(Icons.visibility_off, size: 20),
+                                    child: Icon(Icons.visibility_off,
+                                        size: 20),
                                   ),
                                 )
                               ],
@@ -631,7 +672,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     ],
                   ),
                 ),
-                //------------------------------------------------------------------
 
                 const SizedBox(height: 20),
                 Center(
