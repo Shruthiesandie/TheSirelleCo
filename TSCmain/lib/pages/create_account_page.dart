@@ -1,5 +1,5 @@
 // create_account_page.dart
-// FINAL VERSION — COUNTRY + GENDER MATCH ALL FIELDS EXACTLY
+// FINAL VERSION — ALL BORDERS BLACK (Colors.black87), width: 1.0
 // ------------------------------------------------------------------------------
 
 import 'dart:io';
@@ -39,7 +39,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   // Country
   Country _country = Country.parse("IN")!;
 
-  // Gender dropdown
+  // Gender
   final List<String> _genderOptions = [
     "Male",
     "Female",
@@ -49,13 +49,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   String? _selectedGender;
   bool _attemptSubmit = false;
 
-  // UI state
+  // UI State
   bool _obscure = true;
   bool _obscureConfirm = true;
   bool _agree = false;
   Color _strengthColor = Colors.transparent;
 
-  // Tilt effect
+  // Tilt
   double _tiltX = 0;
   double _tiltY = 0;
 
@@ -80,7 +80,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // ------------------------------------------------------------------------------
-  // Avatar Picker
+  // Avatar
   // ------------------------------------------------------------------------------
   Future<void> _pickAvatar(ImageSource src) async {
     final picked = await _picker.pickImage(source: src, imageQuality: 85);
@@ -91,39 +91,41 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     showModalBottomSheet(
       context: context,
       builder: (c) => SafeArea(
-        child: Wrap(children: [
-          ListTile(
-            leading: const Icon(Icons.camera_alt),
-            title: const Text("Take photo"),
-            onTap: () {
-              Navigator.pop(c);
-              _pickAvatar(ImageSource.camera);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.photo_library),
-            title: const Text("Choose from gallery"),
-            onTap: () {
-              Navigator.pop(c);
-              _pickAvatar(ImageSource.gallery);
-            },
-          ),
-          if (_avatar != null)
+        child: Wrap(
+          children: [
             ListTile(
-              leading: const Icon(Icons.delete),
-              title: const Text("Remove"),
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take photo'),
               onTap: () {
                 Navigator.pop(c);
-                setState(() => _avatar = null);
+                _pickAvatar(ImageSource.camera);
               },
             ),
-        ]),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () {
+                Navigator.pop(c);
+                _pickAvatar(ImageSource.gallery);
+              },
+            ),
+            if (_avatar != null)
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Remove photo'),
+                onTap: () {
+                  Navigator.pop(c);
+                  setState(() => _avatar = null);
+                },
+              ),
+          ],
+        ),
       ),
     );
   }
 
   // ------------------------------------------------------------------------------
-  // Country Picker
+  // Country picker
   // ------------------------------------------------------------------------------
   void _openCountryPicker() {
     showCountryPicker(
@@ -134,7 +136,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // ------------------------------------------------------------------------------
-  // DOB Picker
+  // DOB
   // ------------------------------------------------------------------------------
   Future<void> _pickDOB() async {
     final now = DateTime.now();
@@ -151,7 +153,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // ------------------------------------------------------------------------------
-  // Phone Formatting
+  // Phone formatting
   // ------------------------------------------------------------------------------
   bool _phoneFormatting = false;
   void _phoneFormatListener() {
@@ -163,9 +165,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
     if (raw.length <= 3) f = raw;
     else if (raw.length <= 6) f = "${raw.substring(0, 3)} ${raw.substring(3)}";
-    else if (raw.length <= 10) {
+    else if (raw.length <= 10)
       f = "${raw.substring(0, 3)} ${raw.substring(3, 6)} ${raw.substring(6)}";
-    } else f = raw;
+    else
+      f = raw;
 
     _phoneCtrl.value = TextEditingValue(
       text: f,
@@ -176,7 +179,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // ------------------------------------------------------------------------------
-  // Password Strength
+  // Password strength
   // ------------------------------------------------------------------------------
   void _updateStrength() {
     String p = _passwordCtrl.text;
@@ -189,7 +192,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // ------------------------------------------------------------------------------
-  // Submit
+  // Submit + validation
   // ------------------------------------------------------------------------------
   void _err(String msg) {
     ScaffoldMessenger.of(context)
@@ -232,7 +235,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // ------------------------------------------------------------------------------
-  // Tilt Effect
+  // Tilt
   // ------------------------------------------------------------------------------
   void _onPointerMove(PointerEvent e) {
     final size = MediaQuery.of(context).size;
@@ -252,19 +255,26 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       });
 
   // ------------------------------------------------------------------------------
-  // Gender Dropdown — MATCHES OTHER FIELDS EXACTLY
+  // Borders (Black everywhere)
+  // ------------------------------------------------------------------------------
+  final BorderSide _blackBorder =
+      const BorderSide(color: Colors.black87, width: 1.0);
+
+  // ------------------------------------------------------------------------------
+  // Gender dropdown — Black border
   // ------------------------------------------------------------------------------
   Widget _genderDropdown() {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
+      duration: const Duration(milliseconds: 160),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: (_selectedGender == null && _attemptSubmit)
-              ? Colors.red.shade400
-              : Colors.grey.shade300,
+              ? Colors.red
+              : Colors.black87,
+          width: 1.0,
         ),
       ),
       child: DropdownButtonHideUnderline(
@@ -278,7 +288,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               const Text("Gender"),
             ],
           ),
-          icon: Icon(Icons.keyboard_arrow_down, color: Colors.pink.shade300),
+          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black87),
+          style: const TextStyle(color: Colors.black87),
 
           selectedItemBuilder: (_) {
             return _genderOptions.map((item) {
@@ -295,17 +306,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           items: _genderOptions.map((item) {
             return DropdownMenuItem(
               value: item,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.8, end: 1.0),
-                duration: const Duration(milliseconds: 160),
-                curve: Curves.easeOutBack,
-                builder: (context, scale, child) =>
-                    Transform.scale(scale: scale, child: child),
-                child: Text(
-                  item,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
+              child: Text(item,
+                  style:
+                      const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87)),
             );
           }).toList(),
 
@@ -321,7 +324,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // ------------------------------------------------------------------------------
-  // Country Code — MATCHES INPUT FIELDS EXACTLY
+  // Country box — Black border
   // ------------------------------------------------------------------------------
   Widget _countryBox() {
     return GestureDetector(
@@ -332,18 +335,17 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: Colors.black87, width: 1.0),
         ),
         child: Row(
           children: [
-            Text(
-              "+${_country.phoneCode}",
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
+            Text("+${_country.phoneCode}",
+                style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black87)),
             const SizedBox(width: 10),
-            Text(_country.flagEmoji, style: const TextStyle(fontSize: 18)),
+            Text(_country.flagEmoji,
+                style: const TextStyle(fontSize: 18)),
             const Spacer(),
-            Icon(Icons.keyboard_arrow_down, color: Colors.pink.shade300),
+            const Icon(Icons.keyboard_arrow_down, color: Colors.black87),
           ],
         ),
       ),
@@ -351,7 +353,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // ------------------------------------------------------------------------------
-  // Input Builder
+  // Input field — Black border
   // ------------------------------------------------------------------------------
   Widget _input(String hint, TextEditingController controller,
       {IconData? icon, TextInputType? type, bool obscure = false}) {
@@ -370,7 +372,15 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderSide: _blackBorder,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: _blackBorder,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: _blackBorder,
           ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -407,7 +417,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 ],
               ),
               child: const Icon(Icons.arrow_back_ios_new,
-                  size: 18, color: Colors.black),
+                  size: 18, color: Colors.black87),
             ),
           ),
         ),
@@ -457,13 +467,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                               width: 96,
                               height: 96,
                               decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(colors: [
-                                  Colors.pink.shade50,
-                                  Colors.purple.shade50
-                                ]),
-                                border: Border.all(color: Colors.white, width: 4),
-                              ),
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(colors: [
+                                    Colors.pink.shade50,
+                                    Colors.purple.shade50
+                                  ]),
+                                  border:
+                                      Border.all(color: Colors.white, width: 4)),
                               child: ClipOval(
                                 child: _avatar == null
                                     ? Icon(Icons.camera_alt_outlined,
@@ -474,11 +484,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                             ),
                           ),
                           const SizedBox(width: 14),
-                          const Text(
-                            "Upload profile photo",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w700, fontSize: 14),
-                          )
+                          const Text("Upload profile photo",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14))
                         ],
                       ),
 
@@ -568,7 +577,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                                   _obscure
                                       ? Icons.visibility_off
                                       : Icons.visibility,
-                                  color: Colors.black54,
+                                  color: Colors.black87,
                                 ),
                               ),
                             ),
@@ -593,7 +602,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                                 _obscureConfirm
                                     ? Icons.visibility_off
                                     : Icons.visibility,
-                                color: Colors.black54,
+                                color: Colors.black87,
                               ),
                             ),
                           )
@@ -611,14 +620,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                                 setState(() => _agree = v ?? false),
                           ),
                           const Expanded(
-                            child: Text("I agree to the Terms & Privacy"),
-                          ),
+                              child: Text("I agree to the Terms & Privacy"))
                         ],
                       ),
 
                       const SizedBox(height: 14),
 
-                      // Submit Button
+                      // Button
                       GestureDetector(
                         onTap: _submit,
                         child: Container(
