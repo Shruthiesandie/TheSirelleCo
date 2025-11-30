@@ -1,5 +1,5 @@
 // create_account_page.dart
-// FINAL FULL VERSION WITH GENDER ICON + RED BORDER + ANIMATION
+// FINAL VERSION — COUNTRY + GENDER MATCH ALL FIELDS EXACTLY
 // ------------------------------------------------------------------------------
 
 import 'dart:io';
@@ -41,13 +41,15 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
   // Gender dropdown
   final List<String> _genderOptions = [
-    "Male", "Female", "Other", "Prefer not to say"
+    "Male",
+    "Female",
+    "Other",
+    "Prefer not to say"
   ];
   String? _selectedGender;
+  bool _attemptSubmit = false;
 
-  bool _attemptSubmit = false;   // 🔥 needed for red border
-
-  // UI states
+  // UI state
   bool _obscure = true;
   bool _obscureConfirm = true;
   bool _agree = false;
@@ -77,9 +79,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     super.dispose();
   }
 
-  // ------------------------------------------------------------------
-  // Avatar picker
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------------------
+  // Avatar Picker
+  // ------------------------------------------------------------------------------
   Future<void> _pickAvatar(ImageSource src) async {
     final picked = await _picker.pickImage(source: src, imageQuality: 85);
     if (picked != null) setState(() => _avatar = File(picked.path));
@@ -89,42 +91,40 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     showModalBottomSheet(
       context: context,
       builder: (c) => SafeArea(
-        child: Wrap(
-          children: [
+        child: Wrap(children: [
+          ListTile(
+            leading: const Icon(Icons.camera_alt),
+            title: const Text("Take photo"),
+            onTap: () {
+              Navigator.pop(c);
+              _pickAvatar(ImageSource.camera);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library),
+            title: const Text("Choose from gallery"),
+            onTap: () {
+              Navigator.pop(c);
+              _pickAvatar(ImageSource.gallery);
+            },
+          ),
+          if (_avatar != null)
             ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Take photo'),
+              leading: const Icon(Icons.delete),
+              title: const Text("Remove"),
               onTap: () {
                 Navigator.pop(c);
-                _pickAvatar(ImageSource.camera);
+                setState(() => _avatar = null);
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from gallery'),
-              onTap: () {
-                Navigator.pop(c);
-                _pickAvatar(ImageSource.gallery);
-              },
-            ),
-            if (_avatar != null)
-              ListTile(
-                leading: const Icon(Icons.delete),
-                title: const Text('Remove'),
-                onTap: () {
-                  Navigator.pop(c);
-                  setState(() => _avatar = null);
-                },
-              ),
-          ],
-        ),
+        ]),
       ),
     );
   }
 
-  // ------------------------------------------------------------------
-  // Country picker
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------------------
+  // Country Picker
+  // ------------------------------------------------------------------------------
   void _openCountryPicker() {
     showCountryPicker(
       context: context,
@@ -133,9 +133,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     );
   }
 
-  // ------------------------------------------------------------------
-  // DOB picker
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------------------
+  // DOB Picker
+  // ------------------------------------------------------------------------------
   Future<void> _pickDOB() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -150,9 +150,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     }
   }
 
-  // ------------------------------------------------------------------
-  // Phone formatting
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------------------
+  // Phone Formatting
+  // ------------------------------------------------------------------------------
   bool _phoneFormatting = false;
   void _phoneFormatListener() {
     if (_phoneFormatting) return;
@@ -175,9 +175,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     _phoneFormatting = false;
   }
 
-  // ------------------------------------------------------------------
-  // Password strength
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------------------
+  // Password Strength
+  // ------------------------------------------------------------------------------
   void _updateStrength() {
     String p = _passwordCtrl.text;
     if (p.isEmpty) _strengthColor = Colors.transparent;
@@ -188,18 +188,18 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     setState(() {});
   }
 
-  // ------------------------------------------------------------------
-  // Scroll + validation errors
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------------------
+  // Submit
+  // ------------------------------------------------------------------------------
+  void _err(String msg) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg)));
+  }
+
   void _scrollTo(GlobalKey key) async {
     if (key.currentContext == null) return;
     await Scrollable.ensureVisible(key.currentContext!,
         duration: const Duration(milliseconds: 350));
-  }
-
-  void _err(String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg)));
   }
 
   void _submit() {
@@ -221,7 +221,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       return _err("Passwords do not match");
     }
     if (_selectedGender == null) {
-      setState(() {}); // redraw red border
+      setState(() {});
       return _err("Select gender");
     }
     if (!_agree) {
@@ -231,9 +231,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     _err("Account created!");
   }
 
-  // ------------------------------------------------------------------
-  // Tilt Interaction
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------------------
+  // Tilt Effect
+  // ------------------------------------------------------------------------------
   void _onPointerMove(PointerEvent e) {
     final size = MediaQuery.of(context).size;
     final c = Offset(size.width / 2, size.height / 2);
@@ -251,18 +251,18 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         _tiltY = 0;
       });
 
-  // ------------------------------------------------------------------
-  // Gender Dropdown — WITH ICON + ANIMATION + RED BORDER
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------------------
+  // Gender Dropdown — MATCHES OTHER FIELDS EXACTLY
+  // ------------------------------------------------------------------------------
   Widget _genderDropdown() {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 180),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: _selectedGender == null && _attemptSubmit
+          color: (_selectedGender == null && _attemptSubmit)
               ? Colors.red.shade400
               : Colors.grey.shade300,
         ),
@@ -280,33 +280,30 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           ),
           icon: Icon(Icons.keyboard_arrow_down, color: Colors.pink.shade300),
 
-          // animated selected item
-          selectedItemBuilder: (context) {
-            return _genderOptions.map((gender) {
+          selectedItemBuilder: (_) {
+            return _genderOptions.map((item) {
               return Row(
                 children: [
                   Icon(Icons.person_outline, color: Colors.pink.shade300),
                   const SizedBox(width: 10),
-                  Text(gender),
+                  Text(item),
                 ],
               );
             }).toList();
           },
 
-          // dropdown list with animation
-          items: _genderOptions.map((gender) {
+          items: _genderOptions.map((item) {
             return DropdownMenuItem(
-              value: gender,
+              value: item,
               child: TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.8, end: 1.0),
-                duration: const Duration(milliseconds: 180),
+                duration: const Duration(milliseconds: 160),
                 curve: Curves.easeOutBack,
                 builder: (context, scale, child) =>
                     Transform.scale(scale: scale, child: child),
                 child: Text(
-                  gender,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 14),
+                  item,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
             );
@@ -323,34 +320,68 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     );
   }
 
-  // ------------------------------------------------------------------
-  // Input builder
-  // ------------------------------------------------------------------
-  Widget _input(String hint, TextEditingController controller,
-      {IconData? icon, TextInputType? type, bool obscure = false}) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      keyboardType: type,
-      decoration: InputDecoration(
-        hintText: hint,
-        prefixIcon:
-            icon != null ? Icon(icon, color: Colors.pink.shade300) : null,
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
+  // ------------------------------------------------------------------------------
+  // Country Code — MATCHES INPUT FIELDS EXACTLY
+  // ------------------------------------------------------------------------------
+  Widget _countryBox() {
+    return GestureDetector(
+      onTap: _openCountryPicker,
+      child: Container(
+        height: 52,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          border: Border.all(color: Colors.grey.shade300),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Row(
+          children: [
+            Text(
+              "+${_country.phoneCode}",
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(width: 10),
+            Text(_country.flagEmoji, style: const TextStyle(fontSize: 18)),
+            const Spacer(),
+            Icon(Icons.keyboard_arrow_down, color: Colors.pink.shade300),
+          ],
+        ),
       ),
     );
   }
 
-  // ------------------------------------------------------------------
-  // UI Build
-  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------------------
+  // Input Builder
+  // ------------------------------------------------------------------------------
+  Widget _input(String hint, TextEditingController controller,
+      {IconData? icon, TextInputType? type, bool obscure = false}) {
+    return SizedBox(
+      height: 52,
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        keyboardType: type,
+        decoration: InputDecoration(
+          hintText: hint,
+          prefixIcon: icon != null
+              ? Icon(icon, color: Colors.pink.shade300)
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------------------------
+  // Build UI
+  // ------------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Listener(
@@ -358,7 +389,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       onPointerUp: (_) => _resetTilt(),
       child: Scaffold(
         backgroundColor: const Color(0xFFFCEEEE),
-
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
@@ -410,18 +440,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         fontWeight: FontWeight.w700)),
                 const SizedBox(height: 20),
 
-                //------------------------------------------------------------------
-                // CARD START
-                //------------------------------------------------------------------
+                // CARD
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18)),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Avatar
                       Row(
@@ -449,17 +474,17 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                             ),
                           ),
                           const SizedBox(width: 14),
-                          const Text("Upload profile photo",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 14))
+                          const Text(
+                            "Upload profile photo",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 14),
+                          )
                         ],
                       ),
+
                       const SizedBox(height: 20),
 
-                      //------------------------------------------------------------------
-                      // Row 1 — First + Last
-                      //------------------------------------------------------------------
+                      // Row 1
                       Row(
                         children: [
                           Expanded(
@@ -479,9 +504,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
                       const SizedBox(height: 14),
 
-                      //------------------------------------------------------------------
                       // Row 2 — Email
-                      //------------------------------------------------------------------
                       Container(
                         key: _emailKey,
                         child: _input("Email", _emailCtrl,
@@ -491,51 +514,22 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
                       const SizedBox(height: 14),
 
-                      //------------------------------------------------------------------
-                      // Row 3 — Country Code + Phone
-                      //------------------------------------------------------------------
+                      // Row 3 — Country + Phone
                       Row(
                         children: [
-                          GestureDetector(
-                            onTap: _openCountryPicker,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 14),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                    color: Colors.grey.shade300),
-                              ),
-                              child: Row(
-                                children: [
-                                  Text("+${_country.phoneCode}",
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.w700)),
-                                  const SizedBox(width: 8),
-                                  Text(_country.flagEmoji,
-                                      style: const TextStyle(fontSize: 18)),
-                                  const SizedBox(width: 6),
-                                  const Icon(Icons.keyboard_arrow_down,
-                                      size: 18),
-                                ],
-                              ),
-                            ),
-                          ),
+                          SizedBox(width: 110, child: _countryBox()),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _input("Phone number", _phoneCtrl,
                                 icon: Icons.phone,
                                 type: TextInputType.phone),
-                          )
+                          ),
                         ],
                       ),
 
                       const SizedBox(height: 14),
 
-                      //------------------------------------------------------------------
-                      // Row 4 — DOB + Gender Dropdown
-                      //------------------------------------------------------------------
+                      // Row 4 — DOB + Gender
                       Row(
                         children: [
                           Expanded(
@@ -551,48 +545,32 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Expanded(
-                            child: _genderDropdown(),
-                          ),
+                          Expanded(child: _genderDropdown()),
                         ],
                       ),
 
                       const SizedBox(height: 14),
 
-                      //------------------------------------------------------------------
                       // Password
-                      //------------------------------------------------------------------
                       Container(
                         key: _passwordKey,
                         child: Stack(
                           alignment: Alignment.centerRight,
                           children: [
                             _input("Password", _passwordCtrl,
-                                icon: Icons.lock,
-                                obscure: _obscure),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 12,
-                                  height: 12,
-                                  margin:
-                                      const EdgeInsets.only(right: 10),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: _strengthColor,
-                                  ),
+                                icon: Icons.lock, obscure: _obscure),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => _obscure = !_obscure),
+                                child: Icon(
+                                  _obscure
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: Colors.black54,
                                 ),
-                                GestureDetector(
-                                  onTap: () =>
-                                      setState(() => _obscure = !_obscure),
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(right: 8),
-                                    child: Icon(Icons.visibility_off,
-                                        size: 20),
-                                  ),
-                                )
-                              ],
+                              ),
                             ),
                           ],
                         ),
@@ -600,21 +578,23 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
                       const SizedBox(height: 14),
 
-                      //------------------------------------------------------------------
-                      // Re-enter password
-                      //------------------------------------------------------------------
+                      // Re-enter Password
                       Stack(
                         alignment: Alignment.centerRight,
                         children: [
                           _input("Re-enter password", _confirmCtrl,
-                              icon: Icons.lock,
-                              obscure: _obscureConfirm),
-                          GestureDetector(
-                            onTap: () =>
-                                setState(() => _obscureConfirm = !_obscureConfirm),
-                            child: const Padding(
-                              padding: EdgeInsets.only(right: 8),
-                              child: Icon(Icons.visibility_off, size: 20),
+                              icon: Icons.lock, obscure: _obscureConfirm),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: GestureDetector(
+                              onTap: () => setState(
+                                  () => _obscureConfirm = !_obscureConfirm),
+                              child: Icon(
+                                _obscureConfirm
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: Colors.black54,
+                              ),
                             ),
                           )
                         ],
@@ -622,9 +602,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
                       const SizedBox(height: 14),
 
-                      //------------------------------------------------------------------
                       // Terms
-                      //------------------------------------------------------------------
                       Row(
                         children: [
                           Checkbox(
@@ -633,15 +611,14 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                                 setState(() => _agree = v ?? false),
                           ),
                           const Expanded(
-                              child: Text("I agree to the Terms & Privacy"))
+                            child: Text("I agree to the Terms & Privacy"),
+                          ),
                         ],
                       ),
 
                       const SizedBox(height: 14),
 
-                      //------------------------------------------------------------------
-                      // Button
-                      //------------------------------------------------------------------
+                      // Submit Button
                       GestureDetector(
                         onTap: _submit,
                         child: Container(
@@ -649,11 +626,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(14),
                             gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFFFF6FAF),
-                                Color(0xFFB97BFF),
-                              ],
-                            ),
+                                colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
                           ),
                           child: Shimmer.fromColors(
                             baseColor: Colors.white,
@@ -674,6 +647,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 ),
 
                 const SizedBox(height: 20),
+
                 Center(
                   child: TextButton(
                     onPressed: () {},
@@ -682,7 +656,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       style: TextStyle(color: Colors.pink.shade400),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
