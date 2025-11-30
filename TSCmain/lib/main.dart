@@ -11,6 +11,7 @@ import 'pages/love_page.dart';
 import 'pages/allcategories_page.dart';
 import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
+import 'pages/username_page.dart';
 
 
 void main() {
@@ -39,6 +40,8 @@ class MyApp extends StatelessWidget {
         "/categories": (_) => const AllCategoriesPage(),
         "/login": (_) => LoginPage(),   
         "/register": (_) => const CreateAccountPage(),
+        "/username": (_) => const UsernamePage(),
+
 
       },
     );
