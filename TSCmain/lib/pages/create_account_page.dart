@@ -1,12 +1,24 @@
 // create_account_page.dart
-// Playful / Pinteresty Create Account screen (Style C)
-// Requires pubspec.yaml entries:
+//
+// A single-file, ready-to-copy Create Account page.
+// - Pinteresty, pink-and-white aesthetic
+// - Rotating 3D gender chips (option C chosen)
+// - Avatar upload (camera/gallery) + circular preview
+// - Country picker (no external flag asset required — uses emoji)
+// - DOB picker, phone auto-format, password strength dot, re-enter password
+// - Show/hide password, smooth scroll-to-error, spacious layout
+// - Subtle tilt & micro-animations (no risky anim controller math)
+// - No usage of country_icons assets (avoids missing-asset crash)
+//
+// Make sure you have these dependencies in pubspec.yaml:
 //   image_picker: ^1.0.7
 //   country_picker: ^2.0.21
 //   shimmer: ^3.0.0
+//
+// Note: add permissions for camera/gallery on Android/iOS as usual.
 
 import 'dart:io';
-import 'dart:math';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:country_picker/country_picker.dart';
@@ -19,69 +31,66 @@ class CreateAccountPage extends StatefulWidget {
   State<CreateAccountPage> createState() => _CreateAccountPageState();
 }
 
-class _CreateAccountPageState extends State<CreateAccountPage>
-    with TickerProviderStateMixin {
-  // Controllers
-  final ScrollController _scrollController = ScrollController();
-  final TextEditingController _firstCtrl = TextEditingController();
-  final TextEditingController _lastCtrl = TextEditingController();
-  final TextEditingController _emailCtrl = TextEditingController();
-  final TextEditingController _phoneCtrl = TextEditingController();
-  final TextEditingController _passwordCtrl = TextEditingController();
-  final TextEditingController _confirmCtrl = TextEditingController();
-  final TextEditingController _dobCtrl = TextEditingController();
+class _CreateAccountPageState extends State<CreateAccountPage> {
+  // Controllers & keys
+  final _scrollController = ScrollController();
+  final _firstCtrl = TextEditingController();
+  final _lastCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
+  final _dobCtrl = TextEditingController();
 
-  // Image
+  // Focus nodes for nicer focus handling
+  final _firstFocus = FocusNode();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+
+  // GlobalKeys to scroll to fields on error (unique keys)
+  final _firstKey = GlobalKey();
+  final _emailKey = GlobalKey();
+  final _passwordKey = GlobalKey();
+
+  // Avatar
+  File? _avatar;
   final ImagePicker _picker = ImagePicker();
-  File? _imageFile;
 
-  // Country
-  late Country _country;
+  // Country (default to India)
+  Country _country = Country.parse("IN") ?? Country(
+    phoneCode: '91',
+    countryCode: 'IN',
+    e164Sc: 0,
+    geographic: true,
+    level: 1,
+    example: 'India',
+    displayName: 'India',
+    displayNameNoCountryCode: 'India',
+    e164Key: '',
+    name: 'India',
+  );
 
-  // Gender segmented slider (playful)
-  final List<String> _genders = ['Male', 'Female', 'Other'];
+  // Gender slider (rotating 3D chips)
+  final List<String> _genders = ['Male', 'Female', 'Other', 'Prefer not to say'];
   int _genderIndex = 0;
 
-  // Password helpers
-  bool _showPassword = false;
-  bool _showConfirm = false;
-  Color _strengthDot = Colors.red;
-
-  // UI animations
-  late AnimationController _orbController;
-  late AnimationController _cardIntroController;
-
-  // Tilt subtle
-  double _tiltX = 0.0;
-  double _tiltY = 0.0;
-
-  // For phone formatting cursor handling
-  bool _isFormattingPhone = false;
+  // Tiny UI state
+  bool _obscure = true;
+  bool _obscureConfirm = true;
+  Color _strengthColor = Colors.red;
+  bool _agree = false;
+  double _tiltX = 0;
+  double _tiltY = 0;
 
   @override
   void initState() {
     super.initState();
-    _country = Country.parse('IN');
-
-    _passwordCtrl.addListener(_evaluatePasswordStrength);
-    _phoneCtrl.addListener(_onPhoneChanged);
-
-    // playful orbs animation (repeat)
-    _orbController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 6),
-    )..repeat();
-
-    _cardIntroController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    )..forward();
+    _passwordCtrl.addListener(_updateStrength);
+    _phoneCtrl.addListener(_phoneFormatListener);
   }
 
   @override
   void dispose() {
-    _orbController.dispose();
-    _cardIntroController.dispose();
     _scrollController.dispose();
     _firstCtrl.dispose();
     _lastCtrl.dispose();
@@ -90,645 +99,590 @@ class _CreateAccountPageState extends State<CreateAccountPage>
     _passwordCtrl.dispose();
     _confirmCtrl.dispose();
     _dobCtrl.dispose();
+    _firstFocus.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
-  // -------------------- IMAGE PICKER --------------------
-  Future<void> _pickImage(ImageSource src) async {
+  // ---------------- Avatar ----------------
+  Future<void> _pickAvatar(ImageSource src) async {
     try {
       final picked = await _picker.pickImage(source: src, imageQuality: 85, maxWidth: 1200);
       if (picked != null) {
-        setState(() => _imageFile = File(picked.path));
+        setState(() => _avatar = File(picked.path));
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Image error: $e')));
-    }
+    } catch (_) {}
   }
 
-  void _openImageOptions() {
+  void _showAvatarOptions() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(18))),
-      builder: (ctx) {
-        return SafeArea(
-          child: Wrap(
-            children: [
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (c) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take photo'),
+              onTap: () {
+                Navigator.pop(c);
+                _pickAvatar(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () {
+                Navigator.pop(c);
+                _pickAvatar(ImageSource.gallery);
+              },
+            ),
+            if (_avatar != null)
               ListTile(
-                leading: const Icon(Icons.camera_alt_outlined),
-                title: const Text('Take photo'),
+                leading: const Icon(Icons.delete_forever),
+                title: const Text('Remove photo'),
                 onTap: () {
-                  Navigator.pop(ctx);
-                  _pickImage(ImageSource.camera);
+                  Navigator.pop(c);
+                  setState(() => _avatar = null);
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.photo_library_outlined),
-                title: const Text('Choose from gallery'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-              if (_imageFile != null)
-                ListTile(
-                  leading: const Icon(Icons.delete_forever_outlined),
-                  title: const Text('Remove photo'),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    setState(() => _imageFile = null);
-                  },
-                ),
-            ],
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 
-  // -------------------- DOB --------------------
-  Future<void> _pickDOB() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime(now.year - 22),
-      firstDate: DateTime(now.year - 90),
-      lastDate: DateTime(now.year - 12),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(primary: const Color(0xFFFF6FAF)),
-          ),
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
-    );
-
-    if (picked != null) {
-      _dobCtrl.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
-      setState(() {});
-    }
-  }
-
-  // -------------------- COUNTRY PICKER --------------------
+  // ---------------- Country ----------------
   void _openCountryPicker() {
     showCountryPicker(
       context: context,
       showPhoneCode: true,
       onSelect: (c) {
-        setState(() {
-          _country = c;
-          // If phone empty, prefill code
-          if (_phoneCtrl.text.trim().isEmpty) {
-            _phoneCtrl.text = "+${c.phoneCode} ";
-          } else if (!_phoneCtrl.text.startsWith('+')) {
-            _phoneCtrl.text = "+${c.phoneCode} ${_phoneCtrl.text}";
-          }
-        });
+        setState(() => _country = c);
+        if (!_phoneCtrl.text.startsWith('+')) {
+          _phoneCtrl.text = '+${c.phoneCode} ';
+          _phoneCtrl.selection = TextSelection.fromPosition(TextPosition(offset: _phoneCtrl.text.length));
+        }
       },
     );
   }
 
-  // -------------------- PASSWORD STRENGTH --------------------
-  void _evaluatePasswordStrength() {
-    final s = _passwordCtrl.text;
-    final len = s.length;
-    if (len < 6) {
-      _strengthDot = Colors.red;
-    } else if (len < 10) {
-      _strengthDot = Colors.amber;
+  // ---------------- DOB ----------------
+  Future<void> _pickDOB() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(now.year - 20),
+      firstDate: DateTime(now.year - 100),
+      lastDate: DateTime(now.year - 10),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(primary: Color(0xFFFF6FAF)),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+    );
+    if (picked != null) {
+      _dobCtrl.text = "${picked.year}-${picked.month.toString().padLeft(2,'0')}-${picked.day.toString().padLeft(2,'0')}";
+    }
+  }
+
+  // ---------------- Phone formatting ----------------
+  bool _phoneFormatting = false;
+  void _phoneFormatListener() {
+    if (_phoneFormatting) return;
+    _phoneFormatting = true;
+    final raw = _phoneCtrl.text;
+    final numbers = raw.replaceAll(RegExp(r'\D'), '');
+    String formatted;
+    if (numbers.length <= 3) formatted = numbers;
+    else if (numbers.length <= 6) formatted = "${numbers.substring(0,3)} ${numbers.substring(3)}";
+    else if (numbers.length <= 10) formatted = "${numbers.substring(0,3)} ${numbers.substring(3,6)} ${numbers.substring(6)}";
+    else formatted = numbers;
+    // keep cursor at end — simpler and safe
+    _phoneCtrl.value = TextEditingValue(text: formatted, selection: TextSelection.collapsed(offset: formatted.length));
+    _phoneFormatting = false;
+  }
+
+  // ---------------- Password strength ----------------
+  void _updateStrength() {
+    final p = _passwordCtrl.text;
+    if (p.isEmpty) {
+      _strengthColor = Colors.transparent;
+    } else if (p.length < 6) {
+      _strengthColor = Colors.red;
+    } else if (p.length < 10) {
+      _strengthColor = Colors.orange;
     } else {
-      _strengthDot = Colors.green;
+      _strengthColor = Colors.green;
     }
     setState(() {});
   }
 
-  // -------------------- PHONE FORMAT (simple) --------------------
-  void _onPhoneChanged() {
-    if (_isFormattingPhone) return;
-    _isFormattingPhone = true;
-    final raw = _phoneCtrl.text;
-    // Keep leading plus and country code if present
-    final hasPlus = raw.startsWith('+');
-    String numbers = raw.replaceAll(RegExp(r'[^0-9+]'), '');
-    // remove extra plus inside string except first
-    if (hasPlus) {
-      numbers = '+' + numbers.replaceAll('+', '');
-    }
-
-    // Remove non-digit (except leading +)
-    final cleaned = hasPlus ? numbers.substring(1).replaceAll(RegExp(r'\D'), '') : numbers.replaceAll(RegExp(r'\D'), '');
-
-    String formatted = cleaned;
-    if (cleaned.length <= 3) {
-      formatted = cleaned;
-    } else if (cleaned.length <= 6) {
-      formatted = "${cleaned.substring(0, 3)} ${cleaned.substring(3)}";
-    } else if (cleaned.length <= 10) {
-      formatted = "${cleaned.substring(0, 3)} ${cleaned.substring(3, 6)} ${cleaned.substring(6)}";
-    } else {
-      // if longer, just chunk first 10 then append rest
-      formatted = "${cleaned.substring(0, 3)} ${cleaned.substring(3, 6)} ${cleaned.substring(6, 10)} ${cleaned.substring(10)}";
-    }
-
-    final result = hasPlus ? "+$formatted" : formatted;
-
-    // set text while keeping cursor at end
-    _phoneCtrl.value = TextEditingValue(
-      text: result,
-      selection: TextSelection.collapsed(offset: result.length),
-    );
-
-    _isFormattingPhone = false;
-  }
-
-  // -------------------- SUBMIT + scroll to error --------------------
-  Future<void> _scrollTo(Widget? target, {double offset = 0}) async {
-    // simple: scroll to top or small offset
-    await _scrollController.animateTo(
-      offset,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOut,
-    );
+  // ---------------- Submit & scroll to error ----------------
+  Future<void> _scrollToKey(GlobalKey key) async {
+    final ctx = key.currentContext;
+    if (ctx == null) return;
+    await Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 360), curve: Curves.easeOut);
   }
 
   void _submit() {
-    // Validate in order and scroll to top if error
+    // Simple validations with smooth scrolling
     if (_firstCtrl.text.trim().isEmpty) {
-      _scrollTo(null, offset: 0);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter first name')));
+      _scrollToKey(_firstKey);
+      _shakeSnack('Please enter your first name');
       return;
     }
     if (_emailCtrl.text.trim().isEmpty || !_emailCtrl.text.contains('@')) {
-      _scrollTo(null, offset: 80);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid email')));
+      _scrollToKey(_emailKey);
+      _shakeSnack('Please enter a valid email');
       return;
     }
     if (_passwordCtrl.text.length < 6) {
-      _scrollTo(null, offset: 260);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password is too weak')));
+      _scrollToKey(_passwordKey);
+      _shakeSnack('Password too short');
       return;
     }
     if (_confirmCtrl.text != _passwordCtrl.text) {
-      _scrollTo(null, offset: 320);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      _shakeSnack('Passwords do not match');
+      return;
+    }
+    if (!_agree) {
+      _shakeSnack('Please accept Terms & Privacy');
       return;
     }
 
-    // Success (demo)
+    // Demo success
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Account created — demo')));
   }
 
-  // -------------------- UI PIECES --------------------
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FadeTransition(
-          opacity: CurvedAnimation(parent: _cardIntroController, curve: const Interval(0, 0.6, curve: Curves.easeOut)),
-          child: const Text(
-            'Create your account',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFFEE6FAF)),
-          ),
-        ),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: const Text(
-            'Already registered? Log in',
-            style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Join to get rewards, personalised picks & exclusive offers.',
-          style: TextStyle(fontSize: 13, color: Colors.black54),
-        ),
-        const SizedBox(height: 18),
-      ],
-    );
+  void _shakeSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), duration: const Duration(seconds: 2)));
   }
 
-  Widget _buildAvatarRow() {
-    return Row(
-      children: [
-        // Avatar circle with preview
-        GestureDetector(
-          onTap: _openImageOptions,
-          child: AnimatedScale(
-            scale: 1.0,
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOutBack,
-            child: Container(
-              width: 110,
-              height: 110,
+  // ---------------- Tilt micro-interaction ----------------
+  void _onPointerMove(PointerEvent e) {
+    final size = MediaQuery.of(context).size;
+    final center = Offset(size.width/2, size.height/2);
+    final dx = (e.position.dx - center.dx) / center.dx;
+    final dy = (e.position.dy - center.dy) / center.dy;
+    setState(() {
+      _tiltY = (dx*6).clamp(-8.0, 8.0);
+      _tiltX = (-dy*6).clamp(-8.0, 8.0);
+    });
+  }
+
+  void _resetTilt() {
+    setState(() {
+      _tiltX = 0; _tiltY = 0;
+    });
+  }
+
+  // ---------------- Rotating chip widget used below ----------------
+  Widget _rotatingChip(String label, int index) {
+    final bool selected = index == _genderIndex;
+    final double rotationY = selected ? 0.0 : (index < _genderIndex ? -0.18 : 0.18);
+    return GestureDetector(
+      onTap: () => setState(() => _genderIndex = index),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: selected ? 1.0 : 0.88, end: selected ? 1.0 : 0.88),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutBack,
+        builder: (context, scale, child) {
+          return Transform(
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateY(rotationY)
+              ..scale(scale, scale),
+            alignment: Alignment.center,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 350),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: _imageFile == null
-                    ? LinearGradient(colors: [Colors.pink.shade50, Colors.purple.shade50])
+                gradient: selected
+                    ? const LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)])
                     : null,
-                boxShadow: [
-                  BoxShadow(color: Colors.pink.shade100.withOpacity(0.6), blurRadius: 20, offset: const Offset(0, 12)),
-                ],
-                border: Border.all(color: Colors.white, width: 4),
+                color: selected ? null : Colors.white,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: selected ? Colors.transparent : Colors.grey.shade300),
+                boxShadow: selected
+                    ? [BoxShadow(color: Colors.pink.withOpacity(0.18), blurRadius: 18, offset: const Offset(0, 8))]
+                    : [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6, offset: const Offset(0, 6))],
               ),
-              child: ClipOval(
-                child: _imageFile == null
-                    ? Container(
-                        color: Colors.transparent,
-                        child: Center(
-                          child: Icon(Icons.camera_alt_outlined, size: 36, color: Colors.pink.shade300),
-                        ),
-                      )
-                    : Image.file(_imageFile!, fit: BoxFit.cover),
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Profile photo', style: TextStyle(fontWeight: FontWeight.w800)),
-              const SizedBox(height: 6),
-              const Text('Tap to upload or take a photo', style: TextStyle(color: Colors.black54, fontSize: 12)),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _openImageOptions,
-                    icon: const Icon(Icons.upload_file_outlined, size: 18),
-                    label: const Text('Upload'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.pink.shade400,
-                      elevation: 0,
-                      side: BorderSide(color: Colors.pink.shade50),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  OutlinedButton(
-                    onPressed: () => setState(() => _imageFile = null),
-                    child: const Text('Remove'),
-                    style: OutlinedButton.styleFrom(foregroundColor: Colors.pink.shade300),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    TextInputType keyboardType = TextInputType.text,
-    bool obscure = false,
-    Widget? suffix,
-    void Function()? onTap,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: obscure,
-      onTap: onTap,
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.white,
-        suffixIcon: suffix,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade200)),
-      ),
-    );
-  }
-
-  Widget _genderSelector() {
-    // playful segmented with pill background
-    return Container(
-      height: 52,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 8))],
-      ),
-      child: Stack(
-        children: [
-          AnimatedAlign(
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeOutBack,
-            alignment: () {
-              switch (_genderIndex) {
-                case 0:
-                  return Alignment.centerLeft;
-                case 1:
-                  return Alignment.center;
-                default:
-                  return Alignment.centerRight;
-              }
-            }(),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 6),
-              width: (MediaQuery.of(context).size.width - 64) / 3, // approx
-              height: 44,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFFFF8AC5), Color(0xFFB97BFF)]),
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [BoxShadow(color: Colors.pink.shade100.withOpacity(0.35), blurRadius: 18, offset: const Offset(0, 8))],
-              ),
-            ),
-          ),
-          Row(
-            children: List.generate(3, (i) {
-              final label = _genders[i];
-              final selected = i == _genderIndex;
-              return Expanded(
-                child: InkWell(
-                  onTap: () => setState(() => _genderIndex = i),
-                  borderRadius: BorderRadius.circular(30),
-                  child: Container(
-                    height: 52,
-                    alignment: Alignment.center,
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: selected ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                  ),
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: selected ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.w700,
                 ),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Playful orbs in background
-  Widget _orbs() {
-    return IgnorePointer(
-      child: AnimatedBuilder(
-        animation: _orbController,
-        builder: (context, _) {
-          final t = _orbController.value;
-          return Stack(
-            children: [
-              Positioned(
-                left: 24 + sin(t * 2 * pi) * 18,
-                top: 36 + cos(t * 2 * pi) * 10,
-                child: _orbDot(120, Colors.pink.shade50),
               ),
-              Positioned(
-                right: 12 + cos(t * 1.4 * 2 * pi) * 22,
-                top: 80 + sin(t * 2.1 * 2 * pi) * 12,
-                child: _orbDot(90, Colors.purple.shade50),
-              ),
-              Positioned(
-                left: 40 + sin(t * 1.8 * 2 * pi) * 12,
-                bottom: 120 + cos(t * 1.6 * 2 * pi) * 18,
-                child: _orbDot(140, Colors.pink.shade50.withOpacity(0.12)),
-              ),
-            ],
+            ),
           );
         },
       ),
     );
   }
 
-  Widget _orbDot(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        gradient: RadialGradient(colors: [color, color.withOpacity(0.0)]),
-        shape: BoxShape.circle,
+  // ---------------- Layout ----------------
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Listener(
+      onPointerMove: _onPointerMove,
+      onPointerUp: (_) => _resetTilt(),
+      onPointerCancel: (_) => _resetTilt(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFCEEEE),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: false,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              margin: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0,4))],
+              ),
+              child: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.black),
+            ),
+          ),
+        ),
+
+        body: SingleChildScrollView(
+          controller: _scrollController,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateX(_tiltX * (math.pi/180))
+              ..rotateY(_tiltY * (math.pi/180)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 6),
+                Text('Create your account',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.pink.shade700),
+                ),
+                const SizedBox(height: 6),
+
+                // Already registered placed under title (clean)
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Text('Already registered? Log in',
+                    style: TextStyle(color: Colors.pink.shade400, fontWeight: FontWeight.w700),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+                Text('Join to get rewards, personalized picks & exclusive offers.',
+                  style: TextStyle(color: Colors.black54, fontSize: 13),
+                ),
+
+                const SizedBox(height: 18),
+
+                // Glass card
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.92),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white.withOpacity(0.6)),
+                    boxShadow: [BoxShadow(color: Colors.pink.shade50.withOpacity(0.9), blurRadius: 28, offset: const Offset(0,12))],
+                  ),
+                  child: Column(
+                    children: [
+                      // Avatar row
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: _showAvatarOptions,
+                            child: Container(
+                              width: 96,
+                              height: 96,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: _avatar == null
+                                    ? LinearGradient(colors: [Colors.pink.shade50, Colors.purple.shade50])
+                                    : null,
+                                border: Border.all(color: Colors.white, width: 4),
+                                boxShadow: [BoxShadow(color: Colors.pinkAccent.withOpacity(0.12), blurRadius: 18, offset: const Offset(0,10))],
+                              ),
+                              child: ClipOval(
+                                child: _avatar == null
+                                    ? Center(child: Icon(Icons.camera_alt_outlined, size: 36, color: Colors.pink.shade300))
+                                    : Image.file(_avatar!, fit: BoxFit.cover),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+
+                          // Profile hint and actions
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Profile photo', style: TextStyle(fontWeight: FontWeight.w800)),
+                                const SizedBox(height: 6),
+                                Text('Tap to upload or take photo', style: TextStyle(color: Colors.black54, fontSize: 13)),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        elevation: 0,
+                                        side: BorderSide(color: Colors.pink.shade50),
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      ),
+                                      onPressed: _showAvatarOptions,
+                                      icon: Icon(Icons.upload_file, color: Colors.pink.shade300),
+                                      label: const Text('Upload', style: TextStyle(color: Colors.black87)),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    OutlinedButton(
+                                      onPressed: () => setState(() => _avatar = null),
+                                      style: OutlinedButton.styleFrom(foregroundColor: Colors.pink.shade300),
+                                      child: const Text('Remove'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // FIRST & LAST (with unique key for scrolling)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              key: _firstKey,
+                              child: _inputField(controller: _firstCtrl, hint: 'First name', icon: Icons.person),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(child: _inputField(controller: _lastCtrl, hint: 'Last name', icon: Icons.person_outline)),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Email
+                      Container(
+                        key: _emailKey,
+                        child: _inputField(controller: _emailCtrl, hint: 'Email address', icon: Icons.email, keyboardType: TextInputType.emailAddress),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Phone + Country
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: _openCountryPicker,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey.shade200),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text('+${_country.phoneCode}', style: const TextStyle(fontWeight: FontWeight.w700)),
+                                  const SizedBox(width: 8),
+                                  // Use emoji flag (safe)
+                                  Text(_country.flagEmoji, style: const TextStyle(fontSize: 18)),
+                                  const SizedBox(width: 6),
+                                  const Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.black54),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(child: _inputField(controller: _phoneCtrl, hint: 'Phone number', keyboardType: TextInputType.phone)),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // DOB + Password row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: _pickDOB,
+                              child: AbsorbPointer(child: _inputField(controller: _dobCtrl, hint: 'Date of birth (YYYY-MM-DD)', icon: Icons.cake)),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              key: _passwordKey,
+                              child: Stack(
+                                alignment: Alignment.centerRight,
+                                children: [
+                                  _inputField(controller: _passwordCtrl, hint: 'Password', obscure: _obscure),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // strength dot
+                                      Container(width: 12, height: 12, margin: const EdgeInsets.only(right: 10), decoration: BoxDecoration(shape: BoxShape.circle, color: _strengthColor)),
+                                      GestureDetector(
+                                        onTap: () => setState(() => _obscure = !_obscure),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                          child: Icon(_obscure ? Icons.visibility_off : Icons.visibility, size: 20, color: Colors.black45),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Confirm password
+                      Stack(
+                        alignment: Alignment.centerRight,
+                        children: [
+                          _inputField(controller: _confirmCtrl, hint: 'Re-enter password', obscure: _obscureConfirm),
+                          GestureDetector(
+                            onTap: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility, size: 20, color: Colors.black45),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      if (_confirmCtrl.text.isNotEmpty && _confirmCtrl.text != _passwordCtrl.text)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text('Passwords do not match', style: TextStyle(color: Colors.red.shade400, fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+
+                      const SizedBox(height: 18),
+
+                      // Rotating 3D gender chips area (spacious)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Gender', style: TextStyle(fontWeight: FontWeight.w800)),
+                            const SizedBox(height: 10),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(_genders.length, (i) => Padding(
+                                  padding: const EdgeInsets.only(right: 12),
+                                  child: _rotatingChip(_genders[i], i),
+                                )),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // Terms + Agree
+                      Row(
+                        children: [
+                          Checkbox(value: _agree, onChanged: (v) => setState(() => _agree = v ?? false)),
+                          Expanded(child: Text('I agree to the Terms & Privacy policy', style: TextStyle(color: Colors.black54))),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Register button (shimmer + hover feedback)
+                      MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: _submit,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            height: 56,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              gradient: const LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
+                              boxShadow: [BoxShadow(color: Colors.pinkAccent.withOpacity(0.28), blurRadius: 20, offset: const Offset(0,10))],
+                            ),
+                            child: Shimmer.fromColors(
+                              baseColor: Colors.white,
+                              highlightColor: Colors.white70,
+                              child: const Center(
+                                child: Text('CREATE ACCOUNT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                // Small footer
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Need help?', style: TextStyle(color: Colors.black54)),
+                    const SizedBox(width: 8),
+                    TextButton(onPressed: () {}, child: Text('Contact support', style: TextStyle(color: Colors.pink.shade400)))
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  // -------------------- BUILD --------------------
-  @override
-  Widget build(BuildContext context) {
-    final cardPad = 20.0;
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF6F8),
-      body: Listener(
-        onPointerMove: (e) {
-          final s = MediaQuery.of(context).size;
-          final center = Offset(s.width / 2, s.height / 2);
-          setState(() {
-            _tiltY = ((e.position.dx - center.dx) / center.dx) * 6;
-            _tiltX = ((center.dy - e.position.dy) / center.dy) * 6;
-          });
-        },
-        onPointerUp: (_) {
-          setState(() {
-            _tiltX = 0;
-            _tiltY = 0;
-          });
-        },
-        child: Stack(
-          children: [
-            // Orbs background
-            Positioned.fill(child: _orbs()),
-
-            SafeArea(
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                child: Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.001)
-                    ..rotateX(_tiltX * pi / 180)
-                    ..rotateY(_tiltY * pi / 180),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 12),
-
-                      // Main card
-                      ScaleTransition(
-                        scale: CurvedAnimation(parent: _cardIntroController, curve: Curves.easeOutBack),
-                        child: Container(
-                          padding: EdgeInsets.all(cardPad),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.92),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(color: Colors.pink.shade50.withOpacity(0.9), blurRadius: 30, offset: const Offset(0, 14)),
-                              BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 6)),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildAvatarRow(),
-                              const SizedBox(height: 18),
-
-                              // name
-                              Row(
-                                children: [
-                                  Expanded(child: _buildTextField(controller: _firstCtrl, hint: 'First name')),
-                                  const SizedBox(width: 12),
-                                  Expanded(child: _buildTextField(controller: _lastCtrl, hint: 'Last name')),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-
-                              // email
-                              _buildTextField(controller: _emailCtrl, hint: 'Email address', keyboardType: TextInputType.emailAddress),
-                              const SizedBox(height: 12),
-
-                              // country + phone
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: _openCountryPicker,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: Colors.grey.shade200),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Text('+${_country.phoneCode}', style: const TextStyle(fontWeight: FontWeight.w700)),
-                                          const SizedBox(width: 8),
-                                          const Icon(Icons.keyboard_arrow_down),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(child: _buildTextField(controller: _phoneCtrl, hint: 'Phone number', keyboardType: TextInputType.phone)),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-
-                              // dob + password row
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: _pickDOB,
-                                      child: AbsorbPointer(
-                                        child: _buildTextField(controller: _dobCtrl, hint: 'Date of birth (YYYY-MM-DD)'),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Stack(
-                                      alignment: Alignment.centerRight,
-                                      children: [
-                                        _buildTextField(controller: _passwordCtrl, hint: 'Password', obscure: !_showPassword),
-                                        Positioned(
-                                          right: 40,
-                                          child: IconButton(
-                                            onPressed: () => setState(() => _showPassword = !_showPassword),
-                                            icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
-                                            color: Colors.black45,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          right: 12,
-                                          child: Container(
-                                            width: 12,
-                                            height: 12,
-                                            decoration: BoxDecoration(shape: BoxShape.circle, color: _strengthDot),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-
-                              // confirm password
-                              Stack(
-                                alignment: Alignment.centerRight,
-                                children: [
-                                  _buildTextField(controller: _confirmCtrl, hint: 'Re-enter password', obscure: !_showConfirm),
-                                  Positioned(
-                                    right: 12,
-                                    child: IconButton(
-                                      onPressed: () => setState(() => _showConfirm = !_showConfirm),
-                                      icon: Icon(_showConfirm ? Icons.visibility : Icons.visibility_off),
-                                      color: Colors.black45,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              if (_confirmCtrl.text.isNotEmpty && _confirmCtrl.text != _passwordCtrl.text)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Text('Passwords do not match', style: TextStyle(color: Colors.red.shade400, fontWeight: FontWeight.w600)),
-                                ),
-
-                              const SizedBox(height: 18),
-
-                              // playful gender selector
-                              _genderSelector(),
-
-                              const SizedBox(height: 18),
-
-                              // terms / checkbox simplified
-                              Row(
-                                children: [
-                                  Checkbox(value: true, onChanged: (_) {}),
-                                  Expanded(child: Text('I agree to Terms & Privacy', style: TextStyle(color: Colors.black54))),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-
-                              // CTA
-                              SizedBox(
-                                height: 56,
-                                child: ElevatedButton(
-                                  onPressed: _submit,
-                                  style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                    padding: EdgeInsets.zero,
-                                  ),
-                                  child: Ink(
-                                    decoration: const BoxDecoration(
-                                      gradient: LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
-                                      borderRadius: BorderRadius.all(Radius.circular(14)),
-                                    ),
-                                    child: Center(
-                                      child: Shimmer.fromColors(
-                                        baseColor: Colors.white,
-                                        highlightColor: Colors.white70,
-                                        child: const Text('CREATE ACCOUNT', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.6)),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 26),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+  // ---------------- Small helper to render input fields cleanly ----------------
+  Widget _inputField({required TextEditingController controller, required String hint, IconData? icon, TextInputType? keyboardType, bool obscure = false}) {
+    final focused = FocusScope.of(context).focusedChild == null ? false : false;
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscure,
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: icon != null ? Icon(icon, color: Colors.pink.shade300) : null,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
       ),
     );
   }
