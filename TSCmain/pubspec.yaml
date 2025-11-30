@@ -15,6 +15,7 @@ dependencies:
   country_picker: ^2.0.21
   shimmer: ^3.0.0
   country_icons: ^2.0.2
+  shared_preferences: ^2.2.2
 
   cupertino_icons: ^1.0.8
 
