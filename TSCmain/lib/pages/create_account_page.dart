@@ -1,6 +1,5 @@
 // create_account_page.dart
-// FINAL VERSION — BLACK BORDERS, ANIMATED GENDER PILLS, DOB FULL WIDTH
-// ------------------------------------------------------------------------------
+// FINAL VERSION — Animated Gender Pills, Black Borders, No Crashes
 
 import 'dart:io';
 import 'dart:math' as math;
@@ -50,7 +49,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
   Color _strengthColor = Colors.transparent;
 
-  // Tilt
+  // Tilt effect
   double _tiltX = 0;
   double _tiltY = 0;
 
@@ -292,7 +291,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // --------------------------------------------------------------------------
-  // NEW — Animated Gender Pills (Aesthetic)
+  // FINAL — Animated Gender Pills (SAFE, NO CRASH)
   // --------------------------------------------------------------------------
   Widget _genderSelector() {
     return Column(
@@ -305,18 +304,18 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         Wrap(
           spacing: 12,
           runSpacing: 12,
-          children: List.generate(_genderOptions.length, (i) {
-            final g = _genderOptions[i];
-            final bool selected = (g == _selectedGender);
+          children: _genderOptions.map((g) {
+            final bool selected = (_selectedGender == g);
 
             return GestureDetector(
-              onTap: () {
-                setState(() => _selectedGender = g);
-              },
+              onTap: () => setState(() => _selectedGender = g),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeOutBack,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+
+                // FIX: Shadow list always length 1 (no crash)
                 decoration: BoxDecoration(
                   color: selected ? Colors.pink.shade50 : Colors.white,
                   borderRadius: BorderRadius.circular(999),
@@ -324,18 +323,19 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     color: selected ? Colors.pink.shade400 : Colors.black87,
                     width: 1.0,
                   ),
-                  boxShadow: selected
-                      ? [
-                          BoxShadow(
-                              color: Colors.pink.shade100,
-                              blurRadius: 12,
-                              offset: const Offset(0, 4))
-                        ]
-                      : [],
+                  boxShadow: [
+                    BoxShadow(
+                      color: selected
+                          ? Colors.pink.shade100
+                          : Colors.transparent,
+                      blurRadius: selected ? 12 : 0,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
                 ),
 
                 child: AnimatedScale(
-                  scale: selected ? 1.08 : 1.0,
+                  scale: selected ? 1.06 : 1.0,
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeOutBack,
                   child: Text(
@@ -348,7 +348,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 ),
               ),
             );
-          }),
+          }).toList(),
         ),
 
         if (_selectedGender == null && _attemptSubmit)
@@ -595,12 +595,12 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         ],
                       ),
 
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 20),
 
-                      // NEW — Gender Selector (BOTTOM)
+                      // GENDER AT THE BOTTOM — Animated pills
                       _genderSelector(),
 
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 20),
 
                       // Terms
                       Row(
