@@ -284,10 +284,10 @@ class _LoginPageState extends State<LoginPage>
                 child: IgnorePointer(
                   child: Stack(
                     children: [
-                      _orb(0.12, 0.18, 90, Colors.pinkAccent.withOpacity(0.15)),
-                      _orb(0.78, 0.12, 110, Colors.purpleAccent.withOpacity(0.18)),
-                      _orb(0.30, 0.70, 150, Colors.pink.withOpacity(0.12)),
-                      _orb(0.65, 0.55, 100, Colors.purple.withOpacity(0.14)),
+                      _orb(0.12, 0.18, 90, Colors.pinkAccent.withValues(alpha: 0.15)),
+                      _orb(0.78, 0.12, 110, Colors.purpleAccent.withValues(alpha: 0.18)),
+                      _orb(0.30, 0.70, 150, Colors.pink.withValues(alpha: 0.12)),
+                      _orb(0.65, 0.55, 100, Colors.purple.withValues(alpha: 0.14)),
                     ],
                   ),
                 ),
@@ -351,7 +351,7 @@ class _LoginPageState extends State<LoginPage>
             color: Colors.pink.shade700,
             shadows: [
               Shadow(
-                color: Colors.pink.shade200.withOpacity(0.35),
+                color: Colors.pink.shade200.withValues(alpha: 0.35),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               )
@@ -377,12 +377,12 @@ class _LoginPageState extends State<LoginPage>
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.65),
+        color: Colors.white.withValues(alpha: 0.65),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withOpacity(0.15)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 25,
             offset: const Offset(0, 14),
           ),
@@ -467,7 +467,7 @@ class _LoginPageState extends State<LoginPage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 14,
             offset: const Offset(0, 7),
           )
@@ -523,7 +523,7 @@ class _LoginPageState extends State<LoginPage>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.pinkAccent.withOpacity(0.28),
+                  color: Colors.pinkAccent.withValues(alpha: 0.28),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 )
@@ -600,7 +600,7 @@ class _WavesPainter extends CustomPainter {
     final paint = Paint()..shader = base.createShader(rect);
     canvas.drawRect(rect, paint);
 
-    Path _wave(double yOffset, double amp, double speed, double stretch) {
+    Path wave(double yOffset, double amp, double speed, double stretch) {
       final path = Path();
       path.moveTo(0, size.height);
 
@@ -616,36 +616,36 @@ class _WavesPainter extends CustomPainter {
     }
 
     canvas.drawPath(
-      _wave(size.height * 0.78, 22, 1.0, 1.0),
+      wave(size.height * 0.78, 22, 1.0, 1.0),
       Paint()
         ..shader = fg.LinearGradient(
           colors: [
-            const Color(0xFFFFC9E6).withOpacity(0.95),
-            const Color(0xFFFFF0FB).withOpacity(0.7),
+            const Color(0xFFFFC9E6).withValues(alpha: 0.95),
+            const Color(0xFFFFF0FB).withValues(alpha: 0.7),
           ],
         ).createShader(rect)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14),
     );
 
     canvas.drawPath(
-      _wave(size.height * 0.86, 30, 0.6, 1.3),
+      wave(size.height * 0.86, 30, 0.6, 1.3),
       Paint()
         ..shader = fg.LinearGradient(
           colors: [
-            const Color(0xFFDFB7FF).withOpacity(0.9),
-            const Color(0xFFFDEBFF).withOpacity(0.65),
+            const Color(0xFFDFB7FF).withValues(alpha: 0.9),
+            const Color(0xFFFDEBFF).withValues(alpha: 0.65),
           ],
         ).createShader(rect)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20),
     );
 
     canvas.drawPath(
-      _wave(size.height * 0.92, 16, 1.3, 0.8),
+      wave(size.height * 0.92, 16, 1.3, 0.8),
       Paint()
         ..shader = fg.LinearGradient(
           colors: [
-            const Color(0xFFFFF5F9).withOpacity(0.55),
-            const Color(0xFFFAF0FF).withOpacity(0.45),
+            const Color(0xFFFFF5F9).withValues(alpha: 0.55),
+            const Color(0xFFFAF0FF).withValues(alpha: 0.45),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
