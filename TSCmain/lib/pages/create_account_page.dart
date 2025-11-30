@@ -1,3 +1,9 @@
+// Add these to pubspec.yaml:
+// image_picker: ^1.0.7
+// country_picker: ^2.0.21
+// shimmer: ^3.0.0
+// country_icons: ^2.0.2
+
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -22,29 +28,22 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   final TextEditingController _confirmCtrl = TextEditingController();
   final TextEditingController _dobCtrl = TextEditingController();
 
-  // scroll controller for jump-to-error
   final ScrollController _scrollController = ScrollController();
 
-  // image picker
   File? _image;
-  final _picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker();
 
-  // gender slider (G1)
-  int _genderIndex = 0; // 0=male, 1=female, 2=other
+  int _genderIndex = 0;
   final List<String> _genders = ["Male", "Female", "Other"];
 
-  // country
   late Country _country;
 
-  // tilt
   double _tiltX = 0;
   double _tiltY = 0;
 
-  // show password or not
   bool _showPass = false;
   bool _showConfirmPass = false;
 
-  // password strength dot
   Color _strengthDot = Colors.red;
 
   @override
@@ -142,9 +141,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     if (numbers.length <= 3) return numbers;
     if (numbers.length <= 7) return "${numbers.substring(0, 3)} ${numbers.substring(3)}";
     if (numbers.length <= 10) {
-      return "${numbers.substring(0, 3)} "
-          "${numbers.substring(3, 6)} "
-          "${numbers.substring(6)}";
+      return "${numbers.substring(0, 3)} ${numbers.substring(3, 6)} ${numbers.substring(6)}";
     }
     return numbers;
   }
@@ -161,8 +158,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       lastDate: DateTime(now.year - 10),
       builder: (_, child) => Theme(
         data: ThemeData(
-            colorScheme:
-                ColorScheme.light(primary: Colors.pink.shade300)),
+            colorScheme: ColorScheme.light(primary: Colors.pink.shade300)),
         child: child!,
       ),
     );
@@ -192,7 +188,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       ),
       child: Stack(
         children: [
-          // PINK SLIDING PILL
           AnimatedAlign(
             duration: const Duration(milliseconds: 300),
             alignment: [
@@ -212,7 +207,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
             ),
           ),
-          // LABELS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(
@@ -226,9 +220,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       _genders[i],
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: _genderIndex == i
-                            ? Colors.white
-                            : Colors.black87,
+                        color: _genderIndex == i ? Colors.white : Colors.black87,
                       ),
                     ),
                   ),
@@ -242,14 +234,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   // ---------------------------------------------------------
-  // FIELD
+  // FIELD DECOR
   // ---------------------------------------------------------
   InputDecoration _dec(String hint) => InputDecoration(
         hintText: hint,
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -257,39 +248,21 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       );
 
   // ---------------------------------------------------------
-  // SUBMIT + SCROLL TO ERROR
+  // SUBMIT
   // ---------------------------------------------------------
   void _submit() {
-    if (_firstCtrl.text.trim().isEmpty) {
-      _scrollTo(_firstCtrl);
-      return;
-    }
-    if (_emailCtrl.text.trim().isEmpty) {
-      _scrollTo(_emailCtrl);
-      return;
-    }
-    if (_passwordCtrl.text.length < 6) {
-      _scrollTo(_passwordCtrl);
-      return;
-    }
-    if (_confirmCtrl.text != _passwordCtrl.text) {
-      _scrollTo(_confirmCtrl);
-      return;
-    }
+    if (_firstCtrl.text.isEmpty) return _scrollToError();
+    if (_emailCtrl.text.isEmpty) return _scrollToError();
+    if (_passwordCtrl.text.length < 6) return _scrollToError();
+    if (_confirmCtrl.text != _passwordCtrl.text) return _scrollToError();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Account created (demo)"),
-      ),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Account created (demo).")));
   }
 
-  void _scrollTo(TextEditingController ctrl) {
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
+  void _scrollToError() {
+    _scrollController.animateTo(0,
+        duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
   }
 
   // ---------------------------------------------------------
@@ -300,10 +273,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     return Listener(
       onPointerMove: (e) {
         final size = MediaQuery.of(context).size;
-        final center = Offset(size.width / 2, size.height / 2);
+        final c = Offset(size.width / 2, size.height / 2);
         setState(() {
-          _tiltY = ((e.position.dx - center.dx) / center.dx) * 4;
-          _tiltX = ((center.dy - e.position.dy) / center.dy) * 4;
+          _tiltY = ((e.position.dx - c.dx) / c.dx) * 4;
+          _tiltX = ((c.dy - e.position.dy) / c.dy) * 4;
         });
       },
       onPointerUp: (_) => setState(() {
@@ -312,8 +285,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       }),
       child: Scaffold(
         backgroundColor: const Color(0xFFFCEEEE),
-
-        // ---------------- TOP BAR ----------------
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
@@ -323,21 +294,18 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               margin: const EdgeInsets.all(8),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(.7),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: const [
-                  BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 8,
-                      offset: Offset(0, 4))
-                ],
-              ),
-              child: const Icon(Icons.arrow_back_ios_new,
-                  size: 18, color: Colors.black),
+                  color: Colors.white.withOpacity(.7),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: const [
+                    BoxShadow(
+                        color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))
+                  ]),
+              child: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.black),
             ),
           ),
         ),
 
+        // ------------------ BODY ------------------
         body: SingleChildScrollView(
           controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -350,7 +318,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ---------- TITLE ----------
                 const Text(
                   "Create your account",
                   style: TextStyle(
@@ -358,31 +325,25 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       fontWeight: FontWeight.w900,
                       color: Colors.pinkAccent),
                 ),
-
                 const SizedBox(height: 6),
 
-                // LOGIN BELOW TITLE
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: const Text(
                     "Already registered? Log in",
                     style: TextStyle(
-                        color: Colors.redAccent,
-                        fontWeight: FontWeight.w600),
+                        color: Colors.redAccent, fontWeight: FontWeight.w600),
                   ),
                 ),
 
                 const SizedBox(height: 18),
-
-                Text(
-                  "Earn rewards, personalized outfits and more.",
-                  style:
-                      TextStyle(color: Colors.black54, fontSize: 14),
-                ),
-
+                Text("Earn rewards, personalized outfits and more.",
+                    style: TextStyle(fontSize: 14, color: Colors.black54)),
                 const SizedBox(height: 25),
 
-                // ---------- CARD ----------
+                // -----------------------------------------------------------------
+                // CARD
+                // -----------------------------------------------------------------
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -390,8 +351,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                          color:
-                              Colors.pinkAccent.withOpacity(0.15),
+                          color: Colors.pinkAccent.withOpacity(0.15),
                           blurRadius: 25,
                           offset: const Offset(0, 12))
                     ],
@@ -399,53 +359,45 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   child: Column(
                     children: [
                       // AVATAR
-                      Center(
-                        child: GestureDetector(
-                          onTap: _imageSheet,
-                          child: Container(
-                            width: 110,
-                            height: 110,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.pink.shade50,
-                              border:
-                                  Border.all(color: Colors.white, width: 4),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.pink
-                                        .withOpacity(0.25),
-                                    blurRadius: 22,
-                                    offset: const Offset(0, 10))
-                              ],
-                            ),
-                            child: ClipOval(
-                              child: _image == null
-                                  ? Icon(Icons.camera_alt,
-                                      size: 40,
-                                      color: Colors.pink.shade300)
-                                  : Image.file(_image!,
-                                      fit: BoxFit.cover),
-                            ),
+                      GestureDetector(
+                        onTap: _imageSheet,
+                        child: Container(
+                          width: 110,
+                          height: 110,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.pink.shade50,
+                            border: Border.all(color: Colors.white, width: 4),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.pink.withOpacity(0.25),
+                                  blurRadius: 22,
+                                  offset: const Offset(0, 10))
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: _image == null
+                                ? Icon(Icons.camera_alt,
+                                    size: 40, color: Colors.pink.shade300)
+                                : Image.file(_image!, fit: BoxFit.cover),
                           ),
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
-                      // FIRST + LAST NAME
+                      // FIRST / LAST NAME
                       Row(
                         children: [
                           Expanded(
                               child: TextField(
                                   controller: _firstCtrl,
-                                  decoration:
-                                      _dec("First name"))),
+                                  decoration: _dec("First name"))),
                           const SizedBox(width: 12),
                           Expanded(
                               child: TextField(
                                   controller: _lastCtrl,
-                                  decoration:
-                                      _dec("Last name"))),
+                                  decoration: _dec("Last name"))),
                         ],
                       ),
 
@@ -453,44 +405,51 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
                       // EMAIL
                       TextField(
-                          controller: _emailCtrl,
-                          keyboardType:
-                              TextInputType.emailAddress,
-                          decoration: _dec("Email address")),
+                        controller: _emailCtrl,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: _dec("Email address"),
+                      ),
 
                       const SizedBox(height: 12),
 
-                      // PHONE
+                      // PHONE + COUNTRY
                       Row(
                         children: [
                           GestureDetector(
                             onTap: () => showCountryPicker(
                               context: context,
-                              onSelect: (c) =>
-                                  setState(() => _country = c),
                               showPhoneCode: true,
+                              onSelect: (c) => setState(() => _country = c),
                             ),
                             child: Container(
-                              padding:
-                                  const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 14),
                               decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.circular(14),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
                                     color: Colors.grey.shade300),
-                                color: Colors.white,
                               ),
                               child: Row(
                                 children: [
-                                  Text(
-                                      "+${_country.phoneCode}",
+                                  Text("+${_country.phoneCode}",
                                       style: const TextStyle(
-                                          fontWeight:
-                                              FontWeight.w700)),
-                                  const Icon(Icons
-                                      .keyboard_arrow_down)
+                                          fontWeight: FontWeight.w600)),
+                                  const SizedBox(width: 6),
+                                  
+                                  // ------------------------------
+                                  // FIXED WORKING FLAG
+                                  // ------------------------------
+                                  SizedBox(
+                                    width: 24,
+                                    child: Image.asset(
+                                      "packages/country_icons/icons/flags/png/${_country.countryCode.toLowerCase()}.png",
+                                      errorBuilder: (_, __, ___) =>
+                                          const SizedBox.shrink(),
+                                    ),
+                                  ),
+
+                                  const Icon(Icons.arrow_drop_down),
                                 ],
                               ),
                             ),
@@ -500,11 +459,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                             child: TextField(
                               controller: _phoneCtrl,
                               keyboardType: TextInputType.phone,
-                              onChanged: (txt) => setState(() =>
-                                  _phoneCtrl.text =
-                                      _formatPhone(txt)),
-                              decoration:
-                                  _dec("Phone number"),
+                              onChanged: (txt) =>
+                                  _phoneCtrl.text = _formatPhone(txt),
+                              decoration: _dec("Phone number"),
                             ),
                           ),
                         ],
@@ -535,11 +492,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                             decoration: _dec("Password"),
                           ),
                           Positioned(
-                            right: 10,
+                            right: 12,
                             child: GestureDetector(
                               onTap: () =>
-                                  setState(() => _showPass =
-                                      !_showPass),
+                                  setState(() => _showPass = !_showPass),
                               child: Icon(
                                 _showPass
                                     ? Icons.visibility
@@ -549,15 +505,16 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                             ),
                           ),
                           Positioned(
-                              right: 50,
-                              child: Container(
-                                width: 12,
-                                height: 12,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: _strengthDot,
-                                ),
-                              ))
+                            right: 55,
+                            child: Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _strengthDot,
+                              ),
+                            ),
+                          )
                         ],
                       ),
 
@@ -570,15 +527,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                           TextField(
                             controller: _confirmCtrl,
                             obscureText: !_showConfirmPass,
-                            decoration:
-                                _dec("Re-enter password"),
+                            decoration: _dec("Re-enter password"),
                           ),
                           Positioned(
-                            right: 10,
+                            right: 12,
                             child: GestureDetector(
-                              onTap: () => setState(() =>
-                                  _showConfirmPass =
-                                      !_showConfirmPass),
+                              onTap: () => setState(
+                                  () => _showConfirmPass = !_showConfirmPass),
                               child: Icon(
                                 _showConfirmPass
                                     ? Icons.visibility
@@ -591,11 +546,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       ),
 
                       if (_confirmCtrl.text.isNotEmpty &&
-                          _confirmCtrl.text !=
-                              _passwordCtrl.text)
+                          _confirmCtrl.text != _passwordCtrl.text)
                         Padding(
-                          padding:
-                              const EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.only(top: 6),
                           child: Text(
                             "Passwords do not match",
                             style: TextStyle(
@@ -606,53 +559,43 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
                       const SizedBox(height: 20),
 
-                      // GENDER SLIDER (G1)
+                      // GENDER SWITCH
                       _genderSlider(),
 
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 25),
 
-                      // CREATE ACCOUNT BUTTON
                       GestureDetector(
                         onTap: _submit,
                         child: Container(
                           height: 55,
                           decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(14),
                             gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFFFF6FAF),
-                                Color(0xFFB97BFF)
-                              ],
+                              colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)],
                             ),
                             boxShadow: [
                               BoxShadow(
-                                  color: Colors.pinkAccent
-                                      .withOpacity(0.35),
+                                  color:
+                                      Colors.pinkAccent.withOpacity(0.35),
                                   blurRadius: 22,
-                                  offset: Offset(0, 10))
+                                  offset: const Offset(0, 10))
                             ],
                           ),
                           child: Shimmer.fromColors(
                             baseColor: Colors.white,
-                            highlightColor:
-                                Colors.white70,
+                            highlightColor: Colors.white70,
                             child: const Center(
                               child: Text(
                                 "CREATE ACCOUNT",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
-                                    fontWeight:
-                                        FontWeight.w900,
-                                    letterSpacing: 1),
+                                    fontWeight: FontWeight.w900),
                               ),
                             ),
                           ),
                         ),
                       ),
-
-                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
