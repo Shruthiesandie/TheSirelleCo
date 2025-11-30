@@ -1,6 +1,3 @@
-// create_account_page.dart
-// FINAL VERSION — Animated Pulse Glow Gender Pills (Crash-Proof) + Password Fixes
-
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -67,7 +64,6 @@ class _CreateAccountPageState extends State<CreateAccountPage>
 
     _passwordCtrl.addListener(_updateStrength);
     _confirmCtrl.addListener(() => setState(() {}));
-
     _phoneCtrl.addListener(_phoneFormatListener);
 
     // Pulse Glow Animation
@@ -166,7 +162,6 @@ class _CreateAccountPageState extends State<CreateAccountPage>
           "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
-
   // --------------------------------------------------------------------------
   // Phone Formatting
   // --------------------------------------------------------------------------
@@ -178,6 +173,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
 
     final raw = _phoneCtrl.text.replaceAll(RegExp(r'\D'), '');
     String f;
+
     if (raw.length <= 3)
       f = raw;
     else if (raw.length <= 6)
@@ -187,8 +183,10 @@ class _CreateAccountPageState extends State<CreateAccountPage>
     else
       f = raw;
 
-    _phoneCtrl.value =
-        TextEditingValue(text: f, selection: TextSelection.collapsed(offset: f.length));
+    _phoneCtrl.value = TextEditingValue(
+      text: f,
+      selection: TextSelection.collapsed(offset: f.length),
+    );
 
     _phoneFormatting = false;
   }
@@ -212,15 +210,18 @@ class _CreateAccountPageState extends State<CreateAccountPage>
   }
 
   // --------------------------------------------------------------------------
-  // Error & Submit
+  // Errors & Submit
   // --------------------------------------------------------------------------
   void _err(String msg) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 
   void _scrollTo(GlobalKey key) async {
     if (key.currentContext == null) return;
-    await Scrollable.ensureVisible(key.currentContext!,
-        duration: const Duration(milliseconds: 350), curve: Curves.easeOut);
+    await Scrollable.ensureVisible(
+      key.currentContext!,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOut,
+    );
   }
 
   void _submit() {
@@ -245,7 +246,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
       return _err("Please select gender");
     }
     if (!_agree) {
-      return _err("Please accept terms");
+      return _err("Please accept the terms");
     }
 
     _err("Account created!");
@@ -292,34 +293,34 @@ class _CreateAccountPageState extends State<CreateAccountPage>
         keyboardType: type,
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon:
-              icon != null ? Icon(icon, color: Colors.pink.shade300) : null,
+          prefixIcon: icon != null ? Icon(icon, color: Colors.pink.shade300) : null,
           filled: true,
           fillColor: Colors.white,
-          enabledBorder:
-              OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: _blackBorder),
-          focusedBorder:
-              OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: _blackBorder),
-          suffixIcon: (hint == "Password")
-              ? _passwordStrengthDot()
-              : null,
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14), borderSide: _blackBorder),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14), borderSide: _blackBorder),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
   }
 
-  Widget _passwordStrengthDot() {
+  // SMALL 10px PASSWORD STRENGTH DOT (now left of eye icon)
+  Widget _strengthDot() {
     return Container(
-      width: 16,
-      height: 16,
-      margin: const EdgeInsets.only(right: 10),
-      decoration:
-          BoxDecoration(color: _strengthColor, shape: BoxShape.circle),
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(
+        color: _strengthColor,
+        shape: BoxShape.circle,
+      ),
     );
   }
 
   // --------------------------------------------------------------------------
-  // Animated Pulse Glow Gender Selector (Crash-Proof)
+  // Animated Pulse Glow Gender Selector (3 Pills)
   // --------------------------------------------------------------------------
   Widget _genderSelector() {
     return Column(
@@ -333,7 +334,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
           spacing: 12,
           runSpacing: 12,
           children: _genderOptions.map((g) {
-            final bool selected = (_selectedGender == g);
+            final selected = (_selectedGender == g);
 
             return GestureDetector(
               onTap: () => setState(() {
@@ -343,7 +344,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Animated Glow Behind Pill
+                  // Pink pulse glow when selected
                   if (selected)
                     AnimatedBuilder(
                       animation: _glowCtrl,
@@ -353,10 +354,10 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                           child: Opacity(
                             opacity: _glowOpacity.value,
                             child: Container(
-                              width: 120,
+                              width: 110,
                               height: 44,
                               decoration: BoxDecoration(
-                                color: Colors.pinkAccent.withOpacity(0.4),
+                                color: Colors.pinkAccent.withOpacity(0.35),
                                 borderRadius: BorderRadius.circular(999),
                               ),
                             ),
@@ -365,32 +366,32 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                       },
                     ),
 
-                  // Actual pill
+                  // Main pill
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 260),
                     curve: Curves.easeOutBack,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 22, vertical: 12),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
                     decoration: BoxDecoration(
                       color: selected ? Colors.pink.shade50 : Colors.white,
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                          color:
-                              selected ? Colors.pink.shade400 : Colors.black87,
-                          width: 1.0),
+                        color: selected
+                            ? Colors.pink.shade400
+                            : Colors.black87,
+                        width: 1.0,
+                      ),
                     ),
                     child: AnimatedScale(
                       scale: selected ? 1.06 : 1.0,
                       duration: const Duration(milliseconds: 260),
-                      curve: Curves.easeOutBack,
                       child: Text(
                         g,
                         style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: selected
-                              ? Colors.pink.shade600
-                              : Colors.black87,
-                        ),
+                            fontWeight: FontWeight.w700,
+                            color: selected
+                                ? Colors.pink.shade600
+                                : Colors.black87),
                       ),
                     ),
                   ),
@@ -403,15 +404,14 @@ class _CreateAccountPageState extends State<CreateAccountPage>
         if (_selectedGender == null && _attemptSubmit)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text("Please select a gender",
+            child: Text("Please select gender",
                 style: TextStyle(color: Colors.red.shade400)),
           ),
       ],
     );
   }
-
   // --------------------------------------------------------------------------
-  // Build UI
+  // FULL UI BUILD
   // --------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
@@ -429,14 +429,15 @@ class _CreateAccountPageState extends State<CreateAccountPage>
             child: Container(
               margin: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: const [
-                    BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 8,
-                        offset: Offset(0, 4))
-                  ]),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: const [
+                  BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: Offset(0, 4))
+                ],
+              ),
               child: const Icon(Icons.arrow_back_ios_new,
                   size: 18, color: Colors.black87),
             ),
@@ -467,17 +468,20 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                     style: TextStyle(
                         color: Colors.pink.shade400,
                         fontWeight: FontWeight.w700)),
-                const SizedBox(height: 20),
+                const SizedBox(height: 22),
 
-                // CARD
+                // MAIN CARD
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18)),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
                   child: Column(
                     children: [
-                      // Avatar
+                      // ------------------------------------------------------------------
+                      // AVATAR
+                      // ------------------------------------------------------------------
                       Row(
                         children: [
                           GestureDetector(
@@ -487,32 +491,39 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                               height: 96,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                gradient: LinearGradient(colors: [
-                                  Colors.pink.shade50,
-                                  Colors.purple.shade50
-                                ]),
-                                border:
-                                    Border.all(color: Colors.white, width: 4),
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.pink.shade50,
+                                    Colors.purple.shade50,
+                                  ],
+                                ),
+                                border: Border.all(
+                                    color: Colors.white, width: 4),
                               ),
                               child: ClipOval(
                                 child: _avatar == null
                                     ? Icon(Icons.camera_alt_outlined,
                                         size: 34,
                                         color: Colors.pink.shade300)
-                                    : Image.file(_avatar!, fit: BoxFit.cover),
+                                    : Image.file(_avatar!,
+                                        fit: BoxFit.cover),
                               ),
                             ),
                           ),
                           const SizedBox(width: 14),
                           const Text("Upload profile photo",
                               style: TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 14))
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              )),
                         ],
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 22),
 
-                      // Row 1
+                      // ------------------------------------------------------------------
+                      // FIRST + LAST NAME
+                      // ------------------------------------------------------------------
                       Row(
                         children: [
                           Expanded(
@@ -530,9 +541,11 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                         ],
                       ),
 
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
 
-                      // Email
+                      // ------------------------------------------------------------------
+                      // EMAIL
+                      // ------------------------------------------------------------------
                       Container(
                         key: _emailKey,
                         child: _input("Email", _emailCtrl,
@@ -540,9 +553,11 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                             type: TextInputType.emailAddress),
                       ),
 
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
 
-                      // Row: Country + Phone
+                      // ------------------------------------------------------------------
+                      // COUNTRY + PHONE
+                      // ------------------------------------------------------------------
                       Row(
                         children: [
                           GestureDetector(
@@ -550,13 +565,13 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                             child: Container(
                               height: 52,
                               width: 110,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(14),
-                                border:
-                                    Border.all(color: Colors.black87, width: 1),
+                                border: Border.all(
+                                    color: Colors.black87, width: 1),
                               ),
                               child: Row(
                                 children: [
@@ -564,9 +579,10 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w700,
                                           color: Colors.black87)),
-                                  const SizedBox(width: 10),
+                                  const SizedBox(width: 8),
                                   Text(_country.flagEmoji,
-                                      style: const TextStyle(fontSize: 18)),
+                                      style:
+                                          const TextStyle(fontSize: 18)),
                                   const Spacer(),
                                   const Icon(Icons.keyboard_arrow_down,
                                       color: Colors.black87),
@@ -576,26 +592,34 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                              child: _input("Phone number", _phoneCtrl,
-                                  icon: Icons.phone,
-                                  type: TextInputType.phone)),
+                            child: _input("Phone number", _phoneCtrl,
+                                icon: Icons.phone,
+                                type: TextInputType.phone),
+                          ),
                         ],
                       ),
 
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
 
-                      // DOB
+                      // ------------------------------------------------------------------
+                      // DOB (Single row)
+                      // ------------------------------------------------------------------
                       GestureDetector(
                         onTap: _pickDOB,
                         child: AbsorbPointer(
                           child: _input(
-                              "DOB (YYYY-MM-DD)", _dobCtrl, icon: Icons.cake),
+                            "DOB (YYYY-MM-DD)",
+                            _dobCtrl,
+                            icon: Icons.cake,
+                          ),
                         ),
                       ),
 
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
 
-                      // Password
+                      // ------------------------------------------------------------------
+                      // PASSWORD
+                      // ------------------------------------------------------------------
                       Container(
                         key: _passwordKey,
                         child: Stack(
@@ -603,36 +627,47 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                           children: [
                             _input("Password", _passwordCtrl,
                                 icon: Icons.lock, obscure: _obscure),
+
+                            // strength dot + eye icon
                             Positioned(
                               right: 12,
-                              child: GestureDetector(
-                                onTap: () =>
-                                    setState(() => _obscure = !_obscure),
-                                child: Icon(
-                                  _obscure
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: Colors.black87,
-                                ),
+                              child: Row(
+                                children: [
+                                  _strengthDot(),
+                                  const SizedBox(width: 10),
+                                  GestureDetector(
+                                    onTap: () =>
+                                        setState(() => _obscure = !_obscure),
+                                    child: Icon(
+                                      _obscure
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            )
+                            ),
                           ],
                         ),
                       ),
 
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
 
-                      // Confirm Password
+                      // ------------------------------------------------------------------
+                      // CONFIRM PASSWORD
+                      // ------------------------------------------------------------------
                       Stack(
                         alignment: Alignment.centerRight,
                         children: [
                           _input("Re-enter password", _confirmCtrl,
-                              icon: Icons.lock, obscure: _obscureConfirm),
+                              icon: Icons.lock,
+                              obscure: _obscureConfirm),
                           Positioned(
                             right: 12,
                             child: GestureDetector(
-                              onTap: () => setState(
-                                  () => _obscureConfirm = !_obscureConfirm),
+                              onTap: () => setState(() =>
+                                  _obscureConfirm = !_obscureConfirm),
                               child: Icon(
                                 _obscureConfirm
                                     ? Icons.visibility_off
@@ -647,24 +682,31 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                       if (_confirmCtrl.text.isNotEmpty &&
                           _confirmCtrl.text != _passwordCtrl.text)
                         Padding(
-                          padding: const EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.only(top: 6),
                           child: Align(
                             alignment: Alignment.centerLeft,
-                            child: Text("Passwords do not match",
-                                style: TextStyle(
-                                    color: Colors.red.shade400,
-                                    fontWeight: FontWeight.w600)),
+                            child: Text(
+                              "Passwords do not match",
+                              style: TextStyle(
+                                color: Colors.red.shade400,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 22),
 
-                      // Gender Pills (With Pulse Glow)
+                      // ------------------------------------------------------------------
+                      // GENDER (NOW AT BOTTOM)
+                      // ------------------------------------------------------------------
                       _genderSelector(),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 22),
 
-                      // Terms
+                      // ------------------------------------------------------------------
+                      // TERMS CHECKBOX
+                      // ------------------------------------------------------------------
                       Row(
                         children: [
                           Checkbox(
@@ -673,14 +715,16 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                                 setState(() => _agree = v ?? false),
                           ),
                           const Expanded(
-                              child: Text(
-                                  "I agree to the Terms & Privacy Policy")),
+                            child: Text("I agree to the Terms & Privacy Policy"),
+                          ),
                         ],
                       ),
 
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 18),
 
-                      // Submit
+                      // ------------------------------------------------------------------
+                      // SUBMIT BUTTON
+                      // ------------------------------------------------------------------
                       GestureDetector(
                         onTap: _submit,
                         child: Container(
@@ -701,8 +745,9 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                               child: Text(
                                 "CREATE ACCOUNT",
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w900),
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                ),
                               ),
                             ),
                           ),
@@ -712,15 +757,18 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                   ),
                 ),
 
-                const SizedBox(height: 26),
+                const SizedBox(height: 28),
 
+                // FOOTER
                 Center(
                   child: TextButton(
                     onPressed: () {},
-                    child: Text("Contact support",
-                        style: TextStyle(color: Colors.pink.shade400)),
+                    child: Text(
+                      "Contact support",
+                      style: TextStyle(color: Colors.pink.shade400),
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),
