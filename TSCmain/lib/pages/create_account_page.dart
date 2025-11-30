@@ -92,9 +92,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
     super.dispose();
   }
 
-  // --------------------------------------------------------------------------
   // Avatar Picker
-  // --------------------------------------------------------------------------
   Future<void> _pickAvatar(ImageSource src) async {
     final picked = await _picker.pickImage(source: src, imageQuality: 85);
     if (picked != null) setState(() => _avatar = File(picked.path));
@@ -135,9 +133,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
     );
   }
 
-  // --------------------------------------------------------------------------
   // Country Picker
-  // --------------------------------------------------------------------------
   void _openCountryPicker() {
     showCountryPicker(
       context: context,
@@ -146,9 +142,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
     );
   }
 
-  // --------------------------------------------------------------------------
   // DOB Picker
-  // --------------------------------------------------------------------------
   Future<void> _pickDOB() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -162,9 +156,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
           "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
-  // --------------------------------------------------------------------------
-  // Phone Formatting
-  // --------------------------------------------------------------------------
+
   bool _phoneFormatting = false;
 
   void _phoneFormatListener() {
@@ -191,9 +183,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
     _phoneFormatting = false;
   }
 
-  // --------------------------------------------------------------------------
   // Password Strength
-  // --------------------------------------------------------------------------
   void _updateStrength() {
     final p = _passwordCtrl.text;
 
@@ -209,9 +199,6 @@ class _CreateAccountPageState extends State<CreateAccountPage>
     setState(() {});
   }
 
-  // --------------------------------------------------------------------------
-  // Errors & Submit
-  // --------------------------------------------------------------------------
   void _err(String msg) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 
@@ -252,9 +239,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
     _err("Account created!");
   }
 
-  // --------------------------------------------------------------------------
   // Tilt Effect
-  // --------------------------------------------------------------------------
   void _onPointerMove(PointerEvent e) {
     final size = MediaQuery.of(context).size;
     final c = Offset(size.width / 2, size.height / 2);
@@ -272,9 +257,6 @@ class _CreateAccountPageState extends State<CreateAccountPage>
         _tiltY = 0;
       });
 
-  // --------------------------------------------------------------------------
-  // Black Border Input Builder
-  // --------------------------------------------------------------------------
   final BorderSide _blackBorder =
       const BorderSide(color: Colors.black87, width: 1.0);
 
@@ -293,20 +275,20 @@ class _CreateAccountPageState extends State<CreateAccountPage>
         keyboardType: type,
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon: icon != null ? Icon(icon, color: Colors.pink.shade300) : null,
+          prefixIcon:
+              icon != null ? Icon(icon, color: Colors.pink.shade300) : null,
           filled: true,
           fillColor: Colors.white,
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14), borderSide: _blackBorder),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14), borderSide: _blackBorder),
+          enabledBorder:
+              OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: _blackBorder),
+          focusedBorder:
+              OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: _blackBorder),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
   }
-
   // SMALL 10px PASSWORD STRENGTH DOT (now left of eye icon)
   Widget _strengthDot() {
     return Container(
@@ -344,7 +326,6 @@ class _CreateAccountPageState extends State<CreateAccountPage>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Pink pulse glow when selected
                   if (selected)
                     AnimatedBuilder(
                       animation: _glowCtrl,
@@ -366,12 +347,11 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                       },
                     ),
 
-                  // Main pill
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 260),
                     curve: Curves.easeOutBack,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 22, vertical: 12),
                     decoration: BoxDecoration(
                       color: selected ? Colors.pink.shade50 : Colors.white,
                       borderRadius: BorderRadius.circular(999),
@@ -410,6 +390,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
       ],
     );
   }
+
   // --------------------------------------------------------------------------
   // FULL UI BUILD
   // --------------------------------------------------------------------------
@@ -464,10 +445,22 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                         color: Colors.pink.shade700)),
                 const SizedBox(height: 10),
 
-                Text("Already registered? Log in",
+                // ⭐ FIXED NAVIGATION HERE ⭐
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, "/login");
+                  },
+                  child: Text(
+                    "Already registered? Log in",
                     style: TextStyle(
-                        color: Colors.pink.shade400,
-                        fontWeight: FontWeight.w700)),
+                      color: Colors.pink.shade400,
+                      fontWeight: FontWeight.w700,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.pink,
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 22),
 
                 // MAIN CARD
@@ -602,7 +595,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                       const SizedBox(height: 16),
 
                       // ------------------------------------------------------------------
-                      // DOB (Single row)
+                      // DOB
                       // ------------------------------------------------------------------
                       GestureDetector(
                         onTap: _pickDOB,
@@ -627,8 +620,6 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                           children: [
                             _input("Password", _passwordCtrl,
                                 icon: Icons.lock, obscure: _obscure),
-
-                            // strength dot + eye icon
                             Positioned(
                               right: 12,
                               child: Row(
@@ -636,8 +627,8 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                                   _strengthDot(),
                                   const SizedBox(width: 10),
                                   GestureDetector(
-                                    onTap: () =>
-                                        setState(() => _obscure = !_obscure),
+                                    onTap: () => setState(
+                                        () => _obscure = !_obscure),
                                     child: Icon(
                                       _obscure
                                           ? Icons.visibility_off
@@ -647,7 +638,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                                   ),
                                 ],
                               ),
-                            ),
+                            )
                           ],
                         ),
                       ),
@@ -666,8 +657,9 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                           Positioned(
                             right: 12,
                             child: GestureDetector(
-                              onTap: () => setState(() =>
-                                  _obscureConfirm = !_obscureConfirm),
+                              onTap: () => setState(
+                                  () => _obscureConfirm =
+                                      !_obscureConfirm),
                               child: Icon(
                                 _obscureConfirm
                                     ? Icons.visibility_off
@@ -680,7 +672,8 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                       ),
 
                       if (_confirmCtrl.text.isNotEmpty &&
-                          _confirmCtrl.text != _passwordCtrl.text)
+                          _confirmCtrl.text !=
+                              _passwordCtrl.text)
                         Padding(
                           padding: const EdgeInsets.only(top: 6),
                           child: Align(
@@ -698,7 +691,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                       const SizedBox(height: 22),
 
                       // ------------------------------------------------------------------
-                      // GENDER (NOW AT BOTTOM)
+                      // GENDER
                       // ------------------------------------------------------------------
                       _genderSelector(),
 
@@ -715,7 +708,9 @@ class _CreateAccountPageState extends State<CreateAccountPage>
                                 setState(() => _agree = v ?? false),
                           ),
                           const Expanded(
-                            child: Text("I agree to the Terms & Privacy Policy"),
+                            child: Text(
+                              "I agree to the Terms & Privacy Policy",
+                            ),
                           ),
                         ],
                       ),
@@ -759,7 +754,6 @@ class _CreateAccountPageState extends State<CreateAccountPage>
 
                 const SizedBox(height: 28),
 
-                // FOOTER
                 Center(
                   child: TextButton(
                     onPressed: () {},
