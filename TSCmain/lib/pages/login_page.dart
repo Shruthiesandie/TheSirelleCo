@@ -214,7 +214,6 @@ class _LoginPageState extends State<LoginPage>
   // PARALLAX + EYE FOLLOW
   // ------------------------------------------------------------
   void _onPointerMove(Offset pos, Size size) {
-    // Parallax tilt
     final dx = (pos.dx - size.width / 2) / (size.width / 2);
     final dy = (pos.dy - size.height / 2) / (size.height / 2);
 
@@ -223,7 +222,6 @@ class _LoginPageState extends State<LoginPage>
       tiltY = dx * maxTilt;
     });
 
-    // Eye follow trigger (avoid spam)
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
     if (now - eyeTriggerCooldown < 0.25) return;
     eyeTriggerCooldown = now;
@@ -312,7 +310,7 @@ class _LoginPageState extends State<LoginPage>
                 ),
               ),
 
-              // Character (Tilt + Rive)
+              // Character
               Align(
                 alignment: Alignment.bottomCenter,
                 child: AnimatedOpacity(
@@ -327,10 +325,7 @@ class _LoginPageState extends State<LoginPage>
                       height: 260,
                       child: _artboard == null
                           ? const Center(child: CircularProgressIndicator())
-                          : Rive(
-                              artboard: _artboard!,
-                              fit: BoxFit.contain,
-                            ),
+                          : Rive(artboard: _artboard!, fit: BoxFit.contain),
                     ),
                   ),
                 ),
@@ -343,7 +338,7 @@ class _LoginPageState extends State<LoginPage>
   }
 
   // ------------------------------------------------------------
-  // HEADER TITLE
+  // HEADER
   // ------------------------------------------------------------
   Widget _header() {
     return Column(
@@ -434,6 +429,22 @@ class _LoginPageState extends State<LoginPage>
           const SizedBox(height: 28),
 
           _loginButton(),
+
+          const SizedBox(height: 12),
+
+          // ⭐ ADDED — "Create an account" button
+          TextButton(
+            onPressed: () {
+              Navigator.pushNamed(context, "/register");
+            },
+            child: const Text(
+              "Create an account",
+              style: TextStyle(
+                color: Colors.pinkAccent,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -604,7 +615,6 @@ class _WavesPainter extends CustomPainter {
       return path;
     }
 
-    // Wave layers
     canvas.drawPath(
       _wave(size.height * 0.78, 22, 1.0, 1.0),
       Paint()
@@ -648,9 +658,6 @@ class _WavesPainter extends CustomPainter {
       oldDelegate.t != t;
 }
 
-// ------------------------------------------------------------
-// END OF FILE — Hardcoded Credentials
-// ------------------------------------------------------------
 /*
 ────────────────────────────────────────────
 Hardcoded Login Credentials:
