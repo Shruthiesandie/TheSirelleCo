@@ -238,7 +238,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
       return _err("Please accept the terms");
     }
 
-    _err("Account created!");
+    Navigator.pushNamed(context, "/username");
   }
 
   // Tilt Effect
