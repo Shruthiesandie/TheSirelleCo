@@ -339,7 +339,8 @@ class _UsernamePageState extends State<UsernamePage>
                         savedUsernames.add(_controller.text.toLowerCase());
                         prefs.setStringList("usernames", savedUsernames);
 
-                        Navigator.pushNamed(context, "/home");
+                        // ⭐ FIX: Navigate properly
+                        Navigator.pushReplacementNamed(context, "/home");
                       }
                     : null,
                 child: AnimatedScale(
