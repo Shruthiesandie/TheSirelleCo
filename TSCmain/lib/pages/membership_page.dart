@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart' as fg;
+import 'package:rive/rive.dart';
 
 class MembershipPage extends StatefulWidget {
   const MembershipPage({super.key});
@@ -15,6 +16,9 @@ class _MembershipPageState extends State<MembershipPage>
 
   late AnimationController fadeController;
   late Animation<double> fadeAnim;
+
+  bool isYearly = false; // NEW TOGGLE
+  bool showCoupon = false; // COUPON UI
 
   @override
   void initState() {
@@ -66,14 +70,22 @@ class _MembershipPageState extends State<MembershipPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  _riveMascot(), // ⭐ NEW
+                  const SizedBox(height: 16),
+
                   _header(),
+
+                  const SizedBox(height: 10),
+
+                  _toggleSwitch(), // ⭐ NEW TOGGLE
+
                   const SizedBox(height: 24),
 
                   // Plans
                   _planCard(
                     index: 0,
                     title: "Basic",
-                    price: "₹199 / month",
+                    price: isYearly ? "₹1999 / year" : "₹199 / month",
                     benefits: [
                       "Access to basic features",
                       "Email support",
@@ -90,7 +102,7 @@ class _MembershipPageState extends State<MembershipPage>
                   _planCard(
                     index: 1,
                     title: "Silver",
-                    price: "₹399 / month",
+                    price: isYearly ? "₹3999 / year" : "₹399 / month",
                     benefits: [
                       "All Basic features",
                       "Priority support",
@@ -107,7 +119,7 @@ class _MembershipPageState extends State<MembershipPage>
                   _planCard(
                     index: 2,
                     title: "Premium",
-                    price: "₹799 / month",
+                    price: isYearly ? "₹7999 / year" : "₹799 / month",
                     benefits: [
                       "All Silver features",
                       "Exclusive drops",
@@ -120,15 +132,39 @@ class _MembershipPageState extends State<MembershipPage>
                     ],
                     icon: Icons.workspace_premium_rounded,
                   ),
+
+                  const SizedBox(height: 30),
+
+                  _couponButton(), // ⭐ NEW
+
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: showCoupon ? _couponInput() : const SizedBox(),
+                  ),
+
                   const SizedBox(height: 34),
 
                   _continueButton(),
+
                   const SizedBox(height: 50),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // ⭐ RIVE MASCOT
+  // ------------------------------------------------------------
+  Widget _riveMascot() {
+    return SizedBox(
+      height: 160,
+      child: const RiveAnimation.asset(
+        "assets/mascot.riv",
+        fit: BoxFit.contain,
       ),
     );
   }
@@ -154,6 +190,55 @@ class _MembershipPageState extends State<MembershipPage>
           style: TextStyle(color: Colors.black54, fontSize: 15),
         ),
       ],
+    );
+  }
+
+  // ------------------------------------------------------------
+  // ⭐ MONTHLY ↔ YEARLY TOGGLE
+  // ------------------------------------------------------------
+  Widget _toggleSwitch() {
+    return GestureDetector(
+      onTap: () => setState(() => isYearly = !isYearly),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 14,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _toggleOption("Monthly", !isYearly),
+            _toggleOption("Yearly", isYearly),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _toggleOption(String label, bool active) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      decoration: BoxDecoration(
+        color: active ? Colors.pinkAccent : Colors.transparent,
+        borderRadius: BorderRadius.circular(26),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: active ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      ),
     );
   }
 
@@ -218,7 +303,6 @@ class _MembershipPageState extends State<MembershipPage>
               ),
               const SizedBox(height: 14),
 
-              // Benefits list
               ...benefits.map(
                 (b) => Padding(
                   padding: const EdgeInsets.only(bottom: 6),
@@ -248,19 +332,84 @@ class _MembershipPageState extends State<MembershipPage>
   }
 
   // ------------------------------------------------------------
-  // CONTINUE BUTTON
+  // ⭐ APPLY COUPON BUTTON
+  // ------------------------------------------------------------
+  Widget _couponButton() {
+    return GestureDetector(
+      onTap: () => setState(() => showCoupon = !showCoupon),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.local_offer,
+              color: Colors.pink.shade600, size: 22),
+          const SizedBox(width: 6),
+          Text(
+            showCoupon ? "Hide Coupon" : "Have a coupon?",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.pink.shade600,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // ⭐ COUPON INPUT FIELD
+  // ------------------------------------------------------------
+  Widget _couponInput() {
+    return Container(
+      key: const ValueKey("coupon"),
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          )
+        ],
+      ),
+      child: Row(
+        children: [
+          const Expanded(
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: "Enter coupon code",
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.pinkAccent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Text(
+              "Apply",
+              style: TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // CONTINUE BUTTON (OPEN JOIN/UPGRADE SCREEN)
   // ------------------------------------------------------------
   Widget _continueButton() {
     return GestureDetector(
       onTap: () {
-        // Handle confirm action here
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Selected: ${["Basic", "Silver", "Premium"][selectedPlan]} Plan",
-            ),
-          ),
-        );
+        _showJoinBottomSheet();
       },
       child: Container(
         height: 55,
@@ -292,6 +441,96 @@ class _MembershipPageState extends State<MembershipPage>
           ),
         ),
       ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // ⭐ JOIN / UPGRADE BOTTOM SHEET SCREEN
+  // ------------------------------------------------------------
+  void _showJoinBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 45,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                "Confirm Your Plan",
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black87),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                ["Basic", "Silver", "Premium"][selectedPlan],
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.pink.shade600,
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                "You'll get instant access to all features included in this plan.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black54),
+              ),
+              const SizedBox(height: 24),
+
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Membership Activated!"),
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 55,
+                  decoration: BoxDecoration(
+                    gradient: fg.LinearGradient(
+                      colors: [
+                        Colors.pinkAccent,
+                        const Color(0xFFB97BFF)
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "Join Now",
+                      style: TextStyle(
+                          fontSize: 17,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
     );
   }
 
