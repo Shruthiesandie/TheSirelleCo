@@ -1,10 +1,11 @@
 import 'dart:ui';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart' as fg;
 import 'package:rive/rive.dart';
 import 'package:confetti/confetti.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:math' as math;
 
 class MembershipPage extends StatefulWidget {
   const MembershipPage({super.key});
@@ -14,488 +15,257 @@ class MembershipPage extends StatefulWidget {
 }
 
 class _MembershipPageState extends State<MembershipPage>
-    with SingleTickerProviderStateMixin {
-  // animation controllers
-  late AnimationController fadeController;
-  late Animation<double> fadeAnim;
+    with TickerProviderStateMixin {
+  // ------------------------------------------------------------
+  // Animation controllers
+  // ------------------------------------------------------------
+  late final AnimationController _fadeController;
+  late final Animation<double> _fadeAnim;
 
-  // floating mascot controller
-  late AnimationController floatController;
-  late Animation<double> floatAnim;
+  late final AnimationController _floatController;
+  late final Animation<double> _floatAnim;
 
-  // glowing border controller
-  late AnimationController glowController;
-  late Animation<double> glowAnim;
+  late final AnimationController _glowController;
+  late final Animation<double> _glowAnim;
 
-  // confetti
-  late ConfettiController confettiController;
+  late final ConfettiController _confetti;
 
-  // membership state
+  // ------------------------------------------------------------
+  // UI state
+  // ------------------------------------------------------------
   bool isYearly = false;
   bool showCoupon = false;
   bool isMember = false;
 
-  // coupon text controller
-  final TextEditingController couponController = TextEditingController();
+  final TextEditingController _couponController = TextEditingController();
 
-  // persistence key
-  static const String _prefKeyMember = "is_premium_member";
+  // Shared prefs key
+  static const String _memberKey = "premium_member";
 
   @override
   void initState() {
     super.initState();
 
-    // Fade-in
-    fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
-    fadeAnim =
-        CurvedAnimation(parent: fadeController, curve: Curves.easeOutCubic);
-    fadeController.forward();
+    _initFadeAnimation();
+    _initFloatingMascot();
+    _initGlowAnimation();
 
-    // Floating mascot - loops up & down
-    floatController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2600),
-    );
-    floatAnim = Tween<double>(begin: -6.0, end: 6.0)
-        .chain(CurveTween(curve: Curves.easeInOutSine))
-        .animate(floatController);
-    floatController.repeat(reverse: true);
+    _confetti = ConfettiController(duration: const Duration(seconds: 2));
 
-    // Glowing border - pulse
-    glowController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1600),
-    );
-    glowAnim = Tween<double>(begin: 0.0, end: 1.0)
-        .chain(CurveTween(curve: Curves.easeInOut))
-        .animate(glowController);
-    glowController.repeat(reverse: true);
-
-    // Confetti
-    confettiController =
-        ConfettiController(duration: const Duration(seconds: 2));
-
-    // Load membership status
     _loadMembershipStatus();
   }
 
+  // ------------------------------------------------------------
+  // Init animations
+  // ------------------------------------------------------------
+  void _initFadeAnimation() {
+    _fadeController =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+
+    _fadeAnim = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOutCubic,
+    );
+
+    _fadeController.forward();
+  }
+
+  void _initFloatingMascot() {
+    _floatController =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 2600));
+
+    _floatAnim = Tween<double>(begin: -6, end: 6)
+        .chain(CurveTween(curve: Curves.easeInOutSine))
+        .animate(_floatController);
+
+    _floatController.repeat(reverse: true);
+  }
+
+  void _initGlowAnimation() {
+    _glowController =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 1600));
+
+    _glowAnim = Tween<double>(begin: 0, end: 1)
+        .chain(CurveTween(curve: Curves.easeInOut))
+        .animate(_glowController);
+
+    _glowController.repeat(reverse: true);
+  }
+
+  // ------------------------------------------------------------
+  // Load & save membership status
+  // ------------------------------------------------------------
   Future<void> _loadMembershipStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getBool(_prefKeyMember) ?? false;
-    setState(() => isMember = saved);
+    setState(() => isMember = prefs.getBool(_memberKey) ?? false);
   }
 
   Future<void> _saveMembershipStatus(bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_prefKeyMember, value);
+    await prefs.setBool(_memberKey, value);
     setState(() => isMember = value);
   }
 
-  @override
-  void dispose() {
-    fadeController.dispose();
-    floatController.dispose();
-    glowController.dispose();
-    confettiController.dispose();
-    couponController.dispose();
-    super.dispose();
-  }
-
+  // ------------------------------------------------------------
+  // Activate membership
+  // ------------------------------------------------------------
   void _activateMembership() {
-    // Simulate successful activation: save, confetti, snackbar
     _saveMembershipStatus(true);
-    confettiController.play();
-    Navigator.pop(context); // close bottom sheet if open
+    _confetti.play();
+
+    Navigator.pop(context);
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Membership Activated! Enjoy discounts 🎉")),
+      const SnackBar(content: Text("Membership Activated! 🎉")),
     );
   }
 
+  // ------------------------------------------------------------
+  // Dispose
+  // ------------------------------------------------------------
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _floatController.dispose();
+    _glowController.dispose();
+    _confetti.dispose();
+    _couponController.dispose();
+    super.dispose();
+  }
+
+  // ------------------------------------------------------------
+  // BUILD UI
+  // ------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
-      opacity: fadeAnim,
+      opacity: _fadeAnim,
       child: Scaffold(
         backgroundColor: const Color(0xFFFDF5FA),
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          centerTitle: true,
-          title: const Text(
-            "Premium Membership",
-            style: TextStyle(
-              color: Colors.black87,
-              fontWeight: FontWeight.w700,
-              fontSize: 24,
-            ),
-          ),
-          iconTheme: const IconThemeData(color: Colors.black87),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 12.0),
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 400),
-                opacity: isMember ? 1.0 : 0.0,
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.pink.shade600,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.pink.shade600.withOpacity(0.25),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          )
-                        ],
-                      ),
-                      child: Row(
-                        children: const [
-                          Icon(Icons.workspace_premium_rounded,
-                              size: 16, color: Colors.white),
-                          SizedBox(width: 6),
-                          Text(
-                            "Member",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
+        appBar: _appBar(),
         body: Stack(
           alignment: Alignment.topCenter,
           children: [
             _background(),
-            SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 6),
-                  // Floating Rive mascot (3D-like feel via rotate + scale)
-                  AnimatedBuilder(
-                    animation: floatController,
-                    builder: (context, child) {
-                      final dy = floatAnim.value;
-                      final tilt = math.sin(floatController.value * 2 * math.pi) * 0.02;
-                      final scale = 1.0 + (math.cos(floatController.value * 2 * math.pi) * 0.02);
-                      return Transform.translate(
-                        offset: Offset(0, dy),
-                        child: Transform.rotate(
-                          angle: tilt,
-                          child: Transform.scale(scale: scale, child: child),
-                        ),
-                      );
-                    },
-                    child: SizedBox(
-                      height: 160,
-                      child: const RiveAnimation.asset(
-                        "assets/mascot.riv",
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  _header(),
-                  const SizedBox(height: 12),
-
-                  _toggleSwitch(),
-                  const SizedBox(height: 28),
-
-                  // GLASSMORPHISM + GLOWING BORDER CARD
-                  AnimatedBuilder(
-                    animation: glowController,
-                    builder: (context, _) {
-                      final glowVal = glowAnim.value;
-                      return Center(
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Animated glowing shadow (bigger, diffused)
-                            Container(
-                              width: double.infinity,
-                              height: null,
-                              margin: const EdgeInsets.symmetric(horizontal: 0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(28),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color:
-                                        Colors.pinkAccent.withOpacity(0.14 * (0.6 + glowVal * 0.8)),
-                                    blurRadius: 40 + glowVal * 20,
-                                    spreadRadius: 2 + glowVal * 4,
-                                    offset: const Offset(0, 14),
-                                  ),
-                                  BoxShadow(
-                                    color:
-                                        Colors.purpleAccent.withOpacity(0.06 * (0.6 + glowVal)),
-                                    blurRadius: 60 + glowVal * 30,
-                                    offset: const Offset(0, 10),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // Glass card
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(26),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(26),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.14),
-                                      width: 1.0,
-                                    ),
-                                    gradient: fg.LinearGradient(
-                                      colors: [
-                                        Colors.white.withOpacity(0.06),
-                                        Colors.white.withOpacity(0.03),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Title row with glowing outline
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          // small emblem with gradient
-                                          Container(
-                                            padding: const EdgeInsets.all(10),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              gradient: fg.LinearGradient(
-                                                colors: [
-                                                  Colors.pinkAccent.shade100,
-                                                  const Color(0xFFB97BFF),
-                                                ],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.pinkAccent.withOpacity(0.18 * (0.8 + glowVal)),
-                                                  blurRadius: 18 + glowVal * 8,
-                                                  offset: const Offset(0, 8),
-                                                )
-                                              ],
-                                            ),
-                                            child: const Icon(Icons.workspace_premium_rounded,
-                                                color: Colors.white, size: 28),
-                                          ),
-                                          const SizedBox(width: 14),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                const Text(
-                                                  "Premium Membership",
-                                                  style: TextStyle(
-                                                    fontSize: 22,
-                                                    fontWeight: FontWeight.w800,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  isYearly ? "Best value — billed yearly" : "Billed monthly",
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    color: Colors.white.withOpacity(0.9),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          // Glowing pill that shows discount
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 12, vertical: 8),
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(999),
-                                              gradient: fg.LinearGradient(
-                                                colors: [
-                                                  Colors.white.withOpacity(0.12),
-                                                  Colors.white.withOpacity(0.06),
-                                                ],
-                                              ),
-                                              border: Border.all(
-                                                  color: Colors.white.withOpacity(0.12)),
-                                            ),
-                                            child: RichText(
-                                              text: TextSpan(
-                                                children: [
-                                                  TextSpan(
-                                                      text: "15%",
-                                                      style: TextStyle(
-                                                          fontWeight: FontWeight.w800,
-                                                          color: Colors.pink.shade50,
-                                                          fontSize: 16)),
-                                                  TextSpan(
-                                                      text: " OFF",
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.white.withOpacity(0.95),
-                                                          fontWeight: FontWeight.w700)),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-
-                                      const SizedBox(height: 18),
-
-                                      Text(
-                                        isYearly ? "₹3499 / year" : "₹399 / month",
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w800,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-
-                                      const SizedBox(height: 16),
-
-                                      // Benefits (white text)
-                                      _benefit("Flat 15% OFF on all orders"),
-                                      _benefit("Free delivery on every order"),
-                                      _benefit("Early access to new drops"),
-                                      _benefit("Exclusive member-only discounts"),
-                                      _benefit("Faster customer support"),
-
-                                      const SizedBox(height: 6),
-
-                                      // Join/Upgrade small row
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: GestureDetector(
-                                              onTap: _showJoinBottomSheet,
-                                              child: Container(
-                                                height: 48,
-                                                decoration: BoxDecoration(
-                                                  gradient: fg.LinearGradient(
-                                                    colors: [
-                                                      Colors.pinkAccent,
-                                                      const Color(0xFFB97BFF)
-                                                    ],
-                                                  ),
-                                                  borderRadius: BorderRadius.circular(14),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.pinkAccent.withOpacity(0.18),
-                                                      blurRadius: 16,
-                                                      offset: const Offset(0, 8),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    isMember ? "You're a Member" : "Join Membership",
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight: FontWeight.w800,
-                                                        fontSize: 15),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          // Small restore / toggle display (if already member, allow "Manage")
-                                          if (isMember)
-                                            GestureDetector(
-                                              onTap: () {
-                                                // quick toggle for demo: un-save membership
-                                                _saveMembershipStatus(false);
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  const SnackBar(
-                                                      content:
-                                                          Text("Membership removed")),
-                                                );
-                                              },
-                                              child: Container(
-                                                padding: const EdgeInsets.symmetric(
-                                                    horizontal: 12, vertical: 12),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white.withOpacity(0.06),
-                                                  borderRadius: BorderRadius.circular(12),
-                                                ),
-                                                child: const Icon(Icons.more_horiz,
-                                                    color: Colors.white),
-                                              ),
-                                            ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 26),
-
-                  _couponButton(),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: showCoupon ? _couponInput() : const SizedBox(),
-                  ),
-
-                  const SizedBox(height: 34),
-                ],
-              ),
-            ),
-
-            // Confetti widget placed on top center
-            Align(
-              alignment: Alignment.topCenter,
-              child: ConfettiWidget(
-                confettiController: confettiController,
-                blastDirectionality: BlastDirectionality.explosive,
-                shouldLoop: false,
-                emissionFrequency: 0.02,
-                numberOfParticles: 30,
-                maxBlastForce: 20,
-                minBlastForce: 6,
-                gravity: 0.45,
-              ),
-            ),
+            _mainContent(),
+            _confettiWidget(),
           ],
         ),
       ),
     );
   }
 
+  // ------------------------------------------------------------
+  // AppBar
+  // ------------------------------------------------------------
+  AppBar _appBar() {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      centerTitle: true,
+      title: const Text(
+        "Premium Membership",
+        style: TextStyle(
+          color: Colors.black87,
+          fontWeight: FontWeight.w700,
+          fontSize: 24,
+        ),
+      ),
+      iconTheme: const IconThemeData(color: Colors.black87),
+      actions: [
+        if (isMember) _memberBadge(),
+      ],
+    );
+  }
+
+  Widget _memberBadge() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.pink.shade600,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.pink.shade600.withOpacity(0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: const [
+            Icon(Icons.workspace_premium_rounded, size: 16, color: Colors.white),
+            SizedBox(width: 6),
+            Text("Member",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // Main content scroll
+  // ------------------------------------------------------------
+  Widget _mainContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _floatingMascot(),
+          const SizedBox(height: 6),
+          _header(),
+          const SizedBox(height: 12),
+          _billingToggle(),
+          const SizedBox(height: 28),
+          _membershipCard(),
+          const SizedBox(height: 26),
+          _couponToggle(),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: showCoupon ? _couponInput() : const SizedBox(),
+          ),
+          const SizedBox(height: 34),
+        ],
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // Floating Rive Mascot
+  // ------------------------------------------------------------
+  Widget _floatingMascot() {
+    return AnimatedBuilder(
+      animation: _floatController,
+      builder: (_, child) {
+        final dy = _floatAnim.value;
+        final tilt = math.sin(_floatController.value * 2 * math.pi) * 0.02;
+        final scale = 1 + math.cos(_floatController.value * 2 * math.pi) * 0.02;
+
+        return Transform.translate(
+          offset: Offset(0, dy),
+          child: Transform.rotate(
+            angle: tilt,
+            child: Transform.scale(scale: scale, child: child),
+          ),
+        );
+      },
+      child: SizedBox(
+        height: 160,
+        child: const RiveAnimation.asset(
+          "assets/mascot.riv",
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // Heading text
+  // ------------------------------------------------------------
   Widget _header() {
     return Column(
       children: [
@@ -517,7 +287,10 @@ class _MembershipPageState extends State<MembershipPage>
     );
   }
 
-  Widget _toggleSwitch() {
+  // ------------------------------------------------------------
+  // Monthly/Yearly toggle
+  // ------------------------------------------------------------
+  Widget _billingToggle() {
     return GestureDetector(
       onTap: () => setState(() => isYearly = !isYearly),
       child: Container(
@@ -563,6 +336,147 @@ class _MembershipPageState extends State<MembershipPage>
     );
   }
 
+  // ------------------------------------------------------------
+  // Membership card (Glassmorphism + Glowing Border)
+  // ------------------------------------------------------------
+  Widget _membershipCard() {
+    return AnimatedBuilder(
+      animation: _glowController,
+      builder: (_, __) {
+        final glow = _glowAnim.value;
+
+        return Stack(
+          children: [
+            // Glowing shadow
+            Container(
+              height: null,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(26),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.pinkAccent.withOpacity(0.2 + glow * 0.3),
+                    blurRadius: 40 + glow * 20,
+                    spreadRadius: 2 + glow * 4,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
+              ),
+            ),
+
+            // Glass card
+            ClipRRect(
+              borderRadius: BorderRadius.circular(26),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(26),
+                    color: Colors.white.withOpacity(0.09),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.18),
+                      width: 1.2,
+                    ),
+                    gradient: fg.LinearGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.1),
+                        Colors.white.withOpacity(0.05),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: _membershipCardContent(),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ------------------------------------------------------------
+  // Membership card content
+  // ------------------------------------------------------------
+  Widget _membershipCardContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            _premiumIcon(),
+            const SizedBox(width: 12),
+            _membershipTitle(),
+            const Spacer(),
+            _discountBadge(),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        Text(
+          isYearly ? "₹3499 / year" : "₹399 / month",
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+
+        const SizedBox(height: 18),
+
+        _benefit("Flat 15% OFF on all orders"),
+        _benefit("Free delivery on every order"),
+        _benefit("Early access to new drops"),
+        _benefit("Exclusive member-only discounts"),
+        _benefit("Faster customer support"),
+
+        const SizedBox(height: 18),
+
+        _joinNowButton(),
+      ],
+    );
+  }
+
+  Widget _premiumIcon() {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: fg.LinearGradient(
+          colors: [Colors.pinkAccent.shade100, const Color(0xFFB97BFF)],
+        ),
+      ),
+      child: const Icon(Icons.workspace_premium_rounded, color: Colors.white),
+    );
+  }
+
+  Widget _membershipTitle() {
+    return const Text(
+      "Premium Membership",
+      style: TextStyle(
+          fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white),
+    );
+  }
+
+  Widget _discountBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.white.withOpacity(0.08),
+      ),
+      child: const Text(
+        "15% OFF",
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // Benefit row
+  // ------------------------------------------------------------
   Widget _benefit(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -571,35 +485,136 @@ class _MembershipPageState extends State<MembershipPage>
           const Icon(Icons.check_circle, color: Colors.white, size: 18),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-              ),
-            ),
+            child: Text(text,
+                style: const TextStyle(color: Colors.white, fontSize: 14)),
           ),
         ],
       ),
     );
   }
 
-  Widget _couponButton() {
+  // ------------------------------------------------------------
+  // Join button
+  // ------------------------------------------------------------
+  Widget _joinNowButton() {
+    return GestureDetector(
+      onTap: _showJoinSheet,
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          gradient: fg.LinearGradient(
+            colors: [Colors.pinkAccent, const Color(0xFFB97BFF)],
+          ),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.pinkAccent.withOpacity(0.25),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            isMember ? "You're Already a Member" : "Join Membership",
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // Bottom sheet
+  // ------------------------------------------------------------
+  void _showJoinSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 45, height: 5, decoration: _dragHandleDecoration()),
+              const SizedBox(height: 20),
+              const Text(
+                "Activate Premium Membership",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                isYearly ? "₹3499 / year" : "₹399 / month",
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.pink.shade600),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                "Unlock exclusive perks, extra savings and free delivery.",
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 26),
+              _joinNowBottomButton(),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  BoxDecoration _dragHandleDecoration() {
+    return BoxDecoration(
+      color: Colors.black26,
+      borderRadius: BorderRadius.circular(30),
+    );
+  }
+
+  Widget _joinNowBottomButton() {
+    return GestureDetector(
+      onTap: _activateMembership,
+      child: Container(
+        height: 55,
+        decoration: BoxDecoration(
+          gradient: fg.LinearGradient(
+            colors: [Colors.pinkAccent, const Color(0xFFB97BFF)],
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(
+          child: Text(
+            "Join Now",
+            style: TextStyle(
+                fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // Coupon UI
+  // ------------------------------------------------------------
+  Widget _couponToggle() {
     return GestureDetector(
       onTap: () => setState(() => showCoupon = !showCoupon),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.local_offer, color: Colors.pink.shade600, size: 22),
+          Icon(Icons.local_offer, color: Colors.pink.shade600),
           const SizedBox(width: 6),
           Text(
             showCoupon ? "Hide Coupon" : "Have a coupon?",
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.pink.shade600,
-            ),
-          )
+                color: Colors.pink.shade600, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
@@ -609,60 +624,48 @@ class _MembershipPageState extends State<MembershipPage>
     return Container(
       key: const ValueKey("coupon"),
       margin: const EdgeInsets.only(top: 12),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          )
+              color: Colors.black12, blurRadius: 12, offset: const Offset(0, 6))
         ],
       ),
       child: Row(
         children: [
           Expanded(
             child: TextField(
-              controller: couponController,
+              controller: _couponController,
               decoration: const InputDecoration(
-                hintText: "Enter coupon code",
-                border: InputBorder.none,
-              ),
+                  hintText: "Enter coupon code", border: InputBorder.none),
             ),
           ),
           GestureDetector(
             onTap: () {
-              final code = couponController.text.trim();
+              final code = _couponController.text.trim();
               if (code.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Enter a coupon code")),
-                );
+                _showMessage("Enter a coupon code");
                 return;
               }
-              // Example: simple coupon handling (replace with real logic)
+
               if (code.toUpperCase() == "WELCOME15") {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Coupon Applied: 15% OFF")),
-                );
+                _showMessage("Coupon Applied: 15% OFF");
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Invalid coupon")),
-                );
+                _showMessage("Invalid coupon code");
               }
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.pinkAccent,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
-                "Apply",
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
+              child: const Text("Apply",
+                  style:
+                      TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           )
         ],
@@ -670,97 +673,29 @@ class _MembershipPageState extends State<MembershipPage>
     );
   }
 
-  void _showJoinBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-      ),
-      isScrollControlled: true,
-      builder: (context) {
-        return Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 45,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.black26,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "Activate Premium Membership",
-                  style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black87),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  isYearly ? "₹3499 / year" : "₹399 / month",
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.pink.shade600,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                const Text(
-                  "Unlock exclusive perks, extra savings and free delivery.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black54),
-                ),
-                const SizedBox(height: 24),
-                GestureDetector(
-                  onTap: _activateMembership,
-                  child: Container(
-                    height: 55,
-                    decoration: BoxDecoration(
-                      gradient: fg.LinearGradient(
-                        colors: [Colors.pinkAccent, const Color(0xFFB97BFF)],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "Join Now",
-                        style: TextStyle(
-                            fontSize: 17,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                if (!isMember)
-                  TextButton(
-                    onPressed: () {
-                      // Close sheet - show a quick demo message
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text(
-                              "You can pay using your preferred payment gateway.")));
-                    },
-                    child: const Text("Choose another payment method"),
-                  ),
-                const SizedBox(height: 10),
-              ],
-            ),
-          ),
-        );
-      },
+  void _showMessage(String msg) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  // ------------------------------------------------------------
+  // Confetti overlay
+  // ------------------------------------------------------------
+  Widget _confettiWidget() {
+    return ConfettiWidget(
+      confettiController: _confetti,
+      blastDirectionality: BlastDirectionality.explosive,
+      numberOfParticles: 30,
+      emissionFrequency: 0.02,
+      gravity: 0.4,
+      maxBlastForce: 18,
+      minBlastForce: 6,
     );
   }
 
+  // ------------------------------------------------------------
+  // Background blur orbs
+  // ------------------------------------------------------------
   Widget _background() {
     return Stack(
       children: [
@@ -777,7 +712,7 @@ class _MembershipPageState extends State<MembershipPage>
         Positioned(
           left: 20,
           bottom: 80,
-          child: _blurCircle(120, Colors.amberAccent.withOpacity(0.06)),
+          child: _blurCircle(130, Colors.amberAccent.withOpacity(0.07)),
         ),
       ],
     );
