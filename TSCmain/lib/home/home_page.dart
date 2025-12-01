@@ -1,4 +1,4 @@
-
+// lib/home/home_page.dart
 import 'package:flutter/material.dart';
 import '../widgets/pinterest_arc_menu.dart';
 import '../pages/membership_page.dart';
@@ -11,7 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  int selectedIndex = 0;
+  int selectedIndex = 0; // 0 home, 1 membership, 2 cart, 3 profile
   bool arcOpen = false;
   String selectedCategory = "none";
 
@@ -22,8 +22,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late final ScrollController _galleryController;
 
   int _lastTappedIcon = -1;
-  double _dragStartX = 0.0;
-  bool _draggingFromEdge = false;
 
   @override
   void initState() {
@@ -41,17 +39,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // ---------------------
-  // iOS Back Swipe
-  // ---------------------
-  void _handleHorizontalDragStart(DragStartDetails details) {
-    _dragStartX = details.globalPosition.dx;
+  // Swipe from left to return to home
+  double _dragStartX = 0;
+  bool _draggingFromEdge = false;
+
+  void _handleHorizontalDragStart(DragStartDetails d) {
+    _dragStartX = d.globalPosition.dx;
     _draggingFromEdge = _dragStartX < 32 && selectedIndex != 0;
   }
 
-  void _handleHorizontalDragUpdate(DragUpdateDetails details) {
+  void _handleHorizontalDragUpdate(DragUpdateDetails d) {
     if (!_draggingFromEdge) return;
-    if (details.delta.dx > 12) {
+    if (d.delta.dx > 12) {
       setState(() {
         selectedIndex = 0;
         arcOpen = false;
@@ -60,14 +59,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  void _handleHorizontalDragEnd(DragEndDetails details) {
+  void _handleHorizontalDragEnd(DragEndDetails d) {
     _draggingFromEdge = false;
-    _dragStartX = 0;
   }
 
-  // ---------------------
   // Bottom Nav Tap
-  // ---------------------
   void _onNavIconTap(int index) {
     setState(() {
       _lastTappedIcon = index;
@@ -80,18 +76,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-  // ---------------------
-  // Bottom Nav Bar
-  // ---------------------
+  // Bottom bar
   Widget _bottomNavBar() {
     return Container(
       height: 74,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(26),
-          topRight: Radius.circular(26),
-        ),
+        borderRadius:
+            const BorderRadius.only(topLeft: Radius.circular(26), topRight: Radius.circular(26)),
         boxShadow: const [
           BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, -3)),
         ],
@@ -109,7 +101,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               _navIcon(Icons.person, 3),
             ],
           ),
-
           Positioned(
             bottom: 8,
             child: GestureDetector(
@@ -123,10 +114,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.pinkAccent.withOpacity(0.35),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
-                    ),
+                        color: Colors.pinkAccent.withOpacity(0.35),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8))
                   ],
                 ),
                 child: Icon(
@@ -148,84 +138,66 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  // Icons with scale animation
   Widget _navIcon(IconData icon, int index) {
-    bool isSelected = selectedIndex == index;
-    bool wasTapped = _lastTappedIcon == index;
-
-    double targetScale = wasTapped ? 0.78 : (isSelected ? 1.1 : 1.0);
+    final bool isSelected = selectedIndex == index;
+    final bool wasTapped = _lastTappedIcon == index;
 
     return GestureDetector(
       onTap: () => _onNavIconTap(index),
       child: TweenAnimationBuilder<double>(
         duration: const Duration(milliseconds: 420),
-        curve: const Cubic(0.22, 1.2, 0.38, 1.0),
-        tween: Tween(begin: 1.0, end: targetScale),
-        builder: (_, scale, child) => Transform.scale(
-          scale: scale,
-          child: Icon(icon, size: 28, color: isSelected ? Colors.pinkAccent : Colors.grey),
-        ),
+        curve: const Cubic(0.22, 1.2, 0.38, 1),
+        tween: Tween(begin: 1, end: wasTapped ? 0.78 : (isSelected ? 1.02 : 1)),
+        builder: (_, scale, child) {
+          return Transform.scale(
+            scale: scale,
+            child: Icon(icon,
+                size: 28, color: isSelected ? Colors.pinkAccent : Colors.grey),
+          );
+        },
       ),
     );
   }
 
-  // ---------------------
-  // Home Top Bar
-  // ---------------------
+  // HOME TOP BAR
   Widget _homeTopBar() {
-    return ClipPath(
-      clipper: TopBarClipper(),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.white.withOpacity(0.85),
-              Colors.white.withOpacity(0.98)
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: 90,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 3))
+        ],
+      ),
+      child: Row(
+        children: [
+          _glassIconButton(Icons.menu, () => _scaffoldKey.currentState!.openDrawer()),
+          const Spacer(),
+          SizedBox(
+              height: 70,
+              child: Image.asset("assets/logo/logo.png", fit: BoxFit.contain)),
+          const Spacer(),
+          Row(
+            children: [
+              _glassIconButton(Icons.search, () => Navigator.pushNamed(context, "/search")),
+              const SizedBox(width: 10),
+              _glassIconButton(Icons.favorite_border,
+                  () => Navigator.pushNamed(context, "/love")),
             ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 18,
-              offset: const Offset(0, 2),
-            )
-          ],
-        ),
-        child: Row(
-          children: [
-            _glassIconButton(Icons.menu, () => _scaffoldKey.currentState!.openDrawer()),
-
-            Expanded(
-              child: Transform.translate(
-                offset: const Offset(20, 0),
-                child: SizedBox(
-                  height: 80,
-                  child: Image.asset("assets/logo/logo.png", fit: BoxFit.contain),
-                ),
-              ),
-            ),
-
-            Row(
-              children: [
-                _glassIconButton(Icons.search, () => Navigator.pushNamed(context, "/search")),
-                const SizedBox(width: 10),
-                _glassIconButton(Icons.favorite_border, () => Navigator.pushNamed(context, "/love")),
-              ],
-            )
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  // ---------------------
-  // Subpage Top Bar
-  // ---------------------
+  // SUB-PAGE TOP BAR
   Widget _subPageTopBar() {
-    final titles = ["Home", "Membership", "Cart", "Profile"];
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      height: 90,
       alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Row(
         children: [
           GestureDetector(
@@ -234,7 +206,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           const SizedBox(width: 12),
           Text(
-            titles[selectedIndex],
+            selectedIndex == 1
+                ? "Membership"
+                : selectedIndex == 2
+                    ? "Cart"
+                    : "Profile",
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
           ),
         ],
@@ -242,9 +218,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  // ---------------------
-  // Glass button widget
-  // ---------------------
   Widget _glassIconButton(IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -253,13 +226,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white.withOpacity(0.55),
-          border: Border.all(color: Colors.white.withOpacity(0.8)),
+          border: Border.all(color: Colors.white70),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.07),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            )
+                color: Colors.black.withOpacity(0.07),
+                blurRadius: 10,
+                offset: const Offset(0, 3))
           ],
         ),
         child: Icon(icon, size: 22),
@@ -267,9 +239,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  // ---------------------
   // Drawer
-  // ---------------------
   Drawer _buildPremiumDrawer() {
     return Drawer(
       backgroundColor: Colors.white,
@@ -281,32 +251,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             decoration: const BoxDecoration(
               gradient: LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
             ),
-            child: const Text(
-              "Menu",
-              style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+            child: const Align(
+              alignment: Alignment.bottomLeft,
+              child: Text("Menu",
+                  style: TextStyle(
+                      fontSize: 26,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700)),
             ),
           ),
-
+          const SizedBox(height: 10),
           _drawerItem(Icons.person, "Profile"),
           _drawerItem(Icons.settings, "Settings"),
           _drawerItem(Icons.receipt_long, "Orders"),
-
           const Spacer(),
-
           Padding(
-            padding: const EdgeInsets.only(bottom: 24),
+            padding: const EdgeInsets.only(bottom: 28),
             child: GestureDetector(
               onTap: () {
-                Navigator.pop(context);
-                Future.delayed(const Duration(milliseconds: 120), () {
-                  Navigator.pushNamedAndRemoveUntil(context, "/login", (_) => false);
+                Navigator.of(context).pop();
+                Future.delayed(const Duration(milliseconds: 150), () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, "/login", (route) => false);
                 });
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 14),
                 width: 160,
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
+                  gradient:
+                      const LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Row(
@@ -314,12 +288,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: [
                     Icon(Icons.logout, color: Colors.white),
                     SizedBox(width: 8),
-                    Text("Logout", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    Text("Logout",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
             ),
-          ),
+          )
         ],
       ),
     );
@@ -333,9 +309,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  // ---------------------
-  // HOME CONTENT
-  // ---------------------
+  // HOME BODY
   Widget _homeBody() {
     return SingleChildScrollView(
       child: Column(
@@ -348,31 +322,38 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: PageView.builder(
               controller: _heroController,
               itemCount: 4,
-              itemBuilder: (_, i) => _heroBanner(i),
+              itemBuilder: (_, index) => _heroBanner(index),
             ),
           ),
 
-          const SizedBox(height: 24),
-
+          const SizedBox(height: 20),
           _sectionTitle("Popular Items"),
 
+          // PRODUCT CAROUSEL
           SizedBox(
             height: 260,
             child: PageView.builder(
               controller: _productController,
               itemCount: 6,
-              itemBuilder: (_, index) {
+              itemBuilder: (context, index) {
                 return AnimatedBuilder(
                   animation: _productController,
-                  builder: (_, child) {
+                  builder: (context, child) {
                     double value = 1.0;
-                    if (_productController.position.hasPixels) {
-                      value = _productController.page! - index;
-                      value = (1 - (value.abs() * 0.30)).clamp(0.75, 1.0);
+
+                    if (_productController.hasClients &&
+                        _productController.position.hasPixels &&
+                        _productController.position.haveDimensions) {
+                      final page = _productController.page ?? _productController.initialPage.toDouble();
+                      value = (1 - ((page - index).abs() * 0.30)).clamp(0.75, 1.0);
                     }
-                    return Transform.scale(
-                      scale: value,
-                      child: child,
+
+                    return Center(
+                      child: SizedBox(
+                        height: Curves.easeOut.transform(value) * 260,
+                        width: Curves.easeOut.transform(value) * 200,
+                        child: child,
+                      ),
                     );
                   },
                   child: _productCard(index),
@@ -381,17 +362,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
           _sectionTitle("Gallery"),
 
           SizedBox(
             height: 130,
             child: ListView.separated(
+              controller: _galleryController,
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 18),
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemCount: 10,
-              itemBuilder: (_, i) => _galleryImage(i),
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, index) => _galleryImage(index),
             ),
           ),
 
@@ -401,32 +383,39 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  // ---------------------
-  // Page Widgets
-  // ---------------------
-  Widget _heroBanner(int i) {
+  // Dummy pages (cart + profile)
+  Widget _cartPage() => const Center(child: Text("Cart Page"));
+  Widget _profilePage() => const Center(child: Text("Profile Page"));
+
+  // Reusable elements
+  Widget _sectionTitle(String txt) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+      child: Row(children: [
+        Text(txt, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))
+      ]),
+    );
+  }
+
+  Widget _heroBanner(int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22),
         child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.pink.shade200, Colors.pink.shade100],
-            ),
-          ),
+          color: Colors.pink.shade200,
           child: const Center(
-            child: Text(
-              "IMAGE",
-              style: TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
+              child: Text("IMAGE",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 22))),
         ),
       ),
     );
   }
 
-  Widget _productCard(int i) {
+  Widget _productCard(int index) {
     return Padding(
       padding: const EdgeInsets.only(right: 10),
       child: ClipRRect(
@@ -435,63 +424,53 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.white,
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10)],
             borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.pink.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Center(child: Text("IMAGE")),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Product ${i + 1}",
-                style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.pink),
-              )
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4))
             ],
           ),
+          child: Column(children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.pink.shade50,
+                    borderRadius: BorderRadius.circular(16)),
+                child: const Center(child: Text("IMAGE")),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text("Product ${index + 1}",
+                style: const TextStyle(
+                    fontWeight: FontWeight.w700, color: Colors.pink)),
+          ]),
         ),
       ),
     );
   }
 
-  Widget _galleryImage(int i) {
+  Widget _galleryImage(int index) {
     return Container(
       width: 120,
       decoration: BoxDecoration(
         color: Colors.pink.shade50,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8)],
-      ),
-      child: const Center(
-        child: Text("IMAGE", style: TextStyle(color: Colors.pink)),
-      ),
-    );
-  }
-
-  Widget _sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
-          ),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 3))
         ],
       ),
+      child: const Center(
+          child: Text("IMAGE",
+              style: TextStyle(color: Colors.pink, fontWeight: FontWeight.w600))),
     );
   }
 
-  // ---------------------
   // BUILD
-  // ---------------------
   @override
   Widget build(BuildContext context) {
     Widget pageContent;
@@ -502,112 +481,76 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         break;
 
       case 1:
-        pageContent = const MembershipPage(); // ← REAL MEMBERSHIP PAGE
+        pageContent = const MembershipPage();  // <-- REAL MEMBERSHIP PAGE
         break;
 
       case 2:
-        pageContent = const Center(child: Text("Cart Page", style: TextStyle(fontSize: 22)));
+        pageContent = _cartPage();
         break;
 
       case 3:
-        pageContent = const Center(child: Text("Profile Page", style: TextStyle(fontSize: 22)));
+        pageContent = _profilePage();
         break;
 
       default:
         pageContent = _homeBody();
     }
 
-    final PreferredSizeWidget topBar = PreferredSize(
-      preferredSize: const Size.fromHeight(90),
-      child: selectedIndex == 0 ? _homeTopBar() : _subPageTopBar(),
-    );
-
     return GestureDetector(
       onHorizontalDragStart: _handleHorizontalDragStart,
       onHorizontalDragUpdate: _handleHorizontalDragUpdate,
       onHorizontalDragEnd: _handleHorizontalDragEnd,
-      child: Container(
-        color: Colors.white,
-        child: SafeArea(
-          top: true,
-          bottom: false,
-          child: Scaffold(
-            key: _scaffoldKey,
-            drawer: _buildPremiumDrawer(),
-            backgroundColor: const Color(0xFFFCEEEE),
-            appBar: topBar,
-            body: Stack(
-              children: [
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 420),
-                  transitionBuilder: (child, animation) {
-                    final offset = Tween<Offset>(
-                      begin: Offset(selectedIndex == 0 ? -0.08 : 0.08, 0),
-                      end: Offset.zero,
-                    );
-                    return SlideTransition(
-                      position: animation.drive(offset),
-                      child: FadeTransition(opacity: animation, child: child),
-                    );
-                  },
-                  child: SizedBox(
-                    key: ValueKey(selectedIndex),
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: pageContent,
-                  ),
-                ),
+      child: SafeArea(
+        child: Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: const Color(0xFFFCEEEE),
+          drawer: _buildPremiumDrawer(),
+          appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(90),
+              child: selectedIndex == 0 ? _homeTopBar() : _subPageTopBar()),
+          body: Stack(
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 420),
+                transitionBuilder: (child, animation) {
+                  final slide = Tween<Offset>(
+                          begin: Offset(selectedIndex == 0 ? -0.08 : 0.08, 0),
+                          end: Offset.zero)
+                      .animate(animation);
 
-                PinterestArcMenu(
-                  isOpen: arcOpen,
-                  onMaleTap: () {
-                    setState(() {
-                      selectedCategory = "male";
-                      arcOpen = false;
-                    });
-                  },
-                  onFemaleTap: () {
-                    setState(() {
-                      selectedCategory = "female";
-                      arcOpen = false;
-                    });
-                  },
-                  onUnisexTap: () {
-                    setState(() {
-                      selectedCategory = "unisex";
-                      arcOpen = false;
-                    });
-                  },
+                  return SlideTransition(
+                      position: slide,
+                      child: FadeTransition(opacity: animation, child: child));
+                },
+                child: Container(
+                  key: ValueKey(selectedIndex),
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: pageContent,
                 ),
-              ],
-            ),
-            bottomNavigationBar: _bottomNavBar(),
+              ),
+
+              // Arc menu always above
+              PinterestArcMenu(
+                isOpen: arcOpen,
+                onMaleTap: () => setState(() {
+                  arcOpen = false;
+                  selectedCategory = "male";
+                }),
+                onFemaleTap: () => setState(() {
+                  arcOpen = false;
+                  selectedCategory = "female";
+                }),
+                onUnisexTap: () => setState(() {
+                  arcOpen = false;
+                  selectedCategory = "unisex";
+                }),
+              ),
+            ],
           ),
+          bottomNavigationBar: _bottomNavBar(),
         ),
       ),
     );
   }
-}
-
-// ----------------------------
-// Curve Clipper
-// ----------------------------
-class TopBarClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    const curveHeight = 24;
-    return Path()
-      ..lineTo(0, size.height - curveHeight)
-      ..quadraticBezierTo(
-        size.width / 2,
-        size.height + curveHeight,
-        size.width,
-        size.height - curveHeight,
-      )
-      ..lineTo(size.width, 0)
-      ..close();
-  }
-
-  @override
-  bool shouldReclip(_) => false;
 }
