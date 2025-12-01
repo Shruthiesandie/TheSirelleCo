@@ -44,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 19, 24, 91), // 🌸 Light pink
+      backgroundColor: const Color.fromARGB(255, 225, 38, 91), // 🌸 Light pink
       body: SafeArea(
         child: Center(
           child: FadeTransition(
