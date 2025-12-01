@@ -15,9 +15,9 @@ class _MembershipPageState extends State<MembershipPage>
     with TickerProviderStateMixin {
   // Mock data
   final DateTime purchaseDate =
-      DateTime.now().subtract(const Duration(days: 190));
+      DateTime.now().subtract(const Duration(days: 190)); // 6+ months ago
 
-  final double totalSavings = 124.50; // Will show in ₹ now
+  final double totalSavings = 124.50; // Now in ₹
 
   late AnimationController bgAnimController;
   late ConfettiController confettiController;
@@ -28,11 +28,13 @@ class _MembershipPageState extends State<MembershipPage>
   void initState() {
     super.initState();
 
+    // Background animation
     bgAnimController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 8),
     )..repeat(reverse: true);
 
+    // Confetti
     confettiController =
         ConfettiController(duration: const Duration(seconds: 2));
 
@@ -61,17 +63,20 @@ class _MembershipPageState extends State<MembershipPage>
     setState(() => hasBadge = true);
   }
 
-  // Helpers
+  // ------------------ Helpers ------------------
+
   int get daysSincePurchase =>
       DateTime.now().difference(purchaseDate).inDays;
 
-  int get membershipYearDays => 365;
-
   int get monthsSinceJoin => (daysSincePurchase / 30).floor();
+
+  int get membershipYearDays => 365;
 
   double get membershipProgressPct =>
       ((daysSincePurchase % membershipYearDays) / membershipYearDays)
           .clamp(0.0, 1.0);
+
+  bool get isMember => monthsSinceJoin >= 1;
 
   String formattedDate(DateTime d) => DateFormat.yMMMMd().format(d);
 
@@ -86,12 +91,13 @@ class _MembershipPageState extends State<MembershipPage>
 
   bool stampEarned(int months) => monthsSinceJoin >= months;
 
+  // ------------------ BUILD UI ------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // ------------------- PREMIUM ANIMATED BACKGROUND -------------------
+          // -------- PREMIUM ANIMATED BACKGROUND --------
           AnimatedBuilder(
             animation: bgAnimController,
             builder: (_, child) {
@@ -116,7 +122,7 @@ class _MembershipPageState extends State<MembershipPage>
             },
           ),
 
-          // Confetti
+          // Confetti animation
           Align(
             alignment: Alignment.topCenter,
             child: ConfettiWidget(
@@ -182,7 +188,7 @@ class _MembershipPageState extends State<MembershipPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("Membership Dashboard",
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 18, fontWeight: FontWeight.bold)),
             Text(hasBadge ? "🏅 Badge Unlocked!" : "No Badge Yet",
                 style: TextStyle(
@@ -193,7 +199,7 @@ class _MembershipPageState extends State<MembershipPage>
     );
   }
 
-  // ---------------- SECTION 1 ----------------
+  // ---------------- SECTION 1: Membership Status ----------------
   Widget _membershipStatus() {
     return _card(
       Column(
@@ -203,13 +209,13 @@ class _MembershipPageState extends State<MembershipPage>
               style:
                   TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
+
           _labelValue("Purchase Date", formattedDate(purchaseDate)),
           const SizedBox(height: 10),
-          _labelValue(
-              "Duration", "$monthsSinceJoin month(s) completed"),
+          _labelValue("Duration", "$monthsSinceJoin month(s) completed"),
           const SizedBox(height: 20),
 
-          // Total Savings (INR)
+          // -------- Total Savings (₹) with Breathing Piggy Bank --------
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -231,8 +237,21 @@ class _MembershipPageState extends State<MembershipPage>
                   ],
                 ),
                 const Spacer(),
-                const Icon(Icons.currency_rupee,
-                    color: Colors.pink, size: 32),
+
+                // 💗 Breathing Piggy Animation
+                ScaleTransition(
+                  scale: Tween(begin: 0.95, end: 1.05).animate(
+                    CurvedAnimation(
+                      parent: bgAnimController,
+                      curve: Curves.easeInOut,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.savings_rounded,
+                    color: Colors.pink,
+                    size: 36,
+                  ),
+                ),
               ],
             ),
           ),
@@ -240,8 +259,8 @@ class _MembershipPageState extends State<MembershipPage>
           const SizedBox(height: 20),
 
           // Progress Bar
-          Text("Year Progress",
-              style: const TextStyle(fontWeight: FontWeight.w600)),
+          const Text("Year Progress",
+              style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(14),
@@ -250,6 +269,7 @@ class _MembershipPageState extends State<MembershipPage>
               minHeight: 12,
               valueColor:
                   AlwaysStoppedAnimation<Color>(Colors.pink.shade400),
+              backgroundColor: Colors.grey.shade300,
             ),
           )
         ],
@@ -257,7 +277,7 @@ class _MembershipPageState extends State<MembershipPage>
     );
   }
 
-  // ---------------- SECTION 2 ----------------
+  // ---------------- SECTION 2: Active Plan ----------------
   Widget _activePlan() {
     return _card(
       Column(
@@ -274,8 +294,8 @@ class _MembershipPageState extends State<MembershipPage>
                 height: 60,
                 width: 60,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                      colors: [Colors.pink, Colors.purple]),
+                  gradient:
+                      const LinearGradient(colors: [Colors.pink, Colors.purple]),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(Icons.workspace_premium,
@@ -288,7 +308,7 @@ class _MembershipPageState extends State<MembershipPage>
                   Text("Premium Annual Access",
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text("₹3000 / Year",
+                  Text("₹300 / Year",
                       style: TextStyle(color: Colors.black54)),
                 ],
               ),
@@ -311,7 +331,7 @@ class _MembershipPageState extends State<MembershipPage>
     );
   }
 
-  // ---------------- SECTION 3 ----------------
+  // ---------------- SECTION 3: Stamps ----------------
   Widget _stamps() {
     return _card(
       Column(
@@ -337,10 +357,7 @@ class _MembershipPageState extends State<MembershipPage>
   Widget _stampTile(_StampDefinition def) {
     final earned = stampEarned(def.monthsRequired);
 
-    // Unlock badge if user has 5-year stamp
-    if (earned && def.monthsRequired == 60) {
-      _saveBadge();
-    }
+    if (earned && def.monthsRequired == 60) _saveBadge();
 
     return GestureDetector(
       onTap: () {
@@ -373,24 +390,34 @@ class _MembershipPageState extends State<MembershipPage>
     );
   }
 
-  // ---------------- SECTION 4 ----------------
+  // ---------------- SECTION 4: CTA (Dynamic) ----------------
   Widget _cta() {
     return _card(
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Ready to Renew?",
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(
+            isMember ? "Ready to Renew?" : "Become a Member",
+            style: const TextStyle(
+                fontSize: 18, fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 10),
-          const Text("Tap below to renew your membership.",
-              style: TextStyle(color: Colors.black54)),
+          Text(
+            isMember
+                ? "Tap below to renew your membership."
+                : "Join now to unlock all premium benefits.",
+            style: const TextStyle(color: Colors.black54),
+          ),
           const SizedBox(height: 20),
+
           ElevatedButton(
             onPressed: () {
               confettiController.play();
               ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Renewal Started!")));
+                  SnackBar(
+                      content: Text(isMember
+                          ? "Renewal Started!"
+                          : "Membership Activated!")));
             },
             style: ElevatedButton.styleFrom(
               padding:
@@ -399,14 +426,18 @@ class _MembershipPageState extends State<MembershipPage>
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text("Renew Membership",
-                style:
-                    TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text(
+              isMember ? "Renew Membership" : "Join Membership",
+              style: const TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           )
         ],
       ),
     );
   }
+
+  // ---------------- Helper Widgets ----------------
 
   Widget _labelValue(String label, String value) {
     return Column(
@@ -440,6 +471,7 @@ class _MembershipPageState extends State<MembershipPage>
   }
 }
 
+// ---------------- Stamp Definition ----------------
 class _StampDefinition {
   final int monthsRequired;
   final String title;
@@ -449,6 +481,7 @@ class _StampDefinition {
       this.monthsRequired, this.title, this.description);
 }
 
+// ---------------- Benefit Chip ----------------
 class _benefit extends StatelessWidget {
   final IconData icon;
   final String text;
