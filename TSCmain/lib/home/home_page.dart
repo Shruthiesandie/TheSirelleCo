@@ -536,7 +536,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         pageContent = _homeBody();
         break;
       case 1:
-        pageContent = _membershipPage();
+        pageContent = const MembershipPage(); // ✅ YOUR REAL PAGE
         break;
       case 2:
         pageContent = _cartPage();
