@@ -1,100 +1,119 @@
 // lib/pages/ice_cream_landing_page.dart
 import 'package:flutter/material.dart';
 
-
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFF1F4),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _heroSection(),
-            _wave(),
-            _featuredCardsSection(),
-            _wave(reverse: true),
-            _aboutSection(),
-            _wave(),
-            _galleryTestimonialsSection(),
-            _wave(reverse: true),
-            _videoSection(),
-            _wave(),
-            _footerSection(),
+            _heroSection(width),
+            _wave(height: 110),
+            const SizedBox(height: 40),
+            _featuredSection(width),
+            const SizedBox(height: 70),
+            _wave(height: 120, reverse: true),
+            const SizedBox(height: 40),
+            _aboutSection(width),
+            const SizedBox(height: 60),
+            _wave(height: 120),
+            const SizedBox(height: 50),
+            _gallerySection(width),
+            const SizedBox(height: 60),
+            _wave(height: 120, reverse: true),
+            const SizedBox(height: 50),
+            _videoSection(width),
+            const SizedBox(height: 60),
+            _wave(height: 120),
+            _footerSection(width),
+            const SizedBox(height: 50),
           ],
         ),
       ),
     );
   }
 
-  // -------------------------------------------------------------
-  // ⭐ SECTION 1 — HERO HEADER
-  // -------------------------------------------------------------
-  Widget _heroSection() {
+  // -------------------------------------------------------------------------
+  // ⭐ HERO SECTION (FIXED HEIGHT, BIGGER TITLE, CENTERED IMAGE)
+  // -------------------------------------------------------------------------
+  Widget _heroSection(double width) {
     return Stack(
       children: [
         Container(
-          height: 420,
+          height: 520, // Increased to match the screenshot layout
           width: double.infinity,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFFFFAFCF), Color(0xFFFFC8DA)],
+              colors: [Color(0xFFFF96BD), Color(0xFFFFBFD4)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
           ),
         ),
 
+        // Top navigation items
         Positioned(
-          top: 50,
+          top: 55,
           left: 0,
           right: 0,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _navItem("Lorem"),
-              const SizedBox(width: 26),
+              const SizedBox(width: 30),
               _navItem("Lorem"),
-              const SizedBox(width: 26),
+              const SizedBox(width: 30),
               _navItem("Lorem"),
-              const SizedBox(width: 26),
+              const SizedBox(width: 30),
               _navItem("Lorem"),
             ],
           ),
         ),
 
+        // Title + image block
         Positioned(
-          top: 130,
+          top: 150,
           left: 0,
           right: 0,
           child: Column(
             children: [
-              const Text(
+              Text(
                 "Lorem Ipsum",
                 style: TextStyle(
-                  fontSize: 38,
+                  fontSize: 42,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
+                  height: 1,
+                  shadows: [
+                    Shadow(color: Colors.black.withOpacity(0.1), blurRadius: 6),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 40),
 
-              // 🍓 IMAGE PLACEHOLDER
+              // Placeholder main image box (now bigger)
               Container(
-                height: 180,
-                width: 280,
+                height: 230,
+                width: width * 0.75,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(30),
+                  color: Colors.white.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(32),
                 ),
                 child: const Center(
-                  child: Text("MAIN IMAGE HERE"),
+                  child: Text(
+                    "MAIN IMAGE HERE",
+                    style: TextStyle(fontSize: 18),
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 35),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -111,11 +130,12 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _navItem(String text) {
+  Widget _navItem(String label) {
     return Text(
-      text,
+      label,
       style: const TextStyle(
         color: Colors.white,
+        fontSize: 14,
         fontWeight: FontWeight.w700,
       ),
     );
@@ -123,51 +143,49 @@ class HomePage extends StatelessWidget {
 
   Widget _pillButton(String label, {bool invert = false}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 14),
       decoration: BoxDecoration(
-        color: invert ? Colors.white : Colors.pink,
+        color: invert ? Colors.white : Colors.pink.shade600,
         borderRadius: BorderRadius.circular(40),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: invert ? Colors.pink : Colors.white,
+          color: invert ? Colors.pink.shade600 : Colors.white,
           fontWeight: FontWeight.bold,
+          fontSize: 15,
         ),
       ),
     );
   }
 
-  // -------------------------------------------------------------
-  // ⭐ REUSABLE WAVE DIVIDER
-  // -------------------------------------------------------------
-  Widget _wave({bool reverse = false}) {
+  // -------------------------------------------------------------------------
+  // ⭐ WAVE DIVIDER (SMOOTH & LARGE LIKE THE PNG SAMPLE)
+  // -------------------------------------------------------------------------
+  Widget _wave({bool reverse = false, double height = 100}) {
     return ClipPath(
       clipper: WaveClipper(reverse: reverse),
       child: Container(
-        height: 80,
+        height: height,
+        width: double.infinity,
         color: Colors.white,
       ),
     );
   }
 
-  // -------------------------------------------------------------
-  // ⭐ SECTION 2 — FEATURED ICE CREAM CARDS
-  // -------------------------------------------------------------
-  Widget _featuredCardsSection() {
+  // -------------------------------------------------------------------------
+  // ⭐ FEATURED CARDS (BIGGER & MATCHING THE SPACING IN PNG)
+  // -------------------------------------------------------------------------
+  Widget _featuredSection(double width) {
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 26, horizontal: 20),
-      child: Column(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _iceCard(),
-              _iceCard(),
-              _iceCard(),
-            ],
-          ),
+          _iceCard(),
+          _iceCard(),
+          _iceCard(),
         ],
       ),
     );
@@ -175,44 +193,43 @@ class HomePage extends StatelessWidget {
 
   Widget _iceCard() {
     return Container(
-      width: 110,
-      padding: const EdgeInsets.all(12),
+      width: 115,
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.pink.shade50,
-        borderRadius: BorderRadius.circular(22),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            blurRadius: 14,
-            offset: const Offset(0, 6),
             color: Colors.pink.withOpacity(0.2),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         children: [
-          // Ice cream image placeholder
           Container(
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.pink.shade50,
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Center(child: Text("IMAGE")),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           const Text(
             "Lorem Ipsum",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.pink),
+            style: TextStyle(fontWeight: FontWeight.w700, color: Colors.pink),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           const Text(
             "Lorem ipsum dolor sit amet, consectetur.",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 11, color: Colors.black54),
+            style: TextStyle(fontSize: 12, color: Colors.black54),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           const CircleAvatar(
-            radius: 14,
+            radius: 16,
             backgroundColor: Colors.pink,
             child: Icon(Icons.arrow_forward, size: 16, color: Colors.white),
           ),
@@ -221,52 +238,49 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // -------------------------------------------------------------
-  // ⭐ SECTION 3 — ABOUT SECTION
-  // -------------------------------------------------------------
-  Widget _aboutSection() {
+  // -------------------------------------------------------------------------
+  // ⭐ ABOUT SECTION
+  // -------------------------------------------------------------------------
+  Widget _aboutSection(double width) {
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(26),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
             "Lorem Ipsum",
             style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w900,
               color: Colors.pink,
+              fontSize: 34,
+              fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 26),
 
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Jar image placeholder
               Container(
-                height: 130,
-                width: 130,
+                height: 140,
+                width: 140,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
                   color: Colors.pink.shade100,
+                  shape: BoxShape.circle,
                 ),
                 child: const Center(child: Text("IMAGE")),
               ),
-
-              const SizedBox(width: 20),
-
-              // description
+              const SizedBox(width: 26),
               const Expanded(
                 child: Text(
                   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-                  style: TextStyle(color: Colors.black87, fontSize: 14),
+                  style: TextStyle(fontSize: 14, color: Colors.black87),
                 ),
-              )
+              ),
             ],
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 40),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -283,125 +297,103 @@ class HomePage extends StatelessWidget {
 
   Widget _infoCard() {
     return Container(
-      width: 100,
       height: 90,
-      padding: const EdgeInsets.all(12),
+      width: 100,
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(
-            blurRadius: 12,
-            color: Colors.black.withOpacity(0.08),
-            offset: const Offset(0, 4),
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10),
         ],
       ),
       child: const Center(child: Text("INFO")),
     );
   }
 
-  // -------------------------------------------------------------
-  // ⭐ SECTION 4 — GALLERY + TESTIMONIALS
-  // -------------------------------------------------------------
-  Widget _galleryTestimonialsSection() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(26),
-      child: Column(
-        children: [
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: List.generate(
-              8,
-              (i) => Container(
-                height: 70,
-                width: 70,
-                decoration: BoxDecoration(
-                  color: Colors.pink.shade50,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(child: Text("IMG")),
+  // -------------------------------------------------------------------------
+  // ⭐ GALLERY SECTION
+  // -------------------------------------------------------------------------
+  Widget _gallerySection(double width) {
+    return Column(
+      children: [
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: List.generate(
+            8,
+            (i) => Container(
+              height: 75,
+              width: 75,
+              decoration: BoxDecoration(
+                color: Colors.pink.shade50,
+                borderRadius: BorderRadius.circular(16),
               ),
+              child: const Center(child: Text("IMG")),
             ),
           ),
+        ),
 
-          const SizedBox(height: 26),
+        const SizedBox(height: 36),
 
-          // testimonial
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircleAvatar(
-                radius: 28,
-                backgroundColor: Colors.grey,
-                child: Text("IMG"),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircleAvatar(
+              radius: 28,
+              backgroundColor: Colors.grey,
+              child: Text("IMG"),
+            ),
+            const SizedBox(width: 16),
+            const SizedBox(
+              width: 200,
+              child: Text(
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                style: TextStyle(fontSize: 14),
               ),
-              const SizedBox(width: 16),
-              const Expanded(
-                child: Text(
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-                  style: TextStyle(fontSize: 14),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward_ios),
-                onPressed: () {},
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(icon: const Icon(Icons.arrow_back_ios), onPressed: () {}),
+            IconButton(icon: const Icon(Icons.arrow_forward_ios), onPressed: () {}),
+          ],
+        )
+      ],
     );
   }
 
-  // -------------------------------------------------------------
-  // ⭐ SECTION 5 — VIDEO PREVIEW
-  // -------------------------------------------------------------
-  Widget _videoSection() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(28),
-      child: Column(
-        children: [
-          // big video block
-          Container(
-            height: 200,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.pink.shade100,
-              borderRadius: BorderRadius.circular(22),
-            ),
-            child: const Center(child: Text("VIDEO HERE")),
+  // -------------------------------------------------------------------------
+  // ⭐ VIDEO SECTION
+  // -------------------------------------------------------------------------
+  Widget _videoSection(double width) {
+    return Column(
+      children: [
+        Container(
+          width: width * 0.85,
+          height: 200,
+          decoration: BoxDecoration(
+            color: Colors.pink.shade100,
+            borderRadius: BorderRadius.circular(22),
           ),
-
-          const SizedBox(height: 20),
-
-          // side thumbnails
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _thumbBlock(),
-              const SizedBox(width: 10),
-              _thumbBlock(),
-              const SizedBox(width: 10),
-              _thumbBlock(),
-            ],
-          )
-        ],
-      ),
+          child: const Center(child: Text("VIDEO HERE")),
+        ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _videoThumb(),
+            const SizedBox(width: 10),
+            _videoThumb(),
+            const SizedBox(width: 10),
+            _videoThumb(),
+          ],
+        )
+      ],
     );
   }
 
-  Widget _thumbBlock() {
+  Widget _videoThumb() {
     return Container(
-      width: 70,
       height: 60,
+      width: 60,
       decoration: BoxDecoration(
         color: Colors.pink.shade50,
         borderRadius: BorderRadius.circular(16),
@@ -410,15 +402,15 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // -------------------------------------------------------------
-  // ⭐ SECTION 6 — FOOTER
-  // -------------------------------------------------------------
-  Widget _footerSection() {
+  // -------------------------------------------------------------------------
+  // ⭐ FOOTER SECTION
+  // -------------------------------------------------------------------------
+  Widget _footerSection(double width) {
     return Container(
       padding: const EdgeInsets.all(26),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(50)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
       ),
       child: Column(
         children: [
@@ -427,21 +419,21 @@ class HomePage extends StatelessWidget {
             children: [
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  height: 50,
                   child: const Align(
                     alignment: Alignment.centerLeft,
                     child: Text("Enter email..."),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 14),
                 decoration: BoxDecoration(
                   color: Colors.pink,
                   borderRadius: BorderRadius.circular(30),
@@ -453,25 +445,25 @@ class HomePage extends StatelessWidget {
 
           const SizedBox(height: 40),
 
-          // Social icons
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
               Icon(Icons.camera_alt, color: Colors.pink),
-              SizedBox(width: 20),
+              SizedBox(width: 22),
               Icon(Icons.facebook, color: Colors.pink),
-              SizedBox(width: 20),
+              SizedBox(width: 22),
               Icon(Icons.video_library, color: Colors.pink),
             ],
           ),
 
-          const SizedBox(height: 16),
-
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Text("Lorem"), SizedBox(width: 18),
-              Text("Lorem"), SizedBox(width: 18),
+              Text("Lorem"),
+              SizedBox(width: 20),
+              Text("Lorem"),
+              SizedBox(width: 20),
               Text("Lorem"),
             ],
           ),
@@ -481,26 +473,36 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// ------------------------------------------------------------------
-// ⭐ WAVE CLIPPER
-// ------------------------------------------------------------------
+// -------------------------------------------------------------------------
+// ⭐ BETTER WAVE CLIPPER — 1:1 SAME CURVE AS PNG
+// -------------------------------------------------------------------------
 class WaveClipper extends CustomClipper<Path> {
   final bool reverse;
   WaveClipper({this.reverse = false});
 
   @override
   Path getClip(Size size) {
-    final Path path = Path();
+    const double curveHeight = 40;
+
+    Path path = Path();
+
     if (!reverse) {
-      path.lineTo(0, size.height - 30);
-      path.quadraticBezierTo(size.width / 2, size.height + 30, size.width, size.height - 30);
+      path.lineTo(0, size.height - curveHeight);
+      path.quadraticBezierTo(
+        size.width / 2, size.height + curveHeight,
+        size.width, size.height - curveHeight,
+      );
       path.lineTo(size.width, 0);
     } else {
-      path.moveTo(0, 30);
-      path.quadraticBezierTo(size.width / 2, -30, size.width, 30);
+      path.moveTo(0, curveHeight);
+      path.quadraticBezierTo(
+        size.width / 2, -curveHeight,
+        size.width, curveHeight,
+      );
       path.lineTo(size.width, size.height);
       path.lineTo(0, size.height);
     }
+
     path.close();
     return path;
   }
