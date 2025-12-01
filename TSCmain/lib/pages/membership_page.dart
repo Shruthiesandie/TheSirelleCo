@@ -397,7 +397,7 @@ class _MembershipPageState extends State<MembershipPage>
   }
 
   // ------------------------------------------------------------
-  // Membership card content
+  // Membership card content (with overflow fix)
   // ------------------------------------------------------------
   Widget _membershipCardContent() {
     return Column(
@@ -407,8 +407,23 @@ class _MembershipPageState extends State<MembershipPage>
           children: [
             _premiumIcon(),
             const SizedBox(width: 12),
-            _membershipTitle(),
-            const Spacer(),
+
+            // <<< FIX: Title wrapped in Expanded to avoid horizontal overflow >>>
+            Expanded(
+              child: Text(
+                "Premium Membership",
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
             _discountBadge(),
           ],
         ),
@@ -449,14 +464,6 @@ class _MembershipPageState extends State<MembershipPage>
         ),
       ),
       child: const Icon(Icons.workspace_premium_rounded, color: Colors.white),
-    );
-  }
-
-  Widget _membershipTitle() {
-    return const Text(
-      "Premium Membership",
-      style: TextStyle(
-          fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white),
     );
   }
 
