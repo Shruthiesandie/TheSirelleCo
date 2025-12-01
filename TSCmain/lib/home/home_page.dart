@@ -10,18 +10,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin {
-  // ---------------------------
-  // NAVIGATION STATE
-  // ---------------------------
-  int selectedIndex = 0; // 0=Home, 1=Membership, 3=Cart, 4=Profile
+  int selectedIndex = 0;
   bool arcOpen = false;
   String selectedCategory = "none";
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // ---------------------------
-  // CONTROLLERS
-  // ---------------------------
   late final PageController heroController;
   late final PageController productController;
   late final ScrollController galleryController;
@@ -42,9 +36,7 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  // ---------------------------
-  // PAGE SWITCHER
-  // ---------------------------
+  // SWITCH TABS
   void switchTab(int index) {
     setState(() {
       selectedIndex = index;
@@ -52,13 +44,8 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-  // ---------------------------
-  // BACK BUTTON BEHAVIOR
-  // ---------------------------
   void goBackToHome() {
-    setState(() {
-      selectedIndex = 0;
-    });
+    setState(() => selectedIndex = 0);
   }
 
   @override
@@ -72,35 +59,27 @@ class _HomePageState extends State<HomePage>
           key: scaffoldKey,
           backgroundColor: const Color(0xFFFCEEEE),
 
-          // ---------------------------
-          // TOP BAR (depends on tab)
-          // ---------------------------
+          // TOP BAR
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90),
             child: selectedIndex == 0
-                ? _homeTopBar() // your ORIGINAL curved logo top bar
-                : _simpleTopBar(), // back + title
+                ? _homeTopBar()
+                : _simpleTopBar(),
           ),
 
-          // ---------------------------
-          // BODY (ALL pages inside IndexedStack)
-          // ---------------------------
+          // BODY
           body: Stack(
             children: [
               IndexedStack(
-                index: selectedIndex == 3 ? 2 : selectedIndex, // mapping
+                index: selectedIndex,
                 children: [
                   _homeContent(),
-
                   _membershipPage(),
-
                   _cartPage(),
-
                   _profilePage(),
                 ],
               ),
 
-              // ARC MENU stays only on Home
               if (selectedIndex == 0)
                 PinterestArcMenu(
                   isOpen: arcOpen,
@@ -126,20 +105,15 @@ class _HomePageState extends State<HomePage>
             ],
           ),
 
-          // ---------------------------
-          // BOTTOM NAV BAR
-          // ---------------------------
           bottomNavigationBar: _bottomNavBar(),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // TOP BARS
-  // ============================================================
-
-  // ------------------- HOME TOP BAR (curved logo bar) -------------------
+  // ---------------------------
+  // HOME TOP BAR
+  // ---------------------------
   Widget _homeTopBar() {
     return ClipPath(
       clipper: TopBarClipper(),
@@ -166,7 +140,6 @@ class _HomePageState extends State<HomePage>
               Icons.menu,
               () => scaffoldKey.currentState!.openDrawer(),
             ),
-
             Expanded(
               child: Transform.translate(
                 offset: const Offset(20, 0),
@@ -180,7 +153,6 @@ class _HomePageState extends State<HomePage>
                 ),
               ),
             ),
-
             Row(
               children: [
                 _glassIconButton(Icons.search,
@@ -196,7 +168,9 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------- SIMPLE PAGE TOP BAR -------------------
+  // ---------------------------
+  // SIMPLE PAGE TOP BAR
+  // ---------------------------
   Widget _simpleTopBar() {
     return AppBar(
       elevation: 0,
@@ -206,7 +180,6 @@ class _HomePageState extends State<HomePage>
         icon: const Icon(Icons.arrow_back, color: Colors.black),
         onPressed: goBackToHome,
       ),
-      centerTitle: true,
       title: Text(
         _titleForTab(selectedIndex),
         style: const TextStyle(
@@ -214,28 +187,26 @@ class _HomePageState extends State<HomePage>
           fontWeight: FontWeight.w700,
         ),
       ),
+      centerTitle: true,
     );
   }
 
   String _titleForTab(int index) {
     if (index == 1) return "Membership";
-    if (index == 3) return "Cart";
-    if (index == 4) return "Profile";
+    if (index == 2) return "Cart";
+    if (index == 3) return "Profile";
     return "";
   }
 
-  // ============================================================
-  // PAGE CONTENTS (INSIDE IndexedStack)
-  // ============================================================
-
-  // ------------------- HOME PAGE CONTENT -------------------
+  // ---------------------------
+  // HOME CONTENT
+  // ---------------------------
   Widget _homeContent() {
     return SingleChildScrollView(
       child: Column(
         children: [
           const SizedBox(height: 12),
 
-          // HERO SLIDER
           SizedBox(
             height: 240,
             child: PageView.builder(
@@ -247,7 +218,6 @@ class _HomePageState extends State<HomePage>
 
           const SizedBox(height: 20),
 
-          // POPULAR ITEMS TITLE
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 18),
             child: Align(
@@ -265,7 +235,6 @@ class _HomePageState extends State<HomePage>
 
           const SizedBox(height: 12),
 
-          // PRODUCT CAROUSEL
           SizedBox(
             height: 260,
             child: PageView.builder(
@@ -278,7 +247,8 @@ class _HomePageState extends State<HomePage>
                     double value = 1.0;
                     if (productController.position.haveDimensions) {
                       value = productController.page! - index;
-                      value = (1 - (value.abs() * 0.30)).clamp(0.75, 1.0);
+                      value =
+                          (1 - (value.abs() * 0.30)).clamp(0.75, 1.0);
                     }
                     return Center(
                       child: SizedBox(
@@ -331,39 +301,150 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------- MEMBERSHIP PAGE -------------------
-  Widget _membershipPage() {
-    return const Center(
-      child: Text(
-        "Membership Page",
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  // ---------------------------
+  // OTHER PAGES
+  // ---------------------------
+  Widget _membershipPage() => const Center(child: Text("Membership Page"));
+  Widget _cartPage() => const Center(child: Text("Cart Page"));
+  Widget _profilePage() => const Center(child: Text("Profile Page"));
+
+  // ---------------------------
+  // HERO BANNER (RESTORED)
+  // ---------------------------
+  Widget _heroBanner(int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.pink.shade200,
+                Colors.pink.shade100,
+              ],
+            ),
+          ),
+          child: Center(
+            child: Text(
+              "IMAGE ${index + 1}",
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 22,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  // ------------------- CART PAGE -------------------
-  Widget _cartPage() {
-    return const Center(
-      child: Text(
-        "Cart Page",
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  // ---------------------------
+  // PRODUCT CARD (RESTORED)
+  // ---------------------------
+  Widget _productCard(int index) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.pink.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Center(child: Text("IMAGE")),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Product ${index + 1}",
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.pink,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  // ------------------- PROFILE PAGE -------------------
-  Widget _profilePage() {
-    return const Center(
-      child: Text(
-        "Profile Page",
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  // ---------------------------
+  // GALLERY IMAGE (RESTORED)
+  // ---------------------------
+  Widget _galleryImage(int index) {
+    return Container(
+      width: 120,
+      decoration: BoxDecoration(
+        color: Colors.pink.shade50,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          "IMAGE ${index + 1}",
+          style: const TextStyle(
+            color: Colors.pink,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
       ),
     );
   }
 
-  // ============================================================
+  // ---------------------------
+  // GLASS ICON BUTTON
+  // ---------------------------
+  Widget _glassIconButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(9),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withOpacity(0.55),
+          border: Border.all(color: Colors.white.withOpacity(0.8)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.07),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Icon(icon, size: 22, color: Colors.black87),
+      ),
+    );
+  }
+
+  // ---------------------------
   // DRAWER
-  // ============================================================
+  // ---------------------------
   Drawer _buildPremiumDrawer() {
     return Drawer(
       backgroundColor: Colors.white,
@@ -392,22 +473,17 @@ class _HomePageState extends State<HomePage>
               ),
             ),
           ),
-
           const SizedBox(height: 10),
-
           _drawerItem(Icons.person, "Profile"),
           _drawerItem(Icons.settings, "Settings"),
           _drawerItem(Icons.receipt_long, "Orders"),
-
           const Spacer(),
-
-          // LOGOUT BUTTON
           Padding(
             padding: const EdgeInsets.only(bottom: 28),
             child: GestureDetector(
               onTap: () {
                 Navigator.of(context).pop();
-                Future.delayed(const Duration(milliseconds: 80), () {
+                Future.delayed(const Duration(milliseconds: 100), () {
                   Navigator.pushNamedAndRemoveUntil(
                       context, "/login", (route) => false);
                 });
@@ -460,9 +536,9 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ============================================================
-  // NAV BAR
-  // ============================================================
+  // ---------------------------
+  // BOTTOM NAV BAR
+  // ---------------------------
   Widget _bottomNavBar() {
     return Container(
       height: 74,
@@ -489,12 +565,11 @@ class _HomePageState extends State<HomePage>
               _navIcon(Icons.home_filled, 0),
               _navIcon(Icons.card_membership, 1),
               const SizedBox(width: 60),
-              _navIcon(Icons.shopping_cart, 3),
-              _navIcon(Icons.person, 4),
+              _navIcon(Icons.shopping_cart, 2),
+              _navIcon(Icons.person, 3),
             ],
           ),
 
-          // CENTER BUTTON (Arc Menu Toggle)
           if (selectedIndex == 0)
             Positioned(
               bottom: 8,
@@ -536,51 +611,20 @@ class _HomePageState extends State<HomePage>
       child: Icon(
         icon,
         size: 28,
-        color: selectedIndex == index
-            ? Colors.pinkAccent
-            : Colors.grey,
-      ),
-    );
-  }
-
-  // ============================================================
-  // SMALL COMPONENTS
-  // ============================================================
-  Widget _glassIconButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(9),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withOpacity(0.55),
-          border: Border.all(color: Colors.white.withOpacity(0.8)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.07),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          size: 22,
-          color: Colors.black87,
-        ),
+        color:
+            selectedIndex == index ? Colors.pinkAccent : Colors.grey,
       ),
     );
   }
 }
 
-// ============================================================
-// CURVED TOP BAR CLIPPER
-// ============================================================
+// ---------------------------
+// CURVED CLIPPER
+// ---------------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     const curveHeight = 24;
-
     return Path()
       ..lineTo(0, size.height - curveHeight)
       ..quadraticBezierTo(
