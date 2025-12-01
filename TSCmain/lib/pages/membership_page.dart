@@ -1,6 +1,8 @@
 // membership_dashboard_page.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:confetti/confetti.dart';
 
 class MembershipPage extends StatefulWidget {
   const MembershipPage({super.key});
@@ -11,27 +13,52 @@ class MembershipPage extends StatefulWidget {
 
 class _MembershipPageState extends State<MembershipPage>
     with TickerProviderStateMixin {
-  // Mock Data
+  // Mock data
   final DateTime purchaseDate =
       DateTime.now().subtract(const Duration(days: 190));
 
-  final double totalSavings = 124.50;
+  final double totalSavings = 124.50; // Will show in ₹ now
 
-  late final AnimationController _pulseController;
+  late AnimationController bgAnimController;
+  late ConfettiController confettiController;
+
+  bool hasBadge = false;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
+
+    bgAnimController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: const Duration(seconds: 8),
     )..repeat(reverse: true);
+
+    confettiController =
+        ConfettiController(duration: const Duration(seconds: 2));
+
+    _loadBadge();
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
+    bgAnimController.dispose();
+    confettiController.dispose();
     super.dispose();
+  }
+
+  // Load badge from storage
+  Future<void> _loadBadge() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      hasBadge = prefs.getBool("membership_badge") ?? false;
+    });
+  }
+
+  // Save badge to storage
+  Future<void> _saveBadge() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("membership_badge", true);
+    setState(() => hasBadge = true);
   }
 
   // Helpers
@@ -40,8 +67,7 @@ class _MembershipPageState extends State<MembershipPage>
 
   int get membershipYearDays => 365;
 
-  int get daysRemaining =>
-      membershipYearDays - (daysSincePurchase % membershipYearDays);
+  int get monthsSinceJoin => (daysSincePurchase / 30).floor();
 
   double get membershipProgressPct =>
       ((daysSincePurchase % membershipYearDays) / membershipYearDays)
@@ -49,120 +75,126 @@ class _MembershipPageState extends State<MembershipPage>
 
   String formattedDate(DateTime d) => DateFormat.yMMMMd().format(d);
 
-  int get monthsSinceJoin => (daysSincePurchase / 30).floor();
-
-  final List<_StampDefinition> _stamps = const [
-    _StampDefinition(
-        monthsRequired: 1,
-        title: "1 Month",
-        description: "Completed your first month"),
-    _StampDefinition(
-        monthsRequired: 3,
-        title: "3 Months",
-        description: "3 months loyalty"),
-    _StampDefinition(
-        monthsRequired: 6,
-        title: "6 Months",
-        description: "Half-year milestone"),
-    _StampDefinition(
-        monthsRequired: 12,
-        title: "1 Year",
-        description: "1 Year Achievement"),
-    _StampDefinition(
-        monthsRequired: 24,
-        title: "2 Years",
-        description: "2 Year Veteran"),
-    _StampDefinition(
-        monthsRequired: 60,
-        title: "5 Years",
-        description: "5 Year Legend"),
+  final List<_StampDefinition> stamps = const [
+    _StampDefinition(1, "1 Month", "Completed 1 Month"),
+    _StampDefinition(3, "3 Months", "3 Month Loyalty"),
+    _StampDefinition(6, "6 Months", "Half-Year Milestone"),
+    _StampDefinition(12, "1 Year", "1 Year Achievement"),
+    _StampDefinition(24, "2 Years", "2 Year Veteran"),
+    _StampDefinition(60, "5 Years", "5 Year Legend Badge"),
   ];
 
-  bool stampEarned(_StampDefinition def) =>
-      monthsSinceJoin >= def.monthsRequired;
+  bool stampEarned(int months) => monthsSinceJoin >= months;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // BEAUTIFUL SOFT GRADIENT BACKGROUND
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFFFF5F8), Color(0xFFFCECF1)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          // ------------------- PREMIUM ANIMATED BACKGROUND -------------------
+          AnimatedBuilder(
+            animation: bgAnimController,
+            builder: (_, child) {
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color.lerp(
+                          const Color(0xFFFFF3F8),
+                          const Color(0xFFFFE6F2),
+                          bgAnimController.value)!,
+                      Color.lerp(
+                          const Color(0xFFFBE7F3),
+                          const Color(0xFFFFF0F6),
+                          1 - bgAnimController.value)!,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              );
+            },
           ),
-        ),
 
-        // FULL PAGE SCROLL — OPTION A
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _header(),
-
-                const SizedBox(height: 20),
-
-                // SECTION 1
-                _membershipStatusCard(),
-
-                const SizedBox(height: 20),
-
-                // SECTION 2
-                _activePlanDetailsCard(),
-
-                const SizedBox(height: 20),
-
-                // SECTION 3
-                _loyaltyStampsSection(),
-
-                const SizedBox(height: 20),
-
-                // SECTION 4
-                _renewCTA(),
-
-                const SizedBox(height: 40),
-              ],
+          // Confetti
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: confettiController,
+              blastDirection: -3.14 / 2,
+              shouldLoop: false,
+              emissionFrequency: 0.05,
+              numberOfParticles: 20,
             ),
           ),
-        ),
+
+          SafeArea(
+            child: SingleChildScrollView(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _header(),
+
+                  const SizedBox(height: 20),
+
+                  _membershipStatus(),
+
+                  const SizedBox(height: 20),
+
+                  _activePlan(),
+
+                  const SizedBox(height: 20),
+
+                  _stamps(),
+
+                  const SizedBox(height: 20),
+
+                  _cta(),
+
+                  const SizedBox(height: 50),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // ----------------- HEADER -----------------
+  // ---------------- HEADER ----------------
   Widget _header() {
     return Row(
       children: [
         Container(
-          height: 50,
-          width: 50,
+          height: 52,
+          width: 52,
           decoration: BoxDecoration(
             gradient:
-                const LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
-            borderRadius: BorderRadius.circular(12),
+                const LinearGradient(colors: [Colors.pink, Colors.purple]),
+            borderRadius: BorderRadius.circular(14),
           ),
-          child: const Icon(Icons.card_membership, color: Colors.white),
+          child: const Icon(Icons.workspace_premium, color: Colors.white),
         ),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text("Membership", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text("Dashboard", style: TextStyle(fontSize: 13, color: Colors.black54)),
+          children: [
+            Text("Membership Dashboard",
+                style: TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(hasBadge ? "🏅 Badge Unlocked!" : "No Badge Yet",
+                style: TextStyle(
+                    color: hasBadge ? Colors.green : Colors.black45)),
           ],
         ),
       ],
     );
   }
 
-  // ----------------- SECTION 1 -----------------
-  Widget _membershipStatusCard() {
-    final pct = membershipProgressPct;
-    final percentText = (pct * 100).toStringAsFixed(0);
-
+  // ---------------- SECTION 1 ----------------
+  Widget _membershipStatus() {
     return _card(
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,22 +202,19 @@ class _MembershipPageState extends State<MembershipPage>
           const Text("Membership Status",
               style:
                   TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 14),
-
-          // Purchase Info
+          const SizedBox(height: 16),
           _labelValue("Purchase Date", formattedDate(purchaseDate)),
           const SizedBox(height: 10),
-
           _labelValue(
-              "Membership Duration", "$monthsSinceJoin month(s)"),
-          const SizedBox(height: 16),
+              "Duration", "$monthsSinceJoin month(s) completed"),
+          const SizedBox(height: 20),
 
-          // TOTAL SAVINGS
+          // Total Savings (INR)
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: Colors.pink.shade50,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
               children: [
@@ -194,61 +223,49 @@ class _MembershipPageState extends State<MembershipPage>
                   children: [
                     const Text("Total Savings",
                         style: TextStyle(color: Colors.black54)),
-                    const SizedBox(height: 4),
-                    Text("\$${totalSavings.toStringAsFixed(2)}",
+                    Text("₹${totalSavings.toStringAsFixed(2)}",
                         style: const TextStyle(
                             color: Colors.pink,
                             fontSize: 22,
-                            fontWeight: FontWeight.w700)),
+                            fontWeight: FontWeight.bold)),
                   ],
                 ),
                 const Spacer(),
-                ScaleTransition(
-                  scale: Tween(begin: 0.95, end: 1.05).animate(
-                      CurvedAnimation(
-                          parent: _pulseController,
-                          curve: Curves.easeInOut)),
-                  child: const Icon(Icons.savings,
-                      color: Colors.pink, size: 30),
-                ),
+                const Icon(Icons.currency_rupee,
+                    color: Colors.pink, size: 32),
               ],
             ),
           ),
 
           const SizedBox(height: 20),
 
-          // PROGRESS BAR
-          Text("Year Progress $percentText%",
+          // Progress Bar
+          Text("Year Progress",
               style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             child: LinearProgressIndicator(
-              value: pct,
+              value: membershipProgressPct,
               minHeight: 12,
               valueColor:
                   AlwaysStoppedAnimation<Color>(Colors.pink.shade400),
-              backgroundColor: Colors.grey.shade200,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text("${(pct * membershipYearDays).floor()} of $membershipYearDays days elapsed",
-              style: const TextStyle(fontSize: 12, color: Colors.black54)),
+          )
         ],
       ),
     );
   }
 
-  // ----------------- SECTION 2 -----------------
-  Widget _activePlanDetailsCard() {
+  // ---------------- SECTION 2 ----------------
+  Widget _activePlan() {
     return _card(
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Active Membership",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700)),
+          const Text("Active Plan",
+              style:
+                  TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 20),
 
           Row(
@@ -258,21 +275,21 @@ class _MembershipPageState extends State<MembershipPage>
                 width: 60,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                      colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
+                      colors: [Colors.pink, Colors.purple]),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child:
-                    const Icon(Icons.workspace_premium, color: Colors.white),
+                child: const Icon(Icons.workspace_premium,
+                    color: Colors.white),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   Text("Premium Annual Access",
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text("₹300 / Year",
-                      style: TextStyle(fontSize: 13, color: Colors.black54)),
+                  Text("₹3000 / Year",
+                      style: TextStyle(color: Colors.black54)),
                 ],
               ),
             ],
@@ -280,152 +297,131 @@ class _MembershipPageState extends State<MembershipPage>
 
           const SizedBox(height: 20),
 
-          // BENEFITS
           Wrap(
             spacing: 10,
             runSpacing: 10,
-            children: [
-              _benefit(Icons.local_offer, "10% Discount on all purchases"),
-              _benefit(Icons.headset_mic, "Priority Customer Support"),
-              _benefit(Icons.flash_on, "Early Access to Sales"),
+            children: const [
+              _benefit(Icons.local_offer, "10% instant discount"),
+              _benefit(Icons.headset_mic, "Priority support"),
+              _benefit(Icons.flash_on, "Early access to sales"),
             ],
-          ),
+          )
         ],
       ),
     );
   }
 
-  Widget _benefit(IconData icon, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.pink.shade50,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18, color: Colors.pink),
-          const SizedBox(width: 6),
-          Text(text,
-              style:
-                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-        ],
-      ),
-    );
-  }
-
-  // ----------------- SECTION 3 -----------------
-  Widget _loyaltyStampsSection() {
+  // ---------------- SECTION 3 ----------------
+  Widget _stamps() {
     return _card(
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Loyalty Stamps",
+          const Text("Achievement Stamps",
               style:
                   TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 20),
 
-          // Wrap works PERFECT for mobile, no layout bugs
           Wrap(
-            spacing: 14,
-            runSpacing: 14,
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              for (int i = 0; i < _stamps.length; i++) _stampTile(i),
+              for (var s in stamps) _stampTile(s),
             ],
-          ),
+          )
         ],
       ),
     );
   }
 
-  Widget _stampTile(int index) {
-    final def = _stamps[index];
-    final earned = stampEarned(def);
+  Widget _stampTile(_StampDefinition def) {
+    final earned = stampEarned(def.monthsRequired);
 
-    return Tooltip(
-      message: earned
-          ? def.description
-          : "Unlock at ${def.monthsRequired} months",
-      child: GestureDetector(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    earned ? "Unlocked: ${def.title}" : "Locked — ${def.monthsRequired} months required")),
-          );
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          height: 82,
-          width: 82,
-          decoration: BoxDecoration(
-            color: earned ? Colors.pink.shade50 : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-                color: earned
-                    ? Colors.pink.shade200
-                    : Colors.grey.shade300),
-            boxShadow: [
-              if (earned)
-                BoxShadow(
-                    color: Colors.pink.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 5)),
-            ],
-          ),
-          child: Icon(
-            earned ? Icons.star : Icons.lock_outline,
-            size: 36,
-            color: earned ? Colors.pink : Colors.grey,
-          ),
+    // Unlock badge if user has 5-year stamp
+    if (earned && def.monthsRequired == 60) {
+      _saveBadge();
+    }
+
+    return GestureDetector(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(earned ? def.description : "Locked")));
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        height: 80,
+        width: 80,
+        decoration: BoxDecoration(
+          color: earned ? Colors.pink.shade50 : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+              color: earned ? Colors.pink : Colors.grey.shade300),
+          boxShadow: [
+            if (earned)
+              BoxShadow(
+                  color: Colors.pink.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4)),
+          ],
+        ),
+        child: Icon(
+          earned ? Icons.star : Icons.lock_outline,
+          color: earned ? Colors.pink : Colors.grey,
+          size: 34,
         ),
       ),
     );
   }
 
-  // ----------------- SECTION 4 -----------------
-  Widget _renewCTA() {
+  // ---------------- SECTION 4 ----------------
+  Widget _cta() {
     return _card(
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text("Ready to Renew?",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              style: TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
-
-          const Text("Renew now to continue enjoying member-only perks.",
+          const Text("Tap below to renew your membership.",
               style: TextStyle(color: Colors.black54)),
-
           const SizedBox(height: 20),
-
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text("Membership renewal flow started")),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6FAF),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text("Renew Membership",
-                  style:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ElevatedButton(
+            onPressed: () {
+              confettiController.play();
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Renewal Started!")));
+            },
+            style: ElevatedButton.styleFrom(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+              backgroundColor: Colors.pink,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
-          ),
+            child: const Text("Renew Membership",
+                style:
+                    TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          )
         ],
       ),
     );
   }
 
-  // ----------------- CARD WRAPPER -----------------
+  Widget _labelValue(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(color: Colors.black54)),
+        const SizedBox(height: 4),
+        Text(value,
+            style:
+                const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+      ],
+    );
+  }
+
   Widget _card(Widget child) {
     return Container(
       padding: const EdgeInsets.all(18),
@@ -442,20 +438,6 @@ class _MembershipPageState extends State<MembershipPage>
       child: child,
     );
   }
-
-  Widget _labelValue(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(fontSize: 13, color: Colors.black54)),
-        const SizedBox(height: 4),
-        Text(value,
-            style:
-                const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-      ],
-    );
-  }
 }
 
 class _StampDefinition {
@@ -463,9 +445,32 @@ class _StampDefinition {
   final String title;
   final String description;
 
-  const _StampDefinition({
-    required this.monthsRequired,
-    required this.title,
-    required this.description,
-  });
+  const _StampDefinition(
+      this.monthsRequired, this.title, this.description);
+}
+
+class _benefit extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _benefit(this.icon, this.text, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.pink.shade50,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 16, color: Colors.pink),
+        const SizedBox(width: 6),
+        Text(text,
+            style: const TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w600)),
+      ]),
+    );
+  }
 }
