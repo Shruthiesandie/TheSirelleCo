@@ -1,3 +1,8 @@
+// -------------------------------------------------------------
+// HOME PAGE - Final Version (Everything inside one file)
+// Bottom bar stays globally, top bar is dynamic per page
+// -------------------------------------------------------------
+
 import 'package:flutter/material.dart';
 import '../widgets/pinterest_arc_menu.dart';
 
@@ -8,46 +13,36 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int selectedIndex = 0;
   bool arcOpen = false;
   String selectedCategory = "none";
 
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late final PageController heroController;
-  late final PageController productController;
-  late final ScrollController galleryController;
+  late final PageController _heroController;
+  late final PageController _productController;
+  late final ScrollController _galleryController;
 
   @override
   void initState() {
     super.initState();
-    heroController = PageController(viewportFraction: 0.92);
-    productController = PageController(viewportFraction: 0.72);
-    galleryController = ScrollController();
+    _heroController = PageController(viewportFraction: 0.92);
+    _productController = PageController(viewportFraction: 0.72);
+    _galleryController = ScrollController();
   }
 
   @override
   void dispose() {
-    heroController.dispose();
-    productController.dispose();
-    galleryController.dispose();
+    _heroController.dispose();
+    _productController.dispose();
+    _galleryController.dispose();
     super.dispose();
   }
 
-  // SWITCH TABS
-  void switchTab(int index) {
-    setState(() {
-      selectedIndex = index;
-      arcOpen = false;
-    });
-  }
-
-  void goBackToHome() {
-    setState(() => selectedIndex = 0);
-  }
-
+  // -------------------------------------------------------------
+  // PAGE SWITCHER USING INDEXEDSTACK
+  // -------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -56,64 +51,70 @@ class _HomePageState extends State<HomePage>
         top: true,
         bottom: false,
         child: Scaffold(
-          key: scaffoldKey,
+          key: _scaffoldKey,
           backgroundColor: const Color(0xFFFCEEEE),
 
-          // TOP BAR
+          drawer: _buildPremiumDrawer(),
+
+          // -------------------------------------------------------------
+          // DYNAMIC TOP BAR
+          // -------------------------------------------------------------
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90),
             child: selectedIndex == 0
-                ? _homeTopBar()
-                : _simpleTopBar(),
+                ? _homeTopBar()        // HOME PAGE TOP BAR (curved)
+                : _subPageTopBar(),    // OTHER PAGES SIMPLE TOP BAR
           ),
 
-          // BODY
+          // -------------------------------------------------------------
+          // PAGE BODY (IndexedStack)
+          // -------------------------------------------------------------
           body: Stack(
             children: [
               IndexedStack(
                 index: selectedIndex,
                 children: [
-                  _homeContent(),
-                  _membershipPage(),
-                  _cartPage(),
-                  _profilePage(),
+                  _homePageBody(),        // 0 :: HOME
+                  _membershipPage(),      // 1 :: Membership
+                  _dummyPage("Cart"),     // 2 :: Cart
+                  _dummyPage("Profile"),  // 3 :: Profile
                 ],
               ),
 
-              if (selectedIndex == 0)
-                PinterestArcMenu(
-                  isOpen: arcOpen,
-                  onMaleTap: () {
-                    setState(() {
-                      arcOpen = false;
-                      selectedCategory = "male";
-                    });
-                  },
-                  onFemaleTap: () {
-                    setState(() {
-                      arcOpen = false;
-                      selectedCategory = "female";
-                    });
-                  },
-                  onUnisexTap: () {
-                    setState(() {
-                      arcOpen = false;
-                      selectedCategory = "unisex";
-                    });
-                  },
-                ),
+              // -------------------------------------------------------------
+              // PINTEREST ARC MENU (Now visible on ALL pages)
+              // -------------------------------------------------------------
+              PinterestArcMenu(
+                isOpen: arcOpen,
+                onMaleTap: () => _selectCategory("male"),
+                onFemaleTap: () => _selectCategory("female"),
+                onUnisexTap: () => _selectCategory("unisex"),
+              ),
             ],
           ),
 
+          // -------------------------------------------------------------
+          // BOTTOM NAVIGATION BAR (Always visible)
+          // -------------------------------------------------------------
           bottomNavigationBar: _bottomNavBar(),
         ),
       ),
     );
   }
 
-  // ---------------------------
-  // HOME TOP BAR
-  // ---------------------------
+  // -------------------------------------------------------------
+  // CATEGORY SELECTION (Arc Menu)
+  // -------------------------------------------------------------
+  void _selectCategory(String category) {
+    setState(() {
+      arcOpen = false;
+      selectedCategory = category;
+    });
+  }
+
+  // -------------------------------------------------------------
+  // TOP BAR: HOME ONLY (Curved + Logo)
+  // -------------------------------------------------------------
   Widget _homeTopBar() {
     return ClipPath(
       clipper: TopBarClipper(),
@@ -136,10 +137,7 @@ class _HomePageState extends State<HomePage>
         ),
         child: Row(
           children: [
-            _glassIconButton(
-              Icons.menu,
-              () => scaffoldKey.currentState!.openDrawer(),
-            ),
+            _glassIconButton(Icons.menu, () => _scaffoldKey.currentState!.openDrawer()),
             Expanded(
               child: Transform.translate(
                 offset: const Offset(20, 0),
@@ -155,11 +153,9 @@ class _HomePageState extends State<HomePage>
             ),
             Row(
               children: [
-                _glassIconButton(Icons.search,
-                    () => Navigator.pushNamed(context, "/search")),
+                _glassIconButton(Icons.search, () => Navigator.pushNamed(context, "/search")),
                 const SizedBox(width: 10),
-                _glassIconButton(Icons.favorite_border,
-                    () => Navigator.pushNamed(context, "/love")),
+                _glassIconButton(Icons.favorite_border, () => Navigator.pushNamed(context, "/love")),
               ],
             ),
           ],
@@ -168,49 +164,46 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ---------------------------
-  // SIMPLE PAGE TOP BAR
-  // ---------------------------
-  Widget _simpleTopBar() {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: Colors.white,
-      surfaceTintColor: Colors.transparent,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
-        onPressed: goBackToHome,
+  // -------------------------------------------------------------
+  // TOP BAR: SUB PAGES (Back + Title)
+  // -------------------------------------------------------------
+  Widget _subPageTopBar() {
+    String title = selectedIndex == 1
+        ? "Membership"
+        : selectedIndex == 2
+            ? "Cart"
+            : "Profile";
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      alignment: Alignment.centerLeft,
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => setState(() => selectedIndex = 0),
+            child: const Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87),
+          ),
+          const SizedBox(width: 12),
+          Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+        ],
       ),
-      title: Text(
-        _titleForTab(selectedIndex),
-        style: const TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-      centerTitle: true,
     );
   }
 
-  String _titleForTab(int index) {
-    if (index == 1) return "Membership";
-    if (index == 2) return "Cart";
-    if (index == 3) return "Profile";
-    return "";
-  }
-
-  // ---------------------------
-  // HOME CONTENT
-  // ---------------------------
-  Widget _homeContent() {
+  // -------------------------------------------------------------
+  // HOME PAGE BODY
+  // -------------------------------------------------------------
+  Widget _homePageBody() {
     return SingleChildScrollView(
       child: Column(
         children: [
           const SizedBox(height: 12),
 
+          // HERO BANNERS
           SizedBox(
             height: 240,
             child: PageView.builder(
-              controller: heroController,
+              controller: _heroController,
               itemCount: 4,
               itemBuilder: (_, index) => _heroBanner(index),
             ),
@@ -218,76 +211,44 @@ class _HomePageState extends State<HomePage>
 
           const SizedBox(height: 20),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 18),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Popular Items",
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 22,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 12),
+          _sectionTitle("Popular Items"),
 
           SizedBox(
             height: 260,
             child: PageView.builder(
-              controller: productController,
+              controller: _productController,
               itemCount: 6,
-              itemBuilder: (context, index) {
-                return AnimatedBuilder(
-                  animation: productController,
-                  builder: (context, child) {
-                    double value = 1.0;
-                    if (productController.position.haveDimensions) {
-                      value = productController.page! - index;
-                      value =
-                          (1 - (value.abs() * 0.30)).clamp(0.75, 1.0);
-                    }
-                    return Center(
-                      child: SizedBox(
-                        height: Curves.easeOut.transform(value) * 260,
-                        width: Curves.easeOut.transform(value) * 200,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _productCard(index),
-                );
-              },
+              itemBuilder: (context, index) =>
+                  AnimatedBuilder(
+                    animation: _productController,
+                    builder: (context, child) {
+                      double value = 1.0;
+                      if (_productController.position.haveDimensions) {
+                        value = _productController.page! - index;
+                        value = (1 - (value.abs() * 0.30)).clamp(0.75, 1.0);
+                      }
+                      return Center(
+                        child: SizedBox(
+                          height: Curves.easeOut.transform(value) * 260,
+                          width: Curves.easeOut.transform(value) * 200,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: _productCard(index),
+                  ),
             ),
           ),
 
           const SizedBox(height: 28),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 18),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Gallery",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 12),
+          _sectionTitle("Gallery"),
 
           SizedBox(
             height: 130,
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 18),
-              controller: galleryController,
+              controller: _galleryController,
               scrollDirection: Axis.horizontal,
               itemCount: 10,
               separatorBuilder: (_, __) => const SizedBox(width: 12),
@@ -301,16 +262,43 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ---------------------------
-  // OTHER PAGES
-  // ---------------------------
-  Widget _membershipPage() => const Center(child: Text("Membership Page"));
-  Widget _cartPage() => const Center(child: Text("Cart Page"));
-  Widget _profilePage() => const Center(child: Text("Profile Page"));
+  // -------------------------------------------------------------
+  // MEMBERSHIP PAGE (placeholder)
+  // -------------------------------------------------------------
+  Widget _membershipPage() {
+    return const Center(
+      child: Text("Membership Page", style: TextStyle(fontSize: 22)),
+    );
+  }
 
-  // ---------------------------
-  // HERO BANNER (RESTORED)
-  // ---------------------------
+  // -------------------------------------------------------------
+  // CART & PROFILE PAGES
+  // -------------------------------------------------------------
+  Widget _dummyPage(String title) {
+    return Center(
+      child: Text("$title Page", style: const TextStyle(fontSize: 22)),
+    );
+  }
+
+  // -------------------------------------------------------------
+  // REUSABLE SECTION TITLE
+  // -------------------------------------------------------------
+  Widget _sectionTitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+      child: Row(
+        children: [
+          Text(text,
+              style:
+                  const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------
+  // HERO BANNER
+  // -------------------------------------------------------------
   Widget _heroBanner(int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -319,20 +307,13 @@ class _HomePageState extends State<HomePage>
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Colors.pink.shade200,
-                Colors.pink.shade100,
-              ],
+              colors: [Colors.pink.shade200, Colors.pink.shade100],
             ),
           ),
-          child: Center(
+          child: const Center(
             child: Text(
-              "IMAGE ${index + 1}",
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-              ),
+              "IMAGE",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 22),
             ),
           ),
         ),
@@ -340,9 +321,9 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ---------------------------
-  // PRODUCT CARD (RESTORED)
-  // ---------------------------
+  // -------------------------------------------------------------
+  // PRODUCT CARD
+  // -------------------------------------------------------------
   Widget _productCard(int index) {
     return Padding(
       padding: const EdgeInsets.only(right: 10),
@@ -354,11 +335,7 @@ class _HomePageState extends State<HomePage>
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
+              BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10, offset: const Offset(0, 4)),
             ],
           ),
           child: Column(
@@ -369,17 +346,14 @@ class _HomePageState extends State<HomePage>
                     color: Colors.pink.shade50,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Center(child: Text("IMAGE")),
+                  child: const Center(
+                    child: Text("IMAGE"),
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
-              Text(
-                "Product ${index + 1}",
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: Colors.pink,
-                ),
-              ),
+              Text("Product ${index + 1}",
+                  style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.pink)),
             ],
           ),
         ),
@@ -387,39 +361,26 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ---------------------------
-  // GALLERY IMAGE (RESTORED)
-  // ---------------------------
+  // -------------------------------------------------------------
+  // GALLERY IMAGE
+  // -------------------------------------------------------------
   Widget _galleryImage(int index) {
     return Container(
       width: 120,
       decoration: BoxDecoration(
         color: Colors.pink.shade50,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 3))],
       ),
-      child: Center(
-        child: Text(
-          "IMAGE ${index + 1}",
-          style: const TextStyle(
-            color: Colors.pink,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
+      child: const Center(
+        child: Text("IMAGE", style: TextStyle(color: Colors.pink, fontWeight: FontWeight.w600)),
       ),
     );
   }
 
-  // ---------------------------
+  // -------------------------------------------------------------
   // GLASS ICON BUTTON
-  // ---------------------------
+  // -------------------------------------------------------------
   Widget _glassIconButton(IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -430,11 +391,7 @@ class _HomePageState extends State<HomePage>
           color: Colors.white.withOpacity(0.55),
           border: Border.all(color: Colors.white.withOpacity(0.8)),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.07),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
+            BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 10, offset: const Offset(0, 3)),
           ],
         ),
         child: Icon(icon, size: 22, color: Colors.black87),
@@ -442,9 +399,9 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ---------------------------
+  // -------------------------------------------------------------
   // DRAWER
-  // ---------------------------
+  // -------------------------------------------------------------
   Drawer _buildPremiumDrawer() {
     return Drawer(
       backgroundColor: Colors.white,
@@ -454,50 +411,35 @@ class _HomePageState extends State<HomePage>
             width: double.infinity,
             padding: const EdgeInsets.all(30),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFFF6FAF),
-                  Color(0xFFB97BFF),
-                ],
-              ),
+              gradient: LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
             ),
             child: const Align(
               alignment: Alignment.bottomLeft,
-              child: Text(
-                "Menu",
-                style: TextStyle(
-                  fontSize: 26,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              child: Text("Menu", style: TextStyle(fontSize: 26, color: Colors.white, fontWeight: FontWeight.w700)),
             ),
           ),
           const SizedBox(height: 10),
+
           _drawerItem(Icons.person, "Profile"),
           _drawerItem(Icons.settings, "Settings"),
           _drawerItem(Icons.receipt_long, "Orders"),
+
           const Spacer(),
+
           Padding(
             padding: const EdgeInsets.only(bottom: 28),
             child: GestureDetector(
               onTap: () {
                 Navigator.of(context).pop();
                 Future.delayed(const Duration(milliseconds: 100), () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, "/login", (route) => false);
+                  Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false);
                 });
               },
               child: Container(
                 width: 160,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFF6FAF),
-                      Color(0xFFB97BFF),
-                    ],
-                  ),
+                  gradient: const LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Row(
@@ -505,13 +447,7 @@ class _HomePageState extends State<HomePage>
                   children: [
                     Icon(Icons.logout, color: Colors.white),
                     SizedBox(width: 8),
-                    Text(
-                      "Logout",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    Text("Logout", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
@@ -525,35 +461,22 @@ class _HomePageState extends State<HomePage>
   Widget _drawerItem(IconData icon, String label) {
     return ListTile(
       leading: Icon(icon, color: Colors.pink.shade400),
-      title: Text(
-        label,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-        ),
-      ),
+      title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
       onTap: () {},
     );
   }
 
-  // ---------------------------
-  // BOTTOM NAV BAR
-  // ---------------------------
+  // -------------------------------------------------------------
+  // BOTTOM NAVIGATION BAR (GLOBAL)
+  // -------------------------------------------------------------
   Widget _bottomNavBar() {
     return Container(
       height: 74,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(26),
-          topRight: Radius.circular(26),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, -3),
-          ),
+        borderRadius: const BorderRadius.only(topLeft: Radius.circular(26), topRight: Radius.circular(26)),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, -3)),
         ],
       ),
       child: Stack(
@@ -570,36 +493,43 @@ class _HomePageState extends State<HomePage>
             ],
           ),
 
-          if (selectedIndex == 0)
-            Positioned(
-              bottom: 8,
-              child: GestureDetector(
-                onTap: () => setState(() => arcOpen = !arcOpen),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFFFF6FAF),
-                        Color(0xFFB97BFF),
-                      ],
+          // ALWAYS SHOW + BUTTON IN CENTER
+          Positioned(
+            bottom: 8,
+            child: GestureDetector(
+              onTap: () => setState(() => arcOpen = !arcOpen),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFFF6FAF),
+                      Color(0xFFB97BFF),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pinkAccent.withOpacity(0.35),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
                     ),
-                  ),
-                  child: Icon(
-                    selectedCategory == "male"
-                        ? Icons.male
-                        : selectedCategory == "female"
-                            ? Icons.female
-                            : selectedCategory == "unisex"
-                                ? Icons.transgender
-                                : Icons.add,
-                    color: Colors.white,
-                    size: 30,
-                  ),
+                  ],
+                ),
+                child: Icon(
+                  selectedCategory == "male"
+                      ? Icons.male
+                      : selectedCategory == "female"
+                          ? Icons.female
+                          : selectedCategory == "unisex"
+                              ? Icons.transgender
+                              : Icons.add,
+                  color: Colors.white,
+                  size: 30,
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
@@ -607,32 +537,32 @@ class _HomePageState extends State<HomePage>
 
   Widget _navIcon(IconData icon, int index) {
     return GestureDetector(
-      onTap: () => switchTab(index),
+      onTap: () {
+        setState(() {
+          selectedIndex = index;
+          arcOpen = false;
+        });
+      },
       child: Icon(
         icon,
         size: 28,
-        color:
-            selectedIndex == index ? Colors.pinkAccent : Colors.grey,
+        color: selectedIndex == index ? Colors.pinkAccent : Colors.grey,
       ),
     );
   }
 }
 
-// ---------------------------
-// CURVED CLIPPER
-// ---------------------------
+// -------------------------------------------------------------
+// TOP BAR CLIPPER (Curved Home Top Bar)
+// -------------------------------------------------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     const curveHeight = 24;
     return Path()
       ..lineTo(0, size.height - curveHeight)
-      ..quadraticBezierTo(
-        size.width / 2,
-        size.height + curveHeight,
-        size.width,
-        size.height - curveHeight,
-      )
+      ..quadraticBezierTo(size.width / 2, size.height + curveHeight,
+          size.width, size.height - curveHeight)
       ..lineTo(size.width, 0)
       ..close();
   }
