@@ -1,6 +1,8 @@
 // -------------------------------------------------------------
 // HOME PAGE - Final Version (Everything inside one file)
 // Bottom bar stays globally, top bar is dynamic per page
+// Added: smooth page switch animation with curved spring easing
+// Only the page-switch rendering was changed — everything else kept.
 // -------------------------------------------------------------
 
 import 'package:flutter/material.dart';
@@ -41,7 +43,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   // -------------------------------------------------------------
-  // PAGE SWITCHER USING INDEXEDSTACK
+  // PAGE SWITCHER USING ANIMATEDSWITCHER (Slide + Fade with spring)
   // -------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
@@ -67,18 +69,35 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
 
           // -------------------------------------------------------------
-          // PAGE BODY (IndexedStack)
+          // PAGE BODY (AnimatedSwitcher for smooth page transitions)
           // -------------------------------------------------------------
           body: Stack(
             children: [
-              IndexedStack(
-                index: selectedIndex,
-                children: [
-                  _homePageBody(),        // 0 :: HOME
-                  _membershipPage(),      // 1 :: Membership
-                  _dummyPage("Cart"),     // 2 :: Cart
-                  _dummyPage("Profile"),  // 3 :: Profile
-                ],
+              // AnimatedSwitcher wraps the active page widget. We key the child
+              // by selectedIndex so changing index triggers the custom animation.
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeOutBack, // spring-like entry
+                switchOutCurve: Curves.easeInOut,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  // Slide from slight right -> center + fade
+                  final slideAnim = Tween<Offset>(
+                    begin: const Offset(0.06, 0), // subtle horizontal offset
+                    end: Offset.zero,
+                  ).chain(CurveTween(curve: Curves.easeOutBack)).animate(animation);
+
+                  final fadeAnim = CurvedAnimation(parent: animation, curve: Curves.easeIn);
+
+                  return SlideTransition(
+                    position: slideAnim,
+                    child: FadeTransition(opacity: fadeAnim, child: child),
+                  );
+                },
+                // The child is a single page widget (keyed) chosen by selectedIndex.
+                child: SizedBox.expand(
+                  key: ValueKey<int>(selectedIndex),
+                  child: _pageForIndex(selectedIndex),
+                ),
               ),
 
               // -------------------------------------------------------------
@@ -100,6 +119,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  // Helper that returns the appropriate page widget for the index.
+  // This keeps your original widgets identical, only reorganized into switch.
+  Widget _pageForIndex(int index) {
+    switch (index) {
+      case 0:
+        return _homePageBody();        // 0 :: HOME
+      case 1:
+        return _membershipPage();      // 1 :: Membership
+      case 2:
+        return _dummyPage("Cart");     // 2 :: Cart
+      case 3:
+        return _dummyPage("Profile");  // 3 :: Profile
+      default:
+        return _homePageBody();
+    }
   }
 
   // -------------------------------------------------------------
