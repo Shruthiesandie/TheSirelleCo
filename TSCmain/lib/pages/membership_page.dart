@@ -271,7 +271,7 @@ class _MembershipPageState extends State<MembershipPage>
                   Text("Premium Annual Access",
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text("\$300 / Year",
+                  Text("₹300 / Year",
                       style: TextStyle(fontSize: 13, color: Colors.black54)),
                 ],
               ),
