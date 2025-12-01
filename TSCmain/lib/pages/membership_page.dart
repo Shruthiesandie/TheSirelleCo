@@ -653,7 +653,7 @@ class _StampDefinition {
 class _benefit extends StatelessWidget {
   final IconData icon;
   final String text;
-  const _benefit(this.icon, this.text, {super.key});
+  const _benefit(this.icon, this.text);
 
   @override
   Widget build(BuildContext context) {
