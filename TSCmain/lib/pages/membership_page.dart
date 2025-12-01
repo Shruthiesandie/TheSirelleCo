@@ -12,11 +12,13 @@ class MembershipPage extends StatefulWidget {
 
 class _MembershipPageState extends State<MembershipPage>
     with SingleTickerProviderStateMixin {
+  int selectedPlan = 1;
+
   late AnimationController fadeController;
   late Animation<double> fadeAnim;
 
-  bool isYearly = false; // Monthly / Yearly toggle
-  bool showCoupon = false; // Coupon section toggle
+  bool isYearly = false; // NEW TOGGLE
+  bool showCoupon = false; // COUPON UI
 
   @override
   void initState() {
@@ -44,13 +46,13 @@ class _MembershipPageState extends State<MembershipPage>
     return FadeTransition(
       opacity: fadeAnim,
       child: Scaffold(
-        backgroundColor: const Color(0xFFFDF5FA),
+        backgroundColor: const Color(0xFFFDF4F7),
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.transparent,
           centerTitle: true,
           title: const Text(
-            "Premium Membership",
+            "Membership",
             style: TextStyle(
               color: Colors.black87,
               fontWeight: FontWeight.w700,
@@ -68,20 +70,73 @@ class _MembershipPageState extends State<MembershipPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _riveMascot(),
-                  const SizedBox(height: 10),
+                  _riveMascot(), // ⭐ NEW
+                  const SizedBox(height: 16),
 
                   _header(),
-                  const SizedBox(height: 12),
 
-                  _toggleSwitch(),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 10),
 
-                  _membershipCard(), // ⭐ Only ONE card
+                  _toggleSwitch(), // ⭐ NEW TOGGLE
 
-                  const SizedBox(height: 26),
+                  const SizedBox(height: 24),
 
-                  _couponButton(),
+                  // Plans
+                  _planCard(
+                    index: 0,
+                    title: "Basic",
+                    price: isYearly ? "₹1999 / year" : "₹199 / month",
+                    benefits: [
+                      "Access to basic features",
+                      "Email support",
+                      "Limited rewards"
+                    ],
+                    colors: [
+                      const Color(0xFFFFE4E4),
+                      const Color(0xFFFFD1D1),
+                    ],
+                    icon: Icons.favorite_border,
+                  ),
+                  const SizedBox(height: 20),
+
+                  _planCard(
+                    index: 1,
+                    title: "Silver",
+                    price: isYearly ? "₹3999 / year" : "₹399 / month",
+                    benefits: [
+                      "All Basic features",
+                      "Priority support",
+                      "Monthly discount coupons"
+                    ],
+                    colors: [
+                      const Color(0xFFE3D7FF),
+                      const Color(0xFFC7B5FF),
+                    ],
+                    icon: Icons.stars_rounded,
+                  ),
+                  const SizedBox(height: 20),
+
+                  _planCard(
+                    index: 2,
+                    title: "Premium",
+                    price: isYearly ? "₹7999 / year" : "₹799 / month",
+                    benefits: [
+                      "All Silver features",
+                      "Exclusive drops",
+                      "VIP customer care",
+                      "Special give-aways"
+                    ],
+                    colors: [
+                      const Color(0xFFFFD5F2),
+                      const Color(0xFFFFAEEA),
+                    ],
+                    icon: Icons.workspace_premium_rounded,
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  _couponButton(), // ⭐ NEW
+
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: showCoupon ? _couponInput() : const SizedBox(),
@@ -91,7 +146,7 @@ class _MembershipPageState extends State<MembershipPage>
 
                   _continueButton(),
 
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 50),
                 ],
               ),
             ),
@@ -102,7 +157,7 @@ class _MembershipPageState extends State<MembershipPage>
   }
 
   // ------------------------------------------------------------
-  // RIVE MASCOT
+  // ⭐ RIVE MASCOT
   // ------------------------------------------------------------
   Widget _riveMascot() {
     return SizedBox(
@@ -121,16 +176,16 @@ class _MembershipPageState extends State<MembershipPage>
     return Column(
       children: [
         Text(
-          "Unlock Exclusive Benefits",
+          "Choose your plan",
           style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.w800,
             color: Colors.pink.shade600,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         const Text(
-          "Become a premium member and enjoy better savings.",
+          "Unlock premium benefits and exclusive rewards",
           textAlign: TextAlign.center,
           style: TextStyle(color: Colors.black54, fontSize: 15),
         ),
@@ -139,7 +194,7 @@ class _MembershipPageState extends State<MembershipPage>
   }
 
   // ------------------------------------------------------------
-  // MONTHLY/YEARLY TOGGLE
+  // ⭐ MONTHLY ↔ YEARLY TOGGLE
   // ------------------------------------------------------------
   Widget _toggleSwitch() {
     return GestureDetector(
@@ -188,95 +243,96 @@ class _MembershipPageState extends State<MembershipPage>
   }
 
   // ------------------------------------------------------------
-  // ⭐ SINGLE MEMBERSHIP CARD
+  // PLAN CARD
   // ------------------------------------------------------------
-  Widget _membershipCard() {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
-        gradient: fg.LinearGradient(
-          colors: [
-            const Color(0xFFFFD8F0),
-            const Color(0xFFE7B8FF),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.pinkAccent.withOpacity(0.35),
-            blurRadius: 32,
-            offset: const Offset(0, 12),
+  Widget _planCard({
+    required int index,
+    required String title,
+    required String price,
+    required List<String> benefits,
+    required List<Color> colors,
+    required IconData icon,
+  }) {
+    bool active = selectedPlan == index;
+
+    return AnimatedScale(
+      scale: active ? 1.05 : 1.0,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+      child: GestureDetector(
+        onTap: () => setState(() => selectedPlan = index),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: fg.LinearGradient(
+              colors: colors,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              if (active)
+                BoxShadow(
+                  color: colors.last.withOpacity(0.45),
+                  blurRadius: 30,
+                  offset: const Offset(0, 8),
+                ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            const  Icon(Icons.workspace_premium_rounded,
-                size: 38, color: Colors.white),
-              const SizedBox(width: 12),
-              const Text(
-                "Premium Membership",
-                style: TextStyle(
+              Icon(icon, size: 38, color: Colors.black87),
+              const SizedBox(height: 10),
+              Text(
+                title,
+                style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                price,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              ...benefits.map(
+                (b) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle,
+                          color: Colors.black87, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          b,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 14),
-
-          Text(
-            isYearly ? "₹3499 / year" : "₹399 / month",
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Benefits
-          _benefit("Flat 15% OFF on all orders"),
-          _benefit("Free delivery on every order"),
-          _benefit("Early access to new drops"),
-          _benefit("Exclusive member-only discounts"),
-          _benefit("Faster customer support"),
-        ],
-      ),
-    );
-  }
-
-  Widget _benefit(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          const Icon(Icons.check_circle, color: Colors.white, size: 20),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Colors.white,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   // ------------------------------------------------------------
-  // COUPON UI
+  // ⭐ APPLY COUPON BUTTON
   // ------------------------------------------------------------
   Widget _couponButton() {
     return GestureDetector(
@@ -284,7 +340,8 @@ class _MembershipPageState extends State<MembershipPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.local_offer, color: Colors.pink.shade600, size: 22),
+          Icon(Icons.local_offer,
+              color: Colors.pink.shade600, size: 22),
           const SizedBox(width: 6),
           Text(
             showCoupon ? "Hide Coupon" : "Have a coupon?",
@@ -299,6 +356,9 @@ class _MembershipPageState extends State<MembershipPage>
     );
   }
 
+  // ------------------------------------------------------------
+  // ⭐ COUPON INPUT FIELD
+  // ------------------------------------------------------------
   Widget _couponInput() {
     return Container(
       key: const ValueKey("coupon"),
@@ -326,7 +386,8 @@ class _MembershipPageState extends State<MembershipPage>
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.pinkAccent,
               borderRadius: BorderRadius.circular(12),
@@ -343,11 +404,13 @@ class _MembershipPageState extends State<MembershipPage>
   }
 
   // ------------------------------------------------------------
-  // CONTINUE (Join Membership)
+  // CONTINUE BUTTON (OPEN JOIN/UPGRADE SCREEN)
   // ------------------------------------------------------------
   Widget _continueButton() {
     return GestureDetector(
-      onTap: _showJoinBottomSheet,
+      onTap: () {
+        _showJoinBottomSheet();
+      },
       child: Container(
         height: 55,
         width: double.infinity,
@@ -369,7 +432,7 @@ class _MembershipPageState extends State<MembershipPage>
         ),
         child: const Center(
           child: Text(
-            "Join Membership",
+            "Continue",
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
@@ -382,7 +445,7 @@ class _MembershipPageState extends State<MembershipPage>
   }
 
   // ------------------------------------------------------------
-  // BOTTOM SHEET
+  // ⭐ JOIN / UPGRADE BOTTOM SHEET SCREEN
   // ------------------------------------------------------------
   void _showJoinBottomSheet() {
     showModalBottomSheet(
@@ -408,15 +471,15 @@ class _MembershipPageState extends State<MembershipPage>
               ),
               const SizedBox(height: 16),
               const Text(
-                "Activate Premium Membership",
+                "Confirm Your Plan",
                 style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: Colors.black87),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
-                isYearly ? "₹3499 / year" : "₹399 / month",
+                ["Basic", "Silver", "Premium"][selectedPlan],
                 style: TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w700,
@@ -425,11 +488,12 @@ class _MembershipPageState extends State<MembershipPage>
               ),
               const SizedBox(height: 14),
               const Text(
-                "Unlock exclusive perks, extra savings and free delivery.",
+                "You'll get instant access to all features included in this plan.",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.black54),
               ),
               const SizedBox(height: 24),
+
               GestureDetector(
                 onTap: () {
                   Navigator.pop(context);
@@ -461,6 +525,7 @@ class _MembershipPageState extends State<MembershipPage>
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
             ],
           ),
@@ -470,7 +535,7 @@ class _MembershipPageState extends State<MembershipPage>
   }
 
   // ------------------------------------------------------------
-  // BACKGROUND ORBS
+  // BACKGROUND WAVES + ORBS
   // ------------------------------------------------------------
   Widget _background() {
     return Stack(
