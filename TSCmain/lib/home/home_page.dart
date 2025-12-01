@@ -2,6 +2,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../widgets/pinterest_arc_menu.dart';
+import '../pages/membership_page.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
