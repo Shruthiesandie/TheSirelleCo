@@ -1,14 +1,10 @@
 // lib/home/home_page.dart
 import 'dart:math';
-import 'package:flutter/physics.dart';
 import 'package:flutter/material.dart';
-import '../widgets/pinterest_arc_menu.dart';
-import '../pages/membership_page.dart';
+import 'package:shimmer/shimmer.dart';
 
-// -------------------------------------------------------------
-// HOME PAGE - single-file (3 parts). Paste parts 1 -> 2 -> 3
-// -------------------------------------------------------------
-
+/// Full-screen ice-cream landing page (pure landing layout)
+/// Replace the placeholder containers with Image.asset(...) when you add assets.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -17,673 +13,815 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  // Main navigation state
-  int selectedIndex = 0; // 0: Home, 1: Membership, 2: Cart, 3: Profile
-  bool arcOpen = false;
-  String selectedCategory = "none";
-
-  // Scaffold key for drawer
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  // Home inner controllers
-  late final PageController _heroController;
-  late final PageController _productController;
+  // controllers
+  late final PageController _featuredController;
+  late final PageController _testimonialsController;
   late final ScrollController _galleryController;
 
-  // For nav icon spring-tap animation (we use an AnimationController per-tap)
-  late final AnimationController _iconSpringController;
-  int _animatingIconIndex = -1;
-
-  // For AnimatedSwitcher page transitions we use a small controller to drive a spring simulation
-  late final AnimationController _pageSwitchController;
-
-  // For small boolean to prevent multiple fast taps
-  bool _pageSwitching = false;
-
-  // For iOS-style left-edge swipe back
-  double _dragStartX = 0.0;
-  bool _draggingFromEdge = false;
+  // small animations
+  late final AnimationController _floatingController;
+  late final AnimationController _heroPulseController;
 
   @override
   void initState() {
     super.initState();
-    _heroController = PageController(viewportFraction: 0.92);
-    _productController = PageController(viewportFraction: 0.72);
+    _featuredController = PageController(viewportFraction: 0.86, keepPage: true);
+    _testimonialsController = PageController(viewportFraction: 0.92);
     _galleryController = ScrollController();
 
-    // icon spring controller - small range 0..1
-    _iconSpringController = AnimationController.unbounded(vsync: this);
+    _floatingController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat();
 
-    // page switch controller used only to provide an animation value for transition builder
-    _pageSwitchController = AnimationController(vsync: this, duration: const Duration(milliseconds: 420));
-
-    // No need to start anything here.
+    _heroPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1300),
+      lowerBound: 0.96,
+      upperBound: 1.04,
+    )..repeat(reverse: true);
   }
 
   @override
   void dispose() {
-    _heroController.dispose();
-    _productController.dispose();
+    _featuredController.dispose();
+    _testimonialsController.dispose();
     _galleryController.dispose();
-    _iconSpringController.dispose();
-    _pageSwitchController.dispose();
+    _floatingController.dispose();
+    _heroPulseController.dispose();
     super.dispose();
   }
 
-  // ----------------------
-  // Drag handlers for iOS-back-swipe style
-  // ----------------------
-  void _handleHorizontalDragStart(DragStartDetails details) {
-    _dragStartX = details.globalPosition.dx;
-    _draggingFromEdge = _dragStartX < 32 && selectedIndex != 0;
+  // small helpers
+  double _responsiveValue(BuildContext c, double wide, double narrow) {
+    return MediaQuery.of(c).size.width > 800 ? wide : narrow;
   }
 
-  void _handleHorizontalDragUpdate(DragUpdateDetails details) {
-    if (!_draggingFromEdge) return;
-    final delta = details.delta.dx;
-    // if user drags enough to right, go back
-    if (delta > 12) {
-      setState(() {
-        selectedIndex = 0;
-        arcOpen = false;
-      });
-      _draggingFromEdge = false;
-    }
-  }
+  @override
+  Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final isWide = mq.size.width > 900;
 
-  void _handleHorizontalDragEnd(DragEndDetails details) {
-    _dragStartX = 0.0;
-    _draggingFromEdge = false;
-  }
-
-  // ----------------------
-  // Trigger a physics spring animation for a nav icon tap.
-  // We'll animate _iconSpringController from 0->1 using a SpringSimulation and read its value in the widget.
-  // ----------------------
-  void _playIconSpring(int index) {
-    // stop any previous
-    _iconSpringController.stop();
-    _animatingIconIndex = index;
-
-    // spring parameters tuned for a subtle Apple-like feel
-    final spring = SpringDescription(mass: 0.9, stiffness: 360, damping: 28);
-
-    // start value 1.0 to value 0.78 then return to 1.0 using a simulation
-    // We'll animate from 0 -> 1 and map that to scale curve inside the builder.
-    _iconSpringController.value = 0.0;
-
-    _iconSpringController.animateWith(SpringSimulation(spring, 0.0, 1.0, 0.0)).whenComplete(() {
-      // small reset delay then clear animating index
-      Future.delayed(const Duration(milliseconds: 60), () {
-        if (mounted) setState(() => _animatingIconIndex = -1);
-      });
-    });
-  }
-
-  // ----------------------
-  // Page switch using spring - we use the _pageSwitchController to drive the AnimatedSwitcher transitions.
-  // We'll still use AnimatedSwitcher but call setState and forward controller with a spring to get a springy timing curve.
-  // ----------------------
-  Future<void> _switchPage(int index) async {
-    if (_pageSwitching || index == selectedIndex) return;
-    _pageSwitching = true;
-
-    // Launch a spring for nicer pacing (animation doesn't directly drive AnimatedSwitcher but we'll use its value to shape transitions)
-    final spring = SpringDescription(mass: 1.0, stiffness: 200.0, damping: 26.0);
-    _pageSwitchController.stop();
-    _pageSwitchController.value = 0.0;
-    _pageSwitchController.animateWith(SpringSimulation(spring, 0.0, 1.0, 0.0)).whenComplete(() {
-      // nothing
-    });
-
-    // set new index (AnimatedSwitcher will pick up via key)
-    setState(() {
-      selectedIndex = index;
-      arcOpen = false;
-    });
-
-    // ensure at least 300ms before allowing next
-    await Future.delayed(const Duration(milliseconds: 320));
-    _pageSwitching = false;
-  }
-
-  // Convenience combined nav icon tap handler
-  void _onNavIconTap(int index) {
-    // micro spring visual
-    _playIconSpring(index);
-
-    // perform switch
-    _switchPage(index);
-  }
-
-  // -------------------------------------------------------------
-  // TOP BAR BUILDers (home and sub pages)
-  // -------------------------------------------------------------
-  Widget _homeTopBar() {
-    return ClipPath(
-      clipper: TopBarClipper(),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.white.withOpacity(0.85), Colors.white.withOpacity(0.98)],
-          ),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 18, offset: const Offset(0, 2))],
-        ),
-        child: Row(
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF5F8),
+      body: SafeArea(
+        bottom: false,
+        child: Stack(
           children: [
-            _glassIconButton(Icons.menu, () => _scaffoldKey.currentState?.openDrawer()),
-            Expanded(
-              child: Transform.translate(
-                offset: const Offset(20, 0),
-                child: SizedBox(
-                  height: 80,
-                  width: 80,
-                  child: Image.asset("assets/logo/logo.png", fit: BoxFit.contain),
+            // Background pink gradient
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFFFE6F2), Color(0xFFFFF3F8)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
               ),
             ),
-            Row(children: [
-              _glassIconButton(Icons.search, () => Navigator.pushNamed(context, "/search")),
-              const SizedBox(width: 10),
-              _glassIconButton(Icons.favorite_border, () => Navigator.pushNamed(context, "/love")),
-            ]),
+
+            // Top wave - hero pink band
+            Column(
+              children: [
+                SizedBox(
+                  height: isWide ? 420 : 360,
+                  child: Stack(
+                    children: [
+                      // pink curved band (clipper)
+                      ClipPath(
+                        clipper: TopWaveClipper(),
+                        child: Container(
+                          height: isWide ? 420 : 360,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFFFFAFCF), Color(0xFFFFD0EA)],
+                              begin: Alignment(-0.9, -0.4),
+                              end: Alignment(1.0, 0.8),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // floating decorative fruits/popsicles/chocolate
+                      Positioned.fill(
+                        child: AnimatedBuilder(
+                          animation: _floatingController,
+                          builder: (context, child) {
+                            final t = _floatingController.value;
+                            return Stack(
+                              children: [
+                                // small floating strawberry top-left
+                                Positioned(
+                                  left: 24 + sin(t * 2 * pi) * 6,
+                                  top: 24 + cos(t * 2 * pi) * 8,
+                                  child: _floatingFruit(size: 36, label: "🍓"),
+                                ),
+
+                                // chocolate piece
+                                Positioned(
+                                  right: 70 + sin(t * 1.4 * pi) * 8,
+                                  top: 44 + cos(t * 1.1 * pi) * 6,
+                                  child: _floatingFruit(size: 28, label: "🍫"),
+                                ),
+
+                                // popsicle behind hero (soft)
+                                Positioned(
+                                  right: isWide ? 60 : 24,
+                                  top: isWide ? 80 : 110,
+                                  child: Transform.rotate(
+                                    angle: -0.16,
+                                    child: Opacity(
+                                      opacity: 0.12,
+                                      child: _popsiclePlaceholder(width: 120, height: 240),
+                                    ),
+                                  ),
+                                ),
+
+                                // floating mint leaf
+                                Positioned(
+                                  left: mq.size.width * 0.22 + sin(t * 1.3 * 2 * pi) * 10,
+                                  top: isWide ? 72 + cos(t * 1.7 * 2 * pi) * 6 : 120 + cos(t * 1.7 * 2 * pi) * 6,
+                                  child: _floatingFruit(size: 22, label: "🌿"),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+
+                      // centered nav (white text) and profile small intro
+                      Positioned(
+                        top: 16,
+                        left: 0,
+                        right: 0,
+                        child: Column(
+                          children: [
+                            // nav items
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _navText("Home"),
+                                const SizedBox(width: 22),
+                                _navText("Flavours"),
+                                const SizedBox(width: 22),
+                                _navText("About"),
+                                const SizedBox(width: 22),
+                                _navText("Gallery"),
+                                const SizedBox(width: 22),
+                                _navText("Contact"),
+                              ],
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            // profile circle + intro (on right)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: _responsiveValue(context, 56, 18)),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const CircleAvatar(
+                                      radius: 18,
+                                      backgroundColor: Colors.white24,
+                                      child: Icon(Icons.person, color: Colors.white70),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: const [
+                                        Text("Hi, I'm Sirelle", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                                        Text("Founder", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // HERO CONTENT: bowl of ice-cream (placeholder) + two pill buttons
+                      Positioned.fill(
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // main image/TX + glow + placeholder image container
+                              ScaleTransition(
+                                scale: _heroPulseController,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // soft glow
+                                    Container(
+                                      width: isWide ? 360 : 300,
+                                      height: isWide ? 240 : 200,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(28),
+                                        gradient: RadialGradient(
+                                          colors: [Colors.white.withOpacity(0.6), Colors.white.withOpacity(0.05)],
+                                        ),
+                                        boxShadow: [BoxShadow(color: Colors.pink.withOpacity(0.18), blurRadius: 36, spreadRadius: 6)],
+                                      ),
+                                    ),
+
+                                    // main visual placeholder (your bowl / image)
+                                    _heroImagePlaceholder(width: isWide ? 360 : 300, height: isWide ? 240 : 200),
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(height: 18),
+
+                              // headline + subtext + pills
+                              Column(
+                                children: [
+                                  Text(
+                                    "Creamy Strawberry Dreams",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.pink.shade900,
+                                      fontSize: _responsiveValue(context, 34, 22),
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    "Handmade scoops, whimsical toppings — made with love.",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.pink.shade700.withOpacity(0.9)),
+                                  ),
+
+                                  const SizedBox(height: 14),
+
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () {},
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                                          backgroundColor: Colors.pink.shade400,
+                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        ),
+                                        child: const Text("Order Now", style: TextStyle(fontWeight: FontWeight.bold)),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      OutlinedButton(
+                                        onPressed: () {},
+                                        style: OutlinedButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                                        ),
+                                        child: Text("Explore", style: TextStyle(color: Colors.pink.shade600, fontWeight: FontWeight.bold)),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // MAIN PAGE CONTENT (scrollable)
+            Positioned.fill(
+              top: isWide ? 320 : 300,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28)),
+                child: Container(
+                  color: Colors.white,
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 26),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Section 2 — Featured Ice Cream Cards
+                        _sectionHeading("Featured Flavours"),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: _responsiveValue(context, 380, 320),
+                          child: PageView.builder(
+                            controller: _featuredController,
+                            itemCount: 3,
+                            padEnds: true,
+                            itemBuilder: (context, index) {
+                              final flavors = ["Strawberry Swirl", "Classic Vanilla", "Chocolate Dream"];
+                              final desc = [
+                                "Fresh strawberries and creamy swirls",
+                                "Simple, pure, and velvety",
+                                "Rich cocoa with dark chocolate chips"
+                              ];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: _flavourCard(title: flavors[index], description: desc[index], wide: isWide),
+                              );
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: 22),
+
+                        // Section 3 — About
+                        _sectionHeading("About Us", accent: Colors.pink.shade700),
+                        const SizedBox(height: 12),
+                        _aboutSection(isWide),
+
+                        const SizedBox(height: 22),
+
+                        // Section 4 — Gallery + Testimonials
+                        _sectionHeading("Gallery"),
+                        const SizedBox(height: 12),
+                        _galleryGrid(context),
+                        const SizedBox(height: 18),
+                        _sectionHeading("What People Say"),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 140,
+                          child: PageView.builder(
+                            controller: _testimonialsController,
+                            itemCount: 3,
+                            itemBuilder: (context, i) => _testimonialCard(i),
+                          ),
+                        ),
+
+                        const SizedBox(height: 22),
+
+                        // Section 5 — Video Preview + side thumbnails
+                        _sectionHeading("Preview", accent: Colors.pink.shade700),
+                        const SizedBox(height: 12),
+                        _videoPreviewRow(isWide),
+
+                        const SizedBox(height: 28),
+
+                        // Section 6 — Footer
+                        _footerSection(context, isWide),
+
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _subPageTopBar() {
-    String title;
-    switch (selectedIndex) {
-      case 1:
-        title = "Membership";
-        break;
-      case 2:
-        title = "Cart";
-        break;
-      case 3:
-        title = "Profile";
-        break;
-      default:
-        title = "";
-    }
+  // ---------------- UI pieces ----------------
 
+  // simple nav text
+  Widget _navText(String text) => Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600));
+
+  // glowing placeholder for hero image
+  Widget _heroImagePlaceholder({required double width, required double height}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      alignment: Alignment.centerLeft,
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => _switchPage(0),
-            child: const Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87),
-          ),
-          const SizedBox(width: 12),
-          Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-        ],
-      ),
-    );
-  }
-
-  // ----------------------
-  // Glass icon button helper
-  // ----------------------
-  Widget _glassIconButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(9),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withOpacity(0.55),
-          border: Border.all(color: Colors.white.withOpacity(0.8)),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 10, offset: const Offset(0, 3))],
-        ),
-        child: Icon(icon, size: 22, color: Colors.black87),
-      ),
-    );
-  }
-
-  // -------------------------------------------------------------
-  // BOTTOM NAV BAR (global) - includes center + always visible
-  // -------------------------------------------------------------
-  Widget _bottomNavBar() {
-    return Container(
-      height: 74,
+      width: width,
+      height: height,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(26), topRight: Radius.circular(26)),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, -3))],
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(colors: [Colors.white, Colors.white.withOpacity(0.88)]),
+        boxShadow: [BoxShadow(color: Colors.pink.withOpacity(0.10), blurRadius: 28, offset: const Offset(0, 10))],
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // main row icons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _navIcon(Icons.home_filled, 0),
-              _navIcon(Icons.card_membership, 1),
-              const SizedBox(width: 60), // gap for center + button
-              _navIcon(Icons.shopping_cart, 2),
-              _navIcon(Icons.person, 3),
-            ],
-          ),
-
-          // center + button (always visible)
-          Positioned(
-            bottom: 8,
-            child: GestureDetector(
-              onTap: () => setState(() => arcOpen = !arcOpen),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)],
-                  ),
-                  boxShadow: [
-                    BoxShadow(color: Colors.pinkAccent.withOpacity(0.35), blurRadius: 18, offset: const Offset(0, 8)),
-                  ],
-                ),
-                child: Icon(
-                  selectedCategory == "male" ? Icons.male : selectedCategory == "female" ? Icons.female : selectedCategory == "unisex" ? Icons.transgender : Icons.add,
-                  color: Colors.white,
-                  size: 30,
-                ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // placeholder "image area"
+            Container(
+              width: width * 0.86,
+              height: height * 0.66,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                color: Colors.pink.shade50,
+                border: Border.all(color: Colors.white70),
               ),
+              child: const Center(child: Text("YOUR HERO IMAGE", style: TextStyle(color: Colors.pink))),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // nav icon with micro-spring tap visual using _iconSpringController
-  Widget _navIcon(IconData icon, int index) {
-    final bool isSelected = selectedIndex == index;
-
-    // scale mapping:
-    // when _animatingIconIndex == index, we sample controller value and map it to a subtle overshoot scale curve
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        _onNavIconTap(index);
-      },
-      child: AnimatedBuilder(
-        animation: _iconSpringController,
-        builder: (context, child) {
-          double t = _iconSpringController.value.clamp(0.0, 1.0);
-          // mapping function: ease-out then slight overshoot and settle between 1.0 and 0.78
-          double scale = 1.0;
-          if (_animatingIconIndex == index) {
-            // map t [0..1] -> scale path: 1.0 -> 0.78 -> 1.02 -> 1.0
-            // simple polynomial mapping:
-            if (t < 0.45) {
-              scale = 1.0 - 0.28 * (t / 0.45); // down to 0.72-ish
-            } else if (t < 0.78) {
-              scale = 0.72 + (0.35) * ((t - 0.45) / 0.33); // bump up
-            } else {
-              scale = 1.02 - 0.02 * ((t - 0.78) / 0.22);
-            }
-          } else {
-            // regular selected state tiny scale 1.02
-            scale = isSelected ? 1.02 : 1.0;
-          }
-          return Transform.scale(
-            scale: scale,
-            child: Icon(icon, size: 28, color: isSelected ? Colors.pinkAccent : Colors.grey),
-          );
-        },
-      ),
-    );
-  }
-}
-// ---------------------- Part 2/3 ----------------------
-// Continue inside the same file: home_page.dart
-// Home content, hero, carousel, product cards, gallery, and simple placeholder pages
-
-extension _HomeBodyWidgets on _HomePageState {
-  // HOME BODY (kept layout same)
-  Widget _homeBody() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 12),
-
-          // HERO BANNERS
-          SizedBox(
-            height: 240,
-            child: PageView.builder(
-              controller: _heroController,
-              itemCount: 4,
-              itemBuilder: (_, index) => _heroBanner(index),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          _sectionTitle("Popular Items"),
-
-          // PRODUCT CAROUSEL with simulated 3D scale effect (kept same)
-          SizedBox(
-            height: 260,
-            child: PageView.builder(
-              controller: _productController,
-              itemCount: 6,
-              itemBuilder: (context, index) {
-                return AnimatedBuilder(
-                  animation: _productController,
-                  builder: (context, child) {
-                    double value = 1.0;
-                    try {
-                      if (_productController.position.haveDimensions) {
-                        value = ((_productController.page ?? _productController.initialPage) - index).toDouble();
-                        value = (1 - (value.abs() * 0.30)).clamp(0.75, 1.0);
-                      }
-                    } catch (_) {
-                      // ignore
-                    }
-                    final double eased = Curves.easeOut.transform(value);
-                    return Center(
-                      child: SizedBox(
-                        height: eased * 260,
-                        width: eased * 200,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _productCard(index),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 28),
-
-          _sectionTitle("Gallery"),
-
-          SizedBox(
-            height: 130,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              controller: _galleryController,
-              scrollDirection: Axis.horizontal,
-              itemCount: 10,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (_, index) => _galleryImage(index),
-            ),
-          ),
-
-          const SizedBox(height: 120),
-        ],
-      ),
-    );
-  }
-
-  // Dummy content pages for membership/cart/profile
-  // We keep bottom bar visible and top bar shows back+title.
-  Widget _membershipPage() {
-    // Use the real MembershipPage widget you already have
-    return const MembershipPage();
-  }
-
-  Widget _cartPage() {
-    return Center(
-      child: Column(mainAxisSize: MainAxisSize.min, children: const [
-        Icon(Icons.shopping_cart, size: 48, color: Colors.pink),
-        SizedBox(height: 12),
-        Text("Cart Page", style: TextStyle(fontSize: 22)),
-      ]),
-    );
-  }
-
-  Widget _profilePage() {
-    return Center(
-      child: Column(mainAxisSize: MainAxisSize.min, children: const [
-        Icon(Icons.person, size: 48, color: Colors.pink),
-        SizedBox(height: 12),
-        Text("Profile Page", style: TextStyle(fontSize: 22)),
-      ]),
-    );
-  }
-
-  // Small helpers for repeated UI
-  Widget _sectionTitle(String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-      child: Row(children: [
-        Text(text, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))
-      ]),
-    );
-  }
-
-  Widget _heroBanner(int index) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
-        child: Container(
-          decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.pink.shade200, Colors.pink.shade100])),
-          child: const Center(
-              child: Text("IMAGE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 22))),
+          ],
         ),
       ),
     );
   }
 
-  Widget _productCard(int index) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: ClipRRect(
+  // small floating fruit widget
+  Widget _floatingFruit({required double size, required String label}) {
+    return Container(
+      height: size,
+      width: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        shape: BoxShape.circle,
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8)],
+      ),
+      child: Center(child: Text(label, style: TextStyle(fontSize: max(12, size / 2.6)))),
+    );
+  }
+
+  Widget _popsiclePlaceholder({double width = 80, double height = 200}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(colors: [Colors.pink.shade200, Colors.pink.shade100]),
+      ),
+    );
+  }
+
+  // section heading
+  Widget _sectionHeading(String title, {Color accent = Colors.pink}) {
+    return Row(
+      children: [
+        Container(width: 6, height: 28, decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(6))),
+        const SizedBox(width: 12),
+        Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.pink.shade800)),
+        const Spacer(),
+        // subtle pink section indicator (small stripe)
+        Container(height: 8, width: 80, decoration: BoxDecoration(color: accent.withOpacity(0.12), borderRadius: BorderRadius.circular(8))),
+      ],
+    );
+  }
+
+  // flavour card (vertical style)
+  Widget _flavourCard({required String title, required String description, required bool wide}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10, offset: const Offset(0, 4))
-          ]),
-          child: Column(children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(color: Colors.pink.shade50, borderRadius: BorderRadius.circular(16)),
-                child: const Center(child: Text("IMAGE")),
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 6))],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            // waffle cone + floating toppings (placeholder)
+            SizedBox(
+              width: wide ? 220 : 160,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // placeholder for cone image
+                  Container(
+                    height: wide ? 180 : 140,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(colors: [Colors.pink.shade50, Colors.pink.shade100]),
+                    ),
+                    child: Center(child: Text(title, style: TextStyle(color: Colors.pink.shade700, fontWeight: FontWeight.w700))),
+                  ),
+
+                  // floating toppings
+                  Positioned(top: 8, left: 20, child: _floatingFruit(size: 26, label: "🍓")),
+                  Positioned(bottom: 16, right: 18, child: _floatingFruit(size: 20, label: "✨")),
+                ],
               ),
             ),
-            const SizedBox(height: 10),
-            Text("Product ${index + 1}", style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.pink)),
-          ]),
+
+            const SizedBox(width: 14),
+
+            // content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.pink.shade800)),
+                  const SizedBox(height: 8),
+                  Text(description, style: const TextStyle(color: Colors.black54)),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(color: Colors.pink.shade50.withOpacity(0.6), borderRadius: BorderRadius.circular(12)),
+                        child: const Text("Details", style: TextStyle(fontWeight: FontWeight.w700)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: Container()),
+                      // circular arrow button
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.pink.shade100,
+                        ),
+                        child: IconButton(
+                          onPressed: () {},
+                          icon: const Icon(Icons.rotate_right, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _galleryImage(int index) {
+  // About section layout
+  Widget _aboutSection(bool wide) {
     return Container(
-      width: 120,
-      decoration: BoxDecoration(
-        color: Colors.pink.shade50,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 3))],
-      ),
-      child: const Center(child: Text("IMAGE", style: TextStyle(color: Colors.pink, fontWeight: FontWeight.w600))),
-    );
-  }
-}
-// ---------------------- Part 3/3 ----------------------
-// Continue in same file: additional UI glue, drawer and TopBarClipper
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), color: Colors.white, boxShadow: [
+        BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 6))
+      ]),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // left: milk jar image in pink circle
+          Container(
+            width: wide ? 140 : 100,
+            height: wide ? 140 : 100,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(colors: [Colors.pink.shade100, Colors.purple.shade50]),
+              boxShadow: [BoxShadow(color: Colors.pink.withOpacity(0.06), blurRadius: 12)],
+            ),
+            child: Center(child: Text("MILK\nJAR", textAlign: TextAlign.center, style: TextStyle(color: Colors.pink.shade700))),
+          ),
 
-extension _HomeScaffoldBuild on _HomePageState {
-  @override
-  Widget build(BuildContext context) {
-    // Select page content
-    Widget pageContent;
-    switch (selectedIndex) {
-      case 0:
-        pageContent = _homeBody();
-        break;
-      case 1:
-        pageContent = _membershipPage();
-        break;
-      case 2:
-        pageContent = _cartPage();
-        break;
-      case 3:
-        pageContent = _profilePage();
-        break;
-      default:
-        pageContent = _homeBody();
-    }
+          const SizedBox(width: 16),
 
-    // top bar widget selection
-    final PreferredSizeWidget topBar = PreferredSize(
-      preferredSize: const Size.fromHeight(90),
-      child: selectedIndex == 0 ? _homeTopBar() : _subPageTopBar(),
-    );
-
-    return GestureDetector(
-      onHorizontalDragStart: _handleHorizontalDragStart,
-      onHorizontalDragUpdate: _handleHorizontalDragUpdate,
-      onHorizontalDragEnd: _handleHorizontalDragEnd,
-      child: Container(
-        color: Colors.white,
-        child: SafeArea(
-          top: true,
-          bottom: false,
-          child: Scaffold(
-            key: _scaffoldKey,
-            backgroundColor: const Color(0xFFFCEEEE),
-            drawer: _buildPremiumDrawer(),
-            appBar: topBar,
-            body: Stack(
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // AnimatedSwitcher for smooth page change with custom transition using the page switch controller's value
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 420),
-                  transitionBuilder: (child, animation) {
-                    // Use animation (0..1) and shape a SlideTransition that slightly springs in.
-                    // When switching back to home (selectedIndex == 0) we slide from left, else from right.
-                    final fromLeft = selectedIndex == 0;
-                    final offset = Tween<Offset>(begin: Offset(fromLeft ? -0.08 : 0.08, 0), end: Offset.zero)
-                        .chain(CurveTween(curve: Curves.easeOutCubic))
-                        .animate(animation);
-                    return SlideTransition(position: offset, child: FadeTransition(opacity: animation, child: child));
-                  },
-                  child: SizedBox(
-                    key: ValueKey<int>(selectedIndex),
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: pageContent,
-                  ),
-                ),
+                Text("We make ice cream with care", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.pink.shade800)),
+                const SizedBox(height: 8),
+                const Text("Since 2010 we handcraft small-batch ice cream using local dairy and fresh fruit. Our scoops are made daily and decorated with edible toppings."),
+                const SizedBox(height: 12),
 
-                // Pinterest arc menu (always present) - it relies on your widget implementation
-                PinterestArcMenu(
-                  isOpen: arcOpen,
-                  onMaleTap: () {
-                    setState(() {
-                      arcOpen = false;
-                      selectedCategory = "male";
-                    });
-                  },
-                  onFemaleTap: () {
-                    setState(() {
-                      arcOpen = false;
-                      selectedCategory = "female";
-                    });
-                  },
-                  onUnisexTap: () {
-                    setState(() {
-                      arcOpen = false;
-                      selectedCategory = "unisex";
-                    });
-                  },
+                Row(
+                  children: [
+                    _infoCard("Small-batch", "Handmade daily"),
+                    const SizedBox(width: 10),
+                    _infoCard("Natural", "No artificial flavours"),
+                    const SizedBox(width: 10),
+                    _infoCard("Local", "Sourced ingredients"),
+                  ],
                 ),
               ],
             ),
-            bottomNavigationBar: _bottomNavBar(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Drawer (kept same) - logout navigates to /login and removes previous routes
-  Drawer _buildPremiumDrawer() {
-    return Drawer(
-      backgroundColor: Colors.white,
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(30),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
-            ),
-            child: const Align(
-              alignment: Alignment.bottomLeft,
-              child: Text("Menu", style: TextStyle(fontSize: 26, color: Colors.white, fontWeight: FontWeight.w700)),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _drawerItem(Icons.person, "Profile"),
-          _drawerItem(Icons.settings, "Settings"),
-          _drawerItem(Icons.receipt_long, "Orders"),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 28),
-            child: GestureDetector(
-              onTap: () {
-                // close drawer first then navigate
-                Navigator.of(context).pop();
-                Future.delayed(const Duration(milliseconds: 120), () {
-                  Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false);
-                });
-              },
-              child: Container(
-                width: 160,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.logout, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text("Logout", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-                  ],
-                ),
-              ),
-            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _drawerItem(IconData icon, String label) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.pink.shade400),
-      title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-      onTap: () {},
+  Widget _infoCard(String title, String subtitle) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: Colors.pink.shade50.withOpacity(0.6), borderRadius: BorderRadius.circular(12)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 6),
+          Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+        ]),
+      ),
     );
   }
-}
 
-// TopBarClipper (curved top bar) - unchanged
-class TopBarClipper extends CustomClipper<Path> {
+  // Gallery grid (rounded image tiles)
+  Widget _galleryGrid(BuildContext context) {
+    final columns = MediaQuery.of(context).size.width > 900 ? 4 : (MediaQuery.of(context).size.width > 600 ? 3 : 2);
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 8,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1,
+      ),
+      itemBuilder: (context, i) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            color: Colors.pink.shade50,
+            child: Center(child: Text("PHOTO ${i + 1}", style: const TextStyle(color: Colors.pink, fontWeight: FontWeight.w600))),
+          ),
+        );
+      },
+    );
+  }
+
+  // Testimonial card
+  Widget _testimonialCard(int index) {
+    final names = ["Maya", "Arjun", "Leah"];
+    final quotes = [
+      "Best ice cream ever — creamy and dreamy!",
+      "I can't stop ordering. Fresh and delicious.",
+      "The toppings are on another level. Love it!"
+    ];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), boxShadow: [
+        BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 6))
+      ]),
+      child: Row(
+        children: [
+          CircleAvatar(radius: 28, backgroundColor: Colors.pink.shade50, child: Text(names[index][0])),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(names[index], style: const TextStyle(fontWeight: FontWeight.w800)),
+              const SizedBox(height: 6),
+              Text(quotes[index], style: const TextStyle(color: Colors.black54)),
+            ]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Video preview mock (center rectangle + vertical thumbnails)
+  Widget _videoPreviewRow(bool wide) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                height: wide ? 220 : 160,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  image: const DecorationImage(
+                    // placeholder: replace with your textured background image
+                    image: AssetImage(''), // leave blank; replace later
+                    fit: BoxFit.cover,
+                  ),
+                  color: Colors.pink.shade50,
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("Lorem Ipsum", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white.withOpacity(0.95), shadows: [
+                        const Shadow(blurRadius: 10, color: Colors.black38, offset: Offset(0, 4))
+                      ])),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.9)),
+                        child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow, size: 36, color: Colors.pink)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // soft overlay for emboss
+              Positioned(
+                left: 18,
+                top: 12,
+                child: Opacity(
+                  opacity: 0.06,
+                  child: Container(width: 120, height: 24, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18))),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(width: 12),
+
+        // thumbnails column
+        Expanded(
+          flex: 1,
+          child: Column(
+            children: List.generate(3, (i) => Expanded(child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(color: Colors.pink.shade100, child: Center(child: Text("Thumb ${i + 1}"))),
+              ),
+            ))),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Footer
+  Widget _footerSection(BuildContext context, bool wide) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), boxShadow: [
+        BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 6))
+      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // input + button row
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(12)),
+                  child: Row(children: const [
+                    Icon(Icons.email, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(child: TextField(decoration: InputDecoration.collapsed(hintText: "Enter your email"))),
+                  ]),
+                ),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink.shade400, padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                child: const Text("Subscribe", style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // social + nav links
+          Row(
+            children: [
+              // social icons
+              Row(children: [
+                _socialIcon(Icons.camera_alt),
+                const SizedBox(width: 10),
+                _socialIcon(Icons.facebook),
+                const SizedBox(width: 10),
+                _socialIcon(Icons.play_circle_fill),
+              ]),
+              const Spacer(),
+              Row(children: [
+                _footerLink("Privacy"),
+                const SizedBox(width: 12),
+                _footerLink("Terms"),
+                const SizedBox(width: 12),
+                _footerLink("Contact"),
+              ]),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // bottom navigation links
+          Wrap(
+            spacing: 12,
+            children: [
+              Text("© ${DateTime.now().year} Sirelle Co.", style: const TextStyle(color: Colors.black54)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _socialIcon(IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)]),
+      child: Icon(icon, size: 18, color: Colors.pink),
+    );
+  }
+
+  Widget _footerLink(String text) => Text(text, style: TextStyle(color: Colors.pink.shade700, fontWeight: FontWeight.w600));
+
+} // end HomePage
+
+// ---------------------------
+// Custom Clippers (waves)
+// ---------------------------
+
+class TopWaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    const curveHeight = 24;
-    return Path()
-      ..lineTo(0, size.height - curveHeight)
-      ..quadraticBezierTo(size.width / 2, size.height + curveHeight, size.width, size.height - curveHeight)
-      ..lineTo(size.width, 0)
-      ..close();
+    final path = Path();
+    // top left -> bottom left curve -> top right curve
+    path.lineTo(0, size.height * 0.72);
+    path.quadraticBezierTo(size.width * 0.12, size.height * 0.86, size.width * 0.28, size.height * 0.78);
+    path.quadraticBezierTo(size.width * 0.52, size.height * 0.68, size.width * 0.72, size.height * 0.78);
+    path.quadraticBezierTo(size.width * 0.88, size.height * 0.86, size.width, size.height * 0.72);
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
   }
 
   @override
-  bool shouldReclip(_) => false;
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
