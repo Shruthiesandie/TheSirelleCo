@@ -354,7 +354,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _navIcon(Icons.home_filled, 0),
+              _navIcon(Icons.home_filled, 6),
               _navIcon(Icons.card_membership, 1),
               const SizedBox(width: 60),
               _navIcon(Icons.shopping_cart, 3),
