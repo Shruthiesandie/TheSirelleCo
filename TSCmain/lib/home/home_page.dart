@@ -20,7 +20,6 @@ class _HomePageState extends State<HomePage> {
   bool arcOpen = false;
   String selectedCategory = "none";
 
-  // Titles for each screen
   final List<String> pageTitles = [
     "Home",
     "Favourite",
@@ -29,7 +28,6 @@ class _HomePageState extends State<HomePage> {
     "Profile"
   ];
 
-  // Pages
   final List<Widget> screens = const [
     Center(child: Text("Home Screen")),
     MembershipPage(),
@@ -50,11 +48,9 @@ class _HomePageState extends State<HomePage> {
           children: [
             Column(
               children: [
-                _topBar(),
+                _buildTitleBar(),
 
-                Expanded(
-                  child: screens[selectedIndex],
-                ),
+                Expanded(child: screens[selectedIndex]),
 
                 _bottomNavBar(),
               ],
@@ -72,9 +68,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ---------------------------------------------------------
-  // SET CATEGORY (ARC MENU SELECTION)
-  // ---------------------------------------------------------
   void setCategory(String type) {
     setState(() {
       arcOpen = false;
@@ -83,80 +76,117 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ---------------------------------------------------------
-  // TOP BAR (CURVE + PAGE TITLE + MENU + ICONS)
+  // TOP BAR SWITCHER
   // ---------------------------------------------------------
-  Widget _topBar() {
-    return ClipPath(
-      clipper: TopBarClipper(),
-      child: Container(
-        height: 95,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: const BoxDecoration(color: Colors.white),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Menu + Offer text
-            Positioned(
-              left: 0,
-              top: 4,
-              child: GestureDetector(
-                onTap: () => _scaffoldKey.currentState!.openDrawer(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildTitleBar() {
+    if (selectedIndex == 0) {
+      // HOME SCREEN — BIG CURVED BAR WITH LOGO
+      return ClipPath(
+        clipper: TopBarClipper(),
+        child: Container(
+          height: 120,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: const BoxDecoration(color: Colors.white),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Left menu + offer text
+              Positioned(
+                left: 0,
+                top: 4,
+                child: GestureDetector(
+                  onTap: () => _scaffoldKey.currentState!.openDrawer(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("offer available",
+                          style: TextStyle(
+                              fontSize: 11, fontWeight: FontWeight.w500)),
+                      IconButton(
+                        icon: const Icon(Icons.menu,
+                            size: 28, color: Colors.black),
+                        onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // LOGO IN MIDDLE
+              Positioned(
+                top: 20,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.black, width: 1.6),
+                  ),
+                  child: Image.asset(
+                    "assets/logo/logo.png",
+                    height: 38,
+                    width: 38,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+
+              // Right icons
+              Positioned(
+                right: 0,
+                top: 12,
+                child: Row(
                   children: [
-                    const Text(
-                      "offer available",
-                      style:
-                          TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                    IconButton(
+                      icon: const Icon(Icons.search, size: 26),
+                      onPressed: () => Navigator.pushNamed(context, "/search"),
                     ),
                     IconButton(
-                      icon:
-                          const Icon(Icons.menu, size: 28, color: Colors.black),
-                      onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                      icon: const Icon(Icons.workspace_premium, size: 26),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, "/membership"),
                     ),
                   ],
                 ),
               ),
-            ),
-
-            // Page title
-            Positioned(
-              top: 30,
-              child: Text(
-                pageTitles[selectedIndex],
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-              ),
-            ),
-
-            // Right icons
-            Positioned(
-              right: 0,
-              top: 12,
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.search, size: 26),
-                    onPressed: () => Navigator.pushNamed(context, "/search"),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.workspace_premium, size: 26),
-                    onPressed: () =>
-                        Navigator.pushNamed(context, "/membership"),
-                  ),
-                ],
-              ),
-            ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      // OTHER SCREENS — SIMPLE RECT BAR WITH TITLE + ROUNDED CORNERS
+      return Container(
+        height: 60,
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black12, blurRadius: 6, offset: Offset(0, 2))
           ],
         ),
-      ),
-    );
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+                onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+                icon: const Icon(Icons.menu)),
+
+            Text(
+              pageTitles[selectedIndex],
+              style: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(width: 48), // keeps title centered
+          ],
+        ),
+      );
+    }
   }
 
   // ---------------------------------------------------------
-  // BOTTOM NAVIGATION BAR — BEAUTIFUL + FIXED + PAGES SWITCH
+  // BOTTOM NAV BAR — ICONS NAVIGATE BUT BAR STAYS
   // ---------------------------------------------------------
   Widget _bottomNavBar() {
     return Container(
@@ -164,8 +194,7 @@ class _HomePageState extends State<HomePage> {
       decoration: const BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(
-              color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))
+          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))
         ],
       ),
       child: Row(
@@ -215,7 +244,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ---------------------------------------------------------
-  // DRAWER WITH LOGOUT ADDED
+  // DRAWER WITH LOGOUT INCLUDED
   // ---------------------------------------------------------
   Drawer _drawer() {
     return Drawer(
@@ -225,8 +254,8 @@ class _HomePageState extends State<HomePage> {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.pinkAccent),
-            child: Text("Menu",
-                style: TextStyle(color: Colors.white, fontSize: 22)),
+            child:
+                Text("Menu", style: TextStyle(color: Colors.white, fontSize: 22)),
           ),
           ListTile(
             title: const Text("Profile"),
@@ -261,7 +290,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 // ---------------------------------------------------------
-// TOP BAR WAVY CLIPPER
+// CLIPPER FOR CURVED HOME TOP BAR
 // ---------------------------------------------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
