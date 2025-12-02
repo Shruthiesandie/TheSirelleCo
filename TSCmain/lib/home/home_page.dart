@@ -40,10 +40,10 @@ class _HomePageState extends State<HomePage> {
           children: [
             Column(
               children: [
-                _marqueeStrip(),
-                _buildTopBar(),
+                _marqueeStrip(), // moving "offer available"
+                _buildTopBar(),  // logo layout logic
                 Expanded(child: screens[selectedIndex]),
-                _bottomNavBar(),
+                _bottomNavBar(), // fully flush bottom bar
               ],
             ),
 
@@ -67,39 +67,32 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ---------------------------------------------------------
-  // SEPARATE OFFER STRIP WITH MOVING TEXT
+  // SEPARATE TOP OFFER STRIP WITH MOVING TEXT
   // ---------------------------------------------------------
   Widget _marqueeStrip() {
     return Container(
       height: 22,
       width: double.infinity,
       color: Colors.white,
-      child: ClipRect(
-        child: AnimatedBuilder(
-          animation: Listenable.merge([ValueNotifier(0)]),
-          builder: (context, _) {
-            return TweenAnimationBuilder<double>(
-              tween: Tween(begin: 1, end: -1),
-              duration: const Duration(seconds: 8),
-              repeat: true,
-              builder: (context, value, _) {
-                return FractionalTranslation(
-                  translation: Offset(value, 0),
-                  child: const Text(
-                    "offer available   offer available   offer available   offer available   ",
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
-                  ),
-                );
-              },
-            );
-          },
-        ),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 1, end: -1),
+        duration: const Duration(seconds: 8),
+        onEnd: () => setState(() {}), // restart scrolling
+        builder: (context, value, _) {
+          return FractionalTranslation(
+            translation: Offset(value, 0),
+            child: const Text(
+              "  offer available   offer available   offer available   offer available  ",
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+            ),
+          );
+        },
       ),
     );
   }
 
   // ---------------------------------------------------------
-  // TOP BAR LOGIC
+  // TOP BAR FOR HOME AND OTHER PAGES
   // ---------------------------------------------------------
   Widget _buildTopBar() {
     if (selectedIndex == 0) {
@@ -116,12 +109,15 @@ class _HomePageState extends State<HomePage> {
                 icon: const Icon(Icons.menu, size: 22, color: Colors.black),
                 onPressed: () => _scaffoldKey.currentState!.openDrawer(),
               ),
+
+              // LOGO centered vertically
               Image.asset(
                 "assets/logo/logo.png",
                 height: 58,
                 width: 58,
                 fit: BoxFit.contain,
               ),
+
               Row(
                 children: [
                   IconButton(
@@ -168,13 +164,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ---------------------------------------------------------
-  // PERFECT BOTTOM BAR — FLUSH DOWN, CURVED CORNERS
+  // BOTTOM NAVIGATION — FLUSH STICKY + CURVED CORNERS
   // ---------------------------------------------------------
   Widget _bottomNavBar() {
     return Container(
       height: 64,
-      padding: EdgeInsets.zero,
-      margin: EdgeInsets.zero,
       width: double.infinity,
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -183,7 +177,7 @@ class _HomePageState extends State<HomePage> {
           topRight: Radius.circular(22),
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, -2)),
+          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, -2))
         ],
       ),
       child: Row(
@@ -217,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                 ? Colors.pinkAccent
                 : Colors.grey.shade500,
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
@@ -233,7 +227,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ---------------------------------------------------------
-  // DRAWER (WITH LOGOUT INCLUDED)
+  // DRAWER WITH LOGOUT OPTION
   // ---------------------------------------------------------
   Drawer _drawer() {
     return Drawer(
@@ -258,8 +252,10 @@ class _HomePageState extends State<HomePage> {
           ),
           const Divider(),
           ListTile(
-            title: const Text("Logout",
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            title: const Text(
+              "Logout",
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
             onTap: () {
               Navigator.pushReplacement(
                 context,
