@@ -4,6 +4,7 @@ import '../widgets/pinterest_arc_menu.dart';
 import '../pages/membership_page.dart';
 import '../pages/cart_page.dart';
 import '../pages/profile_page.dart';
+import '../pages/login_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,233 +14,211 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   int selectedIndex = 0;
   bool arcOpen = false;
 
-  // which icon is chosen after selecting from arc menu
   String selectedCategory = "none";
-
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: SafeArea(
-        top: true,
-        bottom: false,
-        child: Scaffold(
-          key: _scaffoldKey,
-          backgroundColor: const Color(0xFFFCEEEE),
-          drawer: _drawer(),
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: const Color(0xFFFCEEEE),
 
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(90),
-            child: _buildTopBar(),
-          ),
+      drawer: _drawer(),
 
-          body: Stack(
-            children: [
-              _buildSelectedPage(),
-
-              // Arc menu floating
-              PinterestArcMenu(
-                isOpen: arcOpen,
-                onMaleTap: () {
-                  setState(() {
-                    arcOpen = false;
-                    selectedCategory = "male";
-                  });
-                },
-                onFemaleTap: () {
-                  setState(() {
-                    arcOpen = false;
-                    selectedCategory = "female";
-                  });
-                },
-                onUnisexTap: () {
-                  setState(() {
-                    arcOpen = false;
-                    selectedCategory = "unisex";
-                  });
-                },
-              ),
-            ],
-          ),
-
-          bottomNavigationBar: _bottomNav(),
-        ),
-      ),
-    );
-  }
-
-  // -------------------------------------------------------------------------
-  // TOP BAR (ARC CLIPPED — EXACT LIKE YOUR ORIGINAL)
-  // -------------------------------------------------------------------------
-  Widget _buildTopBar() {
-    return ClipPath(
-      clipper: TopBarClipper(),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        height: 90,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-        ),
-        child: Row(
+      body: SafeArea(
+        child: Column(
           children: [
-            IconButton(
-              icon: const Icon(Icons.menu, size: 28, color: Colors.black),
-              onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-            ),
+            _customTopBar(),
 
-            Expanded(
-              child: Transform.translate(
-                offset: const Offset(20, 0),
-                child: SizedBox(
-                  height: 80,
-                  child: Image.asset("assets/logo/logo.png"),
-                ),
-              ),
-            ),
+            Expanded(child: _buildHomeBody()),
 
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.search, size: 26, color: Colors.black),
-                  onPressed: () => Navigator.pushNamed(context, "/search"),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.favorite_border,
-                      size: 26, color: Colors.black),
-                  onPressed: () => Navigator.pushNamed(context, "/love"),
-                ),
-              ],
-            )
+            _bottomNavBar(),
           ],
         ),
       ),
     );
   }
 
-  // -------------------------------------------------------------------------
-  // DRAWER
-  // -------------------------------------------------------------------------
-  Drawer _drawer() {
-    return Drawer(
-      backgroundColor: Colors.white,
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: const [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Colors.pinkAccent),
-            child: Text("Menu", style: TextStyle(color: Colors.white, fontSize: 22)),
-          ),
-          ListTile(title: Text("Profile")),
-          ListTile(title: Text("Settings")),
-          ListTile(title: Text("Orders")),
-        ],
-      ),
-    );
-  }
-
-  // -------------------------------------------------------------------------
-  // PAGE SWITCHER (HOME / MEMBERSHIP / CART / PROFILE)
-  // -------------------------------------------------------------------------
-  Widget _buildSelectedPage() {
-    switch (selectedIndex) {
-      case 0:
-        return const Center(
-          child: Text(
-            "Home Page",
-            style: TextStyle(fontSize: 22, color: Colors.black),
-          ),
-        );
-
-      case 1:
-        return const MembershipPage();
-
-      case 2:
-        return const CartPage();
-
-      case 3:
-        return const ProfilePage();
-
-      default:
-        return const Center(child: Text("Home"));
-    }
-  }
-
-  // -------------------------------------------------------------------------
-  // BOTTOM NAV BAR
-  // -------------------------------------------------------------------------
-  Widget _bottomNav() {
-    return Container(
-      height: 74,
-      decoration: const BoxDecoration(
+  // ---------------------------------------------------------
+  // CUSTOM TOP BAR WITH CURVE + LOGO + ICONS
+  // ---------------------------------------------------------
+  Widget _customTopBar() {
+    return ClipPath(
+      clipper: TopBarClipper(),
+      child: Container(
+        height: 120,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         color: Colors.white,
-        borderRadius:
-            BorderRadius.only(topLeft: Radius.circular(26), topRight: Radius.circular(26)),
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, -2)),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _navIcon(Icons.home_filled, 0),
-              _navIcon(Icons.card_membership, 1),
-              const SizedBox(width: 60),
-              _navIcon(Icons.shopping_cart, 2),
-              _navIcon(Icons.person, 3),
-            ],
-          ),
-
-          Positioned(
-            bottom: 8,
-            child: GestureDetector(
-              onTap: () => setState(() => arcOpen = !arcOpen),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            // Offer text left
+            Positioned(
+              left: 0,
+              top: 6,
+              child: GestureDetector(
+                onTap: () => _scaffoldKey.currentState!.openDrawer(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("offer available",
+                        style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w500)),
+                    IconButton(
+                      icon: const Icon(Icons.menu,
+                          size: 28, color: Colors.black),
+                      onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                     ),
                   ],
                 ),
-
-                child: Icon(
-                  selectedCategory == "male"
-                      ? Icons.male
-                      : selectedCategory == "female"
-                          ? Icons.female
-                          : selectedCategory == "unisex"
-                              ? Icons.transgender
-                              : Icons.add,
-                  size: 30,
-                  color: Colors.white,
-                ),
               ),
             ),
-          ),
+
+            // --- Center logo badge ---
+            Positioned(
+              top: 20,
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.black, width: 1.6),
+                    ),
+                    child: Image.asset(
+                      "assets/logo/logo.png",
+                      height: 38,
+                      width: 38,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text("single",
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.8)),
+                ],
+              ),
+            ),
+
+            // -- Right side search + membership
+            Positioned(
+              right: 0,
+              top: 12,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.search, size: 26),
+                    onPressed: () => Navigator.pushNamed(context, "/search"),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.workspace_premium, size: 26),
+                    onPressed: () =>
+                        Navigator.pushNamed(context, "/membership"),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------
+  // MAIN HOME CONTENT (Blank space + scroll images)
+  // ---------------------------------------------------------
+  Widget _buildHomeBody() {
+    return Stack(
+      children: [
+        Column(
+          children: [
+            Expanded(
+              child: Container(color: Colors.transparent),
+            ),
+
+            // Horizontal slider
+            SizedBox(
+              height: 140,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _bannerBox("assets/banner1.png"),
+                  _bannerBox("assets/banner2.png"),
+                  _bannerBox("assets/banner3.png"),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+
+        PinterestArcMenu(
+          isOpen: arcOpen,
+          onMaleTap: () => setCategory("male"),
+          onFemaleTap: () => setCategory("female"),
+          onUnisexTap: () => setCategory("unisex"),
+        ),
+      ],
+    );
+  }
+
+  Widget _bannerBox(String img) {
+    return Container(
+      width: 120,
+      height: 120,
+      margin: const EdgeInsets.only(right: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Image.asset(img, fit: BoxFit.cover),
+    );
+  }
+
+  void setCategory(String type) {
+    setState(() {
+      arcOpen = false;
+      selectedCategory = type;
+    });
+  }
+
+  // ---------------------------------------------------------
+  // BOTTOM NAVIGATION BAR
+  // ---------------------------------------------------------
+  Widget _bottomNavBar() {
+    return Container(
+      height: 72,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _navItem(Icons.home, "Home", 0),
+          _navItem(Icons.favorite_border, "favourite", 1),
+          _navItem(Icons.grid_view, "All", 2),
+          _navItem(Icons.shopping_cart, "cart", 3),
+          _navItem(Icons.person, "Profile", 4),
         ],
       ),
     );
   }
 
-  // -------------------------------------------------------------------------
-  // SINGLE NAV ICON
-  // -------------------------------------------------------------------------
-  Widget _navIcon(IconData icon, int index) {
+  Widget _navItem(IconData icon, String label, int index) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -247,35 +226,89 @@ class _HomePageState extends State<HomePage> {
           arcOpen = false;
         });
       },
-      child: Icon(
-        icon,
-        size: 28,
-        color: selectedIndex == index ? Colors.pinkAccent : Colors.grey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon,
+              size: 26,
+              color: selectedIndex == index
+                  ? Colors.pinkAccent
+                  : Colors.grey.shade500),
+          const SizedBox(height: 4),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 11,
+                  color: selectedIndex == index
+                      ? Colors.pinkAccent
+                      : Colors.grey.shade500))
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------
+  // DRAWER + LOGOUT INCLUDED
+  // ---------------------------------------------------------
+  Drawer _drawer() {
+    return Drawer(
+      backgroundColor: Colors.white,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(color: Colors.pinkAccent),
+            child:
+                Text("Menu", style: TextStyle(color: Colors.white, fontSize: 22)),
+          ),
+          ListTile(
+            title: const Text("Profile"),
+            onTap: () => Navigator.push(
+                context, MaterialPageRoute(builder: (_) => const ProfilePage())),
+          ),
+          ListTile(
+            title: const Text("Settings"),
+            onTap: () {},
+          ),
+          ListTile(
+            title: const Text("Orders"),
+            onTap: () =>
+                Navigator.pushNamed(context, "/orders"),
+          ),
+
+          const Divider(),
+
+          ListTile(
+            title: const Text("Logout",
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginPage()),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 }
 
-// -------------------------------------------------------------------------
-// TOP BAR ARC CLIPPER
-// -------------------------------------------------------------------------
+// ---------------------------------------------------------
+// CLIPPER FOR CURVED TOP BAR
+// ---------------------------------------------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    double curveHeight = 24;
+    double curve = 40;
 
     return Path()
-      ..lineTo(0, size.height - curveHeight)
+      ..lineTo(0, size.height - curve)
       ..quadraticBezierTo(
-        size.width / 2,
-        size.height + curveHeight,
-        size.width,
-        size.height - curveHeight,
-      )
+          size.width / 2, size.height + curve, size.width, size.height - curve)
       ..lineTo(size.width, 0)
       ..close();
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
