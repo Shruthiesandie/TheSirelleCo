@@ -19,6 +19,7 @@ dependencies:
   confetti: ^0.6.0
   intl: ^0.18.0
   google_fonts: ^6.2.0
+  marquee: ^2.2.3
 
   cupertino_icons: ^1.0.8
 

@@ -1,4 +1,3 @@
-// lib/home/home_page.dart
 import 'package:flutter/material.dart';
 import '../widgets/pinterest_arc_menu.dart';
 import '../pages/membership_page.dart';
@@ -20,13 +19,7 @@ class _HomePageState extends State<HomePage> {
   bool arcOpen = false;
   String selectedCategory = "none";
 
-  final List<String> pageTitles = [
-    "Home",
-    "Favourite",
-    "All",
-    "Cart",
-    "Profile"
-  ];
+  final List<String> pages = ["Home", "Favourite", "All", "Cart", "Profile"];
 
   final List<Widget> screens = const [
     Center(child: Text("Home Page")),
@@ -47,11 +40,13 @@ class _HomePageState extends State<HomePage> {
           children: [
             Column(
               children: [
-                _buildTitleBar(),
+                _marqueeStrip(),
+                _buildTopBar(),
                 Expanded(child: screens[selectedIndex]),
                 _bottomNavBar(),
               ],
             ),
+
             PinterestArcMenu(
               isOpen: arcOpen,
               onMaleTap: () => _setCategory("male"),
@@ -72,82 +67,78 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ---------------------------------------------------------
-  // TOP BAR SWITCHER
+  // SEPARATE OFFER STRIP WITH MOVING TEXT
   // ---------------------------------------------------------
-  Widget _buildTitleBar() {
+  Widget _marqueeStrip() {
+    return Container(
+      height: 22,
+      width: double.infinity,
+      color: Colors.white,
+      child: ClipRect(
+        child: AnimatedBuilder(
+          animation: Listenable.merge([ValueNotifier(0)]),
+          builder: (context, _) {
+            return TweenAnimationBuilder<double>(
+              tween: Tween(begin: 1, end: -1),
+              duration: const Duration(seconds: 8),
+              repeat: true,
+              builder: (context, value, _) {
+                return FractionalTranslation(
+                  translation: Offset(value, 0),
+                  child: const Text(
+                    "offer available   offer available   offer available   offer available   ",
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------
+  // TOP BAR LOGIC
+  // ---------------------------------------------------------
+  Widget _buildTopBar() {
     if (selectedIndex == 0) {
-      // HOME: curved bar with centered logo (like your sketch)
       return ClipPath(
         clipper: TopBarClipper(),
         child: Container(
-          height: 110,
+          height: 95,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           color: Colors.white,
-          child: Column(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // thin strip with "offer available"
-              SizedBox(
-                height: 22,
-                child: Center(
-                  child: Text(
-                    "offer available",
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+              IconButton(
+                icon: const Icon(Icons.menu, size: 22, color: Colors.black),
+                onPressed: () => _scaffoldKey.currentState!.openDrawer(),
               ),
-
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // left: menu (opens drawer)
-                      IconButton(
-                        icon: const Icon(Icons.menu,
-                            size: 24, color: Colors.black),
-                        onPressed: () =>
-                            _scaffoldKey.currentState!.openDrawer(),
-                      ),
-
-                      // middle: LOGO (bigger, no circle)
-                      Image.asset(
-                        "assets/logo/logo.png",
-                        height: 60,
-                        width: 60,
-                        fit: BoxFit.contain,
-                      ),
-
-                      // right: search + membership crown
-                      Row(
-                        children: [
-                          IconButton(
-                            icon:
-                                const Icon(Icons.search, size: 24),
-                            onPressed: () =>
-                                Navigator.pushNamed(context, "/search"),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.workspace_premium,
-                                size: 24),
-                            onPressed: () =>
-                                Navigator.pushNamed(context, "/membership"),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+              Image.asset(
+                "assets/logo/logo.png",
+                height: 58,
+                width: 58,
+                fit: BoxFit.contain,
               ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.search, size: 22),
+                    onPressed: () => Navigator.pushNamed(context, "/search"),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.workspace_premium, size: 22),
+                    onPressed: () => Navigator.pushNamed(context, "/membership"),
+                  ),
+                ],
+              )
             ],
           ),
         ),
       );
     } else {
-      // OTHER PAGES: simple rounded rectangular bar with title
       return Container(
         height: 55,
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -155,11 +146,7 @@ class _HomePageState extends State<HomePage> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 5,
-              offset: Offset(0, 2),
-            )
+            BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 2))
           ],
         ),
         child: Row(
@@ -170,13 +157,10 @@ class _HomePageState extends State<HomePage> {
               onPressed: () => _scaffoldKey.currentState!.openDrawer(),
             ),
             Text(
-              pageTitles[selectedIndex],
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              pages[selectedIndex],
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(width: 40), // keeps title visually centered
+            const SizedBox(width: 40),
           ],
         ),
       );
@@ -184,19 +168,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ---------------------------------------------------------
-  // BOTTOM NAV BAR (same icons/positions, just sized nicely)
+  // PERFECT BOTTOM BAR — FLUSH DOWN, CURVED CORNERS
   // ---------------------------------------------------------
   Widget _bottomNavBar() {
     return Container(
       height: 64,
+      padding: EdgeInsets.zero,
+      margin: EdgeInsets.zero,
+      width: double.infinity,
       decoration: const BoxDecoration(
         color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(22),
+          topRight: Radius.circular(22),
+        ),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, -2),
-          )
+          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, -2)),
         ],
       ),
       child: Row(
@@ -230,7 +217,7 @@ class _HomePageState extends State<HomePage> {
                 ? Colors.pinkAccent
                 : Colors.grey.shade500,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text(
             label,
             style: TextStyle(
@@ -246,7 +233,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ---------------------------------------------------------
-  // DRAWER WITH LOGOUT
+  // DRAWER (WITH LOGOUT INCLUDED)
   // ---------------------------------------------------------
   Drawer _drawer() {
     return Drawer(
@@ -256,17 +243,13 @@ class _HomePageState extends State<HomePage> {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.pinkAccent),
-            child: Text(
-              "Menu",
-              style: TextStyle(color: Colors.white, fontSize: 22),
-            ),
+            child: Text("Menu",
+                style: TextStyle(color: Colors.white, fontSize: 22)),
           ),
           ListTile(
             title: const Text("Profile"),
             onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ProfilePage()),
-            ),
+                context, MaterialPageRoute(builder: (_) => const ProfilePage())),
           ),
           const ListTile(title: Text("Settings")),
           ListTile(
@@ -275,13 +258,8 @@ class _HomePageState extends State<HomePage> {
           ),
           const Divider(),
           ListTile(
-            title: const Text(
-              "Logout",
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            title: const Text("Logout",
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
             onTap: () {
               Navigator.pushReplacement(
                 context,
@@ -301,16 +279,12 @@ class _HomePageState extends State<HomePage> {
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    const double curve = 30;
+    double curve = 30;
 
     return Path()
       ..lineTo(0, size.height - curve)
       ..quadraticBezierTo(
-        size.width / 2,
-        size.height + curve,
-        size.width,
-        size.height - curve,
-      )
+          size.width / 2, size.height + curve, size.width, size.height - curve)
       ..lineTo(size.width, 0)
       ..close();
   }
