@@ -18,25 +18,54 @@ class _HomePageState extends State<HomePage> {
 
   int selectedIndex = 0;
   bool arcOpen = false;
-
   String selectedCategory = "none";
+
+  // Titles for each screen
+  final List<String> pageTitles = [
+    "Home",
+    "Favourite",
+    "All",
+    "Cart",
+    "Profile"
+  ];
+
+  // Pages
+  final List<Widget> screens = const [
+    Center(child: Text("Home Screen")),
+    MembershipPage(),
+    Center(child: Text("All Categories Screen")),
+    CartPage(),
+    ProfilePage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
-
       drawer: _drawer(),
 
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            _customTopBar(),
+            Column(
+              children: [
+                _topBar(),
 
-            Expanded(child: _buildHomeBody()),
+                Expanded(
+                  child: screens[selectedIndex],
+                ),
 
-            _bottomNavBar(),
+                _bottomNavBar(),
+              ],
+            ),
+
+            PinterestArcMenu(
+              isOpen: arcOpen,
+              onMaleTap: () => setCategory("male"),
+              onFemaleTap: () => setCategory("female"),
+              onUnisexTap: () => setCategory("unisex"),
+            )
           ],
         ),
       ),
@@ -44,33 +73,45 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ---------------------------------------------------------
-  // CUSTOM TOP BAR WITH CURVE + LOGO + ICONS
+  // SET CATEGORY (ARC MENU SELECTION)
   // ---------------------------------------------------------
-  Widget _customTopBar() {
+  void setCategory(String type) {
+    setState(() {
+      arcOpen = false;
+      selectedCategory = type;
+    });
+  }
+
+  // ---------------------------------------------------------
+  // TOP BAR (CURVE + PAGE TITLE + MENU + ICONS)
+  // ---------------------------------------------------------
+  Widget _topBar() {
     return ClipPath(
       clipper: TopBarClipper(),
       child: Container(
-        height: 120,
+        height: 95,
         padding: const EdgeInsets.symmetric(horizontal: 12),
-        color: Colors.white,
+        decoration: const BoxDecoration(color: Colors.white),
         child: Stack(
-          alignment: Alignment.topCenter,
+          alignment: Alignment.center,
           children: [
-            // Offer text left
+            // Menu + Offer text
             Positioned(
               left: 0,
-              top: 6,
+              top: 4,
               child: GestureDetector(
                 onTap: () => _scaffoldKey.currentState!.openDrawer(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("offer available",
-                        style: TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.w500)),
+                    const Text(
+                      "offer available",
+                      style:
+                          TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                    ),
                     IconButton(
-                      icon: const Icon(Icons.menu,
-                          size: 28, color: Colors.black),
+                      icon:
+                          const Icon(Icons.menu, size: 28, color: Colors.black),
                       onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                     ),
                   ],
@@ -78,35 +119,19 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            // --- Center logo badge ---
+            // Page title
             Positioned(
-              top: 20,
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.black, width: 1.6),
-                    ),
-                    child: Image.asset(
-                      "assets/logo/logo.png",
-                      height: 38,
-                      width: 38,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text("single",
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.8)),
-                ],
+              top: 30,
+              child: Text(
+                pageTitles[selectedIndex],
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
               ),
             ),
 
-            // -- Right side search + membership
+            // Right icons
             Positioned(
               right: 0,
               top: 12,
@@ -131,70 +156,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ---------------------------------------------------------
-  // MAIN HOME CONTENT (Blank space + scroll images)
-  // ---------------------------------------------------------
-  Widget _buildHomeBody() {
-    return Stack(
-      children: [
-        Column(
-          children: [
-            Expanded(
-              child: Container(color: Colors.transparent),
-            ),
-
-            // Horizontal slider
-            SizedBox(
-              height: 140,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  _bannerBox("assets/banner1.png"),
-                  _bannerBox("assets/banner2.png"),
-                  _bannerBox("assets/banner3.png"),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-
-        PinterestArcMenu(
-          isOpen: arcOpen,
-          onMaleTap: () => setCategory("male"),
-          onFemaleTap: () => setCategory("female"),
-          onUnisexTap: () => setCategory("unisex"),
-        ),
-      ],
-    );
-  }
-
-  Widget _bannerBox(String img) {
-    return Container(
-      width: 120,
-      height: 120,
-      margin: const EdgeInsets.only(right: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
-        ],
-      ),
-      child: Image.asset(img, fit: BoxFit.cover),
-    );
-  }
-
-  void setCategory(String type) {
-    setState(() {
-      arcOpen = false;
-      selectedCategory = type;
-    });
-  }
-
-  // ---------------------------------------------------------
-  // BOTTOM NAVIGATION BAR
+  // BOTTOM NAVIGATION BAR — BEAUTIFUL + FIXED + PAGES SWITCH
   // ---------------------------------------------------------
   Widget _bottomNavBar() {
     return Container(
@@ -202,7 +164,8 @@ class _HomePageState extends State<HomePage> {
       decoration: const BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))
+          BoxShadow(
+              color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))
         ],
       ),
       child: Row(
@@ -227,27 +190,32 @@ class _HomePageState extends State<HomePage> {
         });
       },
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon,
-              size: 26,
+          Icon(
+            icon,
+            size: 26,
+            color: selectedIndex == index
+                ? Colors.pinkAccent
+                : Colors.grey.shade500,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
               color: selectedIndex == index
                   ? Colors.pinkAccent
-                  : Colors.grey.shade500),
-          const SizedBox(height: 4),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 11,
-                  color: selectedIndex == index
-                      ? Colors.pinkAccent
-                      : Colors.grey.shade500))
+                  : Colors.grey.shade500,
+            ),
+          ),
         ],
       ),
     );
   }
 
   // ---------------------------------------------------------
-  // DRAWER + LOGOUT INCLUDED
+  // DRAWER WITH LOGOUT ADDED
   // ---------------------------------------------------------
   Drawer _drawer() {
     return Drawer(
@@ -257,29 +225,28 @@ class _HomePageState extends State<HomePage> {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.pinkAccent),
-            child:
-                Text("Menu", style: TextStyle(color: Colors.white, fontSize: 22)),
+            child: Text("Menu",
+                style: TextStyle(color: Colors.white, fontSize: 22)),
           ),
           ListTile(
             title: const Text("Profile"),
             onTap: () => Navigator.push(
                 context, MaterialPageRoute(builder: (_) => const ProfilePage())),
           ),
-          ListTile(
-            title: const Text("Settings"),
-            onTap: () {},
-          ),
+          const ListTile(title: Text("Settings")),
           ListTile(
             title: const Text("Orders"),
-            onTap: () =>
-                Navigator.pushNamed(context, "/orders"),
+            onTap: () => Navigator.pushNamed(context, "/orders"),
           ),
 
           const Divider(),
 
           ListTile(
-            title: const Text("Logout",
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            title: const Text(
+              "Logout",
+              style:
+                  TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
             onTap: () {
               Navigator.pushReplacement(
                 context,
@@ -294,7 +261,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 // ---------------------------------------------------------
-// CLIPPER FOR CURVED TOP BAR
+// TOP BAR WAVY CLIPPER
 // ---------------------------------------------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
