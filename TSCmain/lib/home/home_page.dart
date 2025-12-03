@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
+// Pages
 import '../pages/membership_page.dart';
 import '../pages/cart_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/login_page.dart';
 import '../pages/allcategories_page.dart';
+
+// Widgets
+import '../widgets/top_bar/home_top_bar.dart';
+import '../widgets/bottom_nav/home_bottom_nav_bar.dart';
+import '../widgets/drawer/home_drawer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,6 +28,7 @@ class _HomePageState extends State<HomePage>
   late final AnimationController _marqueeController;
   late final Animation<double> _marqueeAnimation;
 
+  /// Screens for tab navigation
   final List<Widget> screens = const [
     Center(child: Text("Home Page")),
     Center(child: Text("Favourite Page")),
@@ -53,7 +60,10 @@ class _HomePageState extends State<HomePage>
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
-      drawer: _drawer(),
+
+      /// 🔥 Drawer moved to its own widget
+      drawer: const HomeDrawer(),
+
       body: SafeArea(
         top: true,
         bottom: false,
@@ -63,7 +73,9 @@ class _HomePageState extends State<HomePage>
               children: [
                 if (selectedIndex == 0) ...[
                   _marqueeStrip(),
-                  _homeTopBar(),
+                  
+                  /// 🔥 Top Bar from separate widget
+                  HomeTopBar(scaffoldKey: _scaffoldKey),
                 ],
 
                 if (selectedIndex != 0) _backOnlyBar(),
@@ -77,12 +89,17 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
-            /// 🔥 new fixed bottom bar
+            /// 🔥 Bottom Nav imported from separate file
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
-              child: _bottomNavBar(),
+              child: HomeBottomNavBar(
+                selectedIndex: selectedIndex,
+                onTabSelected: (index) {
+                  setState(() => selectedIndex = index);
+                },
+              ),
             ),
           ],
         ),
@@ -141,204 +158,14 @@ class _HomePageState extends State<HomePage>
       padding: const EdgeInsets.symmetric(horizontal: 10),
       color: Colors.white,
       alignment: Alignment.centerLeft,
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios, size: 18),
-            onPressed: () {
-              setState(() {
-                selectedIndex = 0;
-              });
-            },
-          ),
-        ],
+      child: IconButton(
+        icon: const Icon(Icons.arrow_back_ios, size: 18),
+        onPressed: () {
+          setState(() {
+            selectedIndex = 0;
+          });
+        },
       ),
     );
   }
-
-Widget _homeTopBar() {
-  // Adjust this value to move logo
-  // positive = move right | negative = move left
-  double logoShift = 25; // try 5, 10, 15, etc.
-
-  return ClipPath(
-    clipper: TopBarClipper(),
-    child: Container(
-      height: 90,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.menu, size: 24),
-            onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-          ),
-
-          /// ⭐ Logo with fine-tuned right shift
-          Transform.translate(
-            offset: Offset(logoShift, 0), // <— tweak this
-            child: Image.asset(
-              "assets/logo/logo.png",
-              height: 85,
-              width: 85,
-              fit: BoxFit.contain,
-            ),
-          ),
-
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.search, size: 22),
-                onPressed: () => Navigator.pushNamed(context, "/search"),
-              ),
-              IconButton(
-                icon: const Icon(Icons.workspace_premium, size: 22),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const MembershipPage(),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-}
-  // -----------------------------------------------------------
-  // ⭐ FIXED BOTTOM NAV : Equal spacing + centered categories
-  // -----------------------------------------------------------
-
-  Widget _bottomNavBar() {
-    return Container(
-      height: 75,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _navItem(Icons.home, "Home", 0),
-          _navItem(Icons.favorite_border, "Favourite", 1),
-          _navItem(Icons.grid_view_rounded, "All", 2),
-          _navItem(Icons.shopping_bag_outlined, "Cart", 3),
-          _navItem(Icons.person, "Profile", 4),
-        ],
-      ),
-    );
-  }
-
-  Widget _navItem(IconData icon, String label, int index) {
-    final isSelected = selectedIndex == index;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => selectedIndex = index),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: isSelected ? Colors.pinkAccent : Colors.grey.shade500,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color:
-                    isSelected ? Colors.pinkAccent : Colors.grey.shade500,
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  // -----------------------------------------------------------
-  // DRAWER
-  // -----------------------------------------------------------
-
-  Drawer _drawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.pinkAccent),
-            child: Text(
-              "Menu",
-              style: TextStyle(color: Colors.white, fontSize: 22),
-            ),
-          ),
-          ListTile(
-            title: const Text("Profile"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ProfilePage()),
-            ),
-          ),
-          ListTile(
-            title: const Text("Orders"),
-            onTap: () => Navigator.pushNamed(context, "/orders"),
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text(
-              "Logout",
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-            ),
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginPage()),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// -----------------------------------------------------------
-// Curved top bar clipper stays same
-// -----------------------------------------------------------
-
-class TopBarClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    const double curve = 25;
-    return Path()
-      ..lineTo(0, size.height - curve)
-      ..quadraticBezierTo(
-        size.width / 2,
-        size.height + curve,
-        size.width,
-        size.height - curve,
-      )
-      ..lineTo(size.width, 0)
-      ..close();
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> _) => false;
 }
