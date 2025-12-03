@@ -59,7 +59,6 @@ class _HomePageState extends State<HomePage>
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
 
-      // Drawer
       drawer: const HomeDrawer(),
 
       body: SafeArea(
@@ -69,9 +68,8 @@ class _HomePageState extends State<HomePage>
           children: [
             Column(
               children: [
-                // Home top section
                 if (selectedIndex == 0) ...[
-                  _marqueeStrip(),
+                  _blinkingOfferStrip(),
                   HomeTopBar(
                     onMenuTap: () => _scaffoldKey.currentState!.openDrawer(),
                     onSearchTap: () => Navigator.pushNamed(context, "/search"),
@@ -86,10 +84,8 @@ class _HomePageState extends State<HomePage>
                   ),
                 ],
 
-                // Back bar for non-home
                 if (selectedIndex != 0) _backOnlyBar(),
 
-                // Screens remain loaded
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -99,7 +95,6 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
-            // Bottom nav
             Positioned(
               left: 0,
               right: 0,
@@ -107,7 +102,6 @@ class _HomePageState extends State<HomePage>
               child: HomeBottomNavBar(
                 selectedIndex: selectedIndex,
                 onItemTap: (index) {
-                  // If categories (middle icon) tapped -> open page
                   if (index == 2) {
                     Navigator.push(
                       context,
@@ -128,12 +122,72 @@ class _HomePageState extends State<HomePage>
   }
 
   // -----------------------------------------------------------
-  // OFFER STRIP (top moving text)
+  // 🔥 NEW BLINKING AUTO ROTATING OFFER STRIP
   // -----------------------------------------------------------
-  Widget _marqueeStrip() {
-    return Container(
+  Widget _blinkingOfferStrip() {
+    return SizedBox(
       height: 28,
       width: double.infinity,
+      child: _BlinkingOfferSlider(),
+    );
+  }
+
+  // -----------------------------------------------------------
+  // BACK BAR
+  // -----------------------------------------------------------
+  Widget _backOnlyBar() {
+    return Container(
+      height: 45,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      color: Colors.white,
+      alignment: Alignment.centerLeft,
+      child: IconButton(
+        icon: const Icon(Icons.arrow_back_ios, size: 18),
+        onPressed: () {
+          setState(() {
+            selectedIndex = 0;
+          });
+        },
+      ),
+    );
+  }
+}
+
+// =====================================================================
+// ⭐ Internal widget: blinking sliding offer text — aesthetic animation
+// =====================================================================
+class _BlinkingOfferSlider extends StatefulWidget {
+  @override
+  State<_BlinkingOfferSlider> createState() => _BlinkingOfferSliderState();
+}
+
+class _BlinkingOfferSliderState extends State<_BlinkingOfferSlider> {
+  final List<String> offers = [
+    "✨ 10% OFF on orders above ₹1000 ✨",
+    "🔥 20% OFF on orders above ₹4000 🔥",
+    "🚚 Free Delivery on prepaid orders 🚚",
+  ];
+
+  int index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _cycleOffers();
+  }
+
+  void _cycleOffers() {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      setState(() => index = (index + 1) % offers.length);
+      _cycleOffers();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -149,40 +203,31 @@ class _HomePageState extends State<HomePage>
           ),
         ],
       ),
-      clipBehavior: Clip.hardEdge,
-      alignment: Alignment.centerLeft,
-      child: AnimatedBuilder(
-        animation: _marqueeAnimation,
-        builder: (context, child) {
-          return FractionalTranslation(
-            translation: Offset(_marqueeAnimation.value, 0),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 450),
+        transitionBuilder: (child, animation) {
+          final slideAnimation = Tween<Offset>(
+            begin: const Offset(0.6, 0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutExpo,
+          ));
+
+          return SlideTransition(
+            position: slideAnimation,
             child: child,
           );
         },
-        child: const Text(
-          "  offer available  offer available  offer available  offer available  ",
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        child: Text(
+          offers[index],
+          key: ValueKey(index),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
         ),
-      ),
-    );
-  }
-
-  // -----------------------------------------------------------
-  // BACK BAR for non-home screens
-  // -----------------------------------------------------------
-  Widget _backOnlyBar() {
-    return Container(
-      height: 45,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      color: Colors.white,
-      alignment: Alignment.centerLeft,
-      child: IconButton(
-        icon: const Icon(Icons.arrow_back_ios, size: 18),
-        onPressed: () {
-          setState(() {
-            selectedIndex = 0;
-          });
-        },
       ),
     );
   }
