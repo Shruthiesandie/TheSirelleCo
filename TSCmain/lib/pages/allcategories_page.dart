@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 
 class AllCategoriesPage extends StatefulWidget {
-  const AllCategoriesPage({super.key});
+  final VoidCallback? onBackToHome;
+
+  const AllCategoriesPage({super.key, this.onBackToHome});
 
   @override
   State<AllCategoriesPage> createState() => _AllCategoriesPageState();
@@ -86,7 +88,13 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back_ios, size: 22),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        if (widget.onBackToHome != null) {
+                          widget.onBackToHome!();
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
                     ),
 
                     // Center logo with shift ability
