@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../pages/membership_page.dart';
 import '../pages/cart_page.dart';
 import '../pages/profile_page.dart';
-import '../pages/login_page.dart';
 import '../pages/allcategories_page.dart';
 
 // Widgets
@@ -28,7 +27,7 @@ class _HomePageState extends State<HomePage>
   late final AnimationController _marqueeController;
   late final Animation<double> _marqueeAnimation;
 
-  /// Screens for tab navigation
+  // Tabs
   final List<Widget> screens = const [
     Center(child: Text("Home Page")),
     Center(child: Text("Favourite Page")),
@@ -61,7 +60,7 @@ class _HomePageState extends State<HomePage>
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
 
-      /// 🔥 Drawer moved to its own widget
+      // Drawer moved to its own widget
       drawer: const HomeDrawer(),
 
       body: SafeArea(
@@ -71,15 +70,30 @@ class _HomePageState extends State<HomePage>
           children: [
             Column(
               children: [
+                // Home: offer strip + curved top bar
                 if (selectedIndex == 0) ...[
                   _marqueeStrip(),
-                  
-                  /// 🔥 Top Bar from separate widget
-                  HomeTopBar(scaffoldKey: _scaffoldKey),
+                  HomeTopBar(
+                    logoShift: 25,
+                    onMenuTap: () =>
+                        _scaffoldKey.currentState!.openDrawer(),
+                    onSearchTap: () =>
+                        Navigator.pushNamed(context, "/search"),
+                    onMembershipTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MembershipPage(),
+                        ),
+                      );
+                    },
+                  ),
                 ],
 
+                // Back bar for non-home pages
                 if (selectedIndex != 0) _backOnlyBar(),
 
+                // Keep screens alive
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -89,14 +103,14 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
-            /// 🔥 Bottom Nav imported from separate file
+            // Bottom nav bar (separate widget)
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
               child: HomeBottomNavBar(
                 selectedIndex: selectedIndex,
-                onTabSelected: (index) {
+                onItemTap: (index) {
                   setState(() => selectedIndex = index);
                 },
               ),
@@ -110,7 +124,6 @@ class _HomePageState extends State<HomePage>
   // -----------------------------------------------------------
   // OFFER STRIP
   // -----------------------------------------------------------
-
   Widget _marqueeStrip() {
     return Container(
       height: 28,
@@ -149,9 +162,8 @@ class _HomePageState extends State<HomePage>
   }
 
   // -----------------------------------------------------------
-  // BACK BAR
+  // BACK BAR (non-home pages)
   // -----------------------------------------------------------
-
   Widget _backOnlyBar() {
     return Container(
       height: 45,
