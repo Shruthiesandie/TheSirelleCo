@@ -103,9 +103,6 @@ class _HomePageState extends State<HomePage>
                   ),
                 ],
 
-                /// ⭐ All pages except home
-                if (selectedIndex != 0) _backOnlyBar(),
-
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -223,26 +220,6 @@ class _HomePageState extends State<HomePage>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // -------------------------------------------------------------------
-  // ⭐ Back bar for pages other than home
-  // -------------------------------------------------------------------
-  Widget _backOnlyBar() {
-    return Container(
-      height: 45,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      color: Colors.white,
-      alignment: Alignment.centerLeft,
-      child: IconButton(
-        icon: const Icon(Icons.arrow_back_ios, size: 18),
-        onPressed: () {
-          setState(() {
-            selectedIndex = 0;
-          });
-        },
       ),
     );
   }
