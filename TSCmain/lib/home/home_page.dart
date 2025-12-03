@@ -17,7 +17,6 @@ class _HomePageState extends State<HomePage> {
 
   int selectedIndex = 0;
   bool arcOpen = false;
-  String selectedCategory = "none";
 
   final List<String> pages = ["Home", "Favourite", "All", "Cart", "Profile"];
 
@@ -29,6 +28,7 @@ class _HomePageState extends State<HomePage> {
     ProfilePage(),
   ];
 
+  // ============================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,18 +40,24 @@ class _HomePageState extends State<HomePage> {
           children: [
             Column(
               children: [
-                _marqueeStrip(), // moving "offer available"
-                _buildTopBar(),  // logo layout logic
+                _marqueeStrip(),  // continuous scroller
+                _titleBar(),      // dynamic app bar
                 Expanded(child: screens[selectedIndex]),
-                _bottomNavBar(), // fully flush bottom bar
               ],
+            ),
+
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _bottomNavBar(),  // perfectly stuck to bottom
             ),
 
             PinterestArcMenu(
               isOpen: arcOpen,
-              onMaleTap: () => _setCategory("male"),
-              onFemaleTap: () => _setCategory("female"),
-              onUnisexTap: () => _setCategory("unisex"),
+              onMaleTap: () => _selectCategory("male"),
+              onFemaleTap: () => _selectCategory("female"),
+              onUnisexTap: () => _selectCategory("unisex"),
             ),
           ],
         ),
@@ -59,31 +65,32 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _setCategory(String type) {
+  void _selectCategory(String type) {
     setState(() {
       arcOpen = false;
-      selectedCategory = type;
     });
   }
 
-  // ---------------------------------------------------------
-  // SEPARATE TOP OFFER STRIP WITH MOVING TEXT
-  // ---------------------------------------------------------
+  // ============================================================
+  // TOP OFFER STRIP — CONTINUOUS AUTO SCROLL
   Widget _marqueeStrip() {
     return Container(
-      height: 22,
+      height: 26,
       width: double.infinity,
-      color: Colors.white,
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.black, width: 1)),
+        color: Colors.white,
+      ),
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 1, end: -1),
-        duration: const Duration(seconds: 8),
-        onEnd: () => setState(() {}), // restart scrolling
+        duration: const Duration(seconds: 6),
+        onEnd: () => setState(() {}), // restart animation -> infinite loop
         builder: (context, value, _) {
           return FractionalTranslation(
             translation: Offset(value, 0),
             child: const Text(
-              "  offer available   offer available   offer available   offer available  ",
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+              "  offer available  offer available  offer available  offer available  ",
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           );
         },
@@ -91,30 +98,29 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ---------------------------------------------------------
-  // TOP BAR FOR HOME AND OTHER PAGES
-  // ---------------------------------------------------------
-  Widget _buildTopBar() {
+  // ============================================================
+  // TOP BAR — HOME = Logo + Curve, Other = Back + Title
+  Widget _titleBar() {
     if (selectedIndex == 0) {
+      // HOME SCREEN BAR
       return ClipPath(
         clipper: TopBarClipper(),
         child: Container(
-          height: 95,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          height: 90,
           color: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.menu, size: 22, color: Colors.black),
+                icon: const Icon(Icons.menu, size: 24),
                 onPressed: () => _scaffoldKey.currentState!.openDrawer(),
               ),
 
-              // LOGO centered vertically
               Image.asset(
                 "assets/logo/logo.png",
-                height: 58,
-                width: 58,
+                height: 55,
+                width: 55,
                 fit: BoxFit.contain,
               ),
 
@@ -127,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                   IconButton(
                     icon: const Icon(Icons.workspace_premium, size: 22),
                     onPressed: () => Navigator.pushNamed(context, "/membership"),
-                  ),
+                  )
                 ],
               )
             ],
@@ -135,37 +141,36 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     } else {
+      // OTHER PAGE TOP BAR — SIMPLE + BACK + TITLE
       return Container(
-        height: 55,
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 2))
-          ],
-        ),
+        height: 50,
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: const Icon(Icons.menu, size: 22),
-              onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+              icon: const Icon(Icons.arrow_back_ios, size: 18),
+              onPressed: () {
+                setState(() {
+                  selectedIndex = 0;
+                });
+              },
             ),
             Text(
               pages[selectedIndex],
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(width: 40),
           ],
         ),
       );
     }
   }
 
-  // ---------------------------------------------------------
-  // BOTTOM NAVIGATION — FLUSH STICKY + CURVED CORNERS
-  // ---------------------------------------------------------
+  // ============================================================
+  // PERFECT BOTTOM BAR — ALWAYS AT BOTTOM, CURVED TOP
   Widget _bottomNavBar() {
     return Container(
       height: 64,
@@ -177,41 +182,33 @@ class _HomePageState extends State<HomePage> {
           topRight: Radius.circular(22),
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, -2))
+          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, -2)),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navItem(Icons.home, "Home", 0),
-          _navItem(Icons.favorite_border, "favourite", 1),
-          _navItem(Icons.grid_view, "All", 2),
-          _navItem(Icons.shopping_cart, "cart", 3),
-          _navItem(Icons.person, "Profile", 4),
+          _navIcon(Icons.home, "Home", 0),
+          _navIcon(Icons.favorite_border, "favourite", 1),
+          _navIcon(Icons.grid_view, "All", 2),
+          _navIcon(Icons.shopping_cart, "cart", 3),
+          _navIcon(Icons.person, "Profile", 4),
         ],
       ),
     );
   }
 
-  Widget _navItem(IconData icon, String label, int index) {
+  Widget _navIcon(IconData icon, String label, int index) {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedIndex = index;
-          arcOpen = false;
-        });
-      },
+      onTap: () => setState(() => selectedIndex = index),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 22,
-            color: selectedIndex == index
-                ? Colors.pinkAccent
-                : Colors.grey.shade500,
-          ),
-          const SizedBox(height: 4),
+          Icon(icon,
+              size: 22,
+              color: selectedIndex == index
+                  ? Colors.pinkAccent
+                  : Colors.grey.shade500),
           Text(
             label,
             style: TextStyle(
@@ -226,12 +223,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ---------------------------------------------------------
-  // DRAWER WITH LOGOUT OPTION
-  // ---------------------------------------------------------
+  // ============================================================
+  // DRAWER + LOGOUT
   Drawer _drawer() {
     return Drawer(
-      backgroundColor: Colors.white,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
@@ -242,20 +237,17 @@ class _HomePageState extends State<HomePage> {
           ),
           ListTile(
             title: const Text("Profile"),
-            onTap: () => Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const ProfilePage())),
+            onTap: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage())),
           ),
-          const ListTile(title: Text("Settings")),
           ListTile(
             title: const Text("Orders"),
             onTap: () => Navigator.pushNamed(context, "/orders"),
           ),
           const Divider(),
           ListTile(
-            title: const Text(
-              "Logout",
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-            ),
+            title: const Text("Logout",
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
             onTap: () {
               Navigator.pushReplacement(
                 context,
@@ -269,13 +261,12 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// ---------------------------------------------------------
-// CURVED CLIPPER FOR HOME TOP BAR
-// ---------------------------------------------------------
+// ============================================================
+// CURVE SHAPE FOR HOME BAR
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    double curve = 30;
+    double curve = 25;
 
     return Path()
       ..lineTo(0, size.height - curve)
@@ -286,5 +277,5 @@ class TopBarClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
