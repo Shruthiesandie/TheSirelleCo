@@ -13,6 +13,8 @@ import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
+// Theme
+import 'themes/theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,10 +28,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      // Your splash screen stays the same
+      /// ⭐ Apply the global pink + white theme
+      theme: AppTheme.lightTheme,
+
+      /// ⭐ Splash loader remains your home launcher
       home: const SplashScreen(),
 
-      // All app routes
+      /// ⭐ Your full routing system preserved
       routes: {
         "/home": (_) => const HomePage(),
         "/membership": (_) => const MembershipPage(),
@@ -38,11 +43,9 @@ class MyApp extends StatelessWidget {
         "/search": (_) => const SearchPage(),
         "/love": (_) => const LovePage(),
         "/categories": (_) => const AllCategoriesPage(),
-        "/login": (_) => LoginPage(),   
+        "/login": (_) => LoginPage(),
         "/register": (_) => const CreateAccountPage(),
         "/username": (_) => const UsernamePage(),
-
-
       },
     );
   }

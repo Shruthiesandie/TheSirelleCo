@@ -1,48 +1,86 @@
 import 'package:flutter/material.dart';
 
-import 'light_color.dart';
-
 class AppTheme {
-  const AppTheme();
   static ThemeData lightTheme = ThemeData(
-      backgroundColor: LightColor.background,
-      primaryColor: LightColor.background,
-      cardTheme: CardTheme(color: LightColor.background),
-      textTheme: TextTheme(bodyText1: TextStyle(color: LightColor.black)),
-      iconTheme: IconThemeData(color: LightColor.iconColor),
-      bottomAppBarColor: LightColor.background,
-      dividerColor: LightColor.lightGrey,
-      primaryTextTheme:
-          TextTheme(bodyText1: TextStyle(color: LightColor.titleTextColor)));
+    useMaterial3: false,
 
-  static TextStyle titleStyle =
-      const TextStyle(color: LightColor.titleTextColor, fontSize: 16);
-  static TextStyle subTitleStyle =
-      const TextStyle(color: LightColor.subTitleTextColor, fontSize: 12);
+    // Main scaffold background
+    scaffoldBackgroundColor: const Color(0xFFFCEEEE), // soft pink
 
-  static TextStyle h1Style =
-      const TextStyle(fontSize: 24, fontWeight: FontWeight.bold);
-  static TextStyle h2Style = const TextStyle(fontSize: 22);
-  static TextStyle h3Style = const TextStyle(fontSize: 20);
-  static TextStyle h4Style = const TextStyle(fontSize: 18);
-  static TextStyle h5Style = const TextStyle(fontSize: 16);
-  static TextStyle h6Style = const TextStyle(fontSize: 14);
+    // Color scheme base
+    colorScheme: const ColorScheme.light(
+      primary: Colors.pinkAccent,
+      secondary: Colors.pinkAccent,
+      surface: Colors.white,
+      background: Color(0xFFFCEEEE),
+    ),
 
-  static List<BoxShadow> shadow = <BoxShadow>[
-    BoxShadow(color: Color(0xfff8f8f8), blurRadius: 10, spreadRadius: 15),
-  ];
+    // AppBar default styling
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      iconTheme: IconThemeData(color: Colors.black),
+      titleTextStyle: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
+    ),
 
-  static EdgeInsets padding =
-      const EdgeInsets.symmetric(horizontal: 20, vertical: 10);
-  static EdgeInsets hPadding = const EdgeInsets.symmetric(
-    horizontal: 10,
+    cardTheme: CardThemeData(
+      color: Colors.white,
+      elevation: 5,
+      margin: const EdgeInsets.all(10),
+      shadowColor: Colors.black.withOpacity(.08),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+    ),
+
+    bottomAppBarTheme: const BottomAppBarThemeData(
+      color: Colors.white,
+      elevation: 5,
+    ),
+
+    iconTheme: const IconThemeData(
+      color: Colors.black,
+      size: 22,
+    ),
+
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: Colors.pinkAccent,
+      foregroundColor: Colors.white,
+      elevation: 6,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50),
+      ),
+    ),
+
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.pinkAccent,
+        foregroundColor: Colors.white,
+        textStyle: const TextStyle(
+          fontWeight: FontWeight.w600,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      ),
+    ),
+
+    textTheme: const TextTheme(
+      titleLarge: TextStyle(
+          fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black),
+      titleMedium: TextStyle(
+          fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
+      bodyLarge: TextStyle(
+          fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+      bodyMedium: TextStyle(
+          fontSize: 12, fontWeight: FontWeight.w400, color: Colors.black54),
+    ),
+
+    dividerColor: Colors.black12,
   );
-
-  static double fullWidth(BuildContext context) {
-    return MediaQuery.of(context).size.width;
-  }
-
-  static double fullHeight(BuildContext context) {
-    return MediaQuery.of(context).size.height;
-  }
 }
