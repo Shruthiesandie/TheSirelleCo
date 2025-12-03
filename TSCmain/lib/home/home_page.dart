@@ -12,7 +12,6 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-// ticker provider for animation
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -23,7 +22,9 @@ class _HomePageState extends State<HomePage>
   late final AnimationController _marqueeController;
   late final Animation<double> _marqueeAnimation;
 
-  final List<String> pages = ["Home", "Favourite", "All", "Cart", "Profile"];
+  final List<String> pages = [
+    "Home", "Favourite", "All", "Cart", "Profile"
+  ];
 
   final List<Widget> screens = const [
     Center(child: Text("Home Page")),
@@ -69,9 +70,9 @@ class _HomePageState extends State<HomePage>
                   _homeTopBar(),
                 ],
 
-                // Insert back header for Favourite + All only
+                /// Back bar for favourite & all categories
                 if (selectedIndex == 1 || selectedIndex == 2)
-                  _simpleBackBar(),
+                  _backOnlyBar(),
 
                 Expanded(child: screens[selectedIndex]),
               ],
@@ -101,7 +102,7 @@ class _HomePageState extends State<HomePage>
   }
 
   // ---------------------------------------------------------------------------
-  // MODERN OFFER STRIP (NO UGLY BLACK LINE)
+  // OFFER MARQUEE
   // ---------------------------------------------------------------------------
   Widget _marqueeStrip() {
     return Container(
@@ -134,41 +135,43 @@ class _HomePageState extends State<HomePage>
         },
         child: const Text(
           "  offer available  offer available  offer available  offer available  ",
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
 
   // ---------------------------------------------------------------------------
-  // SIMPLE BACK BAR FOR FAVOURITE + ALL
+  // FIXED BACK ONLY BAR — always returns home properly
   // ---------------------------------------------------------------------------
-  Widget _simpleBackBar() {
+  Widget _backOnlyBar() {
     return Container(
       height: 45,
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      alignment: Alignment.centerLeft,
       color: Colors.white,
+      alignment: Alignment.centerLeft,
       child: Row(
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back_ios, size: 18),
-            onPressed: () => setState(() => selectedIndex = 0),
-          ),
-          Text(
-            pages[selectedIndex],
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            onPressed: _returnHomeSafely,
           ),
         ],
       ),
     );
   }
 
+  /// FIX black screen bug — safe UI restoration
+  void _returnHomeSafely() {
+    if (!mounted) return;
+    setState(() {
+      selectedIndex = 0;
+      arcOpen = false;
+    });
+  }
+
   // ---------------------------------------------------------------------------
-  // HOME LOGO TOP BAR
+  // HOME TOP BAR
   // ---------------------------------------------------------------------------
   Widget _homeTopBar() {
     return ClipPath(
@@ -214,11 +217,11 @@ class _HomePageState extends State<HomePage>
   }
 
   // ---------------------------------------------------------------------------
-  // BIGGER BOTTOM BAR — ALWAYS AT BOTTOM
+  // BOTTOM NAV BAR — enlarged & no gap
   // ---------------------------------------------------------------------------
   Widget _bottomNavBar() {
     return Container(
-      height: 75, // increased size
+      height: 75,
       width: double.infinity,
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -228,27 +231,29 @@ class _HomePageState extends State<HomePage>
         ),
         boxShadow: [
           BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, -2)),
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, -2),
+          ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navItem(Icons.home, "Home", 0),
-          _navItem(Icons.favorite_border, "favourite", 1),
-          _navItem(Icons.grid_view, "All", 2),
-          _navItem(Icons.shopping_cart, "cart", 3),
-          _navItem(Icons.person, "Profile", 4),
+          _navButton(Icons.home, "Home", 0),
+          _navButton(Icons.favorite_border, "favourite", 1),
+          _navButton(Icons.grid_view, "All", 2),
+          _navButton(Icons.shopping_cart, "cart", 3),
+          _navButton(Icons.person, "Profile", 4),
         ],
       ),
     );
   }
 
-  Widget _navItem(IconData icon, String label, int index) {
+  Widget _navButton(IconData icon, String label, int index) {
     return GestureDetector(
       onTap: () {
+        if (!mounted) return;
         setState(() {
           selectedIndex = index;
           arcOpen = false;
@@ -280,7 +285,7 @@ class _HomePageState extends State<HomePage>
   }
 
   // ---------------------------------------------------------------------------
-  // DRAWER
+  // Drawer
   // ---------------------------------------------------------------------------
   Drawer _drawer() {
     return Drawer(
@@ -319,18 +324,21 @@ class _HomePageState extends State<HomePage>
   }
 }
 
-// -----------------------------------------------------------------------------
-// CURVED HOME TOP BAR SHAPE
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Curved top bar for home
+// ---------------------------------------------------------------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     const double curve = 25;
-
     return Path()
       ..lineTo(0, size.height - curve)
       ..quadraticBezierTo(
-          size.width / 2, size.height + curve, size.width, size.height - curve)
+        size.width / 2,
+        size.height + curve,
+        size.width,
+        size.height - curve,
+      )
       ..lineTo(size.width, 0)
       ..close();
   }
