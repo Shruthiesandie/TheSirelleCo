@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
- Widget _homeTopBar() {
+Widget _homeTopBar() {
   // Adjust this value to move logo
   // positive = move right | negative = move left
   double logoShift = 25; // try 5, 10, 15, etc.
