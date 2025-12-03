@@ -30,20 +30,31 @@ class _HomePageState extends State<HomePage>
   /// Controller for auto scrolling ribbon
   final ScrollController _scrollController = ScrollController();
 
-  // Pages / Tabs
-  final List<Widget> screens = const [
-    Center(child: Text("Home Page")),
-    Center(child: Text("Favourite Page")),
-    AllCategoriesPage(),
-    CartPage(),
-    ProfilePage(),
-  ];
+  /// Tabs/pages (initialized in initState so we can pass callbacks)
+  late final List<Widget> screens;
 
   @override
   void initState() {
     super.initState();
 
-    /// Kept for future animations if needed
+    // Build the tab pages, including callback for AllCategories
+    screens = [
+      const Center(child: Text("Home Page")),
+      const Center(child: Text("Favourite Page")),
+      AllCategoriesPage(
+        onBackToHome: () {
+          // 👈 This is what the back button in AllCategories will call
+          if (!mounted) return;
+          setState(() {
+            selectedIndex = 0;
+          });
+        },
+      ),
+      const CartPage(),
+      const ProfilePage(),
+    ];
+
+    /// Kept for future use (not actually driving ribbon now)
     _marqueeController =
         AnimationController(vsync: this, duration: const Duration(seconds: 6))
           ..repeat();
@@ -86,7 +97,7 @@ class _HomePageState extends State<HomePage>
           children: [
             Column(
               children: [
-                /// ⭐ HOME page only
+                /// ⭐ HOME page only: offer ribbon + curved top bar
                 if (selectedIndex == 0) ...[
                   _premiumOfferRibbon(),
                   HomeTopBar(
