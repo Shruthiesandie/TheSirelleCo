@@ -5,6 +5,8 @@ import '../pages/cart_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/login_page.dart';
 import '../widgets/BottomNavigationBar/bottom_navigation_bar.dart';
+import '../widgets/top_bar_clipper.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
