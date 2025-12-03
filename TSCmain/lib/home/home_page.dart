@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage>
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
 
-      // Drawer moved to its own widget
+      // Drawer moved to own widget
       drawer: const HomeDrawer(),
 
       body: SafeArea(
@@ -70,15 +70,12 @@ class _HomePageState extends State<HomePage>
           children: [
             Column(
               children: [
-                // Home: offer strip + curved top bar
+                /// Home = offer strip + curved top bar
                 if (selectedIndex == 0) ...[
                   _marqueeStrip(),
                   HomeTopBar(
-                    logoShift: 25,
-                    onMenuTap: () =>
-                        _scaffoldKey.currentState!.openDrawer(),
-                    onSearchTap: () =>
-                        Navigator.pushNamed(context, "/search"),
+                    onMenuTap: () => _scaffoldKey.currentState!.openDrawer(),
+                    onSearchTap: () => Navigator.pushNamed(context, "/search"),
                     onMembershipTap: () {
                       Navigator.push(
                         context,
@@ -90,10 +87,10 @@ class _HomePageState extends State<HomePage>
                   ),
                 ],
 
-                // Back bar for non-home pages
+                /// Back bar for non-home pages
                 if (selectedIndex != 0) _backOnlyBar(),
 
-                // Keep screens alive
+                /// Keeps tabs alive
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -103,7 +100,7 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
-            // Bottom nav bar (separate widget)
+            /// Bottom nav
             Positioned(
               left: 0,
               right: 0,
@@ -162,7 +159,7 @@ class _HomePageState extends State<HomePage>
   }
 
   // -----------------------------------------------------------
-  // BACK BAR (non-home pages)
+  // BACK BAR (non-home)
   // -----------------------------------------------------------
   Widget _backOnlyBar() {
     return Container(

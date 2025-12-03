@@ -10,42 +10,48 @@ class AllCategoriesPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            /// ⭐ Curved Top Bar (same as home)
-            ClipPath(
-              clipper: TopBarClipper(),
-              child: Container(
-                height: 90,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+            Container(
+              height: 90,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
                 color: Colors.white,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    /// Back Button
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, size: 22),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-
-                    /// Center Logo
-                    Image.asset(
-                      "assets/logo/logo.png",
-                      height: 75,
-                      width: 75,
-                      fit: BoxFit.contain,
-                    ),
-
-                    /// Dummy placeholder for spacing (keeps logo centered)
-                    const SizedBox(width: 40),
-                  ],
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(25),
+                  bottomRight: Radius.circular(25),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, size: 22),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+
+                  // Logo
+                  Image.asset(
+                    "assets/logo/logo.png",
+                    height: 75,
+                    width: 75,
+                    fit: BoxFit.contain,
+                  ),
+
+                  SizedBox(width: 40), // keeps logo centered
+                ],
               ),
             ),
 
-            /// Page Body
-            const Expanded(
+            Expanded(
               child: Center(
                 child: Text(
-                  "Categories Pageeee",
+                  "Categories Page",
                   style: TextStyle(
                     fontSize: 26,
                     color: Colors.black,
@@ -59,25 +65,4 @@ class AllCategoriesPage extends StatelessWidget {
       ),
     );
   }
-}
-
-/// SAME clipper used in HomePage
-class TopBarClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    const double curve = 25;
-    return Path()
-      ..lineTo(0, size.height - curve)
-      ..quadraticBezierTo(
-        size.width / 2,
-        size.height + curve,
-        size.width,
-        size.height - curve,
-      )
-      ..lineTo(size.width, 0)
-      ..close();
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

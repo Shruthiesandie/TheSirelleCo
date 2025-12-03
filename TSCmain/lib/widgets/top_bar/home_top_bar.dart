@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Curved home top bar with logo in the center (slightly shifted),
-/// menu on the left, search + membership on the right.
+/// Curved home top bar with centered logo,
+/// menu on left, search + membership on right.
 class HomeTopBar extends StatelessWidget {
   final VoidCallback onMenuTap;
   final VoidCallback onSearchTap;
@@ -27,22 +27,28 @@ class HomeTopBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            /// Left Menu Button
             IconButton(
               icon: const Icon(Icons.menu, size: 24),
               onPressed: onMenuTap,
             ),
 
-            // Logo shifted slightly to the right
-            Transform.translate(
-              offset: Offset(logoShift, 0),
-              child: Image.asset(
-                "assets/logo/logo.png",
-                height: 85,
-                width: 85,
-                fit: BoxFit.contain,
+            /// Perfectly Centered Logo
+            Expanded(
+              child: Center(
+                child: Transform.translate(
+                  offset: Offset(logoShift, 0),
+                  child: Image.asset(
+                    "assets/logo/logo.png",
+                    height: 85,
+                    width: 85,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
 
+            /// Right Icons
             Row(
               children: [
                 IconButton(
@@ -62,7 +68,7 @@ class HomeTopBar extends StatelessWidget {
   }
 }
 
-/// Same clipper you had before – moved next to the top bar.
+/// Curve is maintained using custom clipper
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
