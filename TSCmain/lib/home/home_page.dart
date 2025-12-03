@@ -12,7 +12,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-//  IMPORTANT: SingleTickerProviderStateMixin for marquee animation
+// ticker provider for animation
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -25,8 +25,6 @@ class _HomePageState extends State<HomePage>
 
   final List<String> pages = ["Home", "Favourite", "All", "Cart", "Profile"];
 
-  // NOTE: Favourite is now its own page (placeholder),
-  // Membership is opened only from the crown icon.
   final List<Widget> screens = const [
     Center(child: Text("Home Page")),
     Center(child: Text("Favourite Page")),
@@ -41,7 +39,7 @@ class _HomePageState extends State<HomePage>
 
     _marqueeController =
         AnimationController(vsync: this, duration: const Duration(seconds: 8))
-          ..repeat(); // continuous loop
+          ..repeat();
 
     _marqueeAnimation =
         Tween<double>(begin: 1.0, end: -1.0).animate(_marqueeController);
@@ -61,23 +59,24 @@ class _HomePageState extends State<HomePage>
       drawer: _drawer(),
       body: SafeArea(
         top: true,
-        bottom: false, // bottom allowed to go to the very edge
+        bottom: false,
         child: Stack(
           children: [
             Column(
               children: [
-                // Only show offer + curved top bar on HOME
                 if (selectedIndex == 0) ...[
                   _marqueeStrip(),
                   _homeTopBar(),
                 ],
 
-                // For other pages, no extra top bar/line from here.
+                // Insert back header for Favourite + All only
+                if (selectedIndex == 1 || selectedIndex == 2)
+                  _simpleBackBar(),
+
                 Expanded(child: screens[selectedIndex]),
               ],
             ),
 
-            // Bottom nav always at absolute bottom
             Positioned(
               left: 0,
               right: 0,
@@ -85,7 +84,6 @@ class _HomePageState extends State<HomePage>
               child: _bottomNavBar(),
             ),
 
-            // Arc menu overlay
             PinterestArcMenu(
               isOpen: arcOpen,
               onMaleTap: () => _setCategory("male"),
@@ -103,27 +101,29 @@ class _HomePageState extends State<HomePage>
   }
 
   // ---------------------------------------------------------------------------
-  // OFFER STRIP (HOME ONLY) — NICE LINE + CONTINUOUS MARQUEE
+  // MODERN OFFER STRIP (NO UGLY BLACK LINE)
   // ---------------------------------------------------------------------------
   Widget _marqueeStrip() {
     return Container(
-      height: 26,
+      height: 28,
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: const Border(
-          bottom: BorderSide(color: Colors.black, width: 1.2),
-        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 2,
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 3,
             offset: const Offset(0, 1),
+          ),
+          const BoxShadow(
+            color: Color(0xFFEAEAEA),
+            offset: Offset(0, 2),
+            blurRadius: 4,
           ),
         ],
       ),
-      alignment: Alignment.centerLeft,
       clipBehavior: Clip.hardEdge,
+      alignment: Alignment.centerLeft,
       child: AnimatedBuilder(
         animation: _marqueeAnimation,
         builder: (context, child) {
@@ -144,7 +144,31 @@ class _HomePageState extends State<HomePage>
   }
 
   // ---------------------------------------------------------------------------
-  // HOME TOP BAR — CURVED WITH LOGO (ONLY FOR HOME)
+  // SIMPLE BACK BAR FOR FAVOURITE + ALL
+  // ---------------------------------------------------------------------------
+  Widget _simpleBackBar() {
+    return Container(
+      height: 45,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      alignment: Alignment.centerLeft,
+      color: Colors.white,
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios, size: 18),
+            onPressed: () => setState(() => selectedIndex = 0),
+          ),
+          Text(
+            pages[selectedIndex],
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // HOME LOGO TOP BAR
   // ---------------------------------------------------------------------------
   Widget _homeTopBar() {
     return ClipPath(
@@ -174,14 +198,12 @@ class _HomePageState extends State<HomePage>
                 ),
                 IconButton(
                   icon: const Icon(Icons.workspace_premium, size: 22),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const MembershipPage(),
-                      ),
-                    );
-                  },
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const MembershipPage(),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -192,24 +214,23 @@ class _HomePageState extends State<HomePage>
   }
 
   // ---------------------------------------------------------------------------
-  // BOTTOM NAV BAR — TOUCHES EDGE, CURVED TOP CORNERS, ALWAYS VISIBLE
+  // BIGGER BOTTOM BAR — ALWAYS AT BOTTOM
   // ---------------------------------------------------------------------------
   Widget _bottomNavBar() {
     return Container(
-      height: 64,
+      height: 75, // increased size
       width: double.infinity,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(22),
-          topRight: Radius.circular(22),
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, -2),
-          ),
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: Offset(0, -2)),
         ],
       ),
       child: Row(
@@ -238,16 +259,16 @@ class _HomePageState extends State<HomePage>
         children: [
           Icon(
             icon,
-            size: 22,
+            size: 24,
             color: selectedIndex == index
                 ? Colors.pinkAccent
                 : Colors.grey.shade500,
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 11,
               color: selectedIndex == index
                   ? Colors.pinkAccent
                   : Colors.grey.shade500,
@@ -259,7 +280,7 @@ class _HomePageState extends State<HomePage>
   }
 
   // ---------------------------------------------------------------------------
-  // DRAWER WITH LOGOUT
+  // DRAWER
   // ---------------------------------------------------------------------------
   Drawer _drawer() {
     return Drawer(
@@ -268,17 +289,14 @@ class _HomePageState extends State<HomePage>
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.pinkAccent),
-            child: Text(
-              "Menu",
-              style: TextStyle(color: Colors.white, fontSize: 22),
-            ),
+            child: Text("Menu",
+                style: TextStyle(color: Colors.white, fontSize: 22)),
           ),
           ListTile(
             title: const Text("Profile"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ProfilePage()),
-            ),
+            onTap: () =>
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const ProfilePage())),
           ),
           ListTile(
             title: const Text("Orders"),
@@ -286,13 +304,8 @@ class _HomePageState extends State<HomePage>
           ),
           const Divider(),
           ListTile(
-            title: const Text(
-              "Logout",
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            title: const Text("Logout",
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
             onTap: () {
               Navigator.pushReplacement(
                 context,
@@ -307,7 +320,7 @@ class _HomePageState extends State<HomePage>
 }
 
 // -----------------------------------------------------------------------------
-// CURVED SHAPE FOR HOME TOP BAR
+// CURVED HOME TOP BAR SHAPE
 // -----------------------------------------------------------------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
@@ -317,11 +330,7 @@ class TopBarClipper extends CustomClipper<Path> {
     return Path()
       ..lineTo(0, size.height - curve)
       ..quadraticBezierTo(
-        size.width / 2,
-        size.height + curve,
-        size.width,
-        size.height - curve,
-      )
+          size.width / 2, size.height + curve, size.width, size.height - curve)
       ..lineTo(size.width, 0)
       ..close();
   }
