@@ -13,8 +13,7 @@ import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
-// Theme
-import 'themes/theme.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -27,9 +26,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-      /// ⭐ Apply the global pink + white theme
-      theme: AppTheme.lightTheme,
 
       /// ⭐ Splash loader remains your home launcher
       home: const SplashScreen(),
