@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 
-class AllCategoriesPage extends StatelessWidget {
+class AllCategoriesPage extends StatefulWidget {
   const AllCategoriesPage({super.key});
+
+  @override
+  State<AllCategoriesPage> createState() => _AllCategoriesPageState();
+}
+
+class _AllCategoriesPageState extends State<AllCategoriesPage> {
+  bool showSearch = false;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +46,60 @@ class AllCategoriesPage extends StatelessWidget {
                     ),
                   ),
 
-                  // Spacer to balance right side
-                  const SizedBox(width: 40),
+                  // Search icon button
+                  IconButton(
+                    icon: const Icon(Icons.search, size: 22),
+                    onPressed: () {
+                      setState(() {
+                        showSearch = !showSearch;
+                      });
+                    },
+                  ),
                 ],
               ),
               ),
             ),
+
+            if (showSearch)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.6),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.25),
+                            blurRadius: 12,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.search, color: Colors.pinkAccent),
+                          hintText: "Search products...",
+                          hintStyle: TextStyle(color: Colors.black54),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
             // Body
             const Expanded(
