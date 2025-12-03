@@ -24,8 +24,9 @@ class _HomePageState extends State<HomePage>
 
   int selectedIndex = 0;
 
-  late final AnimationController _marqueeController;
-  late final Animation<double> _marqueeAnimation;
+  ScrollController _scrollController = ScrollController();
+
+  late AnimationController shimmerController;
 
   // Tabs except categories
   final List<Widget> screens = const [
@@ -35,29 +36,24 @@ class _HomePageState extends State<HomePage>
     ProfilePage(),
   ];
 
-  ScrollController _scrollController = ScrollController();
-
   @override
   void initState() {
     super.initState();
 
-    /// Start auto drifting after rendering
+    // Soft shimmer animation
+    shimmerController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 3))
+          ..repeat();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startAutoScroll();
     });
-
-    _marqueeController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 8))
-          ..repeat();
-
-    _marqueeAnimation =
-        Tween<double>(begin: 1.0, end: -1.0).animate(_marqueeController);
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _marqueeController.dispose();
+    shimmerController.dispose();
     super.dispose();
   }
 
@@ -66,9 +62,7 @@ class _HomePageState extends State<HomePage>
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
-
       drawer: const HomeDrawer(),
-
       body: SafeArea(
         top: true,
         bottom: false,
@@ -130,7 +124,7 @@ class _HomePageState extends State<HomePage>
   }
 
   // -----------------------------------------------------------
-  // ✨ PREMIUM DRIFTING OFFER RIBBON
+  // ✨ PREMIUM GLASS + SHIMMER OFFER RIBBON
   // -----------------------------------------------------------
   Widget _premiumOfferRibbon() {
     List<String> offers = [
@@ -141,63 +135,107 @@ class _HomePageState extends State<HomePage>
     ];
 
     return SizedBox(
-      height: 35,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: Colors.pinkAccent.withOpacity(0.25),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.pinkAccent.withOpacity(0.15),
-              blurRadius: 6,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        child: ListView.builder(
-          controller: _scrollController,
-          scrollDirection: Axis.horizontal,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          itemCount: 9999, // infinite illusion
-          itemBuilder: (_, i) {
-            String offer = offers[i % offers.length];
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.pinkAccent.withOpacity(0.18),
-                borderRadius: BorderRadius.circular(30),
-                border:
-                    Border.all(color: Colors.pinkAccent.withOpacity(0.3)),
+      height: 38,
+      child: AnimatedBuilder(
+        animation: shimmerController,
+        builder: (context, child) {
+          final glowOffset =
+              (shimmerController.value * 60) - 30; // subtle shimmer
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: Colors.pinkAccent.withOpacity(0.25),
               ),
-              child: Text(
-                offer,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.pinkAccent,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.pinkAccent.withOpacity(0.20),
+                  blurRadius: 12,
+                  spreadRadius: 1,
                 ),
-              ),
-            );
-          },
-        ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // ✨ glow moving effect
+                Positioned(
+                  left: glowOffset,
+                  top: 6,
+                  bottom: 6,
+                  child: Container(
+                    width: 60,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withOpacity(0.0),
+                          Colors.white.withOpacity(0.30),
+                          Colors.white.withOpacity(0.0),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                ),
+
+                ListView.builder(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: 9999,
+                  itemBuilder: (_, i) {
+                    String offer = offers[i % offers.length];
+                    return Container(
+                      margin:
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.pinkAccent.withOpacity(0.35),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.pinkAccent.withOpacity(0.15),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        offer,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.pink.shade700,
+                          shadows: [
+                            Shadow(
+                              color: Colors.white.withOpacity(0.6),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  // -----------------------------------------------------------
-  // 🔁 AUTO SCROLLING ANIMATION
-  // -----------------------------------------------------------
+  // Auto Scroll for Infinite ribbon
   void _startAutoScroll() async {
     while (mounted) {
-      await Future.delayed(const Duration(milliseconds: 20)); // slower & smooth
+      await Future.delayed(const Duration(milliseconds: 18));
       if (!_scrollController.hasClients) return;
 
-      _scrollController.jumpTo(_scrollController.offset + 0.5);
+      _scrollController.jumpTo(_scrollController.offset + 0.4);
 
       if (_scrollController.offset >=
           _scrollController.position.maxScrollExtent) {
@@ -206,9 +244,7 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  // -----------------------------------------------------------
-  // BACK BAR (non-home)
-  // -----------------------------------------------------------
+  // Back bar
   Widget _backOnlyBar() {
     return Container(
       height: 45,
