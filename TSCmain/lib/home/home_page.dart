@@ -341,7 +341,7 @@ class _HomePageState extends State<HomePage>
 }
 
 // ------------------------------------------------------------------------
-// ⭐ CURVED + ELASTIC ANIMATED BOTTOM BAR ADDED HERE
+// ⭐ CURVED + ELASTIC ANIMATED (TUNED WAVE HEIGHT) BOTTOM BAR 
 // ------------------------------------------------------------------------
 
 class AnimatedBottomBar extends StatefulWidget {
@@ -507,20 +507,22 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
 }
 
 // ------------------------------------------------------------------------
-// Curve Painter + helpers
+// Curve Painter + helpers (wave height REDUCED)
 // ------------------------------------------------------------------------
 
 class BackgroundCurvePainter extends CustomPainter {
-  static const _radiusTop = 50.0;
-  static const _radiusBottom = 30.0;
+  static const _radiusTop = 40.0;      // smaller dip radius
+  static const _radiusBottom = 18.0;
   static const _horizontalControlTop = 0.6;
   static const _horizontalControlBottom = 0.5;
   static const _pointControlTop = 0.35;
   static const _pointControlBottom = 0.85;
-  static const _topY = -60.0;
+
+  static const _topY = -25.0;  // 🔥 previously -60 — now reduced
   static const _bottomY = 0.0;
+
   static const _topDistance = 0.0;
-  static const _bottomDistance = 10.0;
+  static const _bottomDistance = 4.0; // 🔥 previously 10 — smoother
 
   final double _x;
   final double _normalizedY;
