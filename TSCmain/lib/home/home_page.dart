@@ -12,23 +12,47 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+//  IMPORTANT: SingleTickerProviderStateMixin for marquee animation
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int selectedIndex = 0;
   bool arcOpen = false;
 
+  late final AnimationController _marqueeController;
+  late final Animation<double> _marqueeAnimation;
+
   final List<String> pages = ["Home", "Favourite", "All", "Cart", "Profile"];
 
+  // NOTE: Favourite is now its own page (placeholder),
+  // Membership is opened only from the crown icon.
   final List<Widget> screens = const [
     Center(child: Text("Home Page")),
-    MembershipPage(),
+    Center(child: Text("Favourite Page")),
     Center(child: Text("All Categories Page")),
     CartPage(),
     ProfilePage(),
   ];
 
-  // ============================================================
+  @override
+  void initState() {
+    super.initState();
+
+    _marqueeController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 8))
+          ..repeat(); // continuous loop
+
+    _marqueeAnimation =
+        Tween<double>(begin: 1.0, end: -1.0).animate(_marqueeController);
+  }
+
+  @override
+  void dispose() {
+    _marqueeController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,28 +60,37 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: const Color(0xFFFCEEEE),
       drawer: _drawer(),
       body: SafeArea(
+        top: true,
+        bottom: false, // bottom allowed to go to the very edge
         child: Stack(
           children: [
             Column(
               children: [
-                _marqueeStrip(),  // continuous scroller
-                _titleBar(),      // dynamic app bar
+                // Only show offer + curved top bar on HOME
+                if (selectedIndex == 0) ...[
+                  _marqueeStrip(),
+                  _homeTopBar(),
+                ],
+
+                // For other pages, no extra top bar/line from here.
                 Expanded(child: screens[selectedIndex]),
               ],
             ),
 
+            // Bottom nav always at absolute bottom
             Positioned(
-              bottom: 0,
               left: 0,
               right: 0,
-              child: _bottomNavBar(),  // perfectly stuck to bottom
+              bottom: 0,
+              child: _bottomNavBar(),
             ),
 
+            // Arc menu overlay
             PinterestArcMenu(
               isOpen: arcOpen,
-              onMaleTap: () => _selectCategory("male"),
-              onFemaleTap: () => _selectCategory("female"),
-              onUnisexTap: () => _selectCategory("unisex"),
+              onMaleTap: () => _setCategory("male"),
+              onFemaleTap: () => _setCategory("female"),
+              onUnisexTap: () => _setCategory("unisex"),
             ),
           ],
         ),
@@ -65,112 +98,102 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _selectCategory(String type) {
-    setState(() {
-      arcOpen = false;
-    });
+  void _setCategory(String _) {
+    setState(() => arcOpen = false);
   }
 
-  // ============================================================
-  // TOP OFFER STRIP — CONTINUOUS AUTO SCROLL
+  // ---------------------------------------------------------------------------
+  // OFFER STRIP (HOME ONLY) — NICE LINE + CONTINUOUS MARQUEE
+  // ---------------------------------------------------------------------------
   Widget _marqueeStrip() {
     return Container(
       height: 26,
       width: double.infinity,
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.black, width: 1)),
+      decoration: BoxDecoration(
         color: Colors.white,
+        border: const Border(
+          bottom: BorderSide(color: Colors.black, width: 1.2),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 1, end: -1),
-        duration: const Duration(seconds: 6),
-        onEnd: () => setState(() {}), // restart animation -> infinite loop
-        builder: (context, value, _) {
+      alignment: Alignment.centerLeft,
+      clipBehavior: Clip.hardEdge,
+      child: AnimatedBuilder(
+        animation: _marqueeAnimation,
+        builder: (context, child) {
           return FractionalTranslation(
-            translation: Offset(value, 0),
-            child: const Text(
-              "  offer available  offer available  offer available  offer available  ",
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-            ),
+            translation: Offset(_marqueeAnimation.value, 0),
+            child: child,
           );
         },
+        child: const Text(
+          "  offer available  offer available  offer available  offer available  ",
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }
 
-  // ============================================================
-  // TOP BAR — HOME = Logo + Curve, Other = Back + Title
-  Widget _titleBar() {
-    if (selectedIndex == 0) {
-      // HOME SCREEN BAR
-      return ClipPath(
-        clipper: TopBarClipper(),
-        child: Container(
-          height: 90,
-          color: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.menu, size: 24),
-                onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-              ),
-
-              Image.asset(
-                "assets/logo/logo.png",
-                height: 55,
-                width: 55,
-                fit: BoxFit.contain,
-              ),
-
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.search, size: 22),
-                    onPressed: () => Navigator.pushNamed(context, "/search"),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.workspace_premium, size: 22),
-                    onPressed: () => Navigator.pushNamed(context, "/membership"),
-                  )
-                ],
-              )
-            ],
-          ),
-        ),
-      );
-    } else {
-      // OTHER PAGE TOP BAR — SIMPLE + BACK + TITLE
-      return Container(
-        height: 50,
+  // ---------------------------------------------------------------------------
+  // HOME TOP BAR — CURVED WITH LOGO (ONLY FOR HOME)
+  // ---------------------------------------------------------------------------
+  Widget _homeTopBar() {
+    return ClipPath(
+      clipper: TopBarClipper(),
+      child: Container(
+        height: 90,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         color: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back_ios, size: 18),
-              onPressed: () {
-                setState(() {
-                  selectedIndex = 0;
-                });
-              },
+              icon: const Icon(Icons.menu, size: 24),
+              onPressed: () => _scaffoldKey.currentState!.openDrawer(),
             ),
-            Text(
-              pages[selectedIndex],
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+            Image.asset(
+              "assets/logo/logo.png",
+              height: 55,
+              width: 55,
+              fit: BoxFit.contain,
+            ),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.search, size: 22),
+                  onPressed: () => Navigator.pushNamed(context, "/search"),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.workspace_premium, size: 22),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const MembershipPage(),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ],
         ),
-      );
-    }
+      ),
+    );
   }
 
-  // ============================================================
-  // PERFECT BOTTOM BAR — ALWAYS AT BOTTOM, CURVED TOP
+  // ---------------------------------------------------------------------------
+  // BOTTOM NAV BAR — TOUCHES EDGE, CURVED TOP CORNERS, ALWAYS VISIBLE
+  // ---------------------------------------------------------------------------
   Widget _bottomNavBar() {
     return Container(
       height: 64,
@@ -182,33 +205,45 @@ class _HomePageState extends State<HomePage> {
           topRight: Radius.circular(22),
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, -2)),
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, -2),
+          ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navIcon(Icons.home, "Home", 0),
-          _navIcon(Icons.favorite_border, "favourite", 1),
-          _navIcon(Icons.grid_view, "All", 2),
-          _navIcon(Icons.shopping_cart, "cart", 3),
-          _navIcon(Icons.person, "Profile", 4),
+          _navItem(Icons.home, "Home", 0),
+          _navItem(Icons.favorite_border, "favourite", 1),
+          _navItem(Icons.grid_view, "All", 2),
+          _navItem(Icons.shopping_cart, "cart", 3),
+          _navItem(Icons.person, "Profile", 4),
         ],
       ),
     );
   }
 
-  Widget _navIcon(IconData icon, String label, int index) {
+  Widget _navItem(IconData icon, String label, int index) {
     return GestureDetector(
-      onTap: () => setState(() => selectedIndex = index),
+      onTap: () {
+        setState(() {
+          selectedIndex = index;
+          arcOpen = false;
+        });
+      },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon,
-              size: 22,
-              color: selectedIndex == index
-                  ? Colors.pinkAccent
-                  : Colors.grey.shade500),
+          Icon(
+            icon,
+            size: 22,
+            color: selectedIndex == index
+                ? Colors.pinkAccent
+                : Colors.grey.shade500,
+          ),
+          const SizedBox(height: 3),
           Text(
             label,
             style: TextStyle(
@@ -223,8 +258,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ============================================================
-  // DRAWER + LOGOUT
+  // ---------------------------------------------------------------------------
+  // DRAWER WITH LOGOUT
+  // ---------------------------------------------------------------------------
   Drawer _drawer() {
     return Drawer(
       child: ListView(
@@ -232,13 +268,17 @@ class _HomePageState extends State<HomePage> {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.pinkAccent),
-            child: Text("Menu",
-                style: TextStyle(color: Colors.white, fontSize: 22)),
+            child: Text(
+              "Menu",
+              style: TextStyle(color: Colors.white, fontSize: 22),
+            ),
           ),
           ListTile(
             title: const Text("Profile"),
-            onTap: () =>
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfilePage()),
+            ),
           ),
           ListTile(
             title: const Text("Orders"),
@@ -246,8 +286,13 @@ class _HomePageState extends State<HomePage> {
           ),
           const Divider(),
           ListTile(
-            title: const Text("Logout",
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            title: const Text(
+              "Logout",
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             onTap: () {
               Navigator.pushReplacement(
                 context,
@@ -261,17 +306,22 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// ============================================================
-// CURVE SHAPE FOR HOME BAR
+// -----------------------------------------------------------------------------
+// CURVED SHAPE FOR HOME TOP BAR
+// -----------------------------------------------------------------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    double curve = 25;
+    const double curve = 25;
 
     return Path()
       ..lineTo(0, size.height - curve)
       ..quadraticBezierTo(
-          size.width / 2, size.height + curve, size.width, size.height - curve)
+        size.width / 2,
+        size.height + curve,
+        size.width,
+        size.height - curve,
+      )
       ..lineTo(size.width, 0)
       ..close();
   }
