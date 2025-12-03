@@ -20,7 +20,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int selectedIndex = 0;
@@ -44,7 +43,7 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
 
-    /// Unused but keeping if you need animation later
+    /// still kept if you want to hook other animations later
     _marqueeController =
         AnimationController(vsync: this, duration: const Duration(seconds: 6))
           ..repeat();
@@ -52,11 +51,11 @@ class _HomePageState extends State<HomePage>
     _marqueeAnimation =
         Tween<double>(begin: 1.0, end: -1.0).animate(_marqueeController);
 
-    /// Start auto scrolling
+    /// Start auto scrolling the ribbon
     WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoScroll());
   }
 
-  /// Auto-scroll smooth movement
+  /// Auto-scroll smooth movement for the offer ribbon
   void _startAutoScroll() async {
     while (mounted) {
       await Future.delayed(const Duration(milliseconds: 40));
@@ -135,7 +134,7 @@ class _HomePageState extends State<HomePage>
   }
 
   // -------------------------------------------------------------------
-  // ⭐ BEAUTIFUL PREMIUM AUTO-SCROLL OFFER RIBBON (NO FADE ISSUE)
+  // ⭐ BEAUTIFUL PREMIUM AUTO-SCROLL + USER-SCROLL OFFER RIBBON
   // -------------------------------------------------------------------
   Widget _premiumOfferRibbon() {
     List<String> offers = [
@@ -147,71 +146,83 @@ class _HomePageState extends State<HomePage>
 
     return SizedBox(
       height: 48,
-      child: Stack(
-        children: [
-          ListView.builder(
-            controller: _scrollController,
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: 9999,
-            itemBuilder: (_, i) {
-              String offer = offers[i % offers.length];
+      child: Listener(
+        // 👇 allows horizontal drag to manually scroll ribbon
+        onPointerMove: (details) {
+          if (_scrollController.hasClients) {
+            _scrollController.jumpTo(
+              _scrollController.offset - details.delta.dx,
+            );
+          }
+        },
+        child: Stack(
+          children: [
+            ListView.builder(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: 9999,
+              itemBuilder: (_, i) {
+                String offer = offers[i % offers.length];
 
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.pinkAccent.withOpacity(0.17),
-                      Colors.white.withOpacity(0.9),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.pinkAccent.withOpacity(0.15),
-                      blurRadius: 8,
-                      spreadRadius: 2,
+                return Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 18, vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.pinkAccent.withOpacity(0.17),
+                        Colors.white.withOpacity(0.9),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
-                ),
-                child: Text(
-                  offer,
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.pink.shade900,
-                  ),
-                ),
-              );
-            },
-          ),
-
-          /// ⭐ Soft fade edges — NOT blocking text visibility
-          Positioned.fill(
-            child: IgnorePointer(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.white.withOpacity(0.9),
-                      Colors.white.withOpacity(0.0),
-                      Colors.white.withOpacity(0.0),
-                      Colors.white.withOpacity(0.9),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pinkAccent.withOpacity(0.15),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
                     ],
-                    stops: const [0.0, 0.12, 0.88, 1.0],
+                  ),
+                  child: Text(
+                    offer,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.pink.shade900,
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            /// ⭐ Soft fade edges — aesthetic, not blocking scroll
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Colors.white.withOpacity(0.9),
+                        Colors.white.withOpacity(0.0),
+                        Colors.white.withOpacity(0.0),
+                        Colors.white.withOpacity(0.9),
+                      ],
+                      stops: const [0.0, 0.12, 0.88, 1.0],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
