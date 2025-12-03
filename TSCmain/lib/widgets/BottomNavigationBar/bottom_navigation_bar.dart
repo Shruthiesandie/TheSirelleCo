@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'bottom_curved_painter.dart';
+import 'bottom_curved_Painter.dart';
 
 class AnimatedBottomBar extends StatefulWidget {
   final int selectedIndex;
