@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
 
-    /// still kept if you want to hook other animations later
+    /// Kept for future animations if needed
     _marqueeController =
         AnimationController(vsync: this, duration: const Duration(seconds: 6))
           ..repeat();
@@ -103,6 +103,7 @@ class _HomePageState extends State<HomePage>
                   ),
                 ],
 
+                /// Content of the selected tab
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -167,7 +168,9 @@ class _HomePageState extends State<HomePage>
                   margin:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 18, vertical: 10),
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(28),
                     gradient: LinearGradient(
