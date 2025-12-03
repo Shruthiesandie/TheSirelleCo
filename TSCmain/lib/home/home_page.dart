@@ -22,10 +22,6 @@ class _HomePageState extends State<HomePage>
   late final AnimationController _marqueeController;
   late final Animation<double> _marqueeAnimation;
 
-  final List<String> pages = [
-    "Home", "Favourite", "All", "Cart", "Profile"
-  ];
-
   final List<Widget> screens = const [
     Center(child: Text("Home Page")),
     Center(child: Text("Favourite Page")),
@@ -70,11 +66,16 @@ class _HomePageState extends State<HomePage>
                   _homeTopBar(),
                 ],
 
-                /// Back bar for favourite & all categories
                 if (selectedIndex == 1 || selectedIndex == 2)
                   _backOnlyBar(),
 
-                Expanded(child: screens[selectedIndex]),
+                /// 🚀 KEY FIX — we use IndexedStack instead of swapping child
+                Expanded(
+                  child: IndexedStack(
+                    index: selectedIndex,
+                    children: screens,
+                  ),
+                ),
               ],
             ),
 
@@ -101,9 +102,8 @@ class _HomePageState extends State<HomePage>
     setState(() => arcOpen = false);
   }
 
-  // ---------------------------------------------------------------------------
-  // OFFER MARQUEE
-  // ---------------------------------------------------------------------------
+  // ---------- SAME helper widgets you already had -------------
+
   Widget _marqueeStrip() {
     return Container(
       height: 28,
@@ -141,9 +141,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // FIXED BACK ONLY BAR — always returns home properly
-  // ---------------------------------------------------------------------------
   Widget _backOnlyBar() {
     return Container(
       height: 45,
@@ -154,25 +151,13 @@ class _HomePageState extends State<HomePage>
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back_ios, size: 18),
-            onPressed: _returnHomeSafely,
+            onPressed: () => setState(() => selectedIndex = 0),
           ),
         ],
       ),
     );
   }
 
-  /// FIX black screen bug — safe UI restoration
-  void _returnHomeSafely() {
-    if (!mounted) return;
-    setState(() {
-      selectedIndex = 0;
-      arcOpen = false;
-    });
-  }
-
-  // ---------------------------------------------------------------------------
-  // HOME TOP BAR
-  // ---------------------------------------------------------------------------
   Widget _homeTopBar() {
     return ClipPath(
       clipper: TopBarClipper(),
@@ -216,9 +201,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // BOTTOM NAV BAR — enlarged & no gap
-  // ---------------------------------------------------------------------------
   Widget _bottomNavBar() {
     return Container(
       height: 75,
@@ -284,9 +266,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Drawer
-  // ---------------------------------------------------------------------------
   Drawer _drawer() {
     return Drawer(
       child: ListView(
@@ -324,9 +303,6 @@ class _HomePageState extends State<HomePage>
   }
 }
 
-// ---------------------------------------------------------------------------
-// Curved top bar for home
-// ---------------------------------------------------------------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -334,11 +310,7 @@ class TopBarClipper extends CustomClipper<Path> {
     return Path()
       ..lineTo(0, size.height - curve)
       ..quadraticBezierTo(
-        size.width / 2,
-        size.height + curve,
-        size.width,
-        size.height - curve,
-      )
+          size.width / 2, size.height + curve, size.width, size.height - curve)
       ..lineTo(size.width, 0)
       ..close();
   }
