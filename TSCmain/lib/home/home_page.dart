@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../pages/membership_page.dart';
 import '../pages/cart_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/login_page.dart';
+import '../pages/allcategories_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,7 +18,6 @@ class _HomePageState extends State<HomePage>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int selectedIndex = 0;
-  bool arcOpen = false;
 
   late final AnimationController _marqueeController;
   late final Animation<double> _marqueeAnimation;
@@ -24,7 +25,7 @@ class _HomePageState extends State<HomePage>
   final List<Widget> screens = const [
     Center(child: Text("Home Page")),
     Center(child: Text("Favourite Page")),
-    Center(child: Text("All Categories Page")),
+    AllCategoriesPage(),
     CartPage(),
     ProfilePage(),
   ];
@@ -60,16 +61,16 @@ class _HomePageState extends State<HomePage>
           children: [
             Column(
               children: [
-                /// Home page banner and curved top bar
+                // Home page offer strip + curved top bar
                 if (selectedIndex == 0) ...[
                   _marqueeStrip(),
                   _homeTopBar(),
                 ],
 
-                /// Back bar for ALL pages except home
+                // Simple back bar for every non-home page
                 if (selectedIndex != 0) _backOnlyBar(),
 
-                /// Page switching with no destruction
+                // Keep state of each page
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -79,29 +80,17 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
-            /// Bottom nav anchored
+            // Bottom nav anchored to bottom
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
               child: _bottomNavBar(),
             ),
-
-            /// Floating arc menu
-            PinterestArcMenu(
-              isOpen: arcOpen,
-              onMaleTap: () => _setCategory("male"),
-              onFemaleTap: () => _setCategory("female"),
-              onUnisexTap: () => _setCategory("unisex"),
-            ),
           ],
         ),
       ),
     );
-  }
-
-  void _setCategory(String _) {
-    setState(() => arcOpen = false);
   }
 
   // ------------------ OFFER STRIP ------------------
@@ -142,7 +131,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------ BACK BAR ------------------
+  // ------------------ BACK BAR (NON-HOME) ------------------
   Widget _backOnlyBar() {
     return Container(
       height: 45,
@@ -154,10 +143,9 @@ class _HomePageState extends State<HomePage>
           IconButton(
             icon: const Icon(Icons.arrow_back_ios, size: 18),
             onPressed: () {
-              /// Always go back to home
+              // Always go back to home
               setState(() {
                 selectedIndex = 0;
-                arcOpen = false;
               });
             },
           ),
@@ -243,12 +231,13 @@ class _HomePageState extends State<HomePage>
   }
 
   Widget _navButton(IconData icon, String label, int index) {
+    final isSelected = selectedIndex == index;
+
     return GestureDetector(
       onTap: () {
         if (!mounted) return;
         setState(() {
           selectedIndex = index;
-          arcOpen = false;
         });
       },
       child: Column(
@@ -257,18 +246,14 @@ class _HomePageState extends State<HomePage>
           Icon(
             icon,
             size: 24,
-            color: selectedIndex == index
-                ? Colors.pinkAccent
-                : Colors.grey.shade500,
+            color: isSelected ? Colors.pinkAccent : Colors.grey.shade500,
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
               fontSize: 11,
-              color: selectedIndex == index
-                  ? Colors.pinkAccent
-                  : Colors.grey.shade500,
+              color: isSelected ? Colors.pinkAccent : Colors.grey.shade500,
             ),
           ),
         ],
@@ -284,8 +269,10 @@ class _HomePageState extends State<HomePage>
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.pinkAccent),
-            child: Text("Menu",
-                style: TextStyle(color: Colors.white, fontSize: 22)),
+            child: Text(
+              "Menu",
+              style: TextStyle(color: Colors.white, fontSize: 22),
+            ),
           ),
           ListTile(
             title: const Text("Profile"),
@@ -317,7 +304,7 @@ class _HomePageState extends State<HomePage>
   }
 }
 
-// ------------------ CURVED CLIPPER ------------------
+// ------------------ CURVED TOP BAR CLIPPER ------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -325,7 +312,11 @@ class TopBarClipper extends CustomClipper<Path> {
     return Path()
       ..lineTo(0, size.height - curve)
       ..quadraticBezierTo(
-          size.width / 2, size.height + curve, size.width, size.height - curve)
+        size.width / 2,
+        size.height + curve,
+        size.width,
+        size.height - curve,
+      )
       ..lineTo(size.width, 0)
       ..close();
   }
