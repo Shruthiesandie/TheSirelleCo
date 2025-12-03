@@ -61,15 +61,16 @@ class _HomePageState extends State<HomePage>
           children: [
             Column(
               children: [
+                /// Home page banner and curved top bar
                 if (selectedIndex == 0) ...[
                   _marqueeStrip(),
                   _homeTopBar(),
                 ],
 
-                if (selectedIndex == 1 || selectedIndex == 2)
-                  _backOnlyBar(),
+                /// Back bar for ALL pages except home
+                if (selectedIndex != 0) _backOnlyBar(),
 
-                /// 🚀 KEY FIX — we use IndexedStack instead of swapping child
+                /// Page switching with no destruction
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -79,6 +80,7 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
+            /// Bottom nav anchored
             Positioned(
               left: 0,
               right: 0,
@@ -86,6 +88,7 @@ class _HomePageState extends State<HomePage>
               child: _bottomNavBar(),
             ),
 
+            /// Floating arc menu
             PinterestArcMenu(
               isOpen: arcOpen,
               onMaleTap: () => _setCategory("male"),
@@ -102,8 +105,7 @@ class _HomePageState extends State<HomePage>
     setState(() => arcOpen = false);
   }
 
-  // ---------- SAME helper widgets you already had -------------
-
+  // ------------------ OFFER STRIP ------------------
   Widget _marqueeStrip() {
     return Container(
       height: 28,
@@ -141,6 +143,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  // ------------------ BACK BAR ------------------
   Widget _backOnlyBar() {
     return Container(
       height: 45,
@@ -151,13 +154,20 @@ class _HomePageState extends State<HomePage>
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back_ios, size: 18),
-            onPressed: () => setState(() => selectedIndex = 0),
+            onPressed: () {
+              /// Always go back to home
+              setState(() {
+                selectedIndex = 0;
+                arcOpen = false;
+              });
+            },
           ),
         ],
       ),
     );
   }
 
+  // ------------------ HOME TOP BAR ------------------
   Widget _homeTopBar() {
     return ClipPath(
       clipper: TopBarClipper(),
@@ -174,8 +184,8 @@ class _HomePageState extends State<HomePage>
             ),
             Image.asset(
               "assets/logo/logo.png",
-              height: 55,
-              width: 55,
+              height: 75,
+              width: 75,
               fit: BoxFit.contain,
             ),
             Row(
@@ -201,6 +211,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  // ------------------ BOTTOM NAV ------------------
   Widget _bottomNavBar() {
     return Container(
       height: 75,
@@ -266,6 +277,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  // ------------------ DRAWER ------------------
   Drawer _drawer() {
     return Drawer(
       child: ListView(
@@ -278,9 +290,10 @@ class _HomePageState extends State<HomePage>
           ),
           ListTile(
             title: const Text("Profile"),
-            onTap: () =>
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const ProfilePage())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfilePage()),
+            ),
           ),
           ListTile(
             title: const Text("Orders"),
@@ -288,8 +301,10 @@ class _HomePageState extends State<HomePage>
           ),
           const Divider(),
           ListTile(
-            title: const Text("Logout",
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            title: const Text(
+              "Logout",
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
             onTap: () {
               Navigator.pushReplacement(
                 context,
@@ -303,6 +318,7 @@ class _HomePageState extends State<HomePage>
   }
 }
 
+// ------------------ CURVED CLIPPER ------------------
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
