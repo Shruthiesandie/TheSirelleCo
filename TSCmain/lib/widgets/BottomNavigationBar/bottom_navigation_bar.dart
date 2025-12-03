@@ -1,144 +1,176 @@
 import 'package:flutter/material.dart';
-import 'bottom_curved_Painter.dart';
+import 'package:flutter_ecommerce_app/src/themes/light_color.dart';
+import 'package:flutter_ecommerce_app/src/widgets/BottomNavigationBar/bottom_curved_Painter.dart';
 
-class AnimatedBottomNavBar extends StatefulWidget {
-  final int selectedIndex;
-  final Function(int) onTap;
-
-  const AnimatedBottomNavBar({
-    super.key,
-    required this.selectedIndex,
-    required this.onTap,
-  });
+class CustomBottomNavigationBar extends StatefulWidget {
+  final Function(int) onIconPresedCallback;
+  CustomBottomNavigationBar({Key key, this.onIconPresedCallback})
+      : super(key: key);
 
   @override
-  State<AnimatedBottomNavBar> createState() => _AnimatedBottomNavBarState();
+  _CustomBottomNavigationBarState createState() =>
+      _CustomBottomNavigationBarState();
 }
 
-class _AnimatedBottomNavBarState extends State<AnimatedBottomNavBar>
+class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar>
     with TickerProviderStateMixin {
-  late AnimationController _xController;
+  int _selectedIndex = 0;
 
+  AnimationController _xController;
+  AnimationController _yController;
   @override
   void initState() {
     _xController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    )..addListener(() => setState(() {}));
+        vsync: this, animationBehavior: AnimationBehavior.preserve);
+    _yController = AnimationController(
+        vsync: this, animationBehavior: AnimationBehavior.preserve);
+
+    Listenable.merge([_xController, _yController]).addListener(() {
+      setState(() {});
+    });
+
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
     _xController.value =
-        _indexToPosition(widget.selectedIndex) / MediaQuery.of(context).size.width;
+        _indexToPosition(_selectedIndex) / MediaQuery.of(context).size.width;
+    _yController.value = 1.0;
+
     super.didChangeDependencies();
   }
 
-  void _handleTap(int index) {
-    widget.onTap(index);
-
-    _xController.animateTo(
-      _indexToPosition(index) / MediaQuery.of(context).size.width,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOut,
-    );
+  double _indexToPosition(int index) {
+    // Calculate button positions based off of their
+    // index (works with `MainAxisAlignment.spaceAround`)
+    const buttonCount = 4.0;
+    final appWidth = MediaQuery.of(context).size.width;
+    final buttonsWidth = _getButtonContainerWidth();
+    final startX = (appWidth - buttonsWidth) / 2;
+    return startX +
+        index.toDouble() * buttonsWidth / buttonCount +
+        buttonsWidth / (buttonCount * 2.0);
   }
 
   @override
   void dispose() {
     _xController.dispose();
+    _yController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    const height = 70;
-
-    return SizedBox(
-      width: size.width,
-      height: height,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            bottom: 0,
-            width: size.width,
-            height: height - 8,
-            child: CustomPaint(
-              painter: BackgroundCurvePainter(
-                _xController.value * size.width,
-                1.0,
-                Colors.white,
-              ),
-            ),
-          ),
-
-          Positioned(
-            left: (size.width - _getButtonContainerWidth()) / 2,
-            width: _getButtonContainerWidth(),
-            height: height,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _navIcon(Icons.home, 0),
-                _navIcon(Icons.favorite_border, 1),
-                _navIcon(Icons.grid_view, 2),
-                _navIcon(Icons.shopping_cart, 3),
-                _navIcon(Icons.person, 4),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget _navIcon(IconData icon, int index) {
-    final active = widget.selectedIndex == index;
+  Widget _icon(IconData icon, bool isEnable, int index) {
     return Expanded(
       child: InkWell(
-        onTap: () => _handleTap(index),
+        borderRadius: BorderRadius.all(Radius.circular(50)),
+        onTap: () {
+          _handlePressed(index);
+        },
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          alignment: active ? Alignment.topCenter : Alignment.center,
+          duration: Duration(milliseconds: 500),
+          alignment: isEnable ? Alignment.topCenter : Alignment.center,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: active ? 50 : 22,
-            decoration: BoxDecoration(
-              color: active ? Colors.pinkAccent : Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                if (active)
-                  BoxShadow(
-                    color: Colors.pinkAccent.withOpacity(0.30),
-                    blurRadius: 12,
-                    spreadRadius: 5,
-                  )
-              ],
-            ),
-            child: Icon(
-              icon,
-              size: 18,
-              color: active ? Colors.white : Colors.grey,
-            ),
-          ),
+              height: isEnable ? 40 : 20,
+              duration: Duration(milliseconds: 300),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color: isEnable ? LightColor.orange : Colors.white,
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: isEnable ? Color(0xfffeece2) : Colors.white,
+                      blurRadius: 10,
+                      spreadRadius: 5,
+                      offset: Offset(5, 5),
+                    ),
+                  ],
+                  shape: BoxShape.circle),
+              child: Opacity(
+                opacity: isEnable ? _yController.value : 1,
+                child: Icon(icon,
+                    color: isEnable
+                        ? LightColor.background
+                        : Theme.of(context).iconTheme.color),
+              )),
         ),
       ),
     );
   }
 
-  double _getButtonContainerWidth() {
-    double width = MediaQuery.of(context).size.width;
-    return width > 420 ? 420 : width;
+  Widget _buildBackground() {
+    final inCurve = ElasticOutCurve(0.38);
+    return CustomPaint(
+      painter: BackgroundCurvePainter(
+          _xController.value * MediaQuery.of(context).size.width,
+          Tween<double>(
+            begin: Curves.easeInExpo.transform(_yController.value),
+            end: inCurve.transform(_yController.value),
+          ).transform(_yController.velocity.sign * 0.5 + 0.5),
+          Theme.of(context).backgroundColor),
+    );
   }
 
-  double _indexToPosition(int index) {
-    const buttonCount = 5.0;
-    final w = MediaQuery.of(context).size.width;
-    final block = _getButtonContainerWidth();
-    final start = (w - block) / 2;
-    return start + index * (block / buttonCount) + block / (buttonCount * 2);
+  double _getButtonContainerWidth() {
+    double width = MediaQuery.of(context).size.width;
+    if (width > 400.0) {
+      width = 400.0;
+    }
+    return width;
+  }
+
+  void _handlePressed(int index) {
+    if (_selectedIndex == index || _xController.isAnimating) return;
+    widget.onIconPresedCallback(index);
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    _yController.value = 1.0;
+    _xController.animateTo(
+        _indexToPosition(index) / MediaQuery.of(context).size.width,
+        duration: Duration(milliseconds: 620));
+    Future.delayed(
+      Duration(milliseconds: 500),
+      () {
+        _yController.animateTo(1.0, duration: Duration(milliseconds: 1200));
+      },
+    );
+    _yController.animateTo(0.0, duration: Duration(milliseconds: 300));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appSize = MediaQuery.of(context).size;
+    final height = 60.0;
+    return Container(
+      width: appSize.width,
+      height: 60,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            bottom: 0,
+            width: appSize.width,
+            height: height - 10,
+            child: _buildBackground(),
+          ),
+          Positioned(
+            left: (appSize.width - _getButtonContainerWidth()) / 2,
+            top: 0,
+            width: _getButtonContainerWidth(),
+            height: height,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                _icon(Icons.home, _selectedIndex == 0, 0),
+                _icon(Icons.search, _selectedIndex == 1, 1),
+                _icon(Icons.card_travel, _selectedIndex == 2, 2),
+                _icon(Icons.favorite_border, _selectedIndex == 3, 3),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
