@@ -20,6 +20,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int selectedIndex = 0;
@@ -27,10 +28,10 @@ class _HomePageState extends State<HomePage>
   late final AnimationController _marqueeController;
   late final Animation<double> _marqueeAnimation;
 
-  /// ⭐ ADDED — Scroll Controller for auto scrolling ribbon
+  /// Controller for auto scrolling ribbon
   final ScrollController _scrollController = ScrollController();
 
-  // Screens
+  // Pages / Tabs
   final List<Widget> screens = const [
     Center(child: Text("Home Page")),
     Center(child: Text("Favourite Page")),
@@ -43,32 +44,30 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
 
+    /// Unused but keeping if you need animation later
     _marqueeController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 8))
+        AnimationController(vsync: this, duration: const Duration(seconds: 6))
           ..repeat();
 
     _marqueeAnimation =
         Tween<double>(begin: 1.0, end: -1.0).animate(_marqueeController);
 
-    /// ⭐ ADDED — Start auto-scroll
+    /// Start auto scrolling
     WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoScroll());
   }
 
-  /// ⭐ Auto-scroll function
+  /// Auto-scroll smooth movement
   void _startAutoScroll() async {
     while (mounted) {
       await Future.delayed(const Duration(milliseconds: 40));
       if (_scrollController.hasClients) {
-        _scrollController.jumpTo(
-          _scrollController.offset + 0.5,
-        );
+        _scrollController.jumpTo(_scrollController.offset + 1);
       }
     }
   }
 
   @override
   void dispose() {
-    /// ⭐ Dispose controller safely
     _scrollController.dispose();
     _marqueeController.dispose();
     super.dispose();
@@ -80,6 +79,7 @@ class _HomePageState extends State<HomePage>
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
       drawer: const HomeDrawer(),
+
       body: SafeArea(
         top: true,
         bottom: false,
@@ -87,8 +87,9 @@ class _HomePageState extends State<HomePage>
           children: [
             Column(
               children: [
+                /// ⭐ HOME page only
                 if (selectedIndex == 0) ...[
-                  _premiumOfferRibbon(),   // ⭐ Your scrolling ribbon
+                  _premiumOfferRibbon(),
                   HomeTopBar(
                     onMenuTap: () => _scaffoldKey.currentState!.openDrawer(),
                     onSearchTap: () => Navigator.pushNamed(context, "/search"),
@@ -103,6 +104,7 @@ class _HomePageState extends State<HomePage>
                   ),
                 ],
 
+                /// ⭐ All pages except home
                 if (selectedIndex != 0) _backOnlyBar(),
 
                 Expanded(
@@ -114,6 +116,7 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
+            /// ⭐ Bottom Navigation Bar
             Positioned(
               left: 0,
               right: 0,
@@ -132,7 +135,7 @@ class _HomePageState extends State<HomePage>
   }
 
   // -------------------------------------------------------------------
-  // ⭐ Your NEW premium animated ribbon works perfectly now
+  // ⭐ BEAUTIFUL PREMIUM AUTO-SCROLL OFFER RIBBON (NO FADE ISSUE)
   // -------------------------------------------------------------------
   Widget _premiumOfferRibbon() {
     List<String> offers = [
@@ -143,69 +146,78 @@ class _HomePageState extends State<HomePage>
     ];
 
     return SizedBox(
-      height: 42,
-      child: ShaderMask(
-        shaderCallback: (rect) {
-          return LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              Colors.transparent,
-              Colors.white,
-              Colors.white,
-              Colors.transparent,
-            ],
-            stops: const [0.0, 0.15, 0.85, 1.0],
-          ).createShader(rect);
-        },
-        blendMode: BlendMode.dstIn,
-        child: ListView.builder(
-          controller: _scrollController,
-          scrollDirection: Axis.horizontal,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          itemCount: 9999,
-          itemBuilder: (_, i) {
-            String offer = offers[i % offers.length];
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 600),
-              margin: const EdgeInsets.symmetric(horizontal: 22, vertical: 6),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.85),
-                    Colors.pinkAccent.withOpacity(0.40),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.pinkAccent.withOpacity(0.18),
-                    blurRadius: 10,
-                    spreadRadius: 2,
+      height: 48,
+      child: Stack(
+        children: [
+          ListView.builder(
+            controller: _scrollController,
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: 9999,
+            itemBuilder: (_, i) {
+              String offer = offers[i % offers.length];
+
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.pinkAccent.withOpacity(0.17),
+                      Colors.white.withOpacity(0.9),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-              ),
-              child: Text(
-                offer,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.pink.shade800,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pinkAccent.withOpacity(0.15),
+                      blurRadius: 8,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Text(
+                  offer,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.pink.shade900,
+                  ),
+                ),
+              );
+            },
+          ),
+
+          /// ⭐ Soft fade edges — NOT blocking text visibility
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.white.withOpacity(0.9),
+                      Colors.white.withOpacity(0.0),
+                      Colors.white.withOpacity(0.0),
+                      Colors.white.withOpacity(0.9),
+                    ],
+                    stops: const [0.0, 0.12, 0.88, 1.0],
+                  ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   // -------------------------------------------------------------------
-  // Back bar for non-home pages
+  // ⭐ Back bar for pages other than home
   // -------------------------------------------------------------------
   Widget _backOnlyBar() {
     return Container(
