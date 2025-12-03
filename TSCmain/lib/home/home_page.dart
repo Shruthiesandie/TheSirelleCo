@@ -5,6 +5,9 @@ import '../pages/cart_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/login_page.dart';
 
+// -----------------------------------------------------------
+// HOME PAGE + NEW CURVED BOTTOM BAR
+// -----------------------------------------------------------
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -28,6 +31,7 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
 
+    // Pages setup
     screens.addAll([
       _buildHomeScrollBody(),
       const Center(child: Text("Favourite Page")),
@@ -36,6 +40,7 @@ class _HomePageState extends State<HomePage>
       const ProfilePage(),
     ]);
 
+    // Offer strip animation
     _marqueeController =
         AnimationController(vsync: this, duration: const Duration(seconds: 8))
           ..repeat();
@@ -79,6 +84,7 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
+            /// 🔥 Animated curved bottom bar added here
             Positioned(
               left: 0,
               right: 0,
@@ -110,6 +116,9 @@ class _HomePageState extends State<HomePage>
     setState(() => arcOpen = false);
   }
 
+  // -----------------------------------------------------------
+  // HOME SCROLL CONTENT
+  // -----------------------------------------------------------
   Widget _buildHomeScrollBody() {
     return CustomScrollView(
       slivers: [
@@ -191,6 +200,9 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  // -----------------------------------------------------------
+  // OFFER STRIP
+  // -----------------------------------------------------------
   Widget _marqueeStrip() {
     return Container(
       height: 28,
@@ -306,10 +318,8 @@ class _HomePageState extends State<HomePage>
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.pinkAccent),
-            child: Text(
-              "Menu",
-              style: TextStyle(color: Colors.white, fontSize: 22),
-            ),
+            child: Text("Menu",
+                style: TextStyle(color: Colors.white, fontSize: 22)),
           ),
           ListTile(
             title: const Text("Profile"),
@@ -341,9 +351,9 @@ class _HomePageState extends State<HomePage>
   }
 }
 
-// ------------------------------------------------------------------------
-// ⭐ SMOOTH CURVE SHIFT + HIGHER ACTIVE BUBBLE
-// ------------------------------------------------------------------------
+// ===============================================================
+// 🔥 NEW CURVED BOTTOM BAR — HIGHER WAVE, STAYS UP
+// ===============================================================
 
 class AnimatedBottomBar extends StatefulWidget {
   final int selectedIndex;
@@ -362,24 +372,15 @@ class AnimatedBottomBar extends StatefulWidget {
 class _AnimatedBottomBarState extends State<AnimatedBottomBar>
     with TickerProviderStateMixin {
   late AnimationController _xController;
-  late AnimationController _yController;
 
   @override
   void initState() {
     _xController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 450),
+      duration: const Duration(milliseconds: 400),
     );
 
-    _yController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 350),
-    );
-
-    Listenable.merge([_xController, _yController]).addListener(() {
-      setState(() {});
-    });
-
+    _xController.addListener(() => setState(() {}));
     super.initState();
   }
 
@@ -387,36 +388,22 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
   void didChangeDependencies() {
     _xController.value =
         _indexToPosition(widget.selectedIndex) / MediaQuery.of(context).size.width;
-    _yController.value = 1.0;
     super.didChangeDependencies();
   }
 
   void _handleTap(int index) {
-    if (widget.selectedIndex == index || _xController.isAnimating) return;
     widget.onTap(index);
-
-    _yController.value = 1.0;
 
     _xController.animateTo(
       _indexToPosition(index) / MediaQuery.of(context).size.width,
       duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOut,
+      curve: Curves.easeOut,
     );
-
-    _yController.animateTo(0.7,
-        duration: const Duration(milliseconds: 200)).then((_) {
-      _yController.animateTo(
-        1.0,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOut,
-      );
-    });
   }
 
   @override
   void dispose() {
     _xController.dispose();
-    _yController.dispose();
     super.dispose();
   }
 
@@ -438,7 +425,7 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
             child: CustomPaint(
               painter: BackgroundCurvePainter(
                 _xController.value * size.width,
-                _yController.value,
+                1.0, // 👑 curve always stays high
                 Colors.white,
               ),
             ),
@@ -476,16 +463,16 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
           alignment: active ? Alignment.topCenter : Alignment.center,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            height: active ? 48 : 22,
+            height: active ? 50 : 22,
             decoration: BoxDecoration(
               color: active ? Colors.pinkAccent : Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
                 if (active)
                   BoxShadow(
-                    color: Colors.pinkAccent.withOpacity(0.28),
-                    blurRadius: 10,
-                    spreadRadius: 4,
+                    color: Colors.pinkAccent.withOpacity(0.30),
+                    blurRadius: 12,
+                    spreadRadius: 5,
                   )
               ],
             ),
@@ -518,22 +505,24 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
   }
 }
 
-// ------------------------------------------------------------------------
-// Painter for animated bottom bar wave
-// ------------------------------------------------------------------------
+// ===============================================================
+// 🔥 CURVE PAINTER — WAVE HIGHER + CLEANER
+// ===============================================================
 
 class BackgroundCurvePainter extends CustomPainter {
-  static const _radiusTop = 30.0;
-  static const _radiusBottom = 16.0;
+  static const _radiusTop = 45.0;
+  static const _radiusBottom = 28.0;
+
   static const _horizontalControlTop = 0.6;
   static const _horizontalControlBottom = 0.55;
-  static const _pointControlTop = 0.35;
-  static const _pointControlBottom = 0.75;
 
-  static const _topY = -18.0;
+  static const _pointControlTop = 0.28; // higher curve
+  static const _pointControlBottom = 0.78;
+
+  static const _topY = -32.0; // lifted wave
   static const _bottomY = 0.0;
   static const _topDistance = 0.0;
-  static const _bottomDistance = 4.0;
+  static const _bottomDistance = 6.0;
 
   final double _x;
   final double _normalizedY;
@@ -545,8 +534,8 @@ class BackgroundCurvePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final norm = _normalizedY;
 
-    final radius = Tween<double>(begin: _radiusTop, end: _radiusBottom)
-        .transform(norm);
+    final radius =
+        Tween<double>(begin: _radiusTop, end: _radiusBottom).transform(norm);
 
     final anchorControlOffset = Tween<double>(
       begin: radius * _horizontalControlTop,
@@ -558,8 +547,10 @@ class BackgroundCurvePainter extends CustomPainter {
       end: radius * _pointControlBottom,
     ).transform(norm);
 
-    final y =
-        Tween<double>(begin: _topY, end: _bottomY).transform(norm);
+    final y = Tween<double>(
+      begin: _topY,
+      end: _bottomY,
+    ).transform(norm);
 
     final dist = Tween<double>(
       begin: _topDistance,
@@ -605,24 +596,9 @@ class BackgroundCurvePainter extends CustomPainter {
   }
 }
 
-// ------------------------------------------------------------------------
-// Curves
-// ------------------------------------------------------------------------
-
-class LinearPointCurve extends Curve {
-  final double pIn;
-  final double pOut;
-
-  LinearPointCurve(this.pIn, this.pOut);
-
-  @override
-  double transform(double x) {
-    final lowerScale = pOut / pIn;
-    final upperScale = (1.0 - pOut) / (1.0 - pIn);
-    final upperOffset = 1.0 - upperScale;
-    return x < pIn ? x * lowerScale : x * upperScale + upperOffset;
-  }
-}
+// ===============================================================
+// CURVED TOP BAR CLIPPER (unchanged)
+// ===============================================================
 
 class TopBarClipper extends CustomClipper<Path> {
   @override
