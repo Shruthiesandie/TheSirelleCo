@@ -22,17 +22,19 @@ class _HomePageState extends State<HomePage>
   late final AnimationController _marqueeController;
   late final Animation<double> _marqueeAnimation;
 
-  final List<Widget> screens = const [
-    Center(child: Text("Home Page")),
-    Center(child: Text("Favourite Page")),
-    Center(child: Text("All Categories Page")),
-    CartPage(),
-    ProfilePage(),
-  ];
+  final List<Widget> screens = [];
 
   @override
   void initState() {
     super.initState();
+
+    screens.addAll([
+      _buildHomeScrollBody(), // ⭐ replaced "Home Page"
+      const Center(child: Text("Favourite Page")),
+      const Center(child: Text("All Categories Page")),
+      const CartPage(),
+      const ProfilePage(),
+    ]);
 
     _marqueeController =
         AnimationController(vsync: this, duration: const Duration(seconds: 8))
@@ -105,6 +107,90 @@ class _HomePageState extends State<HomePage>
     setState(() => arcOpen = false);
   }
 
+  // ------------------ PREMIUM SCROLL BODY ------------------
+  Widget _buildHomeScrollBody() {
+    return CustomScrollView(
+      slivers: [
+        _sectionBox("Offers & Categories"),
+        _sectionBox("Popular Products"),
+        _sectionBox("Flash Sale"),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: _bannerBox("New Arrival — Special Offer"),
+          ),
+        ),
+        _sectionBox("Best Sellers"),
+        _sectionBox("Most Popular"),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: _bannerBox("Black Friday — 50% OFF"),
+          ),
+        ),
+        _sectionBox("Best Sellers"),
+      ],
+    );
+  }
+
+  // Placeholder SECTION widget
+  SliverToBoxAdapter _sectionBox(String title) {
+    return SliverToBoxAdapter(
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Placeholder BANNER widget
+  Widget _bannerBox(String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Colors.pinkAccent, Colors.deepPurpleAccent],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   // ------------------ OFFER STRIP ------------------
   Widget _marqueeStrip() {
     return Container(
@@ -155,7 +241,6 @@ class _HomePageState extends State<HomePage>
           IconButton(
             icon: const Icon(Icons.arrow_back_ios, size: 18),
             onPressed: () {
-              /// Always go back to home
               setState(() {
                 selectedIndex = 0;
                 arcOpen = false;
@@ -169,59 +254,55 @@ class _HomePageState extends State<HomePage>
 
   // ------------------ HOME TOP BAR ------------------
   Widget _homeTopBar() {
-  // Adjust this value to move logo
-  // positive = move right | negative = move left
-  double logoShift = 20; // try 5, 10, 15, etc.
+    double logoShift = 20;
 
-  return ClipPath(
-    clipper: TopBarClipper(),
-    child: Container(
-      height: 90,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.menu, size: 24),
-            onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-          ),
-
-          /// ⭐ Logo with fine-tuned right shift
-          Transform.translate(
-            offset: Offset(logoShift, 0), // <— tweak this
-            child: Image.asset(
-              "assets/logo/logo.png",
-              height: 75,
-              width: 75,
-              fit: BoxFit.contain,
+    return ClipPath(
+      clipper: TopBarClipper(),
+      child: Container(
+        height: 90,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        color: Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.menu, size: 24),
+              onPressed: () => _scaffoldKey.currentState!.openDrawer(),
             ),
-          ),
 
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.search, size: 22),
-                onPressed: () => Navigator.pushNamed(context, "/search"),
+            Transform.translate(
+              offset: Offset(logoShift, 0),
+              child: Image.asset(
+                "assets/logo/logo.png",
+                height: 75,
+                width: 75,
+                fit: BoxFit.contain,
               ),
-              IconButton(
-                icon: const Icon(Icons.workspace_premium, size: 22),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const MembershipPage(),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
+            ),
+
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.search, size: 22),
+                  onPressed: () => Navigator.pushNamed(context, "/search"),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.workspace_premium, size: 22),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const MembershipPage()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   // ------------------ BOTTOM NAV ------------------
   Widget _bottomNavBar() {
@@ -297,8 +378,8 @@ class _HomePageState extends State<HomePage>
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.pinkAccent),
-            child: Text("Menu",
-                style: TextStyle(color: Colors.white, fontSize: 22)),
+            child:
+                Text("Menu", style: TextStyle(color: Colors.white, fontSize: 22)),
           ),
           ListTile(
             title: const Text("Profile"),
