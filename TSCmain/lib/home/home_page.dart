@@ -169,47 +169,59 @@ class _HomePageState extends State<HomePage>
 
   // ------------------ HOME TOP BAR ------------------
   Widget _homeTopBar() {
-    return ClipPath(
-      clipper: TopBarClipper(),
-      child: Container(
-        height: 90,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.menu, size: 24),
-              onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-            ),
-            Image.asset(
+  // Adjust this value to move logo
+  // positive = move right | negative = move left
+  double logoShift = 20; // try 5, 10, 15, etc.
+
+  return ClipPath(
+    clipper: TopBarClipper(),
+    child: Container(
+      height: 90,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      color: Colors.white,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.menu, size: 24),
+            onPressed: () => _scaffoldKey.currentState!.openDrawer(),
+          ),
+
+          /// ⭐ Logo with fine-tuned right shift
+          Transform.translate(
+            offset: Offset(logoShift, 0), // <— tweak this
+            child: Image.asset(
               "assets/logo/logo.png",
               height: 75,
               width: 75,
               fit: BoxFit.contain,
             ),
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.search, size: 22),
-                  onPressed: () => Navigator.pushNamed(context, "/search"),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.workspace_premium, size: 22),
-                  onPressed: () => Navigator.push(
+          ),
+
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.search, size: 22),
+                onPressed: () => Navigator.pushNamed(context, "/search"),
+              ),
+              IconButton(
+                icon: const Icon(Icons.workspace_premium, size: 22),
+                onPressed: () {
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => const MembershipPage(),
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   // ------------------ BOTTOM NAV ------------------
   Widget _bottomNavBar() {
