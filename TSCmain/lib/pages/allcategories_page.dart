@@ -10,39 +10,42 @@ class AllCategoriesPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
+            // Same curved-ish style as home (rounded bottom bar)
             ClipPath(
-              clipper: _TopBarClipper(), // same curve style
+              clipper: TopBarClipper(),
               child: Container(
                 height: 90,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 color: Colors.white,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, size: 22),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Back button
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, size: 22),
+                    onPressed: () => Navigator.pop(context),
+                  ),
 
-                    /// Center Logo
-                    Expanded(
-                      child: Center(
-                        child: Image.asset(
-                          "assets/logo/logo.png",
-                          height: 75,
-                          width: 75,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
+                  // Center logo
+                  Transform.translate(
+                    offset: const Offset(-5, 0), // adjust value to shift left/right
+                    child: Image.asset(
+                      "assets/logo/logo.png",
+                      height: 85,
+                      width: 85,
+                      fit: BoxFit.contain,
                     ),
+                  ),
 
-                    const SizedBox(width: 40), // keeps logo centered
-                  ],
-                ),
+                  // Spacer to balance right side
+                  const SizedBox(width: 40),
+                ],
+              ),
               ),
             ),
 
-            Expanded(
+            // Body
+            const Expanded(
               child: Center(
                 child: Text(
                   "Categories Page",
@@ -61,8 +64,7 @@ class AllCategoriesPage extends StatelessWidget {
   }
 }
 
-/// ✔ Same curve as home without touching other files
-class _TopBarClipper extends CustomClipper<Path> {
+class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     const double curve = 25;

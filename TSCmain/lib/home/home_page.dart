@@ -27,11 +27,10 @@ class _HomePageState extends State<HomePage>
   late final AnimationController _marqueeController;
   late final Animation<double> _marqueeAnimation;
 
-  // Tabs
+  // Tabs except categories
   final List<Widget> screens = const [
     Center(child: Text("Home Page")),
     Center(child: Text("Favourite Page")),
-    AllCategoriesPage(),
     CartPage(),
     ProfilePage(),
   ];
@@ -60,7 +59,7 @@ class _HomePageState extends State<HomePage>
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
 
-      // Drawer moved to own widget
+      // Drawer
       drawer: const HomeDrawer(),
 
       body: SafeArea(
@@ -70,7 +69,7 @@ class _HomePageState extends State<HomePage>
           children: [
             Column(
               children: [
-                /// Home = offer strip + curved top bar
+                // Home top section
                 if (selectedIndex == 0) ...[
                   _marqueeStrip(),
                   HomeTopBar(
@@ -87,10 +86,10 @@ class _HomePageState extends State<HomePage>
                   ),
                 ],
 
-                /// Back bar for non-home pages
+                // Back bar for non-home
                 if (selectedIndex != 0) _backOnlyBar(),
 
-                /// Keeps tabs alive
+                // Screens remain loaded
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -100,7 +99,7 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
-            /// Bottom nav
+            // Bottom nav
             Positioned(
               left: 0,
               right: 0,
@@ -108,7 +107,17 @@ class _HomePageState extends State<HomePage>
               child: HomeBottomNavBar(
                 selectedIndex: selectedIndex,
                 onItemTap: (index) {
-                  setState(() => selectedIndex = index);
+                  // If categories (middle icon) tapped -> open page
+                  if (index == 2) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AllCategoriesPage(),
+                      ),
+                    );
+                  } else {
+                    setState(() => selectedIndex = index >= 2 ? index - 1 : index);
+                  }
                 },
               ),
             ),
@@ -119,7 +128,7 @@ class _HomePageState extends State<HomePage>
   }
 
   // -----------------------------------------------------------
-  // OFFER STRIP
+  // OFFER STRIP (top moving text)
   // -----------------------------------------------------------
   Widget _marqueeStrip() {
     return Container(
@@ -159,7 +168,7 @@ class _HomePageState extends State<HomePage>
   }
 
   // -----------------------------------------------------------
-  // BACK BAR (non-home)
+  // BACK BAR for non-home screens
   // -----------------------------------------------------------
   Widget _backOnlyBar() {
     return Container(
