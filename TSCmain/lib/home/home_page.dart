@@ -122,18 +122,18 @@ class _HomePageState extends State<HomePage>
   }
 
   // -----------------------------------------------------------
-  // 🔥 NEW BLINKING AUTO ROTATING OFFER STRIP
+  // 🔥 NEW SLIDING OFFER STRIP
   // -----------------------------------------------------------
   Widget _blinkingOfferStrip() {
     return SizedBox(
       height: 28,
       width: double.infinity,
-      child: _BlinkingOfferSlider(),
+      child: _SlideOfferBanner(),
     );
   }
 
   // -----------------------------------------------------------
-  // BACK BAR
+  // BACK BAR (non-home pages)
   // -----------------------------------------------------------
   Widget _backOnlyBar() {
     return Container(
@@ -154,14 +154,14 @@ class _HomePageState extends State<HomePage>
 }
 
 // =====================================================================
-// ⭐ Internal widget: blinking sliding offer text — aesthetic animation
+// ⭐ Internal widget: smooth opposite-direction promo slider
 // =====================================================================
-class _BlinkingOfferSlider extends StatefulWidget {
+class _SlideOfferBanner extends StatefulWidget {
   @override
-  State<_BlinkingOfferSlider> createState() => _BlinkingOfferSliderState();
+  State<_SlideOfferBanner> createState() => _SlideOfferBannerState();
 }
 
-class _BlinkingOfferSliderState extends State<_BlinkingOfferSlider> {
+class _SlideOfferBannerState extends State<_SlideOfferBanner> {
   final List<String> offers = [
     "✨ 10% OFF on orders above ₹1000 ✨",
     "🔥 20% OFF on orders above ₹4000 🔥",
@@ -173,14 +173,14 @@ class _BlinkingOfferSliderState extends State<_BlinkingOfferSlider> {
   @override
   void initState() {
     super.initState();
-    _cycleOffers();
+    _cycle();
   }
 
-  void _cycleOffers() {
+  void _cycle() {
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
       setState(() => index = (index + 1) % offers.length);
-      _cycleOffers();
+      _cycle();
     });
   }
 
@@ -204,21 +204,32 @@ class _BlinkingOfferSliderState extends State<_BlinkingOfferSlider> {
         ],
       ),
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 450),
+        duration: const Duration(milliseconds: 650),
+        switchInCurve: Curves.easeOutQuart,
+        switchOutCurve: Curves.easeInQuart,
+
         transitionBuilder: (child, animation) {
-          final slideAnimation = Tween<Offset>(
-            begin: const Offset(0.6, 0),
+          final slideIn = Tween<Offset>(
+            begin: const Offset(1.0, 0),
             end: Offset.zero,
           ).animate(CurvedAnimation(
             parent: animation,
-            curve: Curves.easeOutExpo,
+            curve: Curves.easeOutQuart,
           ));
 
+          final fadeOut = Tween<double>(begin: 1, end: 0).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeIn),
+          );
+
           return SlideTransition(
-            position: slideAnimation,
-            child: child,
+            position: slideIn,
+            child: FadeTransition(
+              opacity: fadeOut,
+              child: child,
+            ),
           );
         },
+
         child: Text(
           offers[index],
           key: ValueKey(index),
