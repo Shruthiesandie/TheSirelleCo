@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage>
     super.initState();
 
     screens.addAll([
-      _buildHomeScrollBody(), // ⭐ replaced "Home Page"
+      _buildHomeScrollBody(),
       const Center(child: Text("Favourite Page")),
       const Center(child: Text("All Categories Page")),
       const CartPage(),
@@ -63,16 +63,13 @@ class _HomePageState extends State<HomePage>
           children: [
             Column(
               children: [
-                /// Home page banner and curved top bar
                 if (selectedIndex == 0) ...[
                   _marqueeStrip(),
                   _homeTopBar(),
                 ],
 
-                /// Back bar for ALL pages except home
                 if (selectedIndex != 0) _backOnlyBar(),
 
-                /// Page switching with no destruction
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -82,15 +79,21 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
-            /// Bottom nav anchored
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
-              child: _bottomNavBar(),
+              child: AnimatedBottomBar(
+                selectedIndex: selectedIndex,
+                onTap: (index) {
+                  setState(() {
+                    selectedIndex = index;
+                    arcOpen = false;
+                  });
+                },
+              ),
             ),
 
-            /// Floating arc menu
             PinterestArcMenu(
               isOpen: arcOpen,
               onMaleTap: () => _setCategory("male"),
@@ -133,7 +136,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // Placeholder SECTION widget
   SliverToBoxAdapter _sectionBox(String title) {
     return SliverToBoxAdapter(
       child: Container(
@@ -162,7 +164,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // Placeholder BANNER widget
   Widget _bannerBox(String text) {
     return Container(
       width: double.infinity,
@@ -229,7 +230,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------ BACK BAR ------------------
   Widget _backOnlyBar() {
     return Container(
       height: 45,
@@ -252,7 +252,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------ HOME TOP BAR ------------------
   Widget _homeTopBar() {
     double logoShift = 20;
 
@@ -269,7 +268,6 @@ class _HomePageState extends State<HomePage>
               icon: const Icon(Icons.menu, size: 24),
               onPressed: () => _scaffoldKey.currentState!.openDrawer(),
             ),
-
             Transform.translate(
               offset: Offset(logoShift, 0),
               child: Image.asset(
@@ -279,7 +277,6 @@ class _HomePageState extends State<HomePage>
                 fit: BoxFit.contain,
               ),
             ),
-
             Row(
               children: [
                 IconButton(
@@ -304,73 +301,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------ BOTTOM NAV ------------------
-  Widget _bottomNavBar() {
-    return Container(
-      height: 75,
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _navButton(Icons.home, "Home", 0),
-          _navButton(Icons.favorite_border, "favourite", 1),
-          _navButton(Icons.grid_view, "All", 2),
-          _navButton(Icons.shopping_cart, "cart", 3),
-          _navButton(Icons.person, "Profile", 4),
-        ],
-      ),
-    );
-  }
-
-  Widget _navButton(IconData icon, String label, int index) {
-    return GestureDetector(
-      onTap: () {
-        if (!mounted) return;
-        setState(() {
-          selectedIndex = index;
-          arcOpen = false;
-        });
-      },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 24,
-            color: selectedIndex == index
-                ? Colors.pinkAccent
-                : Colors.grey.shade500,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: selectedIndex == index
-                  ? Colors.pinkAccent
-                  : Colors.grey.shade500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ------------------ DRAWER ------------------
   Drawer _drawer() {
     return Drawer(
       child: ListView(
@@ -378,15 +308,14 @@ class _HomePageState extends State<HomePage>
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.pinkAccent),
-            child:
-                Text("Menu", style: TextStyle(color: Colors.white, fontSize: 22)),
+            child: Text("Menu",
+                style: TextStyle(color: Colors.white, fontSize: 22)),
           ),
           ListTile(
             title: const Text("Profile"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ProfilePage()),
-            ),
+            onTap: () =>
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const ProfilePage())),
           ),
           ListTile(
             title: const Text("Orders"),
@@ -411,7 +340,265 @@ class _HomePageState extends State<HomePage>
   }
 }
 
-// ------------------ CURVED CLIPPER ------------------
+// ------------------------------------------------------------------------
+// ⭐ CURVED + ELASTIC ANIMATED BOTTOM BAR ADDED HERE
+// ------------------------------------------------------------------------
+
+class AnimatedBottomBar extends StatefulWidget {
+  final int selectedIndex;
+  final Function(int) onTap;
+
+  const AnimatedBottomBar({
+    super.key,
+    required this.selectedIndex,
+    required this.onTap,
+  });
+
+  @override
+  State<AnimatedBottomBar> createState() => _AnimatedBottomBarState();
+}
+
+class _AnimatedBottomBarState extends State<AnimatedBottomBar>
+    with TickerProviderStateMixin {
+  late AnimationController _xController;
+  late AnimationController _yController;
+
+  @override
+  void initState() {
+    _xController = AnimationController(vsync: this);
+    _yController = AnimationController(vsync: this);
+
+    Listenable.merge([_xController, _yController]).addListener(() {
+      setState(() {});
+    });
+
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    _xController.value =
+        _indexToPosition(widget.selectedIndex) / MediaQuery.of(context).size.width;
+    _yController.value = 1.0;
+    super.didChangeDependencies();
+  }
+
+  void _handleTap(int index) {
+    if (widget.selectedIndex == index || _xController.isAnimating) return;
+    widget.onTap(index);
+
+    _yController.value = 1.0;
+    _xController.animateTo(
+        _indexToPosition(index) / MediaQuery.of(context).size.width,
+        duration: const Duration(milliseconds: 600));
+
+    _yController.animateTo(0.0, duration: const Duration(milliseconds: 250));
+    Future.delayed(const Duration(milliseconds: 350), () {
+      _yController.animateTo(1.0, duration: const Duration(milliseconds: 1200));
+    });
+  }
+
+  @override
+  void dispose() {
+    _xController.dispose();
+    _yController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    const height = 70.0;
+
+    return SizedBox(
+      width: size.width,
+      height: height,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            bottom: 0,
+            width: size.width,
+            height: height - 10,
+            child: CustomPaint(
+              painter: BackgroundCurvePainter(
+                _xController.value * size.width,
+                Tween<double>(
+                  begin: Curves.easeInExpo.transform(_yController.value),
+                  end: ElasticOutCurve(0.38).transform(_yController.value),
+                ).transform(_yController.velocity.sign * 0.5 + 0.5),
+                Colors.white,
+              ),
+            ),
+          ),
+          Positioned(
+            left: (size.width - _getButtonContainerWidth()) / 2,
+            top: 0,
+            width: _getButtonContainerWidth(),
+            height: height,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _navIcon(Icons.home, 0),
+                _navIcon(Icons.favorite_border, 1),
+                _navIcon(Icons.grid_view, 2),
+                _navIcon(Icons.shopping_cart, 3),
+                _navIcon(Icons.person, 4),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _navIcon(IconData icon, int index) {
+    final active = widget.selectedIndex == index;
+
+    return Expanded(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(40),
+        onTap: () => _handleTap(index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          alignment: active ? Alignment.topCenter : Alignment.center,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: active ? 40 : 22,
+            decoration: BoxDecoration(
+              color: active ? Colors.pinkAccent : Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                if (active)
+                  BoxShadow(
+                    color: Colors.pinkAccent.withOpacity(0.25),
+                    blurRadius: 10,
+                    spreadRadius: 3,
+                  )
+              ],
+            ),
+            child: Icon(
+              icon,
+              size: 18,
+              color: active ? Colors.white : Colors.grey,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  double _indexToPosition(int index) {
+    const buttonCount = 5.0;
+    final width = MediaQuery.of(context).size.width;
+    final containerWidth = _getButtonContainerWidth();
+    final startX = (width - containerWidth) / 2;
+
+    return startX +
+        index * (containerWidth / buttonCount) +
+        containerWidth / (buttonCount * 2);
+  }
+
+  double _getButtonContainerWidth() {
+    double width = MediaQuery.of(context).size.width;
+    if (width > 420.0) width = 420.0;
+    return width;
+  }
+}
+
+// ------------------------------------------------------------------------
+// Curve Painter + helpers
+// ------------------------------------------------------------------------
+
+class BackgroundCurvePainter extends CustomPainter {
+  static const _radiusTop = 50.0;
+  static const _radiusBottom = 30.0;
+  static const _horizontalControlTop = 0.6;
+  static const _horizontalControlBottom = 0.5;
+  static const _pointControlTop = 0.35;
+  static const _pointControlBottom = 0.85;
+  static const _topY = -60.0;
+  static const _bottomY = 0.0;
+  static const _topDistance = 0.0;
+  static const _bottomDistance = 10.0;
+
+  final double _x;
+  final double _normalizedY;
+  final Color _color;
+
+  BackgroundCurvePainter(this._x, this._normalizedY, this._color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final norm = LinearPointCurve(0.5, 2.0).transform(_normalizedY) / 5;
+
+    final radius = Tween<double>(
+      begin: _radiusTop,
+      end: _radiusBottom,
+    ).transform(norm);
+
+    final anchorControlOffset = Tween<double>(
+      begin: radius * _horizontalControlTop,
+      end: radius * _horizontalControlBottom,
+    ).transform(LinearPointCurve(0.5, 0.75).transform(norm));
+
+    final dipControlOffset = Tween<double>(
+      begin: radius * _pointControlTop,
+      end: radius * _pointControlBottom,
+    ).transform(LinearPointCurve(0.5, 0.8).transform(norm));
+
+    final y = Tween<double>(
+      begin: _topY,
+      end: _bottomY,
+    ).transform(LinearPointCurve(0.2, 0.7).transform(norm));
+
+    final dist = Tween<double>(
+      begin: _topDistance,
+      end: _bottomDistance,
+    ).transform(LinearPointCurve(0.5, 0.0).transform(norm));
+
+    final x0 = _x - dist / 2;
+    final x1 = _x + dist / 2;
+
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(x0 - radius, 0)
+      ..cubicTo(x0 - radius + anchorControlOffset, 0,
+          x0 - dipControlOffset, y, x0, y)
+      ..lineTo(x1, y)
+      ..cubicTo(x1 + dipControlOffset, y,
+          x1 + radius - anchorControlOffset, 0, x1 + radius, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height);
+
+    final paint = Paint()..color = _color;
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant BackgroundCurvePainter oldDelegate) {
+    return _x != oldDelegate._x ||
+        _normalizedY != oldDelegate._normalizedY ||
+        _color != oldDelegate._color;
+  }
+}
+
+class LinearPointCurve extends Curve {
+  final double pIn;
+  final double pOut;
+
+  LinearPointCurve(this.pIn, this.pOut);
+
+  @override
+  double transform(double x) {
+    final lowerScale = pOut / pIn;
+    final upperScale = (1.0 - pOut) / (1.0 - pIn);
+    final upperOffset = 1.0 - upperScale;
+    return x < pIn ? x * lowerScale : x * upperScale + upperOffset;
+  }
+}
+
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
