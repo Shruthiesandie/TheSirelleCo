@@ -72,19 +72,12 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                 height: 90,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white,
-                      Colors.pink.shade50,
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
+                  color: Colors.white,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black12,
                       blurRadius: 6,
-                      offset: const Offset(0, 2),
+                      offset: Offset(0, 2),
                     ),
                   ],
                 ),
@@ -101,8 +94,8 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                       offset: const Offset(-5, 0),
                       child: Image.asset(
                         "assets/logo/logo.png",
-                        height: 75,
-                        width: 75,
+                        height: 85,
+                        width: 85,
                         fit: BoxFit.contain,
                       ),
                     ),
