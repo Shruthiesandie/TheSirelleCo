@@ -25,7 +25,6 @@ class _HomePageState extends State<HomePage>
   int selectedIndex = 0;
 
   late final AnimationController _marqueeController;
-  late final Animation<double> _marqueeAnimation;
 
   /// Controller for auto scrolling ribbon
   final ScrollController _scrollController = ScrollController();
@@ -59,8 +58,6 @@ class _HomePageState extends State<HomePage>
         AnimationController(vsync: this, duration: const Duration(seconds: 6))
           ..repeat();
 
-    _marqueeAnimation =
-        Tween<double>(begin: 1.0, end: -1.0).animate(_marqueeController);
 
     /// Start auto scrolling the ribbon
     WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoScroll());
