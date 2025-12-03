@@ -35,9 +35,16 @@ class _HomePageState extends State<HomePage>
     ProfilePage(),
   ];
 
+  ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+
+    /// Start auto drifting after rendering
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startAutoScroll();
+    });
 
     _marqueeController =
         AnimationController(vsync: this, duration: const Duration(seconds: 8))
@@ -49,6 +56,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _marqueeController.dispose();
     super.dispose();
   }
@@ -69,7 +77,7 @@ class _HomePageState extends State<HomePage>
             Column(
               children: [
                 if (selectedIndex == 0) ...[
-                  _blinkingOfferStrip(),
+                  _premiumOfferRibbon(),
                   HomeTopBar(
                     onMenuTap: () => _scaffoldKey.currentState!.openDrawer(),
                     onSearchTap: () => Navigator.pushNamed(context, "/search"),
@@ -122,18 +130,84 @@ class _HomePageState extends State<HomePage>
   }
 
   // -----------------------------------------------------------
-  // 🔥 NEW SLIDING OFFER STRIP
+  // ✨ PREMIUM DRIFTING OFFER RIBBON
   // -----------------------------------------------------------
-  Widget _blinkingOfferStrip() {
+  Widget _premiumOfferRibbon() {
+    List<String> offers = [
+      "💗 10% OFF above ₹1000 💗",
+      "✨ 20% OFF above ₹4000 ✨",
+      "⭐ Extra 5% for Members ⭐",
+      "🚚 Free Delivery on prepaid 🚚",
+    ];
+
     return SizedBox(
-      height: 28,
-      width: double.infinity,
-      child: _SlideOfferBanner(),
+      height: 35,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: Colors.pinkAccent.withOpacity(0.25),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.pinkAccent.withOpacity(0.15),
+              blurRadius: 6,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: ListView.builder(
+          controller: _scrollController,
+          scrollDirection: Axis.horizontal,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          itemCount: 9999, // infinite illusion
+          itemBuilder: (_, i) {
+            String offer = offers[i % offers.length];
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.pinkAccent.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(30),
+                border:
+                    Border.all(color: Colors.pinkAccent.withOpacity(0.3)),
+              ),
+              child: Text(
+                offer,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.pinkAccent,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
   // -----------------------------------------------------------
-  // BACK BAR (non-home pages)
+  // 🔁 AUTO SCROLLING ANIMATION
+  // -----------------------------------------------------------
+  void _startAutoScroll() async {
+    while (mounted) {
+      await Future.delayed(const Duration(milliseconds: 20)); // slower & smooth
+      if (!_scrollController.hasClients) return;
+
+      _scrollController.jumpTo(_scrollController.offset + 0.5);
+
+      if (_scrollController.offset >=
+          _scrollController.position.maxScrollExtent) {
+        _scrollController.jumpTo(0);
+      }
+    }
+  }
+
+  // -----------------------------------------------------------
+  // BACK BAR (non-home)
   // -----------------------------------------------------------
   Widget _backOnlyBar() {
     return Container(
@@ -148,101 +222,6 @@ class _HomePageState extends State<HomePage>
             selectedIndex = 0;
           });
         },
-      ),
-    );
-  }
-}
-
-// =====================================================================
-// ⭐ Internal widget: smooth opposite-direction promo slider
-// =====================================================================
-class _SlideOfferBanner extends StatefulWidget {
-  @override
-  State<_SlideOfferBanner> createState() => _SlideOfferBannerState();
-}
-
-class _SlideOfferBannerState extends State<_SlideOfferBanner> {
-  final List<String> offers = [
-    "✨ 10% OFF on orders above ₹1000 ✨",
-    "🔥 20% OFF on orders above ₹4000 🔥",
-    "🚚 Free Delivery on prepaid orders 🚚",
-  ];
-
-  int index = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _cycle();
-  }
-
-  void _cycle() {
-    Future.delayed(const Duration(seconds: 3), () {
-      if (!mounted) return;
-      setState(() => index = (index + 1) % offers.length);
-      _cycle();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.white, Colors.pinkAccent.withOpacity(0.1)],
-        ),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: ClipRect(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 3000),
-          switchInCurve: Curves.easeOutQuart,
-          switchOutCurve: Curves.easeInQuart,
-
-          transitionBuilder: (child, animation) {
-            final slideIn = Tween<Offset>(
-              begin: const Offset(1.0, 0),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutExpo,
-            ));
-
-            final slideOut = Tween<Offset>(
-              begin: Offset.zero,
-              end: const Offset(-1.0, 0),
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOutCubic,
-            ));
-
-            return SlideTransition(
-              position: animation.status == AnimationStatus.forward
-                  ? slideIn
-                  : slideOut,
-              child: child,
-            );
-          },
-
-          child: Text(
-            offers[index],
-            key: ValueKey(index),
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: Colors.pinkAccent,
-            ),
-          ),
-        ),
       ),
     );
   }
