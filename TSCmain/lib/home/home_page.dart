@@ -110,7 +110,6 @@ class _HomePageState extends State<HomePage>
     setState(() => arcOpen = false);
   }
 
-  // ------------------ PREMIUM SCROLL BODY ------------------
   Widget _buildHomeScrollBody() {
     return CustomScrollView(
       slivers: [
@@ -192,7 +191,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------ OFFER STRIP ------------------
   Widget _marqueeStrip() {
     return Container(
       height: 28,
@@ -308,14 +306,17 @@ class _HomePageState extends State<HomePage>
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.pinkAccent),
-            child: Text("Menu",
-                style: TextStyle(color: Colors.white, fontSize: 22)),
+            child: Text(
+              "Menu",
+              style: TextStyle(color: Colors.white, fontSize: 22),
+            ),
           ),
           ListTile(
             title: const Text("Profile"),
-            onTap: () =>
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const ProfilePage())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfilePage()),
+            ),
           ),
           ListTile(
             title: const Text("Orders"),
@@ -341,7 +342,7 @@ class _HomePageState extends State<HomePage>
 }
 
 // ------------------------------------------------------------------------
-// ⭐ CURVED + ELASTIC ANIMATED (TUNED WAVE HEIGHT) BOTTOM BAR 
+// ⭐ SMOOTH CURVE SHIFT + HIGHER ACTIVE BUBBLE
 // ------------------------------------------------------------------------
 
 class AnimatedBottomBar extends StatefulWidget {
@@ -365,8 +366,15 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
 
   @override
   void initState() {
-    _xController = AnimationController(vsync: this);
-    _yController = AnimationController(vsync: this);
+    _xController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+
+    _yController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
 
     Listenable.merge([_xController, _yController]).addListener(() {
       setState(() {});
@@ -388,13 +396,20 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
     widget.onTap(index);
 
     _yController.value = 1.0;
-    _xController.animateTo(
-        _indexToPosition(index) / MediaQuery.of(context).size.width,
-        duration: const Duration(milliseconds: 600));
 
-    _yController.animateTo(0.0, duration: const Duration(milliseconds: 250));
-    Future.delayed(const Duration(milliseconds: 350), () {
-      _yController.animateTo(1.0, duration: const Duration(milliseconds: 1200));
+    _xController.animateTo(
+      _indexToPosition(index) / MediaQuery.of(context).size.width,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+
+    _yController.animateTo(0.7,
+        duration: const Duration(milliseconds: 200)).then((_) {
+      _yController.animateTo(
+        1.0,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOut,
+      );
     });
   }
 
@@ -419,14 +434,11 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
             left: 0,
             bottom: 0,
             width: size.width,
-            height: height - 10,
+            height: height - 8,
             child: CustomPaint(
               painter: BackgroundCurvePainter(
                 _xController.value * size.width,
-                Tween<double>(
-                  begin: Curves.easeInExpo.transform(_yController.value),
-                  end: ElasticOutCurve(0.38).transform(_yController.value),
-                ).transform(_yController.velocity.sign * 0.5 + 0.5),
+                _yController.value,
                 Colors.white,
               ),
             ),
@@ -464,16 +476,16 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
           alignment: active ? Alignment.topCenter : Alignment.center,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            height: active ? 40 : 22,
+            height: active ? 48 : 22,
             decoration: BoxDecoration(
               color: active ? Colors.pinkAccent : Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
                 if (active)
                   BoxShadow(
-                    color: Colors.pinkAccent.withOpacity(0.25),
+                    color: Colors.pinkAccent.withOpacity(0.28),
                     blurRadius: 10,
-                    spreadRadius: 3,
+                    spreadRadius: 4,
                   )
               ],
             ),
@@ -507,22 +519,21 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
 }
 
 // ------------------------------------------------------------------------
-// Curve Painter + helpers (wave height REDUCED)
+// Painter for animated bottom bar wave
 // ------------------------------------------------------------------------
 
 class BackgroundCurvePainter extends CustomPainter {
-  static const _radiusTop = 40.0;      // smaller dip radius
-  static const _radiusBottom = 18.0;
+  static const _radiusTop = 30.0;
+  static const _radiusBottom = 16.0;
   static const _horizontalControlTop = 0.6;
-  static const _horizontalControlBottom = 0.5;
+  static const _horizontalControlBottom = 0.55;
   static const _pointControlTop = 0.35;
-  static const _pointControlBottom = 0.85;
+  static const _pointControlBottom = 0.75;
 
-  static const _topY = -25.0;  // 🔥 previously -60 — now reduced
+  static const _topY = -18.0;
   static const _bottomY = 0.0;
-
   static const _topDistance = 0.0;
-  static const _bottomDistance = 4.0; // 🔥 previously 10 — smoother
+  static const _bottomDistance = 4.0;
 
   final double _x;
   final double _normalizedY;
@@ -532,32 +543,28 @@ class BackgroundCurvePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final norm = LinearPointCurve(0.5, 2.0).transform(_normalizedY) / 5;
+    final norm = _normalizedY;
 
-    final radius = Tween<double>(
-      begin: _radiusTop,
-      end: _radiusBottom,
-    ).transform(norm);
+    final radius = Tween<double>(begin: _radiusTop, end: _radiusBottom)
+        .transform(norm);
 
     final anchorControlOffset = Tween<double>(
       begin: radius * _horizontalControlTop,
       end: radius * _horizontalControlBottom,
-    ).transform(LinearPointCurve(0.5, 0.75).transform(norm));
+    ).transform(norm);
 
     final dipControlOffset = Tween<double>(
       begin: radius * _pointControlTop,
       end: radius * _pointControlBottom,
-    ).transform(LinearPointCurve(0.5, 0.8).transform(norm));
+    ).transform(norm);
 
-    final y = Tween<double>(
-      begin: _topY,
-      end: _bottomY,
-    ).transform(LinearPointCurve(0.2, 0.7).transform(norm));
+    final y =
+        Tween<double>(begin: _topY, end: _bottomY).transform(norm);
 
     final dist = Tween<double>(
       begin: _topDistance,
       end: _bottomDistance,
-    ).transform(LinearPointCurve(0.5, 0.0).transform(norm));
+    ).transform(norm);
 
     final x0 = _x - dist / 2;
     final x1 = _x + dist / 2;
@@ -565,11 +572,23 @@ class BackgroundCurvePainter extends CustomPainter {
     final path = Path()
       ..moveTo(0, 0)
       ..lineTo(x0 - radius, 0)
-      ..cubicTo(x0 - radius + anchorControlOffset, 0,
-          x0 - dipControlOffset, y, x0, y)
+      ..cubicTo(
+        x0 - radius + anchorControlOffset,
+        0,
+        x0 - dipControlOffset,
+        y,
+        x0,
+        y,
+      )
       ..lineTo(x1, y)
-      ..cubicTo(x1 + dipControlOffset, y,
-          x1 + radius - anchorControlOffset, 0, x1 + radius, 0)
+      ..cubicTo(
+        x1 + dipControlOffset,
+        y,
+        x1 + radius - anchorControlOffset,
+        0,
+        x1 + radius,
+        0,
+      )
       ..lineTo(size.width, 0)
       ..lineTo(size.width, size.height)
       ..lineTo(0, size.height);
@@ -585,6 +604,10 @@ class BackgroundCurvePainter extends CustomPainter {
         _color != oldDelegate._color;
   }
 }
+
+// ------------------------------------------------------------------------
+// Curves
+// ------------------------------------------------------------------------
 
 class LinearPointCurve extends Curve {
   final double pIn;
