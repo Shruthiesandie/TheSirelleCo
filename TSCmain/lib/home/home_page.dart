@@ -61,16 +61,13 @@ class _HomePageState extends State<HomePage>
           children: [
             Column(
               children: [
-                // Home page offer strip + curved top bar
                 if (selectedIndex == 0) ...[
                   _marqueeStrip(),
                   _homeTopBar(),
                 ],
 
-                // Simple back bar for every non-home page
                 if (selectedIndex != 0) _backOnlyBar(),
 
-                // Keep state of each page
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -80,7 +77,7 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
-            // Bottom nav anchored to bottom
+            /// 🔥 new fixed bottom bar
             Positioned(
               left: 0,
               right: 0,
@@ -93,7 +90,10 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------ OFFER STRIP ------------------
+  // -----------------------------------------------------------
+  // OFFER STRIP
+  // -----------------------------------------------------------
+
   Widget _marqueeStrip() {
     return Container(
       height: 28,
@@ -131,7 +131,10 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------ BACK BAR (NON-HOME) ------------------
+  // -----------------------------------------------------------
+  // BACK BAR
+  // -----------------------------------------------------------
+
   Widget _backOnlyBar() {
     return Container(
       height: 45,
@@ -143,7 +146,6 @@ class _HomePageState extends State<HomePage>
           IconButton(
             icon: const Icon(Icons.arrow_back_ios, size: 18),
             onPressed: () {
-              // Always go back to home
               setState(() {
                 selectedIndex = 0;
               });
@@ -154,7 +156,10 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------ HOME TOP BAR ------------------
+  // -----------------------------------------------------------
+  // HOME TOP BAR
+  // -----------------------------------------------------------
+
   Widget _homeTopBar() {
     return ClipPath(
       clipper: TopBarClipper(),
@@ -171,8 +176,8 @@ class _HomePageState extends State<HomePage>
             ),
             Image.asset(
               "assets/logo/logo.png",
-              height: 55,
-              width: 55,
+              height: 80,
+              width: 80,
               fit: BoxFit.contain,
             ),
             Row(
@@ -198,11 +203,13 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ------------------ BOTTOM NAV ------------------
+  // -----------------------------------------------------------
+  // ⭐ FIXED BOTTOM NAV : Equal spacing + centered categories
+  // -----------------------------------------------------------
+
   Widget _bottomNavBar() {
     return Container(
       height: 75,
-      width: double.infinity,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -218,50 +225,51 @@ class _HomePageState extends State<HomePage>
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navButton(Icons.home, "Home", 0),
-          _navButton(Icons.favorite_border, "favourite", 1),
-          _navButton(Icons.grid_view, "All", 2),
-          _navButton(Icons.shopping_cart, "cart", 3),
-          _navButton(Icons.person, "Profile", 4),
+          _navItem(Icons.home, "Home", 0),
+          _navItem(Icons.favorite_border, "Favourite", 1),
+          _navItem(Icons.grid_view_rounded, "All", 2),
+          _navItem(Icons.shopping_bag_outlined, "Cart", 3),
+          _navItem(Icons.person, "Profile", 4),
         ],
       ),
     );
   }
 
-  Widget _navButton(IconData icon, String label, int index) {
+  Widget _navItem(IconData icon, String label, int index) {
     final isSelected = selectedIndex == index;
 
-    return GestureDetector(
-      onTap: () {
-        if (!mounted) return;
-        setState(() {
-          selectedIndex = index;
-        });
-      },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 24,
-            color: isSelected ? Colors.pinkAccent : Colors.grey.shade500,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => selectedIndex = index),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 24,
               color: isSelected ? Colors.pinkAccent : Colors.grey.shade500,
             ),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color:
+                    isSelected ? Colors.pinkAccent : Colors.grey.shade500,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
 
-  // ------------------ DRAWER ------------------
+  // -----------------------------------------------------------
+  // DRAWER
+  // -----------------------------------------------------------
+
   Drawer _drawer() {
     return Drawer(
       child: ListView(
@@ -304,7 +312,10 @@ class _HomePageState extends State<HomePage>
   }
 }
 
-// ------------------ CURVED TOP BAR CLIPPER ------------------
+// -----------------------------------------------------------
+// Curved top bar clipper stays same
+// -----------------------------------------------------------
+
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -322,5 +333,5 @@ class TopBarClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<Path> _) => false;
 }
