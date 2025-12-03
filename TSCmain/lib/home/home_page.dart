@@ -189,54 +189,58 @@ class _SlideOfferBannerState extends State<_SlideOfferBanner> {
     return Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: LinearGradient(
+          colors: [Colors.white, Colors.pinkAccent.withOpacity(0.1)],
+        ),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 3,
-            offset: const Offset(0, 1),
-          ),
-          const BoxShadow(
-            color: Color(0xFFEAEAEA),
+            color: Colors.black12,
+            blurRadius: 6,
             offset: Offset(0, 2),
-            blurRadius: 4,
           ),
         ],
       ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 650),
-        switchInCurve: Curves.easeOutQuart,
-        switchOutCurve: Curves.easeInQuart,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: ClipRect(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 3000),
+          switchInCurve: Curves.easeOutQuart,
+          switchOutCurve: Curves.easeInQuart,
 
-        transitionBuilder: (child, animation) {
-          final slideIn = Tween<Offset>(
-            begin: const Offset(1.0, 0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutQuart,
-          ));
+          transitionBuilder: (child, animation) {
+            final slideIn = Tween<Offset>(
+              begin: const Offset(1.0, 0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutExpo,
+            ));
 
-          final fadeOut = Tween<double>(begin: 1, end: 0).animate(
-            CurvedAnimation(parent: animation, curve: Curves.easeIn),
-          );
+            final slideOut = Tween<Offset>(
+              begin: Offset.zero,
+              end: const Offset(-1.0, 0),
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOutCubic,
+            ));
 
-          return SlideTransition(
-            position: slideIn,
-            child: FadeTransition(
-              opacity: fadeOut,
+            return SlideTransition(
+              position: animation.status == AnimationStatus.forward
+                  ? slideIn
+                  : slideOut,
               child: child,
-            ),
-          );
-        },
+            );
+          },
 
-        child: Text(
-          offers[index],
-          key: ValueKey(index),
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: Colors.black,
+          child: Text(
+            offers[index],
+            key: ValueKey(index),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: Colors.pinkAccent,
+            ),
           ),
         ),
       ),
