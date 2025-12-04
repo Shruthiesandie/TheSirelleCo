@@ -68,61 +68,62 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
         child: Column(
           children: [
             // Curved top bar with gradient glow
-            ClipPath(
-              clipper: TopBarClipper(),
-              child: Container(
-                height: 90,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 6,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
+            Container(
+              height: 90,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(30),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, size: 22),
-                      onPressed: () {
-                        if (widget.onBackToHome != null) {
-                          widget.onBackToHome!();
-                        } else {
-                          Navigator.pop(context);
-                        }
-                      },
-                    ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, size: 22),
+                    onPressed: () {
+                      if (widget.onBackToHome != null) {
+                        widget.onBackToHome!();
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
 
-                    // Center logo with shift ability
-                    Transform.translate(
-                      offset: const Offset(-5, 0),
-                      child: Image.asset(
-                        "assets/logo/logo.png",
-                        height: 85,
-                        width: 85,
-                        fit: BoxFit.contain,
-                      ),
+                  // Center logo with shift ability
+                  Transform.translate(
+                    offset: const Offset(-5, 0),
+                    child: Image.asset(
+                      "assets/logo/logo.png",
+                      height: 85,
+                      width: 85,
+                      fit: BoxFit.contain,
                     ),
+                  ),
 
-                    IconButton(
-                      icon: const Icon(Icons.search, size: 22),
-                      onPressed: () {
-                        setState(() {
-                          showSearch = !showSearch;
-                        });
-                        showSearch
-                            ? _animController.forward()
-                            : _animController.reverse();
-                      },
-                    )
-                  ],
-                ),
+                  IconButton(
+                    icon: const Icon(Icons.search, size: 22),
+                    onPressed: () {
+                      setState(() {
+                        showSearch = !showSearch;
+                      });
+                      showSearch
+                          ? _animController.forward()
+                          : _animController.reverse();
+                    },
+                  )
+                ],
               ),
             ),
+            const SizedBox(height: 12), // lowered content spacing
 
             // 🔥 Animated Search Bar
             SizeTransition(
@@ -218,25 +219,4 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
       ),
     );
   }
-}
-
-// Same curved clipper
-class TopBarClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    const double curve = 25;
-    return Path()
-      ..lineTo(0, size.height - curve)
-      ..quadraticBezierTo(
-        size.width / 2,
-        size.height + curve,
-        size.width,
-        size.height - curve,
-      )
-      ..lineTo(size.width, 0)
-      ..close();
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
