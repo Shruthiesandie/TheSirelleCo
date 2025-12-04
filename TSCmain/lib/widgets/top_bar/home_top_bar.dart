@@ -21,9 +21,7 @@ class HomeTopBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(35), // increased curve for aesthetic look
-        ),
+        borderRadius: BorderRadius.circular(35), // curved on all edges including top and bottom
       ),
       height: 90,
       padding: const EdgeInsets.symmetric(horizontal: 12),
