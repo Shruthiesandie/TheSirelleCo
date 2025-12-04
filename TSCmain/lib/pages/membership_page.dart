@@ -710,15 +710,22 @@ class _MembershipPageState extends State<MembershipPage>
 
           const SizedBox(height: 14),
 
-          // 3 x 2 stamp grid
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: List.generate(stampsPerCycle, (index) {
+          // 3 x 2 stamp grid (fixed layout)
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: stampsPerCycle,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,          // 3 per row
+              crossAxisSpacing: 16,       // horizontal spacing
+              mainAxisSpacing: 16,        // vertical spacing
+              childAspectRatio: 1,        // keep square shape area
+            ),
+            itemBuilder: (context, index) {
               final earned = index < filled;
               final stampNumber = index + 1;
               return _buildStampBubble(stampNumber, earned);
-            }),
+            },
           ),
 
           const SizedBox(height: 16),
@@ -812,16 +819,16 @@ class _MembershipPageState extends State<MembershipPage>
   }
 
   Widget _buildStampBubble(int number, bool earned) {
-    return SizedBox(
-      width: 70,
-      child: Column(
-        children: [
-          AnimatedContainer(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 78,
+          width: 78,
+          child: AnimatedContainer(
             duration: const Duration(milliseconds: 260),
-            height: 60,
-            width: 60,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(16), // square with rounded corners
               gradient: earned
                   ? const LinearGradient(
                       colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)],
@@ -861,16 +868,16 @@ class _MembershipPageState extends State<MembershipPage>
                     ),
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            "Stamp $number",
-            style: const TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w500,
-            ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          "Stamp $number",
+          style: const TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
