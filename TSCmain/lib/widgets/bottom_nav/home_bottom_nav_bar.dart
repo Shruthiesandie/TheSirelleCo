@@ -17,7 +17,7 @@ class HomeBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 90, // increased height for breathing space
+      height: 78, // slightly reduced height
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -56,7 +56,7 @@ class HomeBottomNavBar extends StatelessWidget {
             SizedBox(height: 6), // top spacing
             Icon(
               icon,
-              size: 32, // slightly bigger for better proportion
+              size: 28, // reduced icon size
               color: isSelected ? Colors.pinkAccent : Colors.grey.shade500,
             ),
             SizedBox(height: 6), // bottom spacing
