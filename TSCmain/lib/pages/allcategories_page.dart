@@ -165,36 +165,51 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               ),
             ),
 
-            // 🔥 CATEGORY SCROLL CHIPS
             SizedBox(
-              height: 48,
-              child: ListView.separated(
+              height: 95,
+              child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: categories.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemCount: 10, // 10 aesthetic circular categories
                 itemBuilder: (context, index) {
-                  return Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      color: Colors.white,
-                      border: Border.all(color: Colors.pink.shade200),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.pink.shade100.withOpacity(0.4),
-                          blurRadius: 6,
-                          offset: const Offset(0, 4),
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 70,
+                          width: 70,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [Colors.pink.shade200, Colors.purple.shade200],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.pink.withOpacity(0.25),
+                                blurRadius: 6,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: Container(
+                              color: Colors.white, // empty placeholder area
+                            ),
+                          ),
                         ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Item ${index + 1}",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        )
                       ],
-                    ),
-                    child: Text(
-                      categories[index],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.pinkAccent,
-                      ),
                     ),
                   );
                 },
