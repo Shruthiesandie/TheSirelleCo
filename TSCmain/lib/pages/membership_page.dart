@@ -76,12 +76,6 @@ class _MembershipPageState extends State<MembershipPage>
     });
   }
 
-  Future<void> _saveBadge() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("membership_badge", true);
-    setState(() => hasBadge = true);
-  }
-
   // ⭐ NEW: load/save stamp cycle + coupon flag
   Future<void> _loadLoyaltyState() async {
     final prefs = await SharedPreferences.getInstance();
