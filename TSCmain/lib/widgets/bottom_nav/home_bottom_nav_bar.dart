@@ -32,14 +32,18 @@ class HomeBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          _navItem(Icons.home, 0),
-          _navItem(Icons.favorite_border, 1),
-          _navItem(Icons.grid_view_rounded, 2),
-          _navItem(Icons.shopping_bag_outlined, 3),
-          _navItem(Icons.person, 4),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10), // moves icons inward
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly, // adds spacing
+          children: [
+            _navItem(Icons.home, 0),
+            _navItem(Icons.favorite_border, 1),
+            _navItem(Icons.grid_view_rounded, 2),
+            _navItem(Icons.shopping_bag_outlined, 3),
+            _navItem(Icons.person, 4),
+          ],
+        ),
       ),
     );
   }
