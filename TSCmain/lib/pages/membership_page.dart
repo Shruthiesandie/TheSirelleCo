@@ -719,7 +719,7 @@ class _MembershipPageState extends State<MembershipPage>
               crossAxisCount: 3,          // 3 per row
               crossAxisSpacing: 16,       // horizontal spacing
               mainAxisSpacing: 16,        // vertical spacing
-              childAspectRatio: 1,        // keep square shape area
+              childAspectRatio: 0.85,     // give a bit more height to avoid overflow
             ),
             itemBuilder: (context, index) {
               final earned = index < filled;
@@ -823,8 +823,8 @@ class _MembershipPageState extends State<MembershipPage>
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 78,
-          width: 78,
+          height: 72,
+          width: 72,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 260),
             decoration: BoxDecoration(
