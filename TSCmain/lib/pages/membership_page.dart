@@ -29,6 +29,11 @@ class _MembershipPageState extends State<MembershipPage>
   bool membershipActive = true; // toggled on cancel / join
   bool isLoading = true; // shimmer loader
 
+  // ⭐ NEW: stamp / loyalty logic
+  static const int stampsPerCycle = 6;
+  int purchasesInCycle = 0; // 0–6
+  bool couponAvailable = false; // shown on home page
+
   @override
   void initState() {
     super.initState();
@@ -38,12 +43,15 @@ class _MembershipPageState extends State<MembershipPage>
       duration: const Duration(seconds: 8),
     )..repeat(reverse: true);
 
-    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 2));
 
     _stampsPageController = PageController(viewportFraction: 0.36);
 
-    // load saved badge and simulate initial shimmer
+    // load saved badge + loyalty & simulate shimmer
     _loadBadge();
+    _loadLoyaltyState();
+
     Future.delayed(const Duration(milliseconds: 700), () {
       if (mounted) setState(() => isLoading = false);
     });
@@ -74,25 +82,70 @@ class _MembershipPageState extends State<MembershipPage>
     setState(() => hasBadge = true);
   }
 
+  // ⭐ NEW: load/save stamp cycle + coupon flag
+  Future<void> _loadLoyaltyState() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      purchasesInCycle = prefs.getInt("loyalty_purchases_cycle") ?? 0;
+      couponAvailable = prefs.getBool("loyalty_coupon_available") ?? false;
+    });
+  }
+
+  Future<void> _saveLoyaltyState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt("loyalty_purchases_cycle", purchasesInCycle);
+    await prefs.setBool("loyalty_coupon_available", couponAvailable);
+  }
+
+  /// Call this from your order flow when a purchase is completed
+  Future<void> registerPurchase() async {
+    if (!mounted) return;
+
+    setState(() {
+      // each purchase adds one stamp until 6
+      purchasesInCycle =
+          (purchasesInCycle + 1).clamp(0, stampsPerCycle);
+    });
+
+    if (purchasesInCycle >= stampsPerCycle) {
+      // all 6 filled → reward ready
+      _confettiController.play();
+    }
+
+    await _saveLoyaltyState();
+  }
+
+  /// Called when user taps "Claim reward & reset stamps"
+  Future<void> _claimRewardAndReset() async {
+    if (!mounted) return;
+
+    setState(() {
+      couponAvailable = true; // home page can now show coupon banner
+      purchasesInCycle = 0; // reset cycle
+    });
+
+    await _saveLoyaltyState();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          "Reward claimed! A coupon will appear on your Home page 🎁",
+        ),
+      ),
+    );
+  }
+
   // ---------------- Helpers ----------------
-  int get daysSincePurchase => DateTime.now().difference(purchaseDate).inDays;
+  int get daysSincePurchase =>
+      DateTime.now().difference(purchaseDate).inDays;
   int get monthsSinceJoin => (daysSincePurchase / 30).floor();
   int get membershipYearDays => 365;
   double get membershipProgressPct =>
-      ((daysSincePurchase % membershipYearDays) / membershipYearDays).clamp(0.0, 1.0);
-  String formattedDate(DateTime d) => DateFormat.yMMMMd().format(d);
+      ((daysSincePurchase % membershipYearDays) / membershipYearDays)
+          .clamp(0.0, 1.0);
+  String formattedDate(DateTime d) =>
+      DateFormat.yMMMMd().format(d);
   bool get isMember => membershipActive && monthsSinceJoin >= 1;
-
-  final List<_StampDefinition> _stamps = const [
-    _StampDefinition(1, "1 Month", "Completed 1 Month"),
-    _StampDefinition(3, "3 Months", "3 Month Loyalty"),
-    _StampDefinition(6, "6 Months", "Half-Year Milestone"),
-    _StampDefinition(12, "1 Year", "1 Year Achievement"),
-    _StampDefinition(24, "2 Years", "2 Year Veteran"),
-    _StampDefinition(60, "5 Years", "5 Year Legend Badge"),
-  ];
-
-  bool stampEarned(int months) => monthsSinceJoin >= months;
 
   // ---------------- Build ----------------
   @override
@@ -108,10 +161,18 @@ class _MembershipPageState extends State<MembershipPage>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color.lerp(const Color(0xFFFFF3F8), const Color(0xFFFFE6F2),
-                          _bgAnimController.value)!,
-                      Color.lerp(const Color(0xFFFBE7F3), const Color(0xFFFFF0F6),
-                          1 - _bgAnimController.value)!,
+                      Color.lerp(
+                            const Color(0xFFFFF3F8),
+                            const Color(0xFFFFE6F2),
+                            _bgAnimController.value,
+                          ) ??
+                          const Color(0xFFFFF3F8),
+                      Color.lerp(
+                            const Color(0xFFFBE7F3),
+                            const Color(0xFFFFF0F6),
+                            1 - _bgAnimController.value,
+                          ) ??
+                          const Color(0xFFFBE7F3),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -132,8 +193,12 @@ class _MembershipPageState extends State<MembershipPage>
                 height: 260,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient:
-                      LinearGradient(colors: [Colors.pink.shade100, Colors.purple.shade100]),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.pink.shade100,
+                      Colors.purple.shade100
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -156,13 +221,18 @@ class _MembershipPageState extends State<MembershipPage>
               children: [
                 // top header (fixed)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   child: Row(
                     children: [
                       // back button
                       GestureDetector(
                         onTap: () {
-                          if (Navigator.canPop(context)) Navigator.pop(context);
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          }
                         },
                         child: Container(
                           padding: const EdgeInsets.all(8),
@@ -171,7 +241,10 @@ class _MembershipPageState extends State<MembershipPage>
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white70),
                           ),
-                          child: const Icon(Icons.arrow_back, color: Colors.black87),
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
 
@@ -182,10 +255,15 @@ class _MembershipPageState extends State<MembershipPage>
                         height: 42,
                         width: 42,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: [Colors.pink, Colors.purple]),
+                          gradient: const LinearGradient(
+                            colors: [Colors.pink, Colors.purple],
+                          ),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.workspace_premium, color: Colors.white),
+                        child: const Icon(
+                          Icons.workspace_premium,
+                          color: Colors.white,
+                        ),
                       ),
 
                       const SizedBox(width: 12),
@@ -193,18 +271,28 @@ class _MembershipPageState extends State<MembershipPage>
                       // title text (Flexible to avoid overflow)
                       Flexible(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
+                            const Text(
                               "Membership Dashboard",
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              hasBadge ? "🏅 Badge Unlocked!" : "No Badge Yet",
-                              style: TextStyle(color: hasBadge ? Colors.green : Colors.black45),
+                              hasBadge
+                                  ? "🏅 Badge Unlocked!"
+                                  : "No Badge Yet",
+                              style: TextStyle(
+                                color: hasBadge
+                                    ? Colors.green
+                                    : Colors.black45,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -217,7 +305,11 @@ class _MembershipPageState extends State<MembershipPage>
                       IconButton(
                         onPressed: () {
                           ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(content: Text("Profile tapped")));
+                              .showSnackBar(
+                            const SnackBar(
+                              content: Text("Profile tapped"),
+                            ),
+                          );
                         },
                         icon: const Icon(Icons.person_outline),
                       ),
@@ -228,9 +320,13 @@ class _MembershipPageState extends State<MembershipPage>
                 // content
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.stretch,
                       children: [
                         if (isLoading) ...[
                           _shimmerCard(height: 180),
@@ -245,7 +341,7 @@ class _MembershipPageState extends State<MembershipPage>
                           const SizedBox(height: 18),
                           _activePlanCard(),
                           const SizedBox(height: 18),
-                          _stampsSection(),
+                          _stampsSection(), // ⭐ NEW GRID
                           const SizedBox(height: 18),
                           _ctaSection(),
                         ],
@@ -273,7 +369,9 @@ class _MembershipPageState extends State<MembershipPage>
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.18),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.12)),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.12),
+            ),
           ),
           child: Shimmer.fromColors(
             baseColor: Colors.grey.shade300,
@@ -282,9 +380,15 @@ class _MembershipPageState extends State<MembershipPage>
               padding: const EdgeInsets.all(12),
               child: Column(
                 children: [
-                  Container(height: 18, width: 180, color: Colors.white),
+                  Container(
+                    height: 18,
+                    width: 180,
+                    color: Colors.white,
+                  ),
                   const SizedBox(height: 12),
-                  Expanded(child: Container(color: Colors.white70)),
+                  Expanded(
+                    child: Container(color: Colors.white70),
+                  ),
                 ],
               ),
             ),
@@ -296,7 +400,6 @@ class _MembershipPageState extends State<MembershipPage>
 
   // ---------------- Glass card helper ----------------
   Widget _glassCard({required Widget child}) {
-    // Use ClipRRect + BackdropFilter to support older Flutter versions (3.38.3).
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
@@ -306,9 +409,15 @@ class _MembershipPageState extends State<MembershipPage>
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.65),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.15)),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.15),
+            ),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 6))
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              )
             ],
           ),
           child: child,
@@ -323,227 +432,553 @@ class _MembershipPageState extends State<MembershipPage>
     final percentText = (pct * 100).toStringAsFixed(0);
 
     return _glassCard(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text("Membership Status", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 12),
-
-        _labelValue("Purchase Date", formattedDate(purchaseDate)),
-        _labelValue("Membership Duration", "$monthsSinceJoin month(s) completed"),
-
-        const SizedBox(height: 12),
-
-        // Total savings with breathing piggy
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.pink.shade50.withOpacity(0.35),
-            borderRadius: BorderRadius.circular(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Membership Status",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          child: Row(
+          const SizedBox(height: 12),
+
+          _labelValue("Purchase Date", formattedDate(purchaseDate)),
+          _labelValue("Membership Duration",
+              "$monthsSinceJoin month(s) completed"),
+
+          const SizedBox(height: 12),
+
+          // Total savings with breathing piggy
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.pink.shade50.withOpacity(0.35),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Total Savings",
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "₹${totalSavings.toStringAsFixed(2)}",
+                      style: const TextStyle(
+                        color: Colors.pink,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                ScaleTransition(
+                  scale: Tween(begin: 0.96, end: 1.06).animate(
+                    CurvedAnimation(
+                      parent: _bgAnimController,
+                      curve: Curves.easeInOut,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.savings_rounded,
+                    color: Colors.pink,
+                    size: 36,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          Row(
             children: [
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text("Total Savings", style: TextStyle(color: Colors.black54)),
-                const SizedBox(height: 6),
-                Text("₹${totalSavings.toStringAsFixed(2)}",
-                    style: const TextStyle(color: Colors.pink, fontSize: 20, fontWeight: FontWeight.w800)),
-              ]),
-              const Spacer(),
-              ScaleTransition(
-                scale: Tween(begin: 0.96, end: 1.06).animate(CurvedAnimation(parent: _bgAnimController, curve: Curves.easeInOut)),
-                child: const Icon(Icons.savings_rounded, color: Colors.pink, size: 36),
+              const Text(
+                "Year Progress",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                "$percentText%",
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
-        ),
-
-        const SizedBox(height: 14),
-
-        Row(children: [
-          const Text("Year Progress", style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(width: 8),
-          Text("$percentText%", style: const TextStyle(fontWeight: FontWeight.w700)),
-        ]),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(
-            value: pct,
-            minHeight: 12,
-            backgroundColor: Colors.grey.shade200,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.pink.shade400),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: pct,
+              minHeight: 12,
+              backgroundColor: Colors.grey.shade200,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Colors.pink.shade400,
+              ),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 
   // ---------------- Section 2 ----------------
   Widget _activePlanCard() {
     return _glassCard(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text("Active Plan", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 12),
-
-        Row(children: [
-          Container(
-            height: 56,
-            width: 56,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)]),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: Colors.pink.withOpacity(0.12), blurRadius: 8, offset: const Offset(0, 5))],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Active Plan",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
             ),
-            child: const Center(child: Icon(Icons.workspace_premium, color: Colors.white)),
           ),
-          const SizedBox(width: 12),
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
-            Text("Premium Annual Access", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            SizedBox(height: 4),
-            Text("₹300 / Year", style: TextStyle(color: Colors.black54)),
-          ]),
-        ]),
+          const SizedBox(height: 12),
 
-        const SizedBox(height: 12),
-
-        Wrap(spacing: 8, runSpacing: 8, children: const [
-          _benefit(Icons.local_offer, "10% instant discount"),
-          _benefit(Icons.headset_mic, "Priority support"),
-          _benefit(Icons.flash_on, "Early access to sales"),
-        ]),
-
-        const SizedBox(height: 12),
-
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Container(
-            margin: const EdgeInsets.only(top: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.6), borderRadius: BorderRadius.circular(10)),
-            child: Row(children: const [
-              Icon(Icons.check_circle, color: Colors.green, size: 18),
-              SizedBox(width: 8),
-              Text("₹300 billed yearly — verified", style: TextStyle(fontSize: 13)),
-            ]),
+          Row(
+            children: [
+              Container(
+                height: 56,
+                width: 56,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pink.withOpacity(0.12),
+                      blurRadius: 8,
+                      offset: const Offset(0, 5),
+                    )
+                  ],
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.workspace_premium,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    "Premium Annual Access",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "₹300 / Year",
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ),
 
-        const SizedBox(height: 12),
+          const SizedBox(height: 12),
 
-        if (isMember)
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: const [
+              _benefit(Icons.local_offer, "10% instant discount"),
+              _benefit(Icons.headset_mic, "Priority support"),
+              _benefit(Icons.flash_on, "Early access to sales"),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
           Align(
             alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: _showCancelDialog,
-              child: const Text("Cancel Membership", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: Container(
+              margin: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: const [
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                    size: 18,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    "₹300 billed yearly — verified",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                ],
+              ),
             ),
           ),
-      ]),
+
+          const SizedBox(height: 12),
+
+          if (isMember)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: _showCancelDialog,
+                child: const Text(
+                  "Cancel Membership",
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
-  // ---------------- Section 3: Stamps (PageView snapping) ----------------
+  // ---------------- Section 3: NEW 6-STAMP GRID ----------------
   Widget _stampsSection() {
+    final filled = purchasesInCycle.clamp(0, stampsPerCycle);
+
     return _glassCard(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text("Achievement Stamps", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Purchase Stamps",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "$filled of $stampsPerCycle purchases completed",
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 12),
 
-        SizedBox(
-          height: 120,
-          child: PageView.builder(
-            controller: _stampsPageController,
-            itemCount: _stamps.length,
-            padEnds: false,
-            physics: const PageScrollPhysics(),
-            itemBuilder: (context, index) {
-              final s = _stamps[index];
-              final earned = stampEarned(s.monthsRequired);
-
-              if (earned && s.monthsRequired == 60) _saveBadge();
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: GestureDetector(
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(earned ? s.description : "Locked — ${s.monthsRequired} months required")));
-                  },
-                  child: Column(
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 260),
-                        height: 80,
-                        width: 80,
-                        decoration: BoxDecoration(
-                          color: earned ? Colors.pink.shade50 : Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: earned ? Colors.pink : Colors.grey.shade300),
-                          boxShadow: [
-                            if (earned)
-                              BoxShadow(color: Colors.pink.withOpacity(0.18), blurRadius: 8, offset: const Offset(0, 5))
-                          ],
-                        ),
-                        child: Icon(earned ? Icons.star : Icons.lock_outline, color: earned ? Colors.pink : Colors.grey, size: 34),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(s.title, style: const TextStyle(fontSize: 12)),
-                    ],
+          // cute explanation chip
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.pink.shade50.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: const [
+                Icon(Icons.info_outline,
+                    size: 16, color: Colors.pink),
+                SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    "Each purchase fills one stamp. Collect 6 to unlock a surprise coupon ✨",
+                    style: TextStyle(fontSize: 12.5),
                   ),
                 ),
-              );
-            },
+              ],
+            ),
           ),
-        ),
 
-        const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-        // simple indicator
-        Center(child: PageViewIndicator(controller: _stampsPageController, itemCount: _stamps.length)),
-      ]),
+          // 3 x 2 stamp grid
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: List.generate(stampsPerCycle, (index) {
+              final earned = index < filled;
+              final stampNumber = index + 1;
+              return _buildStampBubble(stampNumber, earned);
+            }),
+          ),
+
+          const SizedBox(height: 16),
+
+          if (filled >= stampsPerCycle) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)],
+                ),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.withOpacity(0.17),
+                    blurRadius: 10,
+                    offset: const Offset(0, 6),
+                  )
+                ],
+              ),
+              child: Row(
+                children: const [
+                  Icon(
+                    Icons.celebration,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "All 6 stamps filled! Claim your reward and we’ll drop a coupon on your Home page 🎁",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _claimRewardAndReset,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Claim reward & reset stamps",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ] else if (couponAvailable) ...[
+            // optional: small note that a coupon is waiting on home
+            const SizedBox(height: 8),
+            Row(
+              children: const [
+                Icon(Icons.card_giftcard,
+                    size: 18, color: Colors.pink),
+                SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    "You have an unclaimed coupon waiting on your Home page 🎁",
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStampBubble(int number, bool earned) {
+    return SizedBox(
+      width: 70,
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 260),
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: earned
+                  ? const LinearGradient(
+                      colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)],
+                    )
+                  : null,
+              color:
+                  earned ? null : Colors.grey.shade200,
+              boxShadow: [
+                if (earned)
+                  BoxShadow(
+                    color:
+                        Colors.pink.withOpacity(0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+              ],
+              border: Border.all(
+                color: earned
+                    ? Colors.transparent
+                    : Colors.grey.shade300,
+              ),
+            ),
+            child: Center(
+              child: earned
+                  ? const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 26,
+                    )
+                  : Text(
+                      number.toString(),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "Stamp $number",
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   // ---------------- CTA + Cancel flow ----------------
   Widget _ctaSection() {
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      _glassCard(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(isMember ? "Ready to Renew?" : "Become a Member", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 8),
-          Text(isMember ? "Tap below to renew your membership." : "Join now to unlock all premium benefits.", style: const TextStyle(color: Colors.black54)),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: () {
-              _confettiController.play();
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(isMember ? "Renewal Started!" : "Membership Activated!")));
-              if (!isMember) setState(() => membershipActive = true);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.pink, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-            child: Text(isMember ? "Renew Membership" : "Join Membership", style: const TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ]),
-      ),
-      const SizedBox(height: 12),
-      // If not a member show buy option; if member show manage section already via active plan card
-      if (!isMember)
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         _glassCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text("Membership canceled", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
-            const Text("You can re-join anytime and keep your stamps/benefits (if eligible).", style: TextStyle(color: Colors.black54)),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () {
-                setState(() => membershipActive = true);
-                _confettiController.play();
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Welcome back! Membership reactivated")));
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.pink, padding: const EdgeInsets.symmetric(vertical: 12)),
-              child: const Text("Buy Membership", style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isMember ? "Ready to Renew?" : "Become a Member",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                isMember
+                    ? "Tap below to renew your membership."
+                    : "Join now to unlock all premium benefits.",
+                style: const TextStyle(color: Colors.black54),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  _confettiController.play();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isMember
+                            ? "Renewal Started!"
+                            : "Membership Activated!",
+                      ),
+                    ),
+                  );
+                  if (!isMember) {
+                    setState(() => membershipActive = true);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  isMember ? "Renew Membership" : "Join Membership",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-    ]);
+        const SizedBox(height: 12),
+        if (!isMember)
+          _glassCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Membership canceled",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "You can re-join anytime and keep your stamps/benefits (if eligible).",
+                  style: TextStyle(color: Colors.black54),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() => membershipActive = true);
+                    _confettiController.play();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Welcome back! Membership reactivated",
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pink,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    "Buy Membership",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
   }
 
   // ---------------- Cancel confirmation dialog ----------------
@@ -553,28 +988,66 @@ class _MembershipPageState extends State<MembershipPage>
       barrierDismissible: true,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text("Are you sure you want to cancel?"),
+          title: const Text(
+              "Are you sure you want to cancel?"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text("If you cancel you'll lose:"),
               const SizedBox(height: 8),
-              Row(children: const [Icon(Icons.check, color: Colors.pink), SizedBox(width: 8), Expanded(child: Text("Instant 10% discount on orders"))]),
+              Row(
+                children: const [
+                  Icon(Icons.check, color: Colors.pink),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Instant 10% discount on orders",
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 6),
-              Row(children: const [Icon(Icons.check, color: Colors.pink), SizedBox(width: 8), Expanded(child: Text("Priority customer support"))]),
+              Row(
+                children: const [
+                  Icon(Icons.check, color: Colors.pink),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text("Priority customer support"),
+                  ),
+                ],
+              ),
               const SizedBox(height: 6),
-              Row(children: const [Icon(Icons.check, color: Colors.pink), SizedBox(width: 8), Expanded(child: Text("Early access to sales"))]),
+              Row(
+                children: const [
+                  Icon(Icons.check, color: Colors.pink),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text("Early access to sales"),
+                  ),
+                ],
+              ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text("Keep Membership")),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text("Keep Membership"),
+            ),
             ElevatedButton(
               onPressed: () {
                 setState(() => membershipActive = false);
                 Navigator.of(ctx).pop();
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Membership canceled. You can re-join anytime.")));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      "Membership canceled. You can re-join anytime.",
+                    ),
+                  ),
+                );
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+              ),
               child: const Text("Cancel anyway"),
             ),
           ],
@@ -587,26 +1060,45 @@ class _MembershipPageState extends State<MembershipPage>
   Widget _labelValue(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label, style: const TextStyle(color: Colors.black54)),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-      ]),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(color: Colors.black54),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-// ---------------- PageView Indicator ----------------
+// ---------------- PageView Indicator (still used by old stamps? kept for compatibility) ----------------
 class PageViewIndicator extends StatefulWidget {
   final PageController controller;
   final int itemCount;
-  const PageViewIndicator({required this.controller, required this.itemCount, super.key});
+  const PageViewIndicator({
+    required this.controller,
+    required this.itemCount,
+    super.key,
+  });
 
   @override
-  State<PageViewIndicator> createState() => _PageViewIndicatorState();
+  State<PageViewIndicator> createState() =>
+      _PageViewIndicatorState();
 }
 
-class _PageViewIndicatorState extends State<PageViewIndicator> {
+class _PageViewIndicatorState
+    extends State<PageViewIndicator> {
   double current = 0.0;
   @override
   void initState() {
@@ -616,7 +1108,9 @@ class _PageViewIndicatorState extends State<PageViewIndicator> {
 
   void _listener() {
     setState(() {
-      current = (widget.controller.page ?? widget.controller.initialPage).toDouble();
+      current = (widget.controller.page ??
+              widget.controller.initialPage)
+          .toDouble();
     });
   }
 
@@ -628,25 +1122,27 @@ class _PageViewIndicatorState extends State<PageViewIndicator> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, children: List.generate(widget.itemCount, (i) {
-      final selected = (current - i).abs() < 0.5;
-      return AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        width: selected ? 14 : 8,
-        height: 8,
-        decoration: BoxDecoration(color: selected ? Colors.pink : Colors.grey.shade300, borderRadius: BorderRadius.circular(6)),
-      );
-    }));
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children:
+          List.generate(widget.itemCount, (i) {
+        final selected = (current - i).abs() < 0.5;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          margin:
+              const EdgeInsets.symmetric(horizontal: 4),
+          width: selected ? 14 : 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: selected
+                ? Colors.pink
+                : Colors.grey.shade300,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        );
+      }),
+    );
   }
-}
-
-// ---------------- Stamp definition ----------------
-class _StampDefinition {
-  final int monthsRequired;
-  final String title;
-  final String description;
-  const _StampDefinition(this.monthsRequired, this.title, this.description);
 }
 
 // ---------------- Benefit chip ----------------
@@ -658,13 +1154,32 @@ class _benefit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(color: Colors.pink.shade50, borderRadius: BorderRadius.circular(12)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 16, color: Colors.pink),
-        const SizedBox(width: 6),
-        Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-      ]),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 8,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.pink.shade50,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: Colors.pink,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
