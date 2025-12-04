@@ -19,6 +19,8 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
   final TextEditingController _searchController = TextEditingController();
 
+  int selectedCategoryIndex = -1;
+
   final List<String> categories = [
     "All",
     "Dresses",
@@ -172,44 +174,81 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: 10, // 10 aesthetic circular categories
                 itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 70,
-                          width: 70,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [Colors.pink.shade200, Colors.purple.shade200],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.pink.withOpacity(0.25),
-                                blurRadius: 6,
-                                offset: Offset(0, 4),
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedCategoryIndex = index;
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Column(
+                        children: [
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 250),
+                            height: 70,
+                            width: 70,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: selectedCategoryIndex == index
+                                    ? Colors.pinkAccent
+                                    : Colors.transparent,
+                                width: 3,
                               ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child: Container(
-                              color: Colors.white, // empty placeholder area
+                              gradient: LinearGradient(
+                                colors: [Colors.pink.shade200, Colors.purple.shade200],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.pink.withOpacity(0.25),
+                                  blurRadius: 6,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: Stack(
+                                children: [
+                                  // shimmer background
+                                  AnimatedOpacity(
+                                    duration: Duration(milliseconds: 600),
+                                    opacity: 0.6,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [Colors.white, Colors.grey.shade200, Colors.white],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // placeholder icon
+                                  Center(
+                                    child: Icon(
+                                      Icons.image_outlined,
+                                      size: 28,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "Item ${index + 1}",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        )
-                      ],
+                          const SizedBox(height: 6),
+                          Text(
+                            "Item ${index + 1}",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   );
                 },
