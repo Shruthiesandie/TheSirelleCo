@@ -18,73 +18,54 @@ class HomeTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: TopBarClipper(),
-      child: Container(
-        height: 90,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+    return Container(
+      decoration: BoxDecoration(
         color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            /// Left Menu Button
-            IconButton(
-              icon: const Icon(Icons.menu, size: 24),
-              onPressed: onMenuTap,
-            ),
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(35), // increased curve for aesthetic look
+        ),
+      ),
+      height: 90,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          /// Left Menu Button
+          IconButton(
+            icon: const Icon(Icons.menu, size: 24),
+            onPressed: onMenuTap,
+          ),
 
-            /// Perfectly Centered Logo
-            Expanded(
-              child: Center(
-                child: Transform.translate(
-                  offset: Offset(logoShift, 0),
-                  child: Image.asset(
-                    "assets/logo/logo.png",
-                    height: 85,
-                    width: 85,
-                    fit: BoxFit.contain,
-                  ),
+          /// Perfectly Centered Logo
+          Expanded(
+            child: Center(
+              child: Transform.translate(
+                offset: Offset(logoShift, 0),
+                child: Image.asset(
+                  "assets/logo/logo.png",
+                  height: 85,
+                  width: 85,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
+          ),
 
-            /// Right Icons
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.search, size: 22),
-                  onPressed: onSearchTap,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.workspace_premium, size: 22),
-                  onPressed: onMembershipTap,
-                ),
-              ],
-            ),
-          ],
-        ),
+          /// Right Icons
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.search, size: 22),
+                onPressed: onSearchTap,
+              ),
+              IconButton(
+                icon: const Icon(Icons.workspace_premium, size: 22),
+                onPressed: onMembershipTap,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
-}
-
-/// Curve is maintained using custom clipper
-class TopBarClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    const double curve = 25;
-    return Path()
-      ..lineTo(0, size.height - curve)
-      ..quadraticBezierTo(
-        size.width / 2,
-        size.height + curve,
-        size.width,
-        size.height - curve,
-      )
-      ..lineTo(size.width, 0)
-      ..close();
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
