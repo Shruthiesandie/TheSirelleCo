@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tscmain/animations/rabbit_animations_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
