@@ -40,7 +40,7 @@ class HomeTopBar extends StatelessWidget {
           /// Left Menu Button
           GestureDetector(
             onTap: onMenuTap,
-            child: const Icon(Icons.menu, size: 26, color: Colors.pinkAccent),
+            child: const Icon(Icons.menu, size: 26, color: Colors.grey),
           ),
 
           /// Perfectly Centered Logo
@@ -61,13 +61,19 @@ class HomeTopBar extends StatelessWidget {
           /// Right Icons
           Row(
             children: [
-              GestureDetector(
-                onTap: onSearchTap,
-                child: const Icon(Icons.search, size: 26, color: Colors.pinkAccent),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: GestureDetector(
+                  onTap: onSearchTap,
+                  child: const Icon(Icons.search, size: 26, color: Colors.grey),
+                ),
               ),
-              GestureDetector(
-                onTap: onMembershipTap,
-                child: const Icon(Icons.workspace_premium, size: 26, color: Colors.pinkAccent),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: GestureDetector(
+                  onTap: onMembershipTap,
+                  child: const Icon(Icons.card_giftcard, size: 26, color: Colors.grey),
+                ),
               ),
             ],
           ),
