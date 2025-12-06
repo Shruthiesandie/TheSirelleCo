@@ -18,10 +18,19 @@ class HomeTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(35), // curved on all edges including top and bottom
+        borderRadius: BorderRadius.circular(35),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.pinkAccent.withOpacity(0.15),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       height: 90,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -29,9 +38,24 @@ class HomeTopBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           /// Left Menu Button
-          IconButton(
-            icon: const Icon(Icons.menu, size: 24),
-            onPressed: onMenuTap,
+          GestureDetector(
+            onTap: onMenuTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 240),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.pink.shade50.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.pinkAccent.withOpacity(0.25),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              child: const Icon(Icons.menu, size: 22, color: Colors.pinkAccent),
+            ),
           ),
 
           /// Perfectly Centered Logo
@@ -41,8 +65,8 @@ class HomeTopBar extends StatelessWidget {
                 offset: Offset(logoShift, 0),
                 child: Image.asset(
                   "assets/logo/logo.png",
-                  height: 85,
-                  width: 85,
+                  height: 70,
+                  width: 70,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -52,13 +76,43 @@ class HomeTopBar extends StatelessWidget {
           /// Right Icons
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.search, size: 22),
-                onPressed: onSearchTap,
+              GestureDetector(
+                onTap: onSearchTap,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 240),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.pink.shade50.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pinkAccent.withOpacity(0.25),
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: const Icon(Icons.search, size: 22, color: Colors.pinkAccent),
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.workspace_premium, size: 22),
-                onPressed: onMembershipTap,
+              GestureDetector(
+                onTap: onMembershipTap,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 240),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.pink.shade50.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pinkAccent.withOpacity(0.25),
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: const Icon(Icons.workspace_premium, size: 22, color: Colors.pinkAccent),
+                ),
               ),
             ],
           ),
