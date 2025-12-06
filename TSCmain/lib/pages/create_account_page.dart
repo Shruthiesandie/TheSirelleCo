@@ -81,7 +81,7 @@ class CreateAccountPage extends StatefulWidget {
 }
 
 class _CreateAccountPageState extends State<CreateAccountPage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   // Controllers
   final _scrollController = ScrollController();
   final _firstCtrl = TextEditingController();
