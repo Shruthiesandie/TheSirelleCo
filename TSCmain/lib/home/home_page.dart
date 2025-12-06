@@ -170,13 +170,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 }
 
 /// CUPCAKE STYLE HOME TAB
-class CupcakeHomeTab extends StatelessWidget {
+class CupcakeHomeTab extends StatefulWidget {
   const CupcakeHomeTab({super.key});
+  @override
+  State<CupcakeHomeTab> createState() => _CupcakeHomeTabState();
+}
+
+class _CupcakeHomeTabState extends State<CupcakeHomeTab> {
+  double scrollOffset = 0;
 
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
-      onNotification: (_) {
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification) {
+          setState(() => scrollOffset = notification.metrics.pixels.clamp(0, 200));
+        }
         return true;
       },
       child: SingleChildScrollView(
@@ -201,8 +210,8 @@ class CupcakeHomeTab extends StatelessWidget {
                 tween: Tween(begin: 0, end: 1),
                 duration: const Duration(milliseconds: 600),
                 builder: (context, value, child) => Transform.scale(
-                  scale: value,
-                  child: Opacity(opacity: value, child: child),
+                  scale: value * (1 - (scrollOffset / 450)),
+                  child: Opacity(opacity: (1 - scrollOffset / 200).clamp(0, 1), child: child),
                 ),
                 child: Container(
                   height: 220,
@@ -239,9 +248,9 @@ class CupcakeHomeTab extends StatelessWidget {
                 tween: Tween(begin: 0, end: 1),
                 duration: const Duration(milliseconds: 500),
                 builder: (context, value, child) => Opacity(
-                  opacity: value,
+                  opacity: (value * (1 - scrollOffset / 260)).clamp(0, 1),
                   child: Transform.translate(
-                    offset: Offset(0, 10 * (1 - value)),
+                    offset: Offset(0, 20 * (1 - value) + scrollOffset * 0.3),
                     child: child,
                   ),
                 ),
@@ -273,7 +282,7 @@ class CupcakeHomeTab extends StatelessWidget {
                 tween: Tween(begin: 0, end: 1),
                 duration: const Duration(milliseconds: 800),
                 builder: (context, value, child) => Transform.translate(
-                  offset: Offset(0, 40 * (1 - value)),
+                  offset: Offset(0, 40 * (1 - value) - scrollOffset * 0.4),
                   child: Opacity(opacity: value, child: child),
                 ),
                 child: ClipPath(
