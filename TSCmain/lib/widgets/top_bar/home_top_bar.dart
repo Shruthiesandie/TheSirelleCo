@@ -40,22 +40,7 @@ class HomeTopBar extends StatelessWidget {
           /// Left Menu Button
           GestureDetector(
             onTap: onMenuTap,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.pink.shade50.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(22),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.pinkAccent.withOpacity(0.25),
-                    blurRadius: 14,
-                    offset: const Offset(0, 4),
-                  )
-                ],
-              ),
-              child: const Icon(Icons.menu, size: 22, color: Colors.pinkAccent),
-            ),
+            child: const Icon(Icons.menu, size: 26, color: Colors.pinkAccent),
           ),
 
           /// Perfectly Centered Logo
@@ -65,8 +50,8 @@ class HomeTopBar extends StatelessWidget {
                 offset: Offset(logoShift, 0),
                 child: Image.asset(
                   "assets/logo/logo.png",
-                  height: 70,
-                  width: 70,
+                  height: 90,
+                  width: 90,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -78,41 +63,11 @@ class HomeTopBar extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: onSearchTap,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 240),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.pink.shade50.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(22),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.pinkAccent.withOpacity(0.25),
-                        blurRadius: 14,
-                        offset: const Offset(0, 4),
-                      )
-                    ],
-                  ),
-                  child: const Icon(Icons.search, size: 22, color: Colors.pinkAccent),
-                ),
+                child: const Icon(Icons.search, size: 26, color: Colors.pinkAccent),
               ),
               GestureDetector(
                 onTap: onMembershipTap,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 240),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.pink.shade50.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(22),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.pinkAccent.withOpacity(0.25),
-                        blurRadius: 14,
-                        offset: const Offset(0, 4),
-                      )
-                    ],
-                  ),
-                  child: const Icon(Icons.workspace_premium, size: 22, color: Colors.pinkAccent),
-                ),
+                child: const Icon(Icons.workspace_premium, size: 26, color: Colors.pinkAccent),
               ),
             ],
           ),
