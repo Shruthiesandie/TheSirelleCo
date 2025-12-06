@@ -179,23 +179,54 @@ class _UsernamePageState extends State<UsernamePage>
   // ---------------------------------------------------------------------------
   Widget _ruleChip(String text, bool active) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      duration: const Duration(milliseconds: 300),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: active ? Colors.green.withOpacity(0.15) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        gradient: active
+            ? const LinearGradient(
+                colors: [Color(0xFFB0FFCA), Color(0xFFE4FFE9)],
+              )
+            : LinearGradient(
+                colors: [Colors.white, Colors.white.withOpacity(0.85)],
+              ),
         border: Border.all(
-          color: active ? Colors.green : Colors.black26,
-          width: 1,
+          color: active ? Colors.green.shade600 : Colors.black12,
+          width: active ? 2 : 1,
         ),
+        boxShadow: active
+            ? [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.24),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                )
+              ]
+            : [],
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: active ? Colors.green.shade800 : Colors.black54,
-          fontSize: 12,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: active ? Colors.green.shade700 : Colors.grey.shade400,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontWeight: active ? FontWeight.w800 : FontWeight.w500,
+              color: active ? Colors.green.shade800 : Colors.black45,
+              fontSize: 12.5,
+              letterSpacing: active ? 0.4 : 0.2,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -360,59 +391,66 @@ class _UsernamePageState extends State<UsernamePage>
         elevation: 0,
         leading: const BackButton(color: Colors.black87),
       ),
-
-      body: Listener(
-        onPointerHover: (_) {},
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: AnimatedBuilder(
-                animation: bgController,
-                builder: (_, __) => CustomPaint(
-                  painter: _WavesPainter(bgController.value),
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: IgnorePointer(
-                child: Stack(
-                  children: [
-                    _orb(0.15, 0.25, 90, Colors.pinkAccent.withOpacity(0.12)),
-                    _orb(0.75, 0.18, 120, Colors.purpleAccent.withOpacity(0.15)),
-                    _orb(0.35, 0.70, 140, Colors.pink.withOpacity(0.10)),
-                  ],
-                ),
-              ),
-            ),
-            SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(28),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Choose a username",
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.pink.shade700,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Listener(
+              onPointerHover: (_) {},
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned.fill(
+                    child: AnimatedBuilder(
+                      animation: bgController,
+                      builder: (_, __) => CustomPaint(
+                        painter: _WavesPainter(bgController.value),
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      "This will be your identity in the app.",
-                      style: TextStyle(color: Colors.black54, fontSize: 15),
+                  ),
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Stack(
+                        children: [
+                          _orb(0.15, 0.25, 90, Colors.pinkAccent.withOpacity(0.12)),
+                          _orb(0.75, 0.18, 120, Colors.purpleAccent.withOpacity(0.15)),
+                          _orb(0.35, 0.70, 140, Colors.pink.withOpacity(0.10)),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 35),
-                    _buildCard(),
-                    const SizedBox(height: 60),
-                    _buildContinueButton(),
-                  ],
-                ),
+                  ),
+                  SafeArea(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(28),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Choose a username",
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.pink.shade700,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "This will be your identity in the app.",
+                            style: TextStyle(color: Colors.black54, fontSize: 15),
+                          ),
+                          const SizedBox(height: 35),
+                          _buildCard(),
+                          const SizedBox(height: 60),
+                          _buildContinueButton(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
