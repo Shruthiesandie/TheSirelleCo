@@ -19,15 +19,15 @@ class HomeBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(40),
+      borderRadius: BorderRadius.circular(32),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          height: 78,
-          margin: const EdgeInsets.only(bottom: 18), // elevate from bottom
+          height: 66, // reduced height to reveal curvature
+          margin: const EdgeInsets.only(bottom: 22, left: 12, right: 12), // lift and reveal edges
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.75),
-            borderRadius: BorderRadius.circular(40), // smoother full rounding
+            borderRadius: BorderRadius.circular(32), // smoother full rounding
             boxShadow: [
               BoxShadow(
                 color: Colors.pinkAccent.withOpacity(.22),
