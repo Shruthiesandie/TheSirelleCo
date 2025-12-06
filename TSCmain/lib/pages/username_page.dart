@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:math';
 
 class UsernamePage extends StatefulWidget {
   const UsernamePage({super.key});
@@ -10,7 +11,7 @@ class UsernamePage extends StatefulWidget {
 }
 
 class _UsernamePageState extends State<UsernamePage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final TextEditingController _controller = TextEditingController();
 
   // Allowed characters regex
@@ -30,6 +31,8 @@ class _UsernamePageState extends State<UsernamePage>
   late AnimationController successCtrl;
   late Animation<double> successScale;
 
+  late AnimationController bgController;
+
   // Button hover + press animations
   double btnScale = 1.0;
   double cardLift = 0;
@@ -45,6 +48,11 @@ class _UsernamePageState extends State<UsernamePage>
     successScale = Tween<double>(begin: 0.8, end: 1.15).animate(
       CurvedAnimation(parent: successCtrl, curve: Curves.easeOutBack),
     );
+
+    bgController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat();
   }
 
   Future<void> _loadSavedUsernames() async {
@@ -57,6 +65,7 @@ class _UsernamePageState extends State<UsernamePage>
   void dispose() {
     _controller.dispose();
     successCtrl.dispose();
+    bgController.dispose();
     super.dispose();
   }
 
@@ -191,6 +200,154 @@ class _UsernamePageState extends State<UsernamePage>
     );
   }
 
+  Widget _buildCard() {
+    return MouseRegion(
+      onEnter: (_) => setState(() => cardLift = -4),
+      onExit: (_) => setState(() => cardLift = 0),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        transform: Matrix4.translationValues(0, cardLift, 0),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: getBorderColor(),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.pink.withOpacity(0.12),
+              blurRadius: 22,
+              offset: const Offset(0, 10),
+            )
+          ],
+        ),
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
+              onChanged: checkUsername,
+              decoration: InputDecoration(
+                hintText: "Enter username",
+                prefixIcon: Icon(Icons.person, color: Colors.pink.shade300),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: getDotColor(),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  getStatusText(),
+                  style: TextStyle(
+                    color: status == "available"
+                        ? Colors.green.shade800
+                        : Colors.red.shade400,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 22),
+            Wrap(
+              spacing: 10,
+              children: [
+                _ruleChip(
+                  "Min 3 chars",
+                  _controller.text.isNotEmpty &&
+                      _controller.text.trim().length >= 3,
+                ),
+                _ruleChip(
+                  "Letters, numbers, _",
+                  _controller.text.isNotEmpty &&
+                      _validRegex.hasMatch(_controller.text.trim()),
+                ),
+                _ruleChip(
+                  "No spaces",
+                  _controller.text.isNotEmpty &&
+                      !_controller.text.contains(" "),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContinueButton() {
+    return Listener(
+      onPointerDown: (_) => setState(() => btnScale = 0.95),
+      onPointerUp: (_) => setState(() => btnScale = 1.0),
+      child: GestureDetector(
+        onTap: status == "available"
+            ? () async {
+                final prefs = await SharedPreferences.getInstance();
+                savedUsernames.add(_controller.text.toLowerCase());
+                prefs.setStringList("usernames", savedUsernames);
+                Navigator.pushReplacementNamed(context, "/home");
+              }
+            : null,
+        child: AnimatedScale(
+          scale: btnScale,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          child: AnimatedOpacity(
+            opacity: status == "available" ? 1 : 0.4,
+            duration: const Duration(milliseconds: 300),
+            child: Container(
+              height: 58,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.pinkAccent.withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  )
+                ],
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFFFF6FAF),
+                    Color(0xFFB97BFF),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: ScaleTransition(
+                  scale: successScale,
+                  child: const Text(
+                    "Continue",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // UI
   // ---------------------------------------------------------------------------
@@ -204,191 +361,167 @@ class _UsernamePageState extends State<UsernamePage>
         leading: const BackButton(color: Colors.black87),
       ),
 
-      body: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: Listener(
+        onPointerHover: (_) {},
+        child: Stack(
           children: [
-            // Title -------------------------------
-            Text(
-              "Choose a username",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.w900,
-                color: Colors.pink.shade700,
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: bgController,
+                builder: (_, __) => CustomPaint(
+                  painter: _WavesPainter(bgController.value),
+                ),
               ),
             ),
-            const SizedBox(height: 6),
-
-            Text(
-              "This will be your identity in the app.",
-              style: TextStyle(color: Colors.black54, fontSize: 15),
-            ),
-            const SizedBox(height: 35),
-
-            // Floating Glass Card ------------------------------------
-            MouseRegion(
-              onEnter: (_) => setState(() => cardLift = -4),
-              onExit: (_) => setState(() => cardLift = 0),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                transform: Matrix4.translationValues(0, cardLift, 0),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: getBorderColor(),
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.pink.withOpacity(0.12),
-                      blurRadius: 22,
-                      offset: const Offset(0, 10),
-                    )
-                  ],
-                ),
-                child: Column(
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Stack(
                   children: [
-                    // TextField -----------------------------
-                    TextField(
-                      controller: _controller,
-                      onChanged: checkUsername,
-                      decoration: InputDecoration(
-                        hintText: "Enter username",
-                        prefixIcon: Icon(Icons.person,
-                            color: Colors.pink.shade300),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Status Row ----------------------------
-                    Row(
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: getDotColor(),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          getStatusText(),
-                          style: TextStyle(
-                            color: status == "available"
-                                ? Colors.green.shade800
-                                : Colors.red.shade400,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 22),
-
-                    // Requirement Chips ----------------------
-                    Wrap(
-                      spacing: 10,
-                      children: [
-                        _ruleChip(
-                          "Min 3 chars",
-                          _controller.text.isNotEmpty &&
-                              _controller.text.trim().length >= 3,
-                        ),
-                        _ruleChip(
-                          "Letters, numbers, _",
-                          _controller.text.isNotEmpty &&
-                              _validRegex.hasMatch(_controller.text.trim()),
-                        ),
-                        _ruleChip(
-                          "No spaces",
-                          _controller.text.isNotEmpty &&
-                              !_controller.text.contains(" "),
-                        ),
-                      ],
-                    ),
+                    _orb(0.15, 0.25, 90, Colors.pinkAccent.withOpacity(0.12)),
+                    _orb(0.75, 0.18, 120, Colors.purpleAccent.withOpacity(0.15)),
+                    _orb(0.35, 0.70, 140, Colors.pink.withOpacity(0.10)),
                   ],
                 ),
               ),
             ),
-
-            const SizedBox(height: 60),
-
-            // Continue Button ---------------------------------------
-            Listener(
-              onPointerDown: (_) => setState(() => btnScale = 0.95),
-              onPointerUp: (_) => setState(() => btnScale = 1.0),
-              child: GestureDetector(
-                onTap: status == "available"
-                    ? () async {
-                        final prefs = await SharedPreferences.getInstance();
-
-                        // Save username
-                        savedUsernames.add(_controller.text.toLowerCase());
-                        prefs.setStringList("usernames", savedUsernames);
-
-                        // ⭐ FIX: Navigate properly
-                        Navigator.pushReplacementNamed(context, "/home");
-                      }
-                    : null,
-                child: AnimatedScale(
-                  scale: btnScale,
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOut,
-                  child: AnimatedOpacity(
-                    opacity: status == "available" ? 1 : 0.4,
-                    duration: const Duration(milliseconds: 300),
-                    child: Container(
-                      height: 58,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.pinkAccent.withOpacity(0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          )
-                        ],
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFFFF6FAF),
-                            Color(0xFFB97BFF),
-                          ],
-                        ),
-                      ),
-                      child: Center(
-                        child: ScaleTransition(
-                          scale: successScale,
-                          child: const Text(
-                            "Continue",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
+            SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Choose a username",
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.pink.shade700,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "This will be your identity in the app.",
+                      style: TextStyle(color: Colors.black54, fontSize: 15),
+                    ),
+                    const SizedBox(height: 35),
+                    _buildCard(),
+                    const SizedBox(height: 60),
+                    _buildContinueButton(),
+                  ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
     );
+  }
+}
+
+Widget _orb(double x, double y, double size, Color color) {
+  return Positioned(
+    left: x * WidgetsBinding.instance.window.physicalSize.width / WidgetsBinding.instance.window.devicePixelRatio,
+    top: y * WidgetsBinding.instance.window.physicalSize.height / WidgetsBinding.instance.window.devicePixelRatio,
+    child: _OrbAnimation(size: size, color: color),
+  );
+}
+
+class _OrbAnimation extends StatefulWidget {
+  final double size;
+  final Color color;
+  const _OrbAnimation({Key? key, required this.size, required this.color}) : super(key: key);
+
+  @override
+  State<_OrbAnimation> createState() => _OrbAnimationState();
+}
+
+class _OrbAnimationState extends State<_OrbAnimation> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 6))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) {
+        final t = _controller.value;
+        final dx = sin(t * 2 * pi) * 10;
+        final dy = cos(t * 2 * pi) * 10;
+        return Transform.translate(
+          offset: Offset(dx, dy),
+          child: Container(
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(
+              color: widget.color,
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _WavesPainter extends CustomPainter {
+  final double progress;
+  _WavesPainter(this.progress);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    final waveHeight = 30.0;
+    final waveLength = size.width / 1.5;
+    final baseHeight = size.height * 0.8;
+
+    Path path = Path();
+
+    path.moveTo(0, baseHeight);
+
+    for (double i = 0; i <= size.width; i++) {
+      double y = waveHeight * sin((2 * pi / waveLength) * (i + progress * waveLength)) + baseHeight;
+      path.lineTo(i, y);
+    }
+
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    paint.color = Colors.pink.withOpacity(0.15);
+    canvas.drawPath(path, paint);
+
+    // Second wave
+    Path path2 = Path();
+
+    path2.moveTo(0, baseHeight + 10);
+
+    for (double i = 0; i <= size.width; i++) {
+      double y = waveHeight * cos((2 * pi / waveLength) * (i + progress * waveLength)) + baseHeight + 10;
+      path2.lineTo(i, y);
+    }
+
+    path2.lineTo(size.width, size.height);
+    path2.lineTo(0, size.height);
+    path2.close();
+
+    paint.color = Colors.purple.withOpacity(0.15);
+    canvas.drawPath(path2, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _WavesPainter oldDelegate) {
+    return oldDelegate.progress != progress;
   }
 }
