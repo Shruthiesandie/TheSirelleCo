@@ -54,17 +54,21 @@ class HomeBottomNavBar extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () => onItemTap(index),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(height: 6), // top spacing
-            Icon(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 200),
+            padding: EdgeInsets.symmetric(vertical: isSelected ? 6 : 2, horizontal: 6),
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.pink.shade50 : Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
               icon,
-              size: 28, // reduced icon size
+              size: 30,
               color: isSelected ? Colors.pinkAccent : Colors.grey.shade500,
             ),
-            SizedBox(height: 6), // bottom spacing
-          ],
+          ),
         ),
       ),
     );
