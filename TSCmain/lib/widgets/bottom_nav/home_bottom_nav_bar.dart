@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 typedef BottomNavTap = void Function(int index);
@@ -16,33 +18,38 @@ class HomeBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 78, // slightly reduced height
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, -2),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(40),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          height: 78,
+          margin: const EdgeInsets.only(bottom: 18), // elevate from bottom
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.75),
+            borderRadius: BorderRadius.circular(40), // smoother full rounding
+            boxShadow: [
+              BoxShadow(
+                color: Colors.pinkAccent.withOpacity(.22),
+                blurRadius: 22,
+                spreadRadius: 3,
+                offset: const Offset(0, 6), // deeper soft elevation
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10), // moves icons inward
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly, // adds spacing
-          children: [
-            _navItem(Icons.home, 0),
-            _navItem(Icons.favorite_border, 1),
-            _navItem(Icons.grid_view_rounded, 2),
-            _navItem(Icons.shopping_bag_outlined, 3),
-            _navItem(Icons.person, 4),
-          ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10), // moves icons inward
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly, // adds spacing
+              children: [
+                _navItem(Icons.home, 0),
+                _navItem(Icons.favorite_border, 1),
+                _navItem(Icons.grid_view_rounded, 2),
+                _navItem(Icons.shopping_bag_outlined, 3),
+                _navItem(Icons.person, 4),
+              ],
+            ),
+          ),
         ),
       ),
     );
