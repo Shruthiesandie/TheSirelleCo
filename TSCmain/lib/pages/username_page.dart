@@ -297,6 +297,8 @@ class _UsernamePageState extends State<UsernamePage>
             const SizedBox(height: 22),
             Wrap(
               spacing: 10,
+              alignment: WrapAlignment.start,
+              runSpacing: 10,
               children: [
                 _ruleChip(
                   "Min 3 chars",
@@ -304,7 +306,7 @@ class _UsernamePageState extends State<UsernamePage>
                       _controller.text.trim().length >= 3,
                 ),
                 _ruleChip(
-                  "Letters, numbers, _",
+                  "No symbols — keep it simple",
                   _controller.text.isNotEmpty &&
                       _validRegex.hasMatch(_controller.text.trim()),
                 ),
