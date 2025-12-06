@@ -102,8 +102,9 @@ class _SearchPageState extends State<SearchPage>
   // ------------------------------------------------------------
   Widget _beautifulSearchBox() {
     return AnimatedContainer(
+      margin: const EdgeInsets.only(top: 8, bottom: 6),
       duration: const Duration(milliseconds: 350),
-      height: 45,
+      height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -177,7 +178,9 @@ class _SearchPageState extends State<SearchPage>
       // PREMIUM APP BAR
       // ------------------------------------------------------------
       appBar: AppBar(
+        toolbarHeight: 80,
         backgroundColor: Colors.white,
+        centerTitle: true,
         elevation: 3,
         shadowColor: Colors.pinkAccent.withOpacity(0.1),
         leading: IconButton(
@@ -185,7 +188,13 @@ class _SearchPageState extends State<SearchPage>
               color: Colors.black, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: _beautifulSearchBox(),
+        title: Padding(
+          padding: const EdgeInsets.only(top: 6, bottom: 4, right: 6, left: 2),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.98,
+            child: _beautifulSearchBox(),
+          ),
+        ),
       ),
 
       // ------------------------------------------------------------
