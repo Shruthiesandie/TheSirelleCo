@@ -175,132 +175,170 @@ class CupcakeHomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xFFFCEEEE),
-            Color(0xFFF8C6D0),
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
+    return NotificationListener<ScrollNotification>(
+      onNotification: (_) {
+        return true;
+      },
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFFFCEEEE),
+                Color(0xFFF8C6D0),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
 
-          // Placeholder Cupcake image circle
-          Container(
-            height: 220,
-            alignment: Alignment.center,
-            child: Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(.55),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.pinkAccent.withOpacity(.35),
-                    blurRadius: 28,
-                    spreadRadius: 4,
-                    offset: const Offset(0, 10),
-                  )
-                ],
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.image,
-                  size: 70,
-                  color: Colors.black26,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 600),
+                builder: (context, value, child) => Transform.scale(
+                  scale: value,
+                  child: Opacity(opacity: value, child: child),
                 ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          Text(
-            "Buttery Cupcakes",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              fontFamily: "Playfair Display",
-              color: Colors.pink.shade700,
-            ),
-          ),
-          Text(
-            "Freshly baked with love 🍰",
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.pink.shade400,
-            ),
-          ),
-
-          const Spacer(),
-
-          ClipPath(
-            clipper: CupcakeCurveClipper(),
-            child: Container(
-              height: 260,
-              width: double.infinity,
-              color: Colors.pink.shade300,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Floating cart
-                  Container(
-                    height: 60,
-                    width: 60,
+                child: Container(
+                  height: 220,
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 180,
+                    height: 180,
                     decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(.55),
                       shape: BoxShape.circle,
-                      color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(.2),
-                          blurRadius: 16,
-                          offset: const Offset(0, 8),
+                          color: Colors.pinkAccent.withOpacity(.35),
+                          blurRadius: 28,
+                          spreadRadius: 4,
+                          offset: const Offset(0, 10),
                         )
                       ],
                     ),
-                    child: const Icon(
-                      Icons.shopping_bag_rounded,
-                      size: 24,
-                      color: Colors.pink,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.pink.shade600,
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
+                    child: const Center(
+                      child: Icon(
+                        Icons.image,
+                        size: 70,
+                        color: Colors.black26,
                       ),
                     ),
-                    onPressed: () {},
-                    child: const Text(
-                      "Customize your Cupcake",
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
                   ),
-
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      "More →",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+
+              const SizedBox(height: 16),
+
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 500),
+                builder: (context, value, child) => Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 10 * (1 - value)),
+                    child: child,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      "Buttery Cupcakes",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: "Playfair Display",
+                        color: Colors.pink.shade700,
+                      ),
+                    ),
+                    Text(
+                      "Freshly baked with love 🍰",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.pink.shade400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 80),
+
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 800),
+                builder: (context, value, child) => Transform.translate(
+                  offset: Offset(0, 40 * (1 - value)),
+                  child: Opacity(opacity: value, child: child),
+                ),
+                child: ClipPath(
+                  clipper: CupcakeCurveClipper(),
+                  child: Container(
+                    height: 260,
+                    width: double.infinity,
+                    color: Colors.pink.shade300,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 60,
+                          width: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(.2),
+                                blurRadius: 16,
+                                offset: const Offset(0, 8),
+                              )
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.shopping_bag_rounded,
+                            size: 24,
+                            color: Colors.pink,
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.pink.shade600,
+                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                          ),
+                          onPressed: () {},
+                          child: const Text(
+                            "Customize your Cupcake",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text(
+                            "More →",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
