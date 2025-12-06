@@ -475,53 +475,79 @@ class _OrbAnimationState extends State<_OrbAnimation> with SingleTickerProviderS
 }
 
 class _WavesPainter extends CustomPainter {
-  final double progress;
-  _WavesPainter(this.progress);
+  final double t;
+  _WavesPainter(this.t);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
+    final rect = Offset.zero & size;
 
-    final waveHeight = 30.0;
-    final waveLength = size.width / 1.5;
-    final baseHeight = size.height * 0.8;
+    final Gradient base = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: const [
+        Color(0xFFFFF3F8),
+        Color(0xFFFFEAF4),
+        Color(0xFFF3E8FF),
+      ],
+    );
 
-    Path path = Path();
+    final paint = Paint()..shader = base.createShader(rect);
+    canvas.drawRect(rect, paint);
 
-    path.moveTo(0, baseHeight);
+    Path wave(double baseY, double amp, double speed, double stretch) {
+      final path = Path();
+      path.moveTo(0, size.height);
 
-    for (double i = 0; i <= size.width; i++) {
-      double y = waveHeight * sin((2 * pi / waveLength) * (i + progress * waveLength)) + baseHeight;
-      path.lineTo(i, y);
+      for (double x = 0; x <= size.width; x += 6) {
+        double nx = (x / size.width) * 2 * pi * stretch;
+        double y = baseY + sin(nx + t * speed * 2 * pi) * amp;
+        path.lineTo(x, y);
+      }
+
+      path.lineTo(size.width, size.height);
+      path.close();
+      return path;
     }
 
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
+    canvas.drawPath(
+      wave(size.height * 0.81, 18, 1.0, 1.2),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [
+            const Color(0xFFFFC9E6).withOpacity(0.9),
+            const Color(0xFFFFF0FB).withOpacity(0.7),
+          ],
+        ).createShader(rect)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20),
+    );
 
-    paint.color = Colors.pink.withOpacity(0.15);
-    canvas.drawPath(path, paint);
+    canvas.drawPath(
+      wave(size.height * 0.88, 28, 0.7, 1.4),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [
+            const Color(0xFFDFB7FF).withOpacity(0.85),
+            const Color(0xFFFDEBFF).withOpacity(0.6),
+          ],
+        ).createShader(rect)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
+    );
 
-    // Second wave
-    Path path2 = Path();
-
-    path2.moveTo(0, baseHeight + 10);
-
-    for (double i = 0; i <= size.width; i++) {
-      double y = waveHeight * cos((2 * pi / waveLength) * (i + progress * waveLength)) + baseHeight + 10;
-      path2.lineTo(i, y);
-    }
-
-    path2.lineTo(size.width, size.height);
-    path2.lineTo(0, size.height);
-    path2.close();
-
-    paint.color = Colors.purple.withOpacity(0.15);
-    canvas.drawPath(path2, paint);
+    canvas.drawPath(
+      wave(size.height * 0.94, 16, 1.4, 0.9),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xFFFFF5F9).withOpacity(0.5),
+            const Color(0xFFFAF0FF).withOpacity(0.4),
+          ],
+        ).createShader(rect),
+    );
   }
 
   @override
-  bool shouldRepaint(covariant _WavesPainter oldDelegate) {
-    return oldDelegate.progress != progress;
-  }
+  bool shouldRepaint(covariant _WavesPainter oldDelegate) => oldDelegate.t != t;
 }
