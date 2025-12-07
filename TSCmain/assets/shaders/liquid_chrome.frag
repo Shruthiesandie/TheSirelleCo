@@ -3,12 +3,13 @@ precision highp float;
 uniform vec2 uSize;
 uniform float uTime;
 
-// Smooth noise
+// ------------------------------------------
+// Smooth Noise
+// ------------------------------------------
 float noise(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
 }
 
-// Interpolated noise
 float smoothNoise(vec2 p) {
   vec2 i = floor(p);
   vec2 f = fract(p);
@@ -18,96 +19,49 @@ float smoothNoise(vec2 p) {
   float c = noise(i + vec2(0.0, 1.0));
   float d = noise(i + vec2(1.0, 1.0));
 
-  vec2 u = f * f * (3.0 - 2.0 * f);
+  vec2 u = f*f*(3.0 - 2.0*f);
 
   return mix(a, b, u.x) +
-    (c - a) * u.y * (1.0 - u.x) +
-    (d - b) * u.x * u.y;
+         (c - a) * u.y * (1.0 - u.x) +
+         (d - b) * u.x * u.y;
 }
 
+// ------------------------------------------
+// fbm ripple motion (soft pastel)
+// ------------------------------------------
 float fbm(vec2 p) {
-  float value = 0.0;
-  float scale = 0.5;
+  float val = 0.0;
+  float amp = 0.6;
 
-  for(int i = 0; i < 5; i++) {
-    value += smoothNoise(p) * scale;
+  for (int i = 0; i < 5; i++) {
+    val += smoothNoise(p) * amp;
     p *= 2.0;
-    scale *= 0.5;
+    amp *= 0.47;
   }
-
-  return value;
+  return val;
 }
 
 void main() {
   vec2 uv = gl_FragCoord.xy / uSize.xy;
-  float t = uTime * 0.12;
+  float t = uTime * 0.09;
 
-  float base = fbm(uv * 4.0 + t);
-  float flow = fbm(uv * 8.0 - t);
+  // ripple motion
+  float ripple = fbm(uv * 5.0 + t);
 
-  float chrome = mix(base, flow, 0.6);
-
-  vec3 color = vec3(
-    0.9 + chrome * 0.2,
-    0.7 + chrome * 0.3,
-    1.0 + chrome * 0.15
+  // soft pastel pink blending
+  vec3 pastelPink = vec3(
+    1.0,     // soft white-pink glow
+    0.78,    // blush tint
+    1.0      // lavender highlight
   );
 
-  gl_FragColor = vec4(color, 1.0);
-}precision highp float;
-
-uniform vec2 uSize;
-uniform float uTime;
-
-// Smooth noise
-float noise(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
-}
-
-// Interpolated noise
-float smoothNoise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-
-  float a = noise(i);
-  float b = noise(i + vec2(1.0, 0.0));
-  float c = noise(i + vec2(0.0, 1.0));
-  float d = noise(i + vec2(1.0, 1.0));
-
-  vec2 u = f * f * (3.0 - 2.0 * f);
-
-  return mix(a, b, u.x) +
-    (c - a) * u.y * (1.0 - u.x) +
-    (d - b) * u.x * u.y;
-}
-
-float fbm(vec2 p) {
-  float value = 0.0;
-  float scale = 0.5;
-
-  for(int i = 0; i < 5; i++) {
-    value += smoothNoise(p) * scale;
-    p *= 2.0;
-    scale *= 0.5;
-  }
-
-  return value;
-}
-
-void main() {
-  vec2 uv = gl_FragCoord.xy / uSize.xy;
-  float t = uTime * 0.12;
-
-  float base = fbm(uv * 4.0 + t);
-  float flow = fbm(uv * 8.0 - t);
-
-  float chrome = mix(base, flow, 0.6);
-
-  vec3 color = vec3(
-    0.9 + chrome * 0.2,
-    0.7 + chrome * 0.3,
-    1.0 + chrome * 0.15
+  vec3 pastelPurple = vec3(
+    0.92,
+    0.80,
+    1.0
   );
+
+  vec3 color = mix(pastelPink, pastelPurple, ripple);
 
   gl_FragColor = vec4(color, 1.0);
 }

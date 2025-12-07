@@ -279,16 +279,12 @@ class _LoginPageState extends State<LoginPage>
                 ),
               ),
 
-              // 🌈 Liquid chrome background band
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 900),
-                  opacity: 1,
-                  child: const LiquidChromeBackground(
-                    height: 260, // tweak height if you want more/less chrome
+              // 🌈 Liquid chrome background overlay
+              const Positioned.fill(
+                child: Opacity(
+                  opacity: 0.9,
+                  child: LiquidChromeBackground(
+                    height: double.infinity,
                   ),
                 ),
               ),
