@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart'; // ⬅️ added
 
 typedef BottomNavTap = void Function(int index);
 
@@ -38,7 +39,6 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
 
   @override
   Widget build(BuildContext context) {
-
     return AnimatedPadding(
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
@@ -74,7 +74,7 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
                   _navItem(Icons.home_rounded, 0),
                   _navItem(Icons.favorite_border, 1),
 
-                  // Center floating action button
+                  // Center button
                   _centerButton(),
 
                   _navItem(Icons.shopping_bag_outlined, 3),
@@ -133,11 +133,11 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
     );
   }
 
+  // 👇 UPDATED nav item with animation injected
   Widget _navItem(IconData icon, int index) {
     final bool isSelected = widget.selectedIndex == index;
     final bool isNeighbor = (widget.selectedIndex - index).abs() == 1;
 
-    // Icon morph: swap outline to filled for some icons when selected
     IconData displayIcon = icon;
     if (icon == Icons.favorite_border && isSelected) {
       displayIcon = Icons.favorite;
@@ -145,80 +145,92 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
       displayIcon = Icons.shopping_bag;
     }
 
-    return MouseRegion(
-      onHover: (_) {},
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        splashColor: Colors.pinkAccent.withOpacity(0.18),
-        onTap: () => widget.onItemTap(index),
-        child: AnimatedBuilder(
-          animation: _pulseController,
-          builder: (context, child) {
-            final double t = _pulseController.value;
-            final double wave = (math.sin(t * 2 * math.pi) + 1) / 2; // 0..1
+    return InkWell(
+      borderRadius: BorderRadius.circular(24),
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      onTap: () => widget.onItemTap(index),
 
-            final double scale = isSelected
-                ? 1.12
-                : (isNeighbor ? 1.04 : 1.0);
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          final double t = _pulseController.value;
+          final double wave = (math.sin(t * 2 * math.pi) + 1) / 2;
 
-            final double glowOpacity = isSelected ? (0.20 + wave * 0.15) : 0.0;
-            final double blur = isSelected ? (10 + wave * 6) : 0;
+          final double scale =
+              isSelected ? 1.12 : (isNeighbor ? 1.04 : 1.0);
 
-            return AnimatedScale(
-              scale: scale,
-              duration: Duration(milliseconds: isSelected ? 360 : 230),
-              curve: Curves.elasticOut,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    padding: EdgeInsets.symmetric(
-                      vertical: isSelected ? 8 : 4,
-                      horizontal: 12,
+          final double glowOpacity = isSelected ? (0.20 + wave * 0.15) : 0.0;
+          final double blur = isSelected ? (10 + wave * 6) : 0;
+
+          return AnimatedScale(
+            scale: scale,
+            duration: Duration(milliseconds: isSelected ? 360 : 230),
+            curve: Curves.easeOutBack,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // 🔥 Lottie animation overlay
+                    if (isSelected)
+                      SizedBox(
+                        width: 55,
+                        height: 55,
+                        child: Lottie.asset(
+                          "assets/animation/bottom_bar.json",
+                          repeat: false,
+                        ),
+                      ),
+
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      padding: EdgeInsets.symmetric(
+                        vertical: isSelected ? 8 : 4,
+                        horizontal: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.pink.shade50.withOpacity(0.9)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(22),
+                        boxShadow: glowOpacity > 0
+                            ? [
+                                BoxShadow(
+                                  color: Colors.pinkAccent.withOpacity(glowOpacity),
+                                  blurRadius: blur,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Icon(
+                        displayIcon,
+                        size: 26,
+                        color: isSelected
+                            ? Colors.pinkAccent
+                            : Colors.grey.shade500,
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Colors.pink.shade50.withOpacity(0.9)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(22),
-                      boxShadow: glowOpacity > 0
-                          ? [
-                              BoxShadow(
-                                color: Colors.pinkAccent
-                                    .withOpacity(glowOpacity),
-                                blurRadius: blur,
-                                offset: const Offset(0, 6),
-                              ),
-                            ]
-                          : [],
-                    ),
-                    child: Icon(
-                      displayIcon,
-                      size: 26,
-                      color: isSelected
-                          ? Colors.pinkAccent
-                          : Colors.grey.shade500,
-                    ),
+                  ],
+                ),
+
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOut,
+                  margin: const EdgeInsets.only(top: 4),
+                  height: isSelected ? 4 : 0,
+                  width: isSelected ? 16 : 0,
+                  decoration: BoxDecoration(
+                    color: Colors.pinkAccent,
+                    borderRadius: BorderRadius.circular(999),
                   ),
-
-                  // Curved indicator arc under active item
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 260),
-                    curve: Curves.easeOut,
-                    margin: const EdgeInsets.only(top: 4),
-                    height: isSelected ? 4 : 0,
-                    width: isSelected ? 16 : 0,
-                    decoration: BoxDecoration(
-                      color: Colors.pinkAccent,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
