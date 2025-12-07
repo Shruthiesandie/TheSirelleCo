@@ -1,5 +1,7 @@
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 typedef BottomNavTap = void Function(int index);
 
@@ -50,36 +52,41 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
             topLeft: Radius.circular(26),
             topRight: Radius.circular(26),
           ),
-          child: Container(
-            height: 82,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(26),
-                topRight: Radius.circular(26),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.10),
-                  blurRadius: 22,
-                  offset: const Offset(0, -4),
+          child: ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              child: Container(
+                height: 82,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(26),
+                    topRight: Radius.circular(26),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.10),
+                      blurRadius: 22,
+                      offset: const Offset(0, -4),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _navItem(Icons.home_rounded, 0),
-                  _navItem(Icons.favorite_border, 1),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _navItem(Icons.home_rounded, 0),
+                      _navItem(Icons.favorite_border, 1),
 
-                  // Center floating action button
-                  _centerButton(),
+                      // Center floating action button
+                      _centerButton(),
 
-                  _navItem(Icons.shopping_bag_outlined, 3),
-                  _navItem(Icons.person, 4),
-                ],
+                      _navItem(Icons.shopping_bag_outlined, 3),
+                      _navItem(Icons.person, 4),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -150,7 +157,10 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         splashColor: Colors.pinkAccent.withOpacity(0.18),
-        onTap: () => widget.onItemTap(index),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          widget.onItemTap(index);
+        },
         child: AnimatedBuilder(
           animation: _pulseController,
           builder: (context, child) {
@@ -214,6 +224,22 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
+
+                  AnimatedOpacity(
+                    opacity: isSelected ? 1 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        _labelFor(icon),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.pinkAccent,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -221,5 +247,13 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
         ),
       ),
     );
+  }
+
+  String _labelFor(IconData icon) {
+    if (icon == Icons.home_rounded) return "Home";
+    if (icon == Icons.favorite_border) return "Fav";
+    if (icon == Icons.shopping_bag_outlined) return "Cart";
+    if (icon == Icons.person) return "Profile";
+    return "";
   }
 }
