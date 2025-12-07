@@ -175,12 +175,23 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
                   children: [
                     // 🔥 Lottie animation overlay
                     if (isSelected)
-                      SizedBox(
-                        width: 55,
-                        height: 55,
-                        child: Lottie.asset(
-                          "assets/animation/bottom_bar.json",
-                          repeat: false,
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: AnimatedOpacity(
+                            opacity: isSelected ? 1 : 0,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeOut,
+                            child: Transform.scale(
+                              scale: 1.6,
+                              child: ClipOval(
+                                child: Lottie.asset(
+                                  "assets/animation/bottom_bar.json",
+                                  repeat: false,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
 
