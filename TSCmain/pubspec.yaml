@@ -20,7 +20,6 @@ dependencies:
   intl: ^0.18.0
   google_fonts: ^6.2.0
   marquee: ^2.2.3
-  flutter_shaders: any
 
   cupertino_icons: ^1.0.8
 
@@ -44,7 +43,3 @@ flutter:
     - assets/logo/logo.png
     - assets/animation/login_character.riv
     - packages/country_icons/icons/flags/png/
-    - assets/shaders/liquid_chrome.frag
-
-shaders:
-    - assets/shaders/liquid_chrome.frag
