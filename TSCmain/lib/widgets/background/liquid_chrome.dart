@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 
@@ -52,7 +52,7 @@ class _LiquidChromeBackgroundState extends State<LiquidChromeBackground>
 }
 
 class _ChromePainter extends CustomPainter {
-  final FragmentShader shader;
+  final ui.FragmentShader shader;
   final double time;
 
   _ChromePainter(this.shader, this.time);
