@@ -1,33 +1,29 @@
-#version 460 core
-#include <flutter/runtime_effect.glsl>
-
-uniform float uTime;
-uniform vec2 uSize;
+#version 300 es
+precision highp float;
 
 out vec4 fragColor;
+uniform float uTime;
+uniform vec2 uResolution;
+
+// Simple chrome wave effect
 
 void main() {
-  // Frag coord from Flutter helper
-  vec2 fragCoord = FlutterFragCoord().xy;
+    vec2 uv = gl_FragCoord.xy / uResolution.xy;
+    uv -= 0.5;
 
-  // Normalized coords -1..1
-  vec2 uv = fragCoord / uSize;
-  uv = uv * 2.0 - 1.0;
+    float t = uTime * 0.35;
 
-  float t = uTime * 0.3;
+    float wave = sin(uv.x * 6.0 + t) * 0.25 +
+                 sin(uv.y * 8.0 - t * 1.4) * 0.35 +
+                 sin((uv.x + uv.y) * 4.0 + t * 0.7) * 0.15;
 
-  // Wave swirl distortion
-  float swirl = sin(uv.x * 3.0 + t) * 0.2 +
-                cos(uv.y * 4.0 - t) * 0.2;
+    float metallic = smoothstep(0.15, 0.45, abs(wave));
 
-  uv += swirl;
+    vec3 color = mix(
+        vec3(1.0, 0.85, 1.0),      // soft candy pink
+        vec3(0.92, 0.72, 1.0),     // lavender shimmer
+        metallic
+    );
 
-  // Chrome shading
-  float shade = 0.6 + 0.4 * sin(uv.x * 2.0 + t) *
-                          cos(uv.y * 2.5 - t);
-
-  // Soft pink chrome tone
-  vec3 chrome = vec3(1.2, 0.75, 0.95) * shade;
-
-  fragColor = vec4(chrome, 1.0);
+    fragColor = vec4(color, 0.65);   // 65% transparency
 }
