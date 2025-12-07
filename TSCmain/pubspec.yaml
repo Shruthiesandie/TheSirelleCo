@@ -45,3 +45,6 @@ flutter:
     - assets/animation/login_character.riv
     - packages/country_icons/icons/flags/png/
     - assets/shaders/liquid_chrome.frag
+
+shaders:
+    - assets/shaders/liquid_chrome.frag

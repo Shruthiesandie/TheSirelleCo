@@ -1,29 +1,113 @@
-#version 300 es
 precision highp float;
 
-out vec4 fragColor;
+uniform vec2 uSize;
 uniform float uTime;
-uniform vec2 uResolution;
 
-// Simple chrome wave effect
+// Smooth noise
+float noise(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+// Interpolated noise
+float smoothNoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+
+  float a = noise(i);
+  float b = noise(i + vec2(1.0, 0.0));
+  float c = noise(i + vec2(0.0, 1.0));
+  float d = noise(i + vec2(1.0, 1.0));
+
+  vec2 u = f * f * (3.0 - 2.0 * f);
+
+  return mix(a, b, u.x) +
+    (c - a) * u.y * (1.0 - u.x) +
+    (d - b) * u.x * u.y;
+}
+
+float fbm(vec2 p) {
+  float value = 0.0;
+  float scale = 0.5;
+
+  for(int i = 0; i < 5; i++) {
+    value += smoothNoise(p) * scale;
+    p *= 2.0;
+    scale *= 0.5;
+  }
+
+  return value;
+}
 
 void main() {
-    vec2 uv = gl_FragCoord.xy / uResolution.xy;
-    uv -= 0.5;
+  vec2 uv = gl_FragCoord.xy / uSize.xy;
+  float t = uTime * 0.12;
 
-    float t = uTime * 0.35;
+  float base = fbm(uv * 4.0 + t);
+  float flow = fbm(uv * 8.0 - t);
 
-    float wave = sin(uv.x * 6.0 + t) * 0.25 +
-                 sin(uv.y * 8.0 - t * 1.4) * 0.35 +
-                 sin((uv.x + uv.y) * 4.0 + t * 0.7) * 0.15;
+  float chrome = mix(base, flow, 0.6);
 
-    float metallic = smoothstep(0.15, 0.45, abs(wave));
+  vec3 color = vec3(
+    0.9 + chrome * 0.2,
+    0.7 + chrome * 0.3,
+    1.0 + chrome * 0.15
+  );
 
-    vec3 color = mix(
-        vec3(1.0, 0.85, 1.0),      // soft candy pink
-        vec3(0.92, 0.72, 1.0),     // lavender shimmer
-        metallic
-    );
+  gl_FragColor = vec4(color, 1.0);
+}precision highp float;
 
-    fragColor = vec4(color, 0.65);   // 65% transparency
+uniform vec2 uSize;
+uniform float uTime;
+
+// Smooth noise
+float noise(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+// Interpolated noise
+float smoothNoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+
+  float a = noise(i);
+  float b = noise(i + vec2(1.0, 0.0));
+  float c = noise(i + vec2(0.0, 1.0));
+  float d = noise(i + vec2(1.0, 1.0));
+
+  vec2 u = f * f * (3.0 - 2.0 * f);
+
+  return mix(a, b, u.x) +
+    (c - a) * u.y * (1.0 - u.x) +
+    (d - b) * u.x * u.y;
+}
+
+float fbm(vec2 p) {
+  float value = 0.0;
+  float scale = 0.5;
+
+  for(int i = 0; i < 5; i++) {
+    value += smoothNoise(p) * scale;
+    p *= 2.0;
+    scale *= 0.5;
+  }
+
+  return value;
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / uSize.xy;
+  float t = uTime * 0.12;
+
+  float base = fbm(uv * 4.0 + t);
+  float flow = fbm(uv * 8.0 - t);
+
+  float chrome = mix(base, flow, 0.6);
+
+  vec3 color = vec3(
+    0.9 + chrome * 0.2,
+    0.7 + chrome * 0.3,
+    1.0 + chrome * 0.15
+  );
+
+  gl_FragColor = vec4(color, 1.0);
 }
