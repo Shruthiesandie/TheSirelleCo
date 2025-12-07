@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart' as fg;
 
 import 'package:rive/rive.dart';
-import '../widgets/background/liquid_chrome.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -275,16 +275,6 @@ class _LoginPageState extends State<LoginPage>
                   animation: bgController,
                   builder: (_, __) => CustomPaint(
                     painter: _WavesPainter(bgController.value),
-                  ),
-                ),
-              ),
-
-              // 🌈 Liquid chrome background overlay
-              const Positioned.fill(
-                child: Opacity(
-                  opacity: 0.9,
-                  child: LiquidChromeBackground(
-                    height: double.infinity,
                   ),
                 ),
               ),
