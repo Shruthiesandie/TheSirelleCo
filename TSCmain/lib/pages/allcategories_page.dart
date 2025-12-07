@@ -168,7 +168,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
             ),
 
             SizedBox(
-              height: 95,
+              height: 125,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -184,57 +184,79 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                       padding: const EdgeInsets.only(right: 12),
                       child: Column(
                         children: [
-                          AnimatedContainer(
-                            duration: Duration(milliseconds: 250),
-                            height: 70,
-                            width: 70,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: selectedCategoryIndex == index
-                                    ? Colors.pinkAccent
-                                    : Colors.transparent,
-                                width: 3,
-                              ),
-                              gradient: LinearGradient(
-                                colors: [Colors.pink.shade200, Colors.purple.shade200],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.pink.withOpacity(0.25),
-                                  blurRadius: 6,
-                                  offset: Offset(0, 4),
+                          MouseRegion(
+                            onEnter: (_) => setState(() => selectedCategoryIndex = index),
+                            child: AnimatedContainer(
+                              duration: Duration(milliseconds: 250),
+                              height: 88,
+                              width: 88,
+                              transform: Matrix4.identity()
+                                ..rotateZ(selectedCategoryIndex == index ? 0.05 : 0.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: selectedCategoryIndex == index
+                                      ? Colors.pinkAccent
+                                      : Colors.transparent,
+                                  width: 3,
                                 ),
-                              ],
-                            ),
-                            child: ClipOval(
-                              child: Stack(
-                                children: [
-                                  // shimmer background
-                                  AnimatedOpacity(
-                                    duration: Duration(milliseconds: 600),
-                                    opacity: 0.6,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [Colors.white, Colors.grey.shade200, Colors.white],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
+                                gradient: LinearGradient(
+                                  colors: [Colors.pink.shade200, Colors.purple.shade200],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.pink.withOpacity(0.25),
+                                    blurRadius: 6,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ClipOval(
+                                child: Stack(
+                                  children: [
+                                    // shimmer background
+                                    AnimatedOpacity(
+                                      duration: Duration(milliseconds: 600),
+                                      opacity: 0.6,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [Colors.white, Colors.grey.shade200, Colors.white],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  // placeholder icon
-                                  Center(
-                                    child: Icon(
-                                      Icons.image_outlined,
-                                      size: 28,
-                                      color: Colors.grey.shade500,
+                                    Positioned.fill(
+                                      child: AnimatedOpacity(
+                                        duration: Duration(milliseconds: 300),
+                                        opacity: selectedCategoryIndex == index ? 0.3 : 0,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            gradient: RadialGradient(
+                                              colors: [
+                                                Colors.white.withOpacity(0.6),
+                                                Colors.transparent,
+                                              ],
+                                              radius: 0.6,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    // placeholder icon
+                                    Center(
+                                      child: Icon(
+                                        Icons.image_outlined,
+                                        size: 34,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
