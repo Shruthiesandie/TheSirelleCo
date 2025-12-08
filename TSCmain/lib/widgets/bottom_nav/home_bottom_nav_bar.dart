@@ -219,12 +219,4 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
       ),
     );
   }
-
-  String _labelFor(IconData icon) {
-    if (icon == Icons.home_rounded) return "Home";
-    if (icon == Icons.favorite_border) return "Fav";
-    if (icon == Icons.shopping_bag_outlined) return "Cart";
-    if (icon == Icons.person) return "Profile";
-    return "";
-  }
 }
