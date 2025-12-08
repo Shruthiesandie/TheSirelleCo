@@ -95,24 +95,24 @@ class TopBarClipper extends CustomClipper<Path> {
     final double h = size.height;
 
     // Base line where the curve starts from left and right
-    final double yBase = h * 0.65; // lower start line
-    final double yDip = h * 0.88;  // gentle dip
+    final double yBase = h * 0.60; // slightly higher anchor
+    final double yDip  = h * 0.92; // deeper dip for smoother curvature
 
     path.moveTo(0, 0);
     // Left edge down to the start of the curve
     path.lineTo(0, yBase);
 
-    // First half of the smile curve
+    // First half of the smooth S-curve
     path.cubicTo(
-      w * 0.20, yBase + (yDip - yBase) * 0.25,
+      w * 0.20, yBase + (yDip - yBase) * 0.45,  // deeper left carve
       w * 0.40, yDip,
-      w * 0.50, yDip,
+      w * 0.50, yDip,                          // main dip
     );
 
-    // Second half of the smile curve
+    // Second half of the smooth S-curve
     path.cubicTo(
       w * 0.60, yDip,
-      w * 0.80, yBase + (yDip - yBase) * 0.25,
+      w * 0.80, yBase + (yDip - yBase) * 0.45, // deeper right carve
       w,       yBase,
     );
 
