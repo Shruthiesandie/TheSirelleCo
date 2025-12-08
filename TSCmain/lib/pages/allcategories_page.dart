@@ -188,8 +188,8 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                             onEnter: (_) => setState(() => selectedCategoryIndex = index),
                             child: AnimatedContainer(
                               duration: Duration(milliseconds: 250),
-                              height: 88,
-                              width: 88,
+                              height: 85.5,
+                              width: 85.5,
                               transform: Matrix4.identity()
                                 ..rotateZ(selectedCategoryIndex == index ? 0.05 : 0.0),
                               decoration: BoxDecoration(
