@@ -51,8 +51,8 @@ class _SplashScreenState extends State<SplashScreen>
             opacity: _fade,
             child: Image.asset(
               "assets/splash/splash.png",
-              width: 550,
-              height: 550,
+              width: 750,
+              height: 750,
               fit: BoxFit.contain,
             ),
           ),
