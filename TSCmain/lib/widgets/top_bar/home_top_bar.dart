@@ -49,7 +49,7 @@ class HomeTopBar extends StatelessWidget {
             Expanded(
               child: Center(
                 child: Transform.translate(
-                  offset: Offset(logoShift, 0),
+                  offset: Offset(logoShift, -10),
                   child: Image.asset(
                     "assets/logo/logo.png",
                     height: 90,
@@ -91,20 +91,33 @@ class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
+    final double w = size.width;
+    final double h = size.height;
+
+    // Base line where the curve starts from left and right
+    final double yBase = h * 0.65; // lower start line
+    final double yDip = h * 0.88;  // gentle dip
 
     path.moveTo(0, 0);
-    path.lineTo(0, size.height * 0.60);
+    // Left edge down to the start of the curve
+    path.lineTo(0, yBase);
 
-    // smoother & lower wave — avoids logo clash
+    // First half of the smile curve
     path.cubicTo(
-      size.width * 0.18, size.height * 0.95,
-      size.width * 0.50, size.height * 0.70,
-      size.width * 0.82, size.height * 0.95,
+      w * 0.20, yBase + (yDip - yBase) * 0.25,
+      w * 0.40, yDip,
+      w * 0.50, yDip,
     );
 
-    // Slightly lower finish to match curve depth
-    path.lineTo(size.width, size.height * 0.60 + 12);
-    path.lineTo(size.width, 0);
+    // Second half of the smile curve
+    path.cubicTo(
+      w * 0.60, yDip,
+      w * 0.80, yBase + (yDip - yBase) * 0.25,
+      w,       yBase,
+    );
+
+    // Right edge back up to the top
+    path.lineTo(w, 0);
 
     path.close();
     return path;
