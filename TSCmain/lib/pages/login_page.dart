@@ -360,7 +360,7 @@ class _LoginPageState extends State<LoginPage>
         ),
         const SizedBox(height: 8),
         Text(
-          "Care to pick up where we left off?",
+          "Your soft space awaits you, Sign in",
           style: TextStyle(
             color: Colors.black54,
             fontSize: 16,
