@@ -75,9 +75,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(30),
-                ),
+                borderRadius: BorderRadius.circular(30), // curve top and bottom
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black12,
@@ -143,12 +141,33 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.50),
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.7),
-                            width: 1.2,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white.withOpacity(0.95),
+                              Colors.pink.shade50.withOpacity(0.90),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.pinkAccent.withOpacity(0.18),
+                              blurRadius: 18,
+                              offset: Offset(0, 8),
+                            ),
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.7),
+                              blurRadius: 12,
+                              spreadRadius: -4,
+                              offset: Offset(0, -2),
+                            ),
+                            BoxShadow(
+                              color: Colors.pink.shade200.withOpacity(0.12),
+                              blurRadius: 26,
+                              offset: Offset(0, 14),
+                            ),
+                          ],
                         ),
                         child: TextField(
                           controller: _searchController,
