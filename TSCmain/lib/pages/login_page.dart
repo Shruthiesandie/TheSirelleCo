@@ -344,7 +344,7 @@ class _LoginPageState extends State<LoginPage>
     return Column(
       children: [
         Text(
-          "Welcome Back",
+          "Welcome Love!",
           style: TextStyle(
             fontSize: 36,
             fontWeight: FontWeight.w800,
@@ -360,7 +360,7 @@ class _LoginPageState extends State<LoginPage>
         ),
         const SizedBox(height: 8),
         Text(
-          "Sign in to continue",
+          "Care to pick up where we left off?",
           style: TextStyle(
             color: Colors.black54,
             fontSize: 16,
