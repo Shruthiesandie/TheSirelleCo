@@ -2,6 +2,8 @@
 // PART 1 — Imports, Variables, Rive Loading, Parallax, Eye Follow
 // ------------------------------------------------------------
 
+// ignore_for_file: unnecessary_underscores
+
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';

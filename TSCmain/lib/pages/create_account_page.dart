@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_underscores, curly_braces_in_flow_control_structures
+// ignore_for_file: unnecessary_underscores, curly_braces_in_flow_control_structures, deprecated_member_use
 
 import 'dart:io';
 import 'dart:math' as math;
