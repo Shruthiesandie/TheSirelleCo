@@ -469,7 +469,7 @@ Widget _orb(double x, double y, double size, Color color) {
 class _OrbAnimation extends StatefulWidget {
   final double size;
   final Color color;
-  const _OrbAnimation({super.key, required this.size, required this.color});
+  const _OrbAnimation({required this.size, required this.color});
 
   @override
   State<_OrbAnimation> createState() => _OrbAnimationState();
