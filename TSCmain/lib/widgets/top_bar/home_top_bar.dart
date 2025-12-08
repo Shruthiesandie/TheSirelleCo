@@ -31,16 +31,21 @@ class HomeTopBar extends StatelessWidget {
             ),
           ],
         ),
-        height: 120, // slightly taller to show wave
+
+        // Increased slightly to give logo & curve breathing space
+        height: 135,
         padding: const EdgeInsets.symmetric(horizontal: 12),
+
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            /// Left Menu Button
             GestureDetector(
               onTap: onMenuTap,
               child: const Icon(Icons.menu, size: 26, color: Colors.grey),
             ),
 
+            /// Center Logo
             Expanded(
               child: Center(
                 child: Transform.translate(
@@ -55,22 +60,21 @@ class HomeTopBar extends StatelessWidget {
               ),
             ),
 
+            /// Right Actions
             Row(
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GestureDetector(
                     onTap: onSearchTap,
-                    child:
-                        const Icon(Icons.search, size: 26, color: Colors.grey),
+                    child: const Icon(Icons.search, size: 26, color: Colors.grey),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GestureDetector(
                     onTap: onMembershipTap,
-                    child: const Icon(Icons.card_giftcard,
-                        size: 26, color: Colors.grey),
+                    child: const Icon(Icons.card_giftcard, size: 26, color: Colors.grey),
                   ),
                 ),
               ],
@@ -82,26 +86,27 @@ class HomeTopBar extends StatelessWidget {
   }
 }
 
-/// custom wave bottom clipping
+/// Custom wave clipping — lowered + smoother aesthetic curve
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
 
     path.moveTo(0, 0);
-    path.lineTo(0, size.height * 0.55);
+    path.lineTo(0, size.height * 0.60);
 
-    // wave curve
+    // smoother & lower wave — avoids logo clash
     path.cubicTo(
-      size.width * 0.20, size.height * 0.85,  // lower first control
-      size.width * 0.50, size.height * 0.30,  // higher peak dip
-      size.width * 0.80, size.height * 0.85,  // lower second control
+      size.width * 0.18, size.height * 0.95,
+      size.width * 0.50, size.height * 0.70,
+      size.width * 0.82, size.height * 0.95,
     );
 
-    path.lineTo(size.width, size.height * 0.55 + 10);
+    // Slightly lower finish to match curve depth
+    path.lineTo(size.width, size.height * 0.60 + 12);
     path.lineTo(size.width, 0);
-    path.close();
 
+    path.close();
     return path;
   }
 
