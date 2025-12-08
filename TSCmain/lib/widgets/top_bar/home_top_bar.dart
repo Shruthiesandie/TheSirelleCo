@@ -32,7 +32,6 @@ class HomeTopBar extends StatelessWidget {
           ],
         ),
 
-        // Increased slightly to give logo & curve breathing space
         height: 135,
         padding: const EdgeInsets.symmetric(horizontal: 12),
 
@@ -49,7 +48,7 @@ class HomeTopBar extends StatelessWidget {
             Expanded(
               child: Center(
                 child: Transform.translate(
-                  offset: Offset(logoShift, -10),
+                  offset: Offset(logoShift, -10),   // lifted slightly above curve
                   child: Image.asset(
                     "assets/logo/logo.png",
                     height: 90,
@@ -86,7 +85,7 @@ class HomeTopBar extends StatelessWidget {
   }
 }
 
-/// Custom wave clipping — lowered + smoother aesthetic curve
+/// Smooth premium wave clip — balanced, logo-safe, aesthetic S-curve
 class TopBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -94,35 +93,32 @@ class TopBarClipper extends CustomClipper<Path> {
     final double w = size.width;
     final double h = size.height;
 
-    // Base line where the curve starts from left and right
-    final double yBase = h * 0.60; // slightly higher anchor
-    final double yDip  = h * 0.92; // deeper dip for smoother curvature
+    // Lifted further up so it stays away from the logo, but still shows a nice dip
+    final double yStart = h * 0.55; // edges pushed further down
+    final double yDip   = h * 0.80; // maintain dip depth
 
     path.moveTo(0, 0);
-    // Left edge down to the start of the curve
-    path.lineTo(0, yBase);
+    path.lineTo(0, yStart);
 
-    // First half of the smooth S-curve
+    // Left ➜ mid smooth carved arc (curves already from the start)
     path.cubicTo(
-      w * 0.20, yBase + (yDip - yBase) * 0.45,  // deeper left carve
-      w * 0.40, yDip,
-      w * 0.50, yDip,                          // main dip
+      w * 0.08, yStart + (yDip - yStart) * 0.75, // stronger edge carve
+      w * 0.32, yDip,
+      w * 0.50, yDip,
     );
 
-    // Second half of the smooth S-curve
+    // Mid ➜ right smooth carved arc (mirrored behaviour, curved near the end)
     path.cubicTo(
-      w * 0.60, yDip,
-      w * 0.80, yBase + (yDip - yBase) * 0.45, // deeper right carve
-      w,       yBase,
+      w * 0.68, yDip,
+      w * 0.92, yStart + (yDip - yStart) * 0.75, // stronger edge carve
+      w,       yStart,
     );
 
-    // Right edge back up to the top
     path.lineTo(w, 0);
-
     path.close();
     return path;
   }
 
   @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
