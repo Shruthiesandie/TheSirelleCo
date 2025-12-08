@@ -224,22 +224,6 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-
-                  AnimatedOpacity(
-                    opacity: isSelected ? 1 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        _labelFor(icon),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.pinkAccent,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             );
