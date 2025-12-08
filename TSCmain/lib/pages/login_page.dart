@@ -393,7 +393,7 @@ class _LoginPageState extends State<LoginPage>
         children: [
           _inputField(
             controller: _email,
-            hint: "Sirellename",
+            hint: "Username",
             icon: Icons.person,
             onTap: () {
               introPlaying = false;
