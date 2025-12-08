@@ -211,19 +211,6 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
                           : Colors.grey.shade500,
                     ),
                   ),
-
-                  // Curved indicator arc under active item
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 260),
-                    curve: Curves.easeOut,
-                    margin: const EdgeInsets.only(top: 4),
-                    height: isSelected ? 4 : 0,
-                    width: isSelected ? 16 : 0,
-                    decoration: BoxDecoration(
-                      color: Colors.pinkAccent,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
                 ],
               ),
             );
