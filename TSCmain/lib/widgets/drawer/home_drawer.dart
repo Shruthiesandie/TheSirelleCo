@@ -39,45 +39,70 @@ class HomeDrawer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(left: 18, top: 18, bottom: 10),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.pink.shade200.withOpacity(0.6),
-                          child: const Icon(Icons.person, size: 30, color: Colors.white),
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Welcome 👋",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
+                    padding: const EdgeInsets.all(18),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(.85),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [BoxShadow(color: Colors.pink.shade100.withOpacity(.3), blurRadius: 12, offset: const Offset(0,4))],
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 28,
+                            backgroundColor: Colors.pink.shade200.withOpacity(0.6),
+                            child: const Icon(Icons.person, size: 30, color: Colors.white),
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children:[
+                              Text(
+                                "Guest User",
+                                style: TextStyle(fontSize:18, fontWeight: FontWeight.bold, color: Colors.pink.shade700),
                               ),
-                            ),
-                            Text(
-                              "Guest User",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.pink.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal:8, vertical:4),
+                                decoration: BoxDecoration(
+                                  color: Colors.pink.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  "Non‑Member",
+                                  style: TextStyle(fontSize:12, color: Colors.pink.shade700),
+                                ),
+                              )
+                            ]
+                          )
+                        ]
+                      )
+                    )
                   ),
 
-                  const SizedBox(height: 25),
-
-                  drawerItem(context, Icons.person, "Profile"),
+                  drawerItem(context, Icons.person, "My Profile"),
                   drawerItem(context, Icons.shopping_bag, "Orders"),
-                  drawerItem(context, Icons.workspace_premium, "Membership"),
-                  drawerItem(context, Icons.info, "About Us"),
+                  drawerItem(context, Icons.dashboard, "Dashboard"),
+                  drawerItem(context, Icons.sports_esports, "Game or Your Fairy (Contact Us)"),
+                  drawerItem(context, Icons.settings, "Settings"),
+
+                  Padding(
+                    padding: const EdgeInsets.only(left:18, bottom:10),
+                    child: Text(
+                      "Follow us on",
+                      style: TextStyle(fontSize:14, fontWeight: FontWeight.w600, color: Colors.pink.shade900),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children:[
+                      socialIcon(Icons.camera_alt),
+                      const SizedBox(width:14),
+                      socialIcon(Icons.facebook),
+                      const SizedBox(width:14),
+                      socialIcon(Icons.play_circle_fill),
+                    ],
+                  ),
 
                   const Spacer(),
 
@@ -94,10 +119,10 @@ class HomeDrawer extends StatelessWidget {
                         height: 55,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(18),
-                          gradient: LinearGradient(
+                          gradient: const LinearGradient(
                             colors: [
                               Colors.pinkAccent,
-                              const Color(0xFFB97BFF),
+                              Color(0xFFB97BFF),
                             ],
                           ),
                           boxShadow: [
@@ -135,7 +160,7 @@ class HomeDrawer extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       child: InkWell(
         onTap: () {
-          if (title == "Profile") {
+          if (title == "My Profile" || title == "Profile") {
             Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
           }
         },
@@ -164,6 +189,18 @@ class HomeDrawer extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget socialIcon(IconData icon){
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withOpacity(.8),
+        boxShadow:[BoxShadow(color: Colors.pink.shade100.withOpacity(.3), blurRadius:8)]
+      ),
+      child: Icon(icon, color: Colors.pink.shade600, size:22),
     );
   }
 }
