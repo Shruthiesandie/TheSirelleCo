@@ -96,15 +96,15 @@ class HomeDrawer extends StatelessWidget {
                     SizedBox(height: 10),
 
                     drawerItem(context, Icons.person, "My Profile"),
-                    SizedBox(height: 4),
+                    SizedBox(height: 1),
                     drawerItem(context, Icons.shopping_bag, "Orders"),
-                    SizedBox(height: 4),
+                    SizedBox(height: 1),
                     drawerItem(context, Icons.card_giftcard, "Coupons"),
-                    SizedBox(height: 4),
+                    SizedBox(height: 1),
                     drawerItem(context, Icons.sports_esports, "Games"),
-                    SizedBox(height: 4),
+                    SizedBox(height: 1),
                     drawerItem(context, Icons.wb_twighlight, "Sirelle-chan"),
-                    SizedBox(height: 4),
+                    SizedBox(height: 1),
                     drawerItem(context, Icons.settings, "Settings"),
 
                     SizedBox(height: 80), // Space before social section
