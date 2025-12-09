@@ -101,7 +101,9 @@ class HomeDrawer extends StatelessWidget {
                     SizedBox(height: 6),
                     drawerItem(context, Icons.card_giftcard, "Coupons"),
                     SizedBox(height: 6),
-                    drawerItem(context, Icons.sports_esports, "Game and Your Fairy"),
+                    drawerItem(context, Icons.sports_esports, "Games"),
+                    SizedBox(height: 6),
+                    drawerItem(context, Icons.wb_twighlight, "Sirelle-chan"),
                     SizedBox(height: 6),
                     drawerItem(context, Icons.settings, "Settings"),
 
@@ -169,7 +171,9 @@ class HomeDrawer extends StatelessWidget {
               color: Colors.pink.shade50,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Colors.pink.shade600),
+            child: title == "Sirelle-chan"
+                ? Icon(Icons.auto_awesome, color: Colors.pink.shade600, size: 22)
+                : Icon(icon, color: Colors.pink.shade600),
           ),
           title: Text(
             title,
