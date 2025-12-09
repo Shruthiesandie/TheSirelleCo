@@ -39,86 +39,101 @@ class HomeDrawer extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Profile Card
                     Padding(
                       padding: const EdgeInsets.only(left:18, right:18, top:28, bottom:18),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical:24, horizontal:18),
+                        padding: const EdgeInsets.symmetric(vertical:20, horizontal:18),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(.85),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: [BoxShadow(color: Colors.pink.shade100.withOpacity(.3), blurRadius: 12, offset: const Offset(0,4))],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            )
+                          ],
                         ),
                         child: Row(
                           children: [
                             CircleAvatar(
                               radius: 28,
-                              backgroundColor: Colors.pink.shade200.withOpacity(0.6),
-                              child: const Icon(Icons.person, size: 30, color: Colors.white),
+                              backgroundColor: Colors.pink.shade200.withOpacity(0.7),
+                              child: Icon(Icons.person, size: 30, color: Colors.white),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 14),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children:[
+                              children: [
                                 Text(
                                   "Guest User",
-                                  style: TextStyle(fontSize:18, fontWeight: FontWeight.bold, color: Colors.pink.shade700),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.pink.shade700,
+                                  ),
                                 ),
+                                SizedBox(height: 6),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal:8, vertical:4),
+                                  padding: EdgeInsets.symmetric(horizontal:10, vertical:4),
                                   decoration: BoxDecoration(
                                     color: Colors.pink.shade50,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
                                     "Non‑Member",
-                                    style: TextStyle(fontSize:12, color: Colors.pink.shade700),
+                                    style: TextStyle(fontSize: 12, color: Colors.pink.shade700),
                                   ),
-                                )
-                              ]
-                            )
-                          ]
-                        )
-                      )
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
 
-                    const SizedBox(height: 12),
+                    SizedBox(height: 10),
 
                     drawerItem(context, Icons.person, "My Profile"),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 6),
                     drawerItem(context, Icons.shopping_bag, "Orders"),
-                    const SizedBox(height: 2),
-                    drawerItem(context, Icons.dashboard, "Dashboard"),
-                    const SizedBox(height: 2),
-                    drawerItem(context, Icons.sports_esports, "Game or Your Fairy (Contact Us)"),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 6),
+                    drawerItem(context, Icons.card_giftcard, "Coupons"),
+                    SizedBox(height: 6),
+                    drawerItem(context, Icons.sports_esports, "Game and Your Fairy"),
+                    SizedBox(height: 6),
                     drawerItem(context, Icons.settings, "Settings"),
-                    const SizedBox(height: 2),
+
+                    SizedBox(height: 80), // Space before social section
                   ],
                 ),
               ),
             ),
 
             Positioned(
-              left: 18,
-              bottom: 24,
+              bottom: 28,
+              left: 0,
+              right: 0,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     "Follow us on",
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.pink.shade900,
+                      color: Colors.pink.shade800,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 10),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      socialIcon(Icons.camera_alt_outlined),
-                      const SizedBox(width: 10),
+                      socialIcon(Icons.camera_alt_outlined), // placeholder IG icon
+                      SizedBox(width: 16),
                       socialIcon(Icons.facebook),
-                      const SizedBox(width: 10),
+                      SizedBox(width: 16),
                       socialIcon(Icons.play_circle_fill),
                     ],
                   ),
@@ -133,38 +148,42 @@ class HomeDrawer extends StatelessWidget {
 
   Widget drawerItem(BuildContext context, IconData icon, String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-      child: InkWell(
-        onTap: () {
-          if (title == "Profile" || title == "My Profile") {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
-          }
-        },
-        borderRadius: BorderRadius.circular(18),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.78),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.pink.shade100.withOpacity(.22),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              )
-            ],
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            )
+          ],
+        ),
+        child: ListTile(
+          leading: Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              color: Colors.pink.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.pink.shade600),
           ),
-          child: ListTile(
-            dense: true,
-            minVerticalPadding: 0,
-            leading: Icon(icon, color: Colors.pink.shade400),
-            title: Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.pink.shade900,
-              ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.pink.shade900,
             ),
           ),
+          onTap: () {
+            if (title == "My Profile" || title == "Profile") {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
+            }
+          },
         ),
       ),
     );
@@ -172,13 +191,19 @@ class HomeDrawer extends StatelessWidget {
 
   Widget socialIcon(IconData icon){
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(8),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withOpacity(.8),
-        boxShadow:[BoxShadow(color: Colors.pink.shade100.withOpacity(.3), blurRadius:8)]
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
-      child: Icon(icon, color: Colors.pink.shade600, size:22),
+      child: Icon(icon, color: Colors.pink.shade700, size: 20),
     );
   }
 }
