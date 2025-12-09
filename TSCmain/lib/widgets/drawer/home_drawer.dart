@@ -94,7 +94,7 @@ class HomeDrawer extends StatelessWidget {
                     drawerItem(context, Icons.settings, "Settings"),
                     const SizedBox(height: 6),
 
-                    SizedBox(height: 40),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.04),
 
                     Padding(
                       padding: const EdgeInsets.only(left:22, bottom:10),
@@ -118,7 +118,7 @@ class HomeDrawer extends StatelessWidget {
                         socialIcon(Icons.play_circle_fill),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
