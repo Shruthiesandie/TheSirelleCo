@@ -39,9 +39,9 @@ class HomeDrawer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(18),
+                    padding: const EdgeInsets.only(left:18, right:18, top:28, bottom:18),
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(vertical:24, horizontal:18),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(.85),
                         borderRadius: BorderRadius.circular(20),
@@ -80,22 +80,22 @@ class HomeDrawer extends StatelessWidget {
                     )
                   ),
 
-                  drawerItem(context, Icons.person, "My Profile"),
-                  drawerItem(context, Icons.shopping_bag, "Orders"),
-                  drawerItem(context, Icons.dashboard, "Dashboard"),
-                  drawerItem(context, Icons.sports_esports, "Game or Your Fairy (Contact Us)"),
-                  drawerItem(context, Icons.settings, "Settings"),
-
+                  const SizedBox(height: 12),
                   Padding(
-                    padding: const EdgeInsets.only(left:18, bottom:10),
+                    padding: const EdgeInsets.only(left:22, bottom:10),
                     child: Text(
                       "Follow us on",
-                      style: TextStyle(fontSize:14, fontWeight: FontWeight.w600, color: Colors.pink.shade900),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.pink.shade900,
+                      ),
                     ),
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children:[
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const SizedBox(width:18),
                       socialIcon(Icons.camera_alt),
                       const SizedBox(width:14),
                       socialIcon(Icons.facebook),
@@ -103,6 +103,18 @@ class HomeDrawer extends StatelessWidget {
                       socialIcon(Icons.play_circle_fill),
                     ],
                   ),
+                  const SizedBox(height: 28),
+
+                  drawerItem(context, Icons.person, "My Profile"),
+                  const SizedBox(height: 6),
+                  drawerItem(context, Icons.shopping_bag, "Orders"),
+                  const SizedBox(height: 6),
+                  drawerItem(context, Icons.dashboard, "Dashboard"),
+                  const SizedBox(height: 6),
+                  drawerItem(context, Icons.sports_esports, "Game or Your Fairy (Contact Us)"),
+                  const SizedBox(height: 6),
+                  drawerItem(context, Icons.settings, "Settings"),
+                  const SizedBox(height: 6),
 
                   const Spacer(),
 
@@ -157,7 +169,7 @@ class HomeDrawer extends StatelessWidget {
 
   Widget drawerItem(BuildContext context, IconData icon, String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       child: InkWell(
         onTap: () {
           if (title == "My Profile" || title == "Profile") {
@@ -178,6 +190,7 @@ class HomeDrawer extends StatelessWidget {
             ],
           ),
           child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal:16, vertical:6),
             leading: Icon(icon, color: Colors.pink.shade400),
             title: Text(
               title,
@@ -194,13 +207,13 @@ class HomeDrawer extends StatelessWidget {
 
   Widget socialIcon(IconData icon){
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.white.withOpacity(.8),
         boxShadow:[BoxShadow(color: Colors.pink.shade100.withOpacity(.3), blurRadius:8)]
       ),
-      child: Icon(icon, color: Colors.pink.shade600, size:22),
+      child: Icon(icon, color: Colors.pink.shade600, size:28),
     );
   }
 }
