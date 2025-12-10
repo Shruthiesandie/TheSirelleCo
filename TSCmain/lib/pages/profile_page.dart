@@ -12,16 +12,50 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStateMixin {
   // Replace with your real user state / provider
   String userName = 'Guest User';
   String membership = 'Non-Member';
   File? avatarFile;
 
+  late AnimationController _editController;
+  late Animation<double> _editScale;
+
   // theme helpers (matching drawer)
   Color get _accent => Colors.pink.shade600;
   Color get _muted => Colors.pink.shade50;
   Color get _textDark => Colors.pink.shade900;
+
+  void onEditTap() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditProfilePage(
+          initialUsername: userName,
+          initialAvatar: avatarFile,
+        ),
+      ),
+    );
+    if (result is Map<String, dynamic>) {
+      setState(() {
+        if (result['username'] != null) userName = result['username'];
+        if (result['avatarFile'] != null) avatarFile = result['avatarFile'] as File;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _editController = AnimationController(vsync: this, duration: const Duration(milliseconds: 150));
+    _editScale = Tween<double>(begin: 1.0, end: 0.85).animate(_editController);
+  }
+
+  @override
+  void dispose() {
+    _editController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +83,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 72),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white,
+                              Colors.pink.shade50.withOpacity(0.4),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
                           borderRadius: BorderRadius.circular(22),
                           boxShadow: const [
                             BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
@@ -100,35 +141,26 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ),
                                 const SizedBox(width: 10),
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(12),
-                                  onTap: () async {
-                                    final result = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => EditProfilePage(
-                                          initialUsername: userName,
-                                          initialAvatar: avatarFile,
-                                        ),
-                                      ),
-                                    );
-                                    if (result is Map<String, dynamic>) {
-                                      setState(() {
-                                        if (result['username'] != null) userName = result['username'];
-                                        if (result['avatarFile'] != null) avatarFile = result['avatarFile'] as File;
-                                      });
-                                    }
+                                GestureDetector(
+                                  onTapDown: (_) => _editController.forward(),
+                                  onTapUp: (_) {
+                                    _editController.reverse();
+                                    onEditTap();
                                   },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: _muted),
-                                      color: Colors.white,
+                                  onTapCancel: () => _editController.reverse(),
+                                  child: ScaleTransition(
+                                    scale: _editScale,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: _muted),
+                                        color: Colors.white,
+                                      ),
+                                      child: Text('Edit',
+                                          style: TextStyle(
+                                              color: _accent, fontWeight: FontWeight.w600)),
                                     ),
-                                    child: Text('Edit',
-                                        style: TextStyle(
-                                            color: _accent, fontWeight: FontWeight.w600)),
                                   ),
                                 ),
                               ],
