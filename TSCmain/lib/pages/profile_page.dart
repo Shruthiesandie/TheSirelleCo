@@ -56,49 +56,56 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // avatar (use avatarFile if available)
-                            CircleAvatar(
-                              radius: 44,
-                              backgroundColor: _muted,
-                              backgroundImage: avatarFile != null ? FileImage(avatarFile!) : null,
-                              child: avatarFile == null
-                                  ? Icon(Icons.person, color: Colors.white, size: 38)
-                                  : null,
-                            ),
-                            const SizedBox(width: 18),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            Flexible(
+                              child: Row(
                                 children: [
-                                  Text(
-                                    userName,
-                                    style: TextStyle(
-                                        fontSize: 20, fontWeight: FontWeight.w800, color: _textDark),
+                                  // avatar (use avatarFile if available)
+                                  CircleAvatar(
+                                    radius: 44,
+                                    backgroundColor: _muted,
+                                    backgroundImage: avatarFile != null ? FileImage(avatarFile!) : null,
+                                    child: avatarFile == null
+                                        ? Icon(Icons.person, color: Colors.white, size: 38)
+                                        : null,
                                   ),
-                                  const SizedBox(height: 10),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: _muted,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      membership,
-                                      style: TextStyle(fontSize: 12, color: _accent, fontWeight: FontWeight.w600),
+                                  const SizedBox(width: 18),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          userName,
+                                          style: TextStyle(
+                                              fontSize: 20, fontWeight: FontWeight.w800, color: _textDark),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: _muted,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            membership,
+                                            style: TextStyle(fontSize: 12, color: _accent, fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        // Optional small user stats row (orders/wishlist) - aesthetic
+                                        Row(
+                                          children: [
+                                            _smallStat('Orders', '0'),
+                                            const SizedBox(width: 12),
+                                            _smallStat('Wishlist', '0'),
+                                            const SizedBox(width: 12),
+                                            _smallStat('Coupons', '0'),
+                                          ],
+                                        )
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
-                                  // Optional small user stats row (orders/wishlist) - aesthetic
-                                  Row(
-                                    children: [
-                                      _smallStat('Orders', '0'),
-                                      const SizedBox(width: 12),
-                                      _smallStat('Wishlist', '0'),
-                                      const SizedBox(width: 12),
-                                      _smallStat('Coupons', '0'),
-                                    ],
-                                  )
                                 ],
                               ),
                             ),
@@ -230,11 +237,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ProfileSection(
                       title: 'Address & Delivery',
                       children: [
-                        profileOptionTile(context, Icons.add_location, 'Add New Address', onTap: () {/* add address */}),
-                        profileOptionTile(context, Icons.home_outlined, 'Home (set default)', onTap: () {/* set default home */}),
-                        profileOptionTile(context, Icons.business, 'Office', onTap: () {/* office */}),
-                        profileOptionTile(context, Icons.location_searching, 'Set Default Address', onTap: () {/* set default */}),
-                        profileOptionTile(context, Icons.list_alt, 'All Addresses', onTap: () {/* list addresses */}),
+                        profileOptionTile(context, Icons.location_on_outlined, 'Address', onTap: () {/* open address manager */}),
                       ],
                     ),
 
@@ -242,10 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ProfileSection(
                       title: 'Payment',
                       children: [
-                        profileOptionTile(context, Icons.payments_outlined, 'UPI IDs', onTap: () {/* upi */}),
-                        profileOptionTile(context, Icons.money_off, 'Cash on Delivery preference', onTap: () {/* cod */}),
-                        profileOptionTile(context, Icons.credit_card, 'Credit / Debit Cards', onTap: () {/* cards */}),
-                        profileOptionTile(context, Icons.add_card, 'Add Payment Method', onTap: () {/* add */}),
+                        profileOptionTile(context, Icons.payment, 'Payment Methods', onTap: () {/* open payment manager */}),
                       ],
                     ),
 
@@ -260,16 +260,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
 
-                    // ======= Account & Security =======
-                    ProfileSection(
-                      title: 'Account & Security',
-                      children: [
-                        profileOptionTile(context, Icons.lock_outline, 'Change Password', onTap: () {/* change password */}),
-                        profileOptionTile(context, Icons.verified_user_outlined, 'Two-step Verification', onTap: () {/* 2fa */}),
-                        profileOptionTile(context, Icons.history_toggle_off, 'Login Activity', onTap: () {/* login activity */}),
-                        profileOptionTile(context, Icons.devices_other, 'Logout from all devices', onTap: () {/* logout all */}),
-                      ],
-                    ),
 
                     // ======= App Settings (expansion) =======
                     Padding(
@@ -308,32 +298,44 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
 
-                    // ======= Help & Information (expansion) =======
-                    ProfileSection(
-                      title: 'Help & Information',
-                      children: [
-                        profileOptionTile(context, Icons.help_outline, 'Help Center'),
-                        profileOptionTile(context, Icons.report_problem_outlined, 'Report an issue'),
-                        profileOptionTile(context, Icons.chat_bubble_outline, 'Chat with Support'),
-                        profileOptionTile(context, Icons.description_outlined, 'Terms & Conditions'),
-                      ],
+                    // ======= Help & Information (dropdown) =======
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(left: 18.0, bottom: 6),
+                            child: Text('Help & Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0,3))],
+                              ),
+                              child: ExpansionTile(
+                                title: Text('Help & Info', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.pink)),
+                                children: [
+                                  profileOptionTile(context, Icons.help_outline, 'Help Center'),
+                                  profileOptionTile(context, Icons.report_problem_outlined, 'Report an issue'),
+                                  profileOptionTile(context, Icons.chat_bubble_outline, 'Chat with Support'),
+                                  profileOptionTile(context, Icons.description_outlined, 'Terms & Conditions'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
 
-                    // ======= Privacy Policies (BIG LIST) =======
+                    // ======= Privacy Policies (single option) =======
                     ProfileSection(
                       title: 'Privacy & Policies',
                       children: [
-                        profileOptionTile(context, Icons.policy, 'Privacy Policy'),
-                        profileOptionTile(context, Icons.rule, 'Return & Refund Policy'),
-                        profileOptionTile(context, Icons.local_shipping_outlined, 'Shipping / Delivery Policy'),
-                        profileOptionTile(context, Icons.block, 'Cancellation Policy'),
-                        profileOptionTile(context, Icons.payment, 'Payment Policy'),
-                        profileOptionTile(context, Icons.cookie, 'Cookie Policy'),
-                        profileOptionTile(context, Icons.account_box, 'User Account Policy'),
-                        profileOptionTile(context, Icons.copyright, 'Content & Copyright Policy'),
-                        profileOptionTile(context, Icons.security, 'Safety & Security Policy'),
-                        profileOptionTile(context, Icons.support_agent, 'Support & Complaint Policy'),
-                        profileOptionTile(context, Icons.storefront, 'Seller Policy'),
+                        profileOptionTile(context, Icons.policy, 'Privacy & Policies', onTap: () {/* open policies page */}),
                       ],
                     ),
 
