@@ -98,7 +98,7 @@ class ProfilePage extends StatelessWidget {
             // Body (scrollable)
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8).copyWith(bottom: 120),
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8).copyWith(bottom: 80),
                 child: Column(
                   children: [
                     // My Account Section
@@ -181,6 +181,9 @@ class ProfilePage extends StatelessWidget {
                                   profileOptionTile(context, Icons.info_outline, 'Terms & Conditions'),
                                   profileOptionTile(context, Icons.privacy_tip_outlined, 'Privacy Policy'),
                                   profileOptionTile(context, Icons.system_update_alt, 'App Version', subtitle: '1.0.0'),
+                                  profileOptionTile(context, Icons.logout, 'Log Out', onTap: () {
+                                    Navigator.pushReplacementNamed(context, "/login");
+                                  }),
                                 ],
                               ),
                             ),
@@ -189,7 +192,6 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 28), // breathing room above logout
                   ],
                 ),
               ),
