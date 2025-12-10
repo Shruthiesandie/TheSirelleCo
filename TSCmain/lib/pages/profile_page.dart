@@ -55,7 +55,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink.shade50.withOpacity(0.12),
+      backgroundColor: Color(0xFFFCEEEE),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
