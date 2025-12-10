@@ -23,94 +23,87 @@ class ProfilePage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Top header card (fixed)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 60),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white,
-                      Colors.pink.shade50.withOpacity(0.6),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: _muted,
-                      child: Icon(Icons.person, color: Colors.white, size: 34),
-                    ),
-                    const SizedBox(width: 18),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Guest User',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: _textDark,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: _muted,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              'Non-Member',
-                              style: TextStyle(fontSize: 12, color: _accent),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    // Edit button
-                    InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const EditProfilePage()),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _muted),
-                          color: Colors.white,
-                        ),
-                        child: Text('Edit', style: TextStyle(color: _accent, fontWeight: FontWeight.w600)),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-
             // Body (scrollable)
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8).copyWith(bottom: 20),
                 child: Column(
                   children: [
+                    // Top header card (was fixed, now scrolls)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 60),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundColor: _muted,
+                              child: Icon(Icons.person, color: Colors.white, size: 34),
+                            ),
+                            const SizedBox(width: 18),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Guest User',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: _textDark,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: _muted,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      'Non-Member',
+                                      style: TextStyle(fontSize: 12, color: _accent),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            // Edit button
+                            InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const EditProfilePage()),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: _muted),
+                                  color: Colors.white,
+                                ),
+                                child: Text('Edit', style: TextStyle(color: _accent, fontWeight: FontWeight.w600)),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+
                     // My Account Section
                     ProfileSection(
                       title: 'My Account',
@@ -314,7 +307,6 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  final TextEditingController nameController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
 
   @override
@@ -334,25 +326,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // Editable Profile Picture
             GestureDetector(
               onTap: () {
-                // TODO: add image picker logic
+                // TODO: Implement image picker to change profile photo
               },
               child: CircleAvatar(
                 radius: 50,
                 backgroundColor: Colors.pink.shade200,
-                child: const Icon(Icons.camera_alt, color: Colors.white, size: 32),
+                child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 36),
               ),
             ),
             const SizedBox(height: 30),
-
-            // Name Field
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: "Name",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 20),
 
             // Username Field
             TextField(
