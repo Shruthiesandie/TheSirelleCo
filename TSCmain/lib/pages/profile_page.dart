@@ -27,10 +27,10 @@ class ProfilePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 42),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(22),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
@@ -42,11 +42,11 @@ class ProfilePage extends StatelessWidget {
                 child: Row(
                   children: [
                     CircleAvatar(
-                      radius: 34,
+                      radius: 40,
                       backgroundColor: _muted,
                       child: Icon(Icons.person, color: Colors.white, size: 34),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 18),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +59,7 @@ class ProfilePage extends StatelessWidget {
                               color: _textDark,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 10),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
@@ -189,30 +189,42 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
 
+                    const SizedBox(height: 20),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 46,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: BorderSide(color: _accent, width: 1.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(context, "/login");
+                          },
+                          child: Text(
+                            'Log Out',
+                            style: TextStyle(
+                              color: _accent,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
             ),
 
-            // Logout button (fixed bottom)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 8, 18, 48),
-              child: SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: BorderSide(color: _accent, width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, "/login");
-                  },
-                  child: Text('Log Out', style: TextStyle(color: _accent, fontWeight: FontWeight.w700, fontSize: 16)),
-                ),
-              ),
-            ),
           ],
         ),
       ),
