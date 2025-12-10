@@ -27,9 +27,16 @@ class ProfilePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 42),
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 60),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.white,
+                      Colors.pink.shade50.withOpacity(0.6),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
                   borderRadius: BorderRadius.circular(22),
                   boxShadow: const [
                     BoxShadow(
@@ -78,7 +85,10 @@ class ProfilePage extends StatelessWidget {
                     InkWell(
                       borderRadius: BorderRadius.circular(12),
                       onTap: () {
-                        // TODO: Navigate to edit profile screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const EditProfilePage()),
+                        );
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -291,6 +301,95 @@ class ProfileSection extends StatelessWidget {
           ),
           Column(children: children),
         ],
+      ),
+    );
+  }
+}
+
+class EditProfilePage extends StatefulWidget {
+  const EditProfilePage({super.key});
+
+  @override
+  State<EditProfilePage> createState() => _EditProfilePageState();
+}
+
+class _EditProfilePageState extends State<EditProfilePage> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Edit Profile", style: TextStyle(fontWeight: FontWeight.w700)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            // Editable Profile Picture
+            GestureDetector(
+              onTap: () {
+                // TODO: add image picker logic
+              },
+              child: CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.pink.shade200,
+                child: const Icon(Icons.camera_alt, color: Colors.white, size: 32),
+              ),
+            ),
+            const SizedBox(height: 30),
+
+            // Name Field
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: "Name",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Username Field
+            TextField(
+              controller: usernameController,
+              decoration: InputDecoration(
+                labelText: "Username",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 30),
+
+            // Save Button
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink.shade600,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "Save",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
