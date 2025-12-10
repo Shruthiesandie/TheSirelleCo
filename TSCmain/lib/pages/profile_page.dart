@@ -47,96 +47,101 @@ class _ProfilePageState extends State<ProfilePage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 72), // bigger vertically
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 72),
                         decoration: BoxDecoration(
-                          color: Colors.white, // solid (not glossy)
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(22),
                           boxShadow: const [
                             BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
                           ],
                         ),
-                        child: Row(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Flexible(
-                              child: Row(
-                                children: [
-                                  // avatar (use avatarFile if available)
-                                  CircleAvatar(
-                                    radius: 44,
-                                    backgroundColor: _muted,
-                                    backgroundImage: avatarFile != null ? FileImage(avatarFile!) : null,
-                                    child: avatarFile == null
-                                        ? Icon(Icons.person, color: Colors.white, size: 38)
-                                        : null,
-                                  ),
-                                  const SizedBox(width: 18),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          userName,
-                                          style: TextStyle(
-                                              fontSize: 20, fontWeight: FontWeight.w800, color: _textDark),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                          decoration: BoxDecoration(
-                                            color: _muted,
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: Text(
-                                            membership,
-                                            style: TextStyle(fontSize: 12, color: _accent, fontWeight: FontWeight.w600),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        // Optional small user stats row (orders/wishlist) - aesthetic
-                                        Row(
-                                          children: [
-                                            _smallStat('Orders', '0'),
-                                            const SizedBox(width: 12),
-                                            _smallStat('Wishlist', '0'),
-                                            const SizedBox(width: 12),
-                                            _smallStat('Coupons', '0'),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Edit button
-                            InkWell(
-                              borderRadius: BorderRadius.circular(12),
-                              onTap: () async {
-                                // launch Edit page and accept updated username/avatar result
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => EditProfilePage(
-                                    initialUsername: userName,
-                                    initialAvatar: avatarFile,
-                                  )),
-                                );
-                                if (result is Map<String, dynamic>) {
-                                  setState(() {
-                                    if (result['username'] != null) userName = result['username'];
-                                    if (result['avatarFile'] != null) avatarFile = result['avatarFile'] as File;
-                                  });
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: _muted),
-                                  color: Colors.white,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CircleAvatar(
+                                  radius: 44,
+                                  backgroundColor: _muted,
+                                  backgroundImage: avatarFile != null ? FileImage(avatarFile!) : null,
+                                  child: avatarFile == null
+                                      ? Icon(Icons.person, color: Colors.white, size: 38)
+                                      : null,
                                 ),
-                                child: Text('Edit', style: TextStyle(color: _accent, fontWeight: FontWeight.w600)),
-                              ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        userName,
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w800,
+                                            color: _textDark),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: _muted,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          membership,
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: _accent,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(12),
+                                  onTap: () async {
+                                    final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => EditProfilePage(
+                                          initialUsername: userName,
+                                          initialAvatar: avatarFile,
+                                        ),
+                                      ),
+                                    );
+                                    if (result is Map<String, dynamic>) {
+                                      setState(() {
+                                        if (result['username'] != null) userName = result['username'];
+                                        if (result['avatarFile'] != null) avatarFile = result['avatarFile'] as File;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: _muted),
+                                      color: Colors.white,
+                                    ),
+                                    child: Text('Edit',
+                                        style: TextStyle(
+                                            color: _accent, fontWeight: FontWeight.w600)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18),
+                            Row(
+                              children: [
+                                _smallStat('Orders', '0'),
+                                const SizedBox(width: 12),
+                                _smallStat('Wishlist', '0'),
+                                const SizedBox(width: 12),
+                                _smallStat('Coupons', '0'),
+                              ],
                             ),
                           ],
                         ),
