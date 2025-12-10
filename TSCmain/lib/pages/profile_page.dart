@@ -30,10 +30,10 @@ class ProfilePage extends StatelessWidget {
                 child: Column(
                   children: [
                     // Top header card (was fixed, now scrolls)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 60),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 72),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(22),
