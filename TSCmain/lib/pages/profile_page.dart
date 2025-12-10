@@ -98,7 +98,7 @@ class ProfilePage extends StatelessWidget {
             // Body (scrollable)
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8).copyWith(bottom: 120),
                 child: Column(
                   children: [
                     // My Account Section
@@ -124,18 +124,69 @@ class ProfilePage extends StatelessWidget {
                     ),
 
                     // Settings & Support Section
-                    ProfileSection(
-                      title: 'Settings & App',
-                      children: [
-                        profileOptionTile(context, Icons.notifications_none, 'Notifications', onTap: () {/* notifications */}),
-                        profileOptionTile(context, Icons.language, 'Language', onTap: () {/* language */}),
-                        profileOptionTile(context, Icons.color_lens_outlined, 'Theme', onTap: () {/* theme */}),
-                        profileOptionTile(context, Icons.help_outline, 'Help Center', onTap: () {/* help */}),
-                        profileOptionTile(context, Icons.phone_in_talk_outlined, 'Contact Support', onTap: () {/* contact */}),
-                        profileOptionTile(context, Icons.info_outline, 'Terms & Conditions', onTap: () {/* terms */}),
-                        profileOptionTile(context, Icons.privacy_tip_outlined, 'Privacy Policy', onTap: () {/* privacy */}),
-                        profileOptionTile(context, Icons.system_update_alt, 'App Version', subtitle: '1.0.0', onTap: () {/* version */}),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 18.0, bottom: 6),
+                            child: Text(
+                              "Settings & App",
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                boxShadow: const [
+                                  BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+                                ],
+                              ),
+                              child: ExpansionTile(
+                                title: Text("Settings", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.pink.shade900)),
+                                iconColor: Colors.pink.shade600,
+                                collapsedIconColor: Colors.black26,
+                                childrenPadding: const EdgeInsets.only(bottom: 12),
+                                children: [
+                                  profileOptionTile(context, Icons.notifications_none, 'Notifications'),
+                                  profileOptionTile(context, Icons.language, 'Language'),
+                                  profileOptionTile(context, Icons.color_lens_outlined, 'Theme'),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                boxShadow: const [
+                                  BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+                                ],
+                              ),
+                              child: ExpansionTile(
+                                title: Text("Support & About", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.pink.shade900)),
+                                iconColor: Colors.pink.shade600,
+                                collapsedIconColor: Colors.black26,
+                                childrenPadding: const EdgeInsets.only(bottom: 12),
+                                children: [
+                                  profileOptionTile(context, Icons.help_outline, 'Help Center'),
+                                  profileOptionTile(context, Icons.phone_in_talk_outlined, 'Contact Support'),
+                                  profileOptionTile(context, Icons.info_outline, 'Terms & Conditions'),
+                                  profileOptionTile(context, Icons.privacy_tip_outlined, 'Privacy Policy'),
+                                  profileOptionTile(context, Icons.system_update_alt, 'App Version', subtitle: '1.0.0'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
 
                     const SizedBox(height: 28), // breathing room above logout
@@ -157,7 +208,7 @@ class ProfilePage extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                   onPressed: () {
-                    // TODO: log out action
+                    Navigator.pushReplacementNamed(context, "/login");
                   },
                   child: Text('Log Out', style: TextStyle(color: _accent, fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
