@@ -196,7 +196,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      _orderStatus('Pending', Icons.hourglass_bottom),
+                                      _orderStatus('Processing', Icons.hourglass_bottom),
                                       _orderStatus('Shipped', Icons.local_shipping),
                                       _orderStatus('Delivered', Icons.check_circle_outline),
                                       _orderStatus('Cancelled', Icons.cancel_outlined),
