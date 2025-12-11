@@ -330,11 +330,43 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                       ),
                     ),
 
-                    // ======= Privacy Policies (single option) =======
+                    // ======= Privacy Policies (expansion tile version) =======
                     ProfileSection(
                       title: 'Privacy & Policies',
                       children: [
-                        profileOptionTile(context, Icons.policy, 'Privacy & Policies', onTap: () {/* open policies page */}),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 6),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0,3))],
+                            ),
+                            child: ExpansionTile(
+                              title: Text(
+                                'Privacy & Policies',
+                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.pink.shade900),
+                              ),
+                              iconColor: Colors.pink.shade600,
+                              collapsedIconColor: Colors.black26,
+                              childrenPadding: const EdgeInsets.only(bottom: 12),
+                              children: [
+                                profileOptionTile(context, Icons.privacy_tip, 'Privacy Policy'),
+                                profileOptionTile(context, Icons.article_outlined, 'Terms & Conditions'),
+                                profileOptionTile(context, Icons.assignment_return, 'Return & Refund Policy'),
+                                profileOptionTile(context, Icons.local_shipping_outlined, 'Shipping / Delivery Policy'),
+                                profileOptionTile(context, Icons.cancel_outlined, 'Cancellation Policy'),
+                                profileOptionTile(context, Icons.payment, 'Payment Policy'),
+                                profileOptionTile(context, Icons.cookie_outlined, 'Cookie Policy'),
+                                profileOptionTile(context, Icons.person_outline, 'User Account Policy'),
+                                profileOptionTile(context, Icons.copyright, 'Content & Copyright Policy'),
+                                profileOptionTile(context, Icons.security_outlined, 'Safety & Security Policy'),
+                                profileOptionTile(context, Icons.support_agent, 'Support & Complaint Policy'),
+                                profileOptionTile(context, Icons.store_mall_directory_outlined, 'Seller Policy'),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
 
