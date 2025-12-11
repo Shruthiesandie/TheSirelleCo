@@ -232,12 +232,12 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                 curve: Curves.easeOut,
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.pink.shade50,
+                                  color: Colors.white,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(color: Colors.pink.shade300, width: 1),
-                                  boxShadow: [
+                                  boxShadow: const [
                                     BoxShadow(
-                                      color: Colors.pink.shade100.withOpacity(0.6),
+                                      color: Colors.black12,
                                       blurRadius: 6,
                                       offset: Offset(0, 3),
                                     ),
