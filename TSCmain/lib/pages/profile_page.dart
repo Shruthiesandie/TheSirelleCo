@@ -193,23 +193,27 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                 const Divider(height: 1),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 12),
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      children: [
-                                        _orderStatus('Processing', Icons.hourglass_bottom),
-                                        const SizedBox(width: 14),
-                                        _orderStatus('Shipped', Icons.local_shipping),
-                                        const SizedBox(width: 14),
-                                        _orderStatus('Delivered', Icons.check_circle_outline),
-                                        const SizedBox(width: 14),
-                                        _orderStatus('Cancelled', Icons.cancel_outlined),
-                                        const SizedBox(width: 14),
-                                        _orderStatus('Returned', Icons.undo),
-                                        const SizedBox(width: 14),
-                                        _orderStatus('Unpaid', Icons.payments_outlined),
-                                        const SizedBox(width: 6),
-                                      ],
+                                  child: SizedBox(
+                                    width: 300, // Adjusted viewport to show exactly 4 items
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      physics: BouncingScrollPhysics(),
+                                      child: Row(
+                                        children: [
+                                          _orderStatus('Processing', Icons.hourglass_bottom),
+                                          const SizedBox(width: 14),
+                                          _orderStatus('Shipped', Icons.local_shipping),
+                                          const SizedBox(width: 14),
+                                          _orderStatus('Delivered', Icons.check_circle_outline),
+                                          const SizedBox(width: 14),
+                                          _orderStatus('Cancelled', Icons.cancel_outlined),
+                                          const SizedBox(width: 14),
+                                          _orderStatus('Returned', Icons.undo),
+                                          const SizedBox(width: 14),
+                                          _orderStatus('Unpaid', Icons.payments_outlined),
+                                          const SizedBox(width: 6),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -219,38 +223,41 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                         ),
                         Padding(
                           padding: const EdgeInsets.only(left: 18.0, top: 6),
-                          child: GestureDetector(
-                            onTap: () {/* open tracking page */},
-                            child: AnimatedContainer(
-                              duration: Duration(milliseconds: 180),
-                              curve: Curves.easeOut,
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.pink.shade50,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.pink.shade300, width: 1),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.pink.shade100.withOpacity(0.6),
-                                    blurRadius: 6,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.map_outlined, size: 18, color: Colors.pink.shade700),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Track Order',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.pink.shade700,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: GestureDetector(
+                              onTap: () {/* open tracking page */},
+                              child: AnimatedContainer(
+                                duration: Duration(milliseconds: 180),
+                                curve: Curves.easeOut,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.pink.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.pink.shade300, width: 1),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.pink.shade100.withOpacity(0.6),
+                                      blurRadius: 6,
+                                      offset: Offset(0, 3),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.map_outlined, size: 18, color: Colors.pink.shade700),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Track Order',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.pink.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -456,13 +463,13 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     return Column(
       children: [
         Container(
-          height: 52,
-          width: 52,
+          height: 64,
+          width: 64,
           decoration: BoxDecoration(
             color: Colors.pink.shade100,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(icon, color: Colors.pink.shade700, size: 26),
+          child: Icon(icon, color: Colors.pink.shade700, size: 32),
         ),
         const SizedBox(height: 8),
         Text(label, style: const TextStyle(fontSize: 12)),
