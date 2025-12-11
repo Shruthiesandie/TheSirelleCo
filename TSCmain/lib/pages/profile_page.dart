@@ -233,12 +233,12 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.pink.shade300, width: 1),
-                                  boxShadow: const [
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 6,
+                                      color: Colors.black.withOpacity(0.08),
+                                      blurRadius: 10,
+                                      spreadRadius: 1,
                                       offset: Offset(0, 3),
                                     ),
                                   ],
