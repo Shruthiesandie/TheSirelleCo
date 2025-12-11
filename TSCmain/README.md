@@ -1,7 +1,7 @@
 # sirelle
 
 A new Flutter project.
-
+The Sirelle Co
 ## Getting Started
 
 This project is a starting point for a Flutter application.
