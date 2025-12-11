@@ -76,7 +76,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 72),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                         decoration: BoxDecoration(
                           color: Colors.white,              // SAME as other tiles
                           borderRadius: BorderRadius.circular(20),
@@ -145,8 +145,6 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                 _smallStat('Orders', '0'),
                                 const SizedBox(width: 12),
                                 _smallStat('Wishlist', '0'),
-                                const SizedBox(width: 12),
-                                _smallStat('Coupons', '0'),
                               ],
                             ),
                           ],
@@ -161,7 +159,6 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                       title: 'My Account',
                       children: [
                         profileOptionTile(context, Icons.person_outline, 'Profile', onTap: () {/* open profile details */}),
-                        profileOptionTile(context, Icons.card_giftcard, 'Coupons', onTap: () {/* open coupons */}),
                         profileOptionTile(context, Icons.location_on_outlined, 'Addresses', onTap: () {/* addresses */}),
                         profileOptionTile(context, Icons.favorite_border, 'Saved Items / Wishlist', onTap: () {/* wishlist */}),
                         profileOptionTile(context, Icons.shopping_cart_outlined, 'Cart Shortcut', onTap: () {/* cart */}),
