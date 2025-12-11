@@ -222,9 +222,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 18.0, top: 6),
+                          padding: const EdgeInsets.only(top: 6),
                           child: Align(
-                            alignment: Alignment.centerLeft,
+                            alignment: Alignment.center,
                             child: GestureDetector(
                               onTap: () {/* open tracking page */},
                               child: AnimatedContainer(
