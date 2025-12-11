@@ -196,6 +196,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
+                                      _orderStatus('Unpaid', Icons.payments_outlined),
                                       _orderStatus('Processing', Icons.hourglass_bottom),
                                       _orderStatus('Shipped', Icons.local_shipping),
                                       _orderStatus('Delivered', Icons.check_circle_outline),
@@ -204,30 +205,36 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                     ],
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 12, right: 12),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: _accent,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                        ),
-                                        onPressed: () {
-                                          // track order action
-                                        },
-                                        icon: const Icon(Icons.map_outlined, size: 18),
-                                        label: const Text('Track Order'),
-                                      )
-                                    ],
-                                  ),
-                                )
                               ],
                             ),
                           ),
                         ),
                       ],
+                    ),
+                    // Track Order tile below My Orders box
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 6),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0,3))],
+                        ),
+                        child: ListTile(
+                          leading: Container(
+                            height: 44,
+                            width: 44,
+                            decoration: BoxDecoration(
+                              color: Colors.pink.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(Icons.map_outlined, color: Colors.pink.shade700),
+                          ),
+                          title: Text('Track Order', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.pink.shade900)),
+                          trailing: const Icon(Icons.chevron_right, color: Colors.black26),
+                          onTap: () {/* open tracking page */},
+                        ),
+                      ),
                     ),
 
 
@@ -427,10 +434,13 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     return Column(
       children: [
         Container(
-          height: 40,
-          width: 40,
-          decoration: BoxDecoration(color: _muted, borderRadius: BorderRadius.circular(10)),
-          child: Icon(icon, color: _accent, size: 20),
+          height: 52,
+          width: 52,
+          decoration: BoxDecoration(
+            color: Colors.pink.shade100,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, color: Colors.pink.shade700, size: 26),
         ),
         const SizedBox(height: 8),
         Text(label, style: const TextStyle(fontSize: 12)),
