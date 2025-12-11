@@ -193,16 +193,43 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                 const Divider(height: 1),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 12),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      _orderStatus('Unpaid', Icons.payments_outlined),
-                                      _orderStatus('Processing', Icons.hourglass_bottom),
-                                      _orderStatus('Shipped', Icons.local_shipping),
-                                      _orderStatus('Delivered', Icons.check_circle_outline),
-                                      _orderStatus('Cancelled', Icons.cancel_outlined),
-                                      _orderStatus('Returned', Icons.undo),
-                                    ],
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: [
+                                        _orderStatus('Processing', Icons.hourglass_bottom),
+                                        const SizedBox(width: 14),
+                                        _orderStatus('Shipped', Icons.local_shipping),
+                                        const SizedBox(width: 14),
+                                        _orderStatus('Delivered', Icons.check_circle_outline),
+                                        const SizedBox(width: 14),
+                                        _orderStatus('Cancelled', Icons.cancel_outlined),
+                                        const SizedBox(width: 14),
+                                        _orderStatus('Returned', Icons.undo),
+                                        const SizedBox(width: 14),
+                                        _orderStatus('Unpaid', Icons.payments_outlined),
+                                        const SizedBox(width: 6),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 18.0, top: 4),
+                                  child: SizedBox(
+                                    height: 32,
+                                    child: OutlinedButton.icon(
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        side: BorderSide(color: Colors.pink.shade600, width: 1),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      ),
+                                      onPressed: () {/* open tracking page */},
+                                      icon: Icon(Icons.map_outlined, size: 16, color: Colors.pink.shade600),
+                                      label: Text(
+                                        'Track Order',
+                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.pink.shade600),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -211,31 +238,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                         ),
                       ],
                     ),
-                    // Track Order tile below My Orders box
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 6),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0,3))],
-                        ),
-                        child: ListTile(
-                          leading: Container(
-                            height: 44,
-                            width: 44,
-                            decoration: BoxDecoration(
-                              color: Colors.pink.shade100,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(Icons.map_outlined, color: Colors.pink.shade700),
-                          ),
-                          title: Text('Track Order', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.pink.shade900)),
-                          trailing: const Icon(Icons.chevron_right, color: Colors.black26),
-                          onTap: () {/* open tracking page */},
-                        ),
-                      ),
-                    ),
+
 
 
                     // ======= Address & Delivery =======
