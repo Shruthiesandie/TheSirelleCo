@@ -160,7 +160,6 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                       children: [
                         profileOptionTile(context, Icons.person_outline, 'Profile', onTap: () {/* open profile details */}),
                         profileOptionTile(context, Icons.location_on_outlined, 'Addresses', onTap: () {/* addresses */}),
-                        profileOptionTile(context, Icons.favorite_border, 'Saved Items / Wishlist', onTap: () {/* wishlist */}),
                         profileOptionTile(context, Icons.shopping_cart_outlined, 'Cart Shortcut', onTap: () {/* cart */}),
                         profileOptionTile(context, Icons.account_balance_wallet_outlined, 'Payments / Wallet', onTap: () {/* wallet */}),
                       ],
@@ -232,14 +231,6 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                       ],
                     ),
 
-                    // ======= Wishlist / Recently Viewed =======
-                    ProfileSection(
-                      title: 'Wishlist',
-                      children: [
-                        profileOptionTile(context, Icons.favorite_border, 'Saved Items', onTap: () {/* saved */}),
-                        profileOptionTile(context, Icons.history_toggle_off, 'Recently Viewed', onTap: () {/* recently viewed */}),
-                      ],
-                    ),
 
                     // ======= Address & Delivery =======
                     ProfileSection(
