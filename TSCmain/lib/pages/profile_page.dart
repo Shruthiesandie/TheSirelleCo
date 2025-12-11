@@ -161,7 +161,6 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                         profileOptionTile(context, Icons.person_outline, 'Profile', onTap: () {/* open profile details */}),
                         profileOptionTile(context, Icons.location_on_outlined, 'Addresses', onTap: () {/* addresses */}),
                         profileOptionTile(context, Icons.shopping_cart_outlined, 'Cart Shortcut', onTap: () {/* cart */}),
-                        profileOptionTile(context, Icons.account_balance_wallet_outlined, 'Payments / Wallet', onTap: () {/* wallet */}),
                       ],
                     ),
 
@@ -245,6 +244,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                       title: 'Payment',
                       children: [
                         profileOptionTile(context, Icons.payment, 'Payment Methods', onTap: () {/* open payment manager */}),
+                        profileOptionTile(context, Icons.account_balance_wallet_outlined, 'Payments / Wallet', onTap: () {/* wallet */}),
                       ],
                     ),
 
