@@ -213,26 +213,45 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                     ),
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 18.0, top: 4),
-                                  child: SizedBox(
-                                    height: 32,
-                                    child: OutlinedButton.icon(
-                                      style: OutlinedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                                        side: BorderSide(color: Colors.pink.shade600, width: 1),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                      ),
-                                      onPressed: () {/* open tracking page */},
-                                      icon: Icon(Icons.map_outlined, size: 16, color: Colors.pink.shade600),
-                                      label: Text(
-                                        'Track Order',
-                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.pink.shade600),
-                                      ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 18.0, top: 6),
+                          child: GestureDetector(
+                            onTap: () {/* open tracking page */},
+                            child: AnimatedContainer(
+                              duration: Duration(milliseconds: 180),
+                              curve: Curves.easeOut,
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.pink.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.pink.shade300, width: 1),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.pink.shade100.withOpacity(0.6),
+                                    blurRadius: 6,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.map_outlined, size: 18, color: Colors.pink.shade700),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Track Order',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.pink.shade700,
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
