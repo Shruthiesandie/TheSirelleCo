@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'splash/splash_screen.dart';
 
 // Pages
@@ -15,16 +16,11 @@ import 'pages/username_page.dart';
 
 
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    final manifest = await DefaultAssetBundle.of(
-      WidgetsBinding.instance.rootElement!,
-    ).loadString('AssetManifest.json');
-
+    final manifest = await rootBundle.loadString('AssetManifest.json');
     debugPrint(
       'ASSET CHECK (hair band): ${manifest.contains(
         "assets/images/all_categories/hair_accessories/h2/band1.webp",
