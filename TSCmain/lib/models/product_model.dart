@@ -18,13 +18,22 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    String normalize(String path) {
+      if (path.startsWith('assets/')) {
+        return path.replaceFirst('assets/', '');
+      }
+      return path;
+    }
+
     return Product(
       id: json['id'],
       name: json['name'],
       category: json['category'],
       price: (json['price'] as num).toDouble(),
-      mainImage: json['mainImage'],
-      images: List<String>.from(json['images']),
+      mainImage: normalize(json['mainImage']),
+      images: (json['images'] as List)
+          .map((e) => normalize(e as String))
+          .toList(),
       description: json['description'],
     );
   }
