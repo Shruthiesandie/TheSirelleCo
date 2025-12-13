@@ -20,14 +20,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    final manifest = await rootBundle.loadString('AssetManifest.json');
-    debugPrint(
-      'ASSET CHECK (hair band): ${manifest.contains(
-        "assets/images/all_categories/hair_accessories/h2/band1.webp",
-      )}',
+    await rootBundle.load(
+      'assets/images/all_categories/hair_accessories/h2/band1.webp',
     );
+    debugPrint('ASSET CHECK (hair band): LOADED ✅');
   } catch (e) {
-    debugPrint('ASSET MANIFEST LOAD ERROR: $e');
+    debugPrint('ASSET CHECK (hair band): FAILED ❌ -> $e');
   }
 
   runApp(const MyApp());
