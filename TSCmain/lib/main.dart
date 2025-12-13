@@ -19,17 +19,18 @@ Future<void> dumpAssetManifest() async {
   final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
   final assets = manifest.listAssets();
 
+  print('📦 TOTAL ASSETS: ${assets.length}');
+
   final filtered = assets
-      .where((a) => a.contains('assets/images/all_categories'))
+      .where((a) => a.contains('images/all_categories'))
       .take(30)
       .toList();
 
-  print('📦 ASSETS FOUND (${filtered.length}):');
+  print('📦 ALL_CATEGORIES ASSETS (${filtered.length}):');
   for (final a in filtered) {
     print(a);
   }
-}
-void main() async {
+}void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dumpAssetManifest();
   runApp(const MyApp());
