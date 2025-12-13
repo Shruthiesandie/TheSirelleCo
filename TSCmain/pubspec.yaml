@@ -43,5 +43,5 @@ flutter:
     - assets/splash/splash.png
     - assets/logo/logo.png
     - assets/animation/login_character.riv
-    - assets/images/all_categories/
+    - assets/images/
     - assets/data/
