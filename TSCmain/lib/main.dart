@@ -16,7 +16,9 @@ import 'pages/username_page.dart';
 
 Future<void> dumpAssetManifest() async {
   final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-  final keys = manifest.keys
+
+  final keys = manifest
+      .listAssets()
       .where((k) => k.contains('all_categories'))
       .take(30)
       .toList();
