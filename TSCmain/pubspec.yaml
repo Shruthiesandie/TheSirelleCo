@@ -44,3 +44,4 @@ flutter:
     - assets/logo/logo.png
     - assets/animation/login_character.riv
     - packages/country_icons/icons/flags/png/
+    - assets/images/
