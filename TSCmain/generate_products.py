@@ -1,7 +1,7 @@
 import os
 import json
 
-BASE_DIR = "assets/images/all_categories"
+BASE_DIR = "assets/images/"
 OUTPUT_FILE = "assets/data/products.json"
 PRICE = 999
 
