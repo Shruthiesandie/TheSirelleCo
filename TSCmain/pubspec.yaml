@@ -43,6 +43,5 @@ flutter:
     - assets/splash/splash.png
     - assets/logo/logo.png
     - assets/animation/login_character.riv
-    - packages/country_icons/icons/flags/png/
     - assets/images/all_categories/
     - assets/data/
