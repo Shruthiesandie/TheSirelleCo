@@ -4,7 +4,7 @@
     "name": "B1",
     "category": "bottles",
     "price": 999,
-    "mainImage": "assets/images//bottles/b1/bottle.jpg",
+    "mainImage": "assets/images/bottles/b1/bottle.jpg",
     "images": [
       "assets/images/bottles/b1/bdiff1/bottle11.jpg",
       "assets/images/bottles/b1/bdiff1/bottle12.png",
@@ -17,11 +17,11 @@
     "name": "B2",
     "category": "bottles",
     "price": 999,
-    "mainImage": "assets/images//bottles/b2/bottle2.png",
+    "mainImage": "assets/images/bottles/b2/bottle2.png",
     "images": [
-      "assets/images/bottles/b2/bdiff2/bottle21.png",
       "assets/images/bottles/b2/bdiff2/bottle22.png",
-      "assets/images/bottles/b2/bdiff2/bottle23.png"
+      "assets/images/bottles/b2/bdiff2/bottle23.png",
+      "assets/images/bottles/b2/bdiff2/bottle21.png"
     ],
     "description": "b2 from bottles"
   },
@@ -30,11 +30,11 @@
     "name": "B3",
     "category": "bottles",
     "price": 999,
-    "mainImage": "assets/images//bottles/b3/bottle3.png",
+    "mainImage": "assets/images/bottles/b3/bottle3.png",
     "images": [
       "assets/images/bottles/b3/bdiff3/bottle31.png",
-      "assets/images/bottles/b3/bdiff3/bottle32.png",
-      "assets/images/bottles/b3/bdiff3/bottle33.png"
+      "assets/images/bottles/b3/bdiff3/bottle33.png",
+      "assets/images/bottles/b3/bdiff3/bottle32.png"
     ],
     "description": "b3 from bottles"
   },
@@ -43,7 +43,7 @@
     "name": "B4",
     "category": "bottles",
     "price": 999,
-    "mainImage": "assets/images//bottles/b4/bottle4.png",
+    "mainImage": "assets/images/bottles/b4/bottle4.png",
     "images": [
       "assets/images/bottles/b4/bdiff4/bottle41.png",
       "assets/images/bottles/b4/bdiff4/bottle42.png",
@@ -56,11 +56,11 @@
     "name": "B5",
     "category": "bottles",
     "price": 999,
-    "mainImage": "assets/images//bottles/b5/bottle5.png",
+    "mainImage": "assets/images/bottles/b5/bottle5.png",
     "images": [
-      "assets/images/bottles/b5/bdiff5/bottle51.png",
+      "assets/images/bottles/b5/bdiff5/bottle53.png",
       "assets/images/bottles/b5/bdiff5/bottle52.png",
-      "assets/images/bottles/b5/bdiff5/bottle53.png"
+      "assets/images/bottles/b5/bdiff5/bottle51.png"
     ],
     "description": "b5 from bottles"
   },
@@ -69,11 +69,11 @@
     "name": "B6",
     "category": "bottles",
     "price": 999,
-    "mainImage": "assets/images//bottles/b6/bottle61.png",
+    "mainImage": "assets/images/bottles/b6/bottle61.png",
     "images": [
       "assets/images/bottles/b6/bdiff6/bottle61.png",
-      "assets/images/bottles/b6/bdiff6/bottle62.png",
-      "assets/images/bottles/b6/bdiff6/bottle63.png"
+      "assets/images/bottles/b6/bdiff6/bottle63.png",
+      "assets/images/bottles/b6/bdiff6/bottle62.png"
     ],
     "description": "b6 from bottles"
   },
@@ -82,11 +82,11 @@
     "name": "B7",
     "category": "bottles",
     "price": 999,
-    "mainImage": "assets/images//bottles/b7/bottle7.jpg",
+    "mainImage": "assets/images/bottles/b7/bottle7.jpg",
     "images": [
-      "assets/images/bottles/b7/bdiff7/bottle71.jpg",
       "assets/images/bottles/b7/bdiff7/bottle72.jpg",
-      "assets/images/bottles/b7/bdiff7/bottle73.jpg"
+      "assets/images/bottles/b7/bdiff7/bottle73.jpg",
+      "assets/images/bottles/b7/bdiff7/bottle71.jpg"
     ],
     "description": "b7 from bottles"
   },
@@ -95,11 +95,11 @@
     "name": "B8",
     "category": "bottles",
     "price": 999,
-    "mainImage": "assets/images//bottles/b8/bottle8.png",
+    "mainImage": "assets/images/bottles/b8/bottle8.png",
     "images": [
-      "assets/images/bottles/b8/bdiff8/bottle81.png",
       "assets/images/bottles/b8/bdiff8/bottle82.png",
-      "assets/images/bottles/b8/bdiff8/bottle83.png"
+      "assets/images/bottles/b8/bdiff8/bottle83.png",
+      "assets/images/bottles/b8/bdiff8/bottle81.png"
     ],
     "description": "b8 from bottles"
   },
@@ -108,11 +108,11 @@
     "name": "C1",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c1/glass1.jpg",
+    "mainImage": "assets/images/candle/c1/glass1.jpg",
     "images": [
       "assets/images/candle/c1/cdiff1/glass11.jpg",
-      "assets/images/candle/c1/cdiff1/glass12.jpg",
-      "assets/images/candle/c1/cdiff1/glass13.jpg"
+      "assets/images/candle/c1/cdiff1/glass13.jpg",
+      "assets/images/candle/c1/cdiff1/glass12.jpg"
     ],
     "description": "c1 from candle"
   },
@@ -121,11 +121,11 @@
     "name": "C10",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c10/cake2.jpg",
+    "mainImage": "assets/images/candle/c10/cake2.jpg",
     "images": [
       "assets/images/candle/c10/cdiff10/cake21.jpg",
-      "assets/images/candle/c10/cdiff10/cake22.jpg",
-      "assets/images/candle/c10/cdiff10/cake23.jpg"
+      "assets/images/candle/c10/cdiff10/cake23.jpg",
+      "assets/images/candle/c10/cdiff10/cake22.jpg"
     ],
     "description": "c10 from candle"
   },
@@ -134,11 +134,11 @@
     "name": "C11",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c11/cake3.jpg",
+    "mainImage": "assets/images/candle/c11/cake3.jpg",
     "images": [
-      "assets/images/candle/c11/cdiff11/cake31.jpg",
       "assets/images/candle/c11/cdiff11/cake32.jpg",
-      "assets/images/candle/c11/cdiff11/cake33.jpg"
+      "assets/images/candle/c11/cdiff11/cake33.jpg",
+      "assets/images/candle/c11/cdiff11/cake31.jpg"
     ],
     "description": "c11 from candle"
   },
@@ -147,11 +147,11 @@
     "name": "C12",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c12/glass5.jpg",
+    "mainImage": "assets/images/candle/c12/glass5.jpg",
     "images": [
-      "assets/images/candle/c12/cdiff12/glass51.jpg",
       "assets/images/candle/c12/cdiff12/glass52.jpg",
-      "assets/images/candle/c12/cdiff12/glass53.jpg"
+      "assets/images/candle/c12/cdiff12/glass53.jpg",
+      "assets/images/candle/c12/cdiff12/glass51.jpg"
     ],
     "description": "c12 from candle"
   },
@@ -160,11 +160,11 @@
     "name": "C13",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c13/cake4.jpg",
+    "mainImage": "assets/images/candle/c13/cake4.jpg",
     "images": [
-      "assets/images/candle/c13/cdiff13/cake41.jpg",
+      "assets/images/candle/c13/cdiff13/cake43.jpg",
       "assets/images/candle/c13/cdiff13/cake42.jpg",
-      "assets/images/candle/c13/cdiff13/cake43.jpg"
+      "assets/images/candle/c13/cdiff13/cake41.jpg"
     ],
     "description": "c13 from candle"
   },
@@ -173,7 +173,7 @@
     "name": "C14",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c14/cake5.jpg",
+    "mainImage": "assets/images/candle/c14/cake5.jpg",
     "images": [
       "assets/images/candle/c14/cdiff14/cake51.jpg",
       "assets/images/candle/c14/cdiff14/cake52.jpg",
@@ -186,7 +186,7 @@
     "name": "C15",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c15/glass6.jpg",
+    "mainImage": "assets/images/candle/c15/glass6.jpg",
     "images": [
       "assets/images/candle/c15/cdiff15/glass61.jpg",
       "assets/images/candle/c15/cdiff15/glass62.jpg",
@@ -199,11 +199,11 @@
     "name": "C16",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c16/cake6.jpg",
+    "mainImage": "assets/images/candle/c16/cake6.jpg",
     "images": [
-      "assets/images/candle/c16/cdiff16/cake61.jpg",
       "assets/images/candle/c16/cdiff16/cake62.jpg",
-      "assets/images/candle/c16/cdiff16/cake63.jpg"
+      "assets/images/candle/c16/cdiff16/cake63.jpg",
+      "assets/images/candle/c16/cdiff16/cake61.jpg"
     ],
     "description": "c16 from candle"
   },
@@ -212,11 +212,11 @@
     "name": "C17",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c17/cake7.jpg",
+    "mainImage": "assets/images/candle/c17/cake7.jpg",
     "images": [
       "assets/images/candle/c17/cdiff17/cake71.jpg",
-      "assets/images/candle/c17/cdiff17/cake72.jpg",
-      "assets/images/candle/c17/cdiff17/cake73.jpg"
+      "assets/images/candle/c17/cdiff17/cake73.jpg",
+      "assets/images/candle/c17/cdiff17/cake72.jpg"
     ],
     "description": "c17 from candle"
   },
@@ -225,11 +225,11 @@
     "name": "C18",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c18/cake8.jpg",
+    "mainImage": "assets/images/candle/c18/cake8.jpg",
     "images": [
       "assets/images/candle/c18/cdiff18/cake81.jpg",
-      "assets/images/candle/c18/cdiff18/cake82.jpg",
-      "assets/images/candle/c18/cdiff18/cake83.jpg"
+      "assets/images/candle/c18/cdiff18/cake83.jpg",
+      "assets/images/candle/c18/cdiff18/cake82.jpg"
     ],
     "description": "c18 from candle"
   },
@@ -238,11 +238,11 @@
     "name": "C19",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c19/cake9.jpg",
+    "mainImage": "assets/images/candle/c19/cake9.jpg",
     "images": [
-      "assets/images/candle/c19/cdiff19/cake91.jpg",
       "assets/images/candle/c19/cdiff19/cake92.jpg",
-      "assets/images/candle/c19/cdiff19/cake93.jpg"
+      "assets/images/candle/c19/cdiff19/cake93.jpg",
+      "assets/images/candle/c19/cdiff19/cake91.jpg"
     ],
     "description": "c19 from candle"
   },
@@ -251,11 +251,11 @@
     "name": "C2",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c2/glass2.jpg",
+    "mainImage": "assets/images/candle/c2/glass2.jpg",
     "images": [
-      "assets/images/candle/c2/cdiff2/glass21.jpg",
+      "assets/images/candle/c2/cdiff2/glass23.jpg",
       "assets/images/candle/c2/cdiff2/glass22.jpg",
-      "assets/images/candle/c2/cdiff2/glass23.jpg"
+      "assets/images/candle/c2/cdiff2/glass21.jpg"
     ],
     "description": "c2 from candle"
   },
@@ -264,11 +264,11 @@
     "name": "C20",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c20/cake10.jpg",
+    "mainImage": "assets/images/candle/c20/cake10.jpg",
     "images": [
-      "assets/images/candle/c20/cdiff20/cake101.jpg",
+      "assets/images/candle/c20/cdiff20/cake103.jpg",
       "assets/images/candle/c20/cdiff20/cake102.jpg",
-      "assets/images/candle/c20/cdiff20/cake103.jpg"
+      "assets/images/candle/c20/cdiff20/cake101.jpg"
     ],
     "description": "c20 from candle"
   },
@@ -277,7 +277,7 @@
     "name": "C21",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c21/cake11.jpg",
+    "mainImage": "assets/images/candle/c21/cake11.jpg",
     "images": [
       "assets/images/candle/c21/cdiff21/cake111.jpg",
       "assets/images/candle/c21/cdiff21/cake112.jpg",
@@ -290,11 +290,11 @@
     "name": "C22",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c22/cake12.jpg",
+    "mainImage": "assets/images/candle/c22/cake12.jpg",
     "images": [
-      "assets/images/candle/c22/cdiff22/cake121.jpg",
       "assets/images/candle/c22/cdiff22/cake122.jpg",
-      "assets/images/candle/c22/cdiff22/cake123.jpg"
+      "assets/images/candle/c22/cdiff22/cake123.jpg",
+      "assets/images/candle/c22/cdiff22/cake121.jpg"
     ],
     "description": "c22 from candle"
   },
@@ -303,11 +303,11 @@
     "name": "C23",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c23/cake13.jpg",
+    "mainImage": "assets/images/candle/c23/cake13.jpg",
     "images": [
       "assets/images/candle/c23/cdiff23/cake131.jpg",
-      "assets/images/candle/c23/cdiff23/cake132.jpg",
-      "assets/images/candle/c23/cdiff23/cake133.jpg"
+      "assets/images/candle/c23/cdiff23/cake133.jpg",
+      "assets/images/candle/c23/cdiff23/cake132.jpg"
     ],
     "description": "c23 from candle"
   },
@@ -316,11 +316,11 @@
     "name": "C3",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c3/cake1.jpg",
+    "mainImage": "assets/images/candle/c3/cake1.jpg",
     "images": [
-      "assets/images/candle/c3/cdiff3/cake11.jpg",
+      "assets/images/candle/c3/cdiff3/cake13.jpg",
       "assets/images/candle/c3/cdiff3/cake12.jpg",
-      "assets/images/candle/c3/cdiff3/cake13.jpg"
+      "assets/images/candle/c3/cdiff3/cake11.jpg"
     ],
     "description": "c3 from candle"
   },
@@ -329,7 +329,7 @@
     "name": "C4",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c4/glass3.jpg",
+    "mainImage": "assets/images/candle/c4/glass3.jpg",
     "images": [
       "assets/images/candle/c4/cdiff4/glass31.jpg",
       "assets/images/candle/c4/cdiff4/glass32.jpg",
@@ -342,11 +342,11 @@
     "name": "C5",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c5/macarron.jpg",
+    "mainImage": "assets/images/candle/c5/macarron.jpg",
     "images": [
       "assets/images/candle/c5/cdiff5/macarron1.jpg",
-      "assets/images/candle/c5/cdiff5/macarron2.jpg",
-      "assets/images/candle/c5/cdiff5/macarron3.jpg"
+      "assets/images/candle/c5/cdiff5/macarron3.jpg",
+      "assets/images/candle/c5/cdiff5/macarron2.jpg"
     ],
     "description": "c5 from candle"
   },
@@ -355,7 +355,7 @@
     "name": "C6",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c6/popcorn.jpg",
+    "mainImage": "assets/images/candle/c6/popcorn.jpg",
     "images": [
       "assets/images/candle/c6/cdiff6/popcorn1.jpg",
       "assets/images/candle/c6/cdiff6/popcorn2.jpg",
@@ -368,11 +368,11 @@
     "name": "C7",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c7/crossaint.jpg",
+    "mainImage": "assets/images/candle/c7/crossaint.jpg",
     "images": [
-      "assets/images/candle/c7/cdiff6/crossaint1.jpg",
       "assets/images/candle/c7/cdiff6/crossaint2.jpg",
-      "assets/images/candle/c7/cdiff6/crossaint3.jpg"
+      "assets/images/candle/c7/cdiff6/crossaint3.jpg",
+      "assets/images/candle/c7/cdiff6/crossaint1.jpg"
     ],
     "description": "c7 from candle"
   },
@@ -381,11 +381,11 @@
     "name": "C8",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c8/lemon.jpg",
+    "mainImage": "assets/images/candle/c8/lemon.jpg",
     "images": [
       "assets/images/candle/c8/cdiff8/lemon1.jpg",
-      "assets/images/candle/c8/cdiff8/lemon2.jpg",
-      "assets/images/candle/c8/cdiff8/lemon3.jpg"
+      "assets/images/candle/c8/cdiff8/lemon3.jpg",
+      "assets/images/candle/c8/cdiff8/lemon2.jpg"
     ],
     "description": "c8 from candle"
   },
@@ -394,11 +394,11 @@
     "name": "C9",
     "category": "candle",
     "price": 999,
-    "mainImage": "assets/images//candle/c9/glass4.jpg",
+    "mainImage": "assets/images/candle/c9/glass4.jpg",
     "images": [
       "assets/images/candle/c9/cdiff9/glass41.jpg",
-      "assets/images/candle/c9/cdiff9/glass42.jpg",
-      "assets/images/candle/c9/cdiff9/glass43.jpg"
+      "assets/images/candle/c9/cdiff9/glass43.jpg",
+      "assets/images/candle/c9/cdiff9/glass42.jpg"
     ],
     "description": "c9 from candle"
   },
@@ -407,11 +407,11 @@
     "name": "CA1",
     "category": "caps",
     "price": 999,
-    "mainImage": "assets/images//caps/ca1/cap1.jpg",
+    "mainImage": "assets/images/caps/ca1/cap1.jpg",
     "images": [
-      "assets/images/caps/ca1/cadiff1/cap11.jpg",
+      "assets/images/caps/ca1/cadiff1/cap13.jpg",
       "assets/images/caps/ca1/cadiff1/cap12.jpg",
-      "assets/images/caps/ca1/cadiff1/cap13.jpg"
+      "assets/images/caps/ca1/cadiff1/cap11.jpg"
     ],
     "description": "ca1 from caps"
   },
@@ -420,11 +420,11 @@
     "name": "CA2",
     "category": "caps",
     "price": 999,
-    "mainImage": "assets/images//caps/ca2/cap2.jpg",
+    "mainImage": "assets/images/caps/ca2/cap2.jpg",
     "images": [
       "assets/images/caps/ca2/cadiff2/cap21.jpg",
-      "assets/images/caps/ca2/cadiff2/cap22.jpg",
-      "assets/images/caps/ca2/cadiff2/cap23.jpg"
+      "assets/images/caps/ca2/cadiff2/cap23.jpg",
+      "assets/images/caps/ca2/cadiff2/cap22.jpg"
     ],
     "description": "ca2 from caps"
   },
@@ -433,11 +433,11 @@
     "name": "CA3",
     "category": "caps",
     "price": 999,
-    "mainImage": "assets/images//caps/ca3/cap3.png",
+    "mainImage": "assets/images/caps/ca3/cap3.png",
     "images": [
-      "assets/images/caps/ca3/cadiff3/cap31.png",
       "assets/images/caps/ca3/cadiff3/cap32.png",
-      "assets/images/caps/ca3/cadiff3/cap33.png"
+      "assets/images/caps/ca3/cadiff3/cap33.png",
+      "assets/images/caps/ca3/cadiff3/cap31.png"
     ],
     "description": "ca3 from caps"
   },
@@ -446,11 +446,11 @@
     "name": "CA4",
     "category": "caps",
     "price": 999,
-    "mainImage": "assets/images//caps/ca4/cap4.png",
+    "mainImage": "assets/images/caps/ca4/cap4.png",
     "images": [
-      "assets/images/caps/ca4/cadiff4/cap41.png",
+      "assets/images/caps/ca4/cadiff4/cap43.jpg",
       "assets/images/caps/ca4/cadiff4/cap42.png",
-      "assets/images/caps/ca4/cadiff4/cap43.jpg"
+      "assets/images/caps/ca4/cadiff4/cap41.png"
     ],
     "description": "ca4 from caps"
   },
@@ -459,7 +459,7 @@
     "name": "CA5",
     "category": "caps",
     "price": 999,
-    "mainImage": "assets/images//caps/ca5/cap5.jpg",
+    "mainImage": "assets/images/caps/ca5/cap5.jpg",
     "images": [
       "assets/images/caps/ca5/cadiff5/cap51.jpg",
       "assets/images/caps/ca5/cadiff5/cap52.jpg",
@@ -472,11 +472,11 @@
     "name": "CA6",
     "category": "caps",
     "price": 999,
-    "mainImage": "assets/images//caps/ca6/cap6.png",
+    "mainImage": "assets/images/caps/ca6/cap6.png",
     "images": [
-      "assets/images/caps/ca6/cadiff6/cap61.jpg",
       "assets/images/caps/ca6/cadiff6/cap62.png",
-      "assets/images/caps/ca6/cadiff6/cap63.png"
+      "assets/images/caps/ca6/cadiff6/cap63.png",
+      "assets/images/caps/ca6/cadiff6/cap61.jpg"
     ],
     "description": "ca6 from caps"
   },
@@ -485,11 +485,11 @@
     "name": "CA7",
     "category": "caps",
     "price": 999,
-    "mainImage": "assets/images//caps/ca7/cap7.jpg",
+    "mainImage": "assets/images/caps/ca7/cap7.jpg",
     "images": [
       "assets/images/caps/ca7/cadiff7/cap71.jpg",
-      "assets/images/caps/ca7/cadiff7/cap72.jpg",
-      "assets/images/caps/ca7/cadiff7/cap73.jpg"
+      "assets/images/caps/ca7/cadiff7/cap73.jpg",
+      "assets/images/caps/ca7/cadiff7/cap72.jpg"
     ],
     "description": "ca7 from caps"
   },
@@ -498,11 +498,11 @@
     "name": "CA8",
     "category": "caps",
     "price": 999,
-    "mainImage": "assets/images//caps/ca8/cap8.jpg",
+    "mainImage": "assets/images/caps/ca8/cap8.jpg",
     "images": [
       "assets/images/caps/ca8/cadiff8/cap81.jpg",
-      "assets/images/caps/ca8/cadiff8/cap82.jpg",
-      "assets/images/caps/ca8/cadiff8/cap83.jpg"
+      "assets/images/caps/ca8/cadiff8/cap83.jpg",
+      "assets/images/caps/ca8/cadiff8/cap82.jpg"
     ],
     "description": "ca8 from caps"
   },
@@ -511,11 +511,11 @@
     "name": "CE1",
     "category": "ceramic",
     "price": 999,
-    "mainImage": "assets/images//ceramic/ce1/cup1.jpg",
+    "mainImage": "assets/images/ceramic/ce1/cup1.jpg",
     "images": [
-      "assets/images/ceramic/ce1/cediff1/cup11.jpg",
       "assets/images/ceramic/ce1/cediff1/cup12.jpg",
-      "assets/images/ceramic/ce1/cediff1/cup13.jpg"
+      "assets/images/ceramic/ce1/cediff1/cup13.jpg",
+      "assets/images/ceramic/ce1/cediff1/cup11.jpg"
     ],
     "description": "ce1 from ceramic"
   },
@@ -524,7 +524,7 @@
     "name": "CE2",
     "category": "ceramic",
     "price": 999,
-    "mainImage": "assets/images//ceramic/ce2/cup2.jpg",
+    "mainImage": "assets/images/ceramic/ce2/cup2.jpg",
     "images": [
       "assets/images/ceramic/ce2/cediff2/cup21.jpg",
       "assets/images/ceramic/ce2/cediff2/cup22.jpg",
@@ -537,11 +537,11 @@
     "name": "CE3",
     "category": "ceramic",
     "price": 999,
-    "mainImage": "assets/images//ceramic/ce3/cup3.jpg",
+    "mainImage": "assets/images/ceramic/ce3/cup3.jpg",
     "images": [
-      "assets/images/ceramic/ce3/cediff3/cup31.jpg",
+      "assets/images/ceramic/ce3/cediff3/cup33.jpg",
       "assets/images/ceramic/ce3/cediff3/cup32.jpg",
-      "assets/images/ceramic/ce3/cediff3/cup33.jpg"
+      "assets/images/ceramic/ce3/cediff3/cup31.jpg"
     ],
     "description": "ce3 from ceramic"
   },
@@ -550,7 +550,7 @@
     "name": "CE4",
     "category": "ceramic",
     "price": 999,
-    "mainImage": "assets/images//ceramic/ce4/cup4.webp",
+    "mainImage": "assets/images/ceramic/ce4/cup4.webp",
     "images": [
       "assets/images/ceramic/ce4/cediff4/cup41.webp",
       "assets/images/ceramic/ce4/cediff4/cup42.webp",
@@ -563,11 +563,11 @@
     "name": "CE5",
     "category": "ceramic",
     "price": 999,
-    "mainImage": "assets/images//ceramic/ce5/cup5.jpg",
+    "mainImage": "assets/images/ceramic/ce5/cup5.jpg",
     "images": [
       "assets/images/ceramic/ce5/cediff5/cup51.jpg",
-      "assets/images/ceramic/ce5/cediff5/cup52.jpg",
-      "assets/images/ceramic/ce5/cediff5/cup53.jpg"
+      "assets/images/ceramic/ce5/cediff5/cup53.jpg",
+      "assets/images/ceramic/ce5/cediff5/cup52.jpg"
     ],
     "description": "ce5 from ceramic"
   },
@@ -576,11 +576,11 @@
     "name": "CE6",
     "category": "ceramic",
     "price": 999,
-    "mainImage": "assets/images//ceramic/ce6/cup6.jpg",
+    "mainImage": "assets/images/ceramic/ce6/cup6.jpg",
     "images": [
-      "assets/images/ceramic/ce6/cediff6/cup61.jpg",
+      "assets/images/ceramic/ce6/cediff6/cup63.jpg",
       "assets/images/ceramic/ce6/cediff6/cup62.jpg",
-      "assets/images/ceramic/ce6/cediff6/cup63.jpg"
+      "assets/images/ceramic/ce6/cediff6/cup61.jpg"
     ],
     "description": "ce6 from ceramic"
   },
@@ -589,7 +589,7 @@
     "name": "CE7",
     "category": "ceramic",
     "price": 999,
-    "mainImage": "assets/images//ceramic/ce7/cup7.jpg",
+    "mainImage": "assets/images/ceramic/ce7/cup7.jpg",
     "images": [
       "assets/images/ceramic/ce7/cediff7/cup71.jpg",
       "assets/images/ceramic/ce7/cediff7/cup72.jpg",
@@ -602,7 +602,7 @@
     "name": "CE8",
     "category": "ceramic",
     "price": 999,
-    "mainImage": "assets/images//ceramic/ce8/cup8.jpg",
+    "mainImage": "assets/images/ceramic/ce8/cup8.jpg",
     "images": [
       "assets/images/ceramic/ce8/cediff8/cup81.jpg",
       "assets/images/ceramic/ce8/cediff8/cup82.jpg",
@@ -615,11 +615,11 @@
     "name": "H1",
     "category": "hair_accessories",
     "price": 999,
-    "mainImage": "assets/images//hair_accessories/h1/bearband.webp",
+    "mainImage": "assets/images/hair_accessories/h1/bearband.webp",
     "images": [
-      "assets/images/hair_accessories/h1/hdiff1/bearband1.webp",
       "assets/images/hair_accessories/h1/hdiff1/bearband2.webp",
-      "assets/images/hair_accessories/h1/hdiff1/bearband3.webp"
+      "assets/images/hair_accessories/h1/hdiff1/bearband3.webp",
+      "assets/images/hair_accessories/h1/hdiff1/bearband1.webp"
     ],
     "description": "h1 from hair_accessories"
   },
@@ -628,11 +628,11 @@
     "name": "H2",
     "category": "hair_accessories",
     "price": 999,
-    "mainImage": "assets/images//hair_accessories/h2/band1.webp",
+    "mainImage": "assets/images/hair_accessories/h2/band1.webp",
     "images": [
       "assets/images/hair_accessories/h2/hdiff2/band11.webp",
-      "assets/images/hair_accessories/h2/hdiff2/band12.webp",
-      "assets/images/hair_accessories/h2/hdiff2/band13.webp"
+      "assets/images/hair_accessories/h2/hdiff2/band13.webp",
+      "assets/images/hair_accessories/h2/hdiff2/band12.webp"
     ],
     "description": "h2 from hair_accessories"
   },
@@ -641,11 +641,11 @@
     "name": "H3",
     "category": "hair_accessories",
     "price": 999,
-    "mainImage": "assets/images//hair_accessories/h3/clip.jpg",
+    "mainImage": "assets/images/hair_accessories/h3/clip.jpg",
     "images": [
-      "assets/images/hair_accessories/h3/hdiff3/clip1.jpg",
       "assets/images/hair_accessories/h3/hdiff3/clip2.jpg",
-      "assets/images/hair_accessories/h3/hdiff3/clip3.jpg"
+      "assets/images/hair_accessories/h3/hdiff3/clip3.jpg",
+      "assets/images/hair_accessories/h3/hdiff3/clip1.jpg"
     ],
     "description": "h3 from hair_accessories"
   },
@@ -654,11 +654,11 @@
     "name": "H4",
     "category": "hair_accessories",
     "price": 999,
-    "mainImage": "assets/images//hair_accessories/h4/crown.jpg",
+    "mainImage": "assets/images/hair_accessories/h4/crown.jpg",
     "images": [
-      "assets/images/hair_accessories/h4/hdiff4/crown1.jpg",
       "assets/images/hair_accessories/h4/hdiff4/crown2.jpg",
-      "assets/images/hair_accessories/h4/hdiff4/crown3.jpg"
+      "assets/images/hair_accessories/h4/hdiff4/crown3.jpg",
+      "assets/images/hair_accessories/h4/hdiff4/crown1.jpg"
     ],
     "description": "h4 from hair_accessories"
   },
@@ -667,11 +667,11 @@
     "name": "H5",
     "category": "hair_accessories",
     "price": 999,
-    "mainImage": "assets/images//hair_accessories/h5/band2.jpg",
+    "mainImage": "assets/images/hair_accessories/h5/band2.jpg",
     "images": [
       "assets/images/hair_accessories/h5/hdiff5/band21.jpg",
-      "assets/images/hair_accessories/h5/hdiff5/band22.jpg",
-      "assets/images/hair_accessories/h5/hdiff5/band23.jpg"
+      "assets/images/hair_accessories/h5/hdiff5/band23.jpg",
+      "assets/images/hair_accessories/h5/hdiff5/band22.jpg"
     ],
     "description": "h5 from hair_accessories"
   },
@@ -680,11 +680,11 @@
     "name": "H6",
     "category": "hair_accessories",
     "price": 999,
-    "mainImage": "assets/images//hair_accessories/h6/clutch.jpg",
+    "mainImage": "assets/images/hair_accessories/h6/clutch.jpg",
     "images": [
-      "assets/images/hair_accessories/h6/hdiff6/clutch1.jpg",
+      "assets/images/hair_accessories/h6/hdiff6/clutch3.jpg",
       "assets/images/hair_accessories/h6/hdiff6/clutch2.jpg",
-      "assets/images/hair_accessories/h6/hdiff6/clutch3.jpg"
+      "assets/images/hair_accessories/h6/hdiff6/clutch1.jpg"
     ],
     "description": "h6 from hair_accessories"
   },
@@ -693,11 +693,11 @@
     "name": "H7",
     "category": "hair_accessories",
     "price": 999,
-    "mainImage": "assets/images//hair_accessories/h7/band3.webp",
+    "mainImage": "assets/images/hair_accessories/h7/band3.webp",
     "images": [
       "assets/images/hair_accessories/h7/hdiff7/band31.webp",
-      "assets/images/hair_accessories/h7/hdiff7/band32.webp",
-      "assets/images/hair_accessories/h7/hdiff7/band33.webp"
+      "assets/images/hair_accessories/h7/hdiff7/band33.webp",
+      "assets/images/hair_accessories/h7/hdiff7/band32.webp"
     ],
     "description": "h7 from hair_accessories"
   },
@@ -706,11 +706,11 @@
     "name": "H8",
     "category": "hair_accessories",
     "price": 999,
-    "mainImage": "assets/images//hair_accessories/h8/clutch2.jpg",
+    "mainImage": "assets/images/hair_accessories/h8/clutch2.jpg",
     "images": [
-      "assets/images/hair_accessories/h8/hdiff8/clutch21.jpg",
+      "assets/images/hair_accessories/h8/hdiff8/clutch23.jpg",
       "assets/images/hair_accessories/h8/hdiff8/clutch22.jpg",
-      "assets/images/hair_accessories/h8/hdiff8/clutch23.jpg"
+      "assets/images/hair_accessories/h8/hdiff8/clutch21.jpg"
     ],
     "description": "h8 from hair_accessories"
   },
@@ -719,11 +719,11 @@
     "name": "K1",
     "category": "key_chain",
     "price": 999,
-    "mainImage": "assets/images//key_chain/k1/star.jpg",
+    "mainImage": "assets/images/key_chain/k1/star.jpg",
     "images": [
       "assets/images/key_chain/k1/kdiff1/star1.jpg",
-      "assets/images/key_chain/k1/kdiff1/star2.jpg",
-      "assets/images/key_chain/k1/kdiff1/star3.jpg"
+      "assets/images/key_chain/k1/kdiff1/star3.jpg",
+      "assets/images/key_chain/k1/kdiff1/star2.jpg"
     ],
     "description": "k1 from key_chain"
   },
@@ -732,11 +732,11 @@
     "name": "K2",
     "category": "key_chain",
     "price": 999,
-    "mainImage": "assets/images//key_chain/k2/idbag.jpg",
+    "mainImage": "assets/images/key_chain/k2/idbag.jpg",
     "images": [
-      "assets/images/key_chain/k2/kdiff2/idbag1.jpg",
       "assets/images/key_chain/k2/kdiff2/idbag2.jpg",
-      "assets/images/key_chain/k2/kdiff2/idbag3.jpg"
+      "assets/images/key_chain/k2/kdiff2/idbag3.jpg",
+      "assets/images/key_chain/k2/kdiff2/idbag1.jpg"
     ],
     "description": "k2 from key_chain"
   },
@@ -745,7 +745,7 @@
     "name": "K3",
     "category": "key_chain",
     "price": 999,
-    "mainImage": "assets/images//key_chain/k3/catkey.jpg",
+    "mainImage": "assets/images/key_chain/k3/catkey.jpg",
     "images": [
       "assets/images/key_chain/k3/kdiff3/catkey1.jpg",
       "assets/images/key_chain/k3/kdiff3/catkey2.jpg",
@@ -758,7 +758,7 @@
     "name": "K4",
     "category": "key_chain",
     "price": 999,
-    "mainImage": "assets/images//key_chain/k4/dogkey.jpg",
+    "mainImage": "assets/images/key_chain/k4/dogkey.jpg",
     "images": [
       "assets/images/key_chain/k4/kdiff4/dogkey1.jpg",
       "assets/images/key_chain/k4/kdiff4/dogkey2.jpg",
@@ -771,11 +771,11 @@
     "name": "K5",
     "category": "key_chain",
     "price": 999,
-    "mainImage": "assets/images//key_chain/k5/teddykey.jpg",
+    "mainImage": "assets/images/key_chain/k5/teddykey.jpg",
     "images": [
-      "assets/images/key_chain/k5/kdiff5/teddykey1.jpg",
+      "assets/images/key_chain/k5/kdiff5/teddykey3.jpg",
       "assets/images/key_chain/k5/kdiff5/teddykey2.jpg",
-      "assets/images/key_chain/k5/kdiff5/teddykey3.jpg"
+      "assets/images/key_chain/k5/kdiff5/teddykey1.jpg"
     ],
     "description": "k5 from key_chain"
   },
@@ -784,11 +784,11 @@
     "name": "K6",
     "category": "key_chain",
     "price": 999,
-    "mainImage": "assets/images//key_chain/k6/teddyman.jpg",
+    "mainImage": "assets/images/key_chain/k6/teddyman.jpg",
     "images": [
-      "assets/images/key_chain/k6/kdiff6/teddyman1.jpg",
+      "assets/images/key_chain/k6/kdiff6/teddyman3.jpg",
       "assets/images/key_chain/k6/kdiff6/teddyman2.jpg",
-      "assets/images/key_chain/k6/kdiff6/teddyman3.jpg"
+      "assets/images/key_chain/k6/kdiff6/teddyman1.jpg"
     ],
     "description": "k6 from key_chain"
   },
@@ -797,11 +797,11 @@
     "name": "K7",
     "category": "key_chain",
     "price": 999,
-    "mainImage": "assets/images//key_chain/k7/cattykey.jpg",
+    "mainImage": "assets/images/key_chain/k7/cattykey.jpg",
     "images": [
-      "assets/images/key_chain/k7/kdiff7/cattykey1.jpg",
+      "assets/images/key_chain/k7/kdiff7/cattykey3.jpg",
       "assets/images/key_chain/k7/kdiff7/cattykey2.jpg",
-      "assets/images/key_chain/k7/kdiff7/cattykey3.jpg"
+      "assets/images/key_chain/k7/kdiff7/cattykey1.jpg"
     ],
     "description": "k7 from key_chain"
   },
@@ -810,11 +810,11 @@
     "name": "K8",
     "category": "key_chain",
     "price": 999,
-    "mainImage": "assets/images//key_chain/k8/alpa.jpg",
+    "mainImage": "assets/images/key_chain/k8/alpa.jpg",
     "images": [
-      "assets/images/key_chain/k8/kdiff8/alpa1.jpg",
+      "assets/images/key_chain/k8/kdiff8/alpa3.jpg",
       "assets/images/key_chain/k8/kdiff8/alpa2.jpg",
-      "assets/images/key_chain/k8/kdiff8/alpa3.jpg"
+      "assets/images/key_chain/k8/kdiff8/alpa1.jpg"
     ],
     "description": "k8 from key_chain"
   },
@@ -823,7 +823,7 @@
     "name": "1",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/1/letter1.jpg",
+    "mainImage": "assets/images/letter/1/letter1.jpg",
     "images": [],
     "description": "1 from letter"
   },
@@ -832,7 +832,7 @@
     "name": "10",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/10/letter10.jpg",
+    "mainImage": "assets/images/letter/10/letter10.jpg",
     "images": [],
     "description": "10 from letter"
   },
@@ -841,7 +841,7 @@
     "name": "11",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/11/letter11.jpg",
+    "mainImage": "assets/images/letter/11/letter11.jpg",
     "images": [],
     "description": "11 from letter"
   },
@@ -850,7 +850,7 @@
     "name": "12",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/12/letter12.jpg",
+    "mainImage": "assets/images/letter/12/letter12.jpg",
     "images": [],
     "description": "12 from letter"
   },
@@ -859,7 +859,7 @@
     "name": "13",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/13/letter13.jpg",
+    "mainImage": "assets/images/letter/13/letter13.jpg",
     "images": [],
     "description": "13 from letter"
   },
@@ -868,7 +868,7 @@
     "name": "14",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/14/letter14.jpg",
+    "mainImage": "assets/images/letter/14/letter14.jpg",
     "images": [],
     "description": "14 from letter"
   },
@@ -877,7 +877,7 @@
     "name": "15",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/15/letter15.jpg",
+    "mainImage": "assets/images/letter/15/letter15.jpg",
     "images": [],
     "description": "15 from letter"
   },
@@ -886,7 +886,7 @@
     "name": "16",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/16/letter16.jpg",
+    "mainImage": "assets/images/letter/16/letter16.jpg",
     "images": [],
     "description": "16 from letter"
   },
@@ -895,7 +895,7 @@
     "name": "17",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/17/letter17.jpg",
+    "mainImage": "assets/images/letter/17/letter17.jpg",
     "images": [],
     "description": "17 from letter"
   },
@@ -904,7 +904,7 @@
     "name": "18",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/18/letter18.jpg",
+    "mainImage": "assets/images/letter/18/letter18.jpg",
     "images": [],
     "description": "18 from letter"
   },
@@ -913,7 +913,7 @@
     "name": "19",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/19/letter19.jpg",
+    "mainImage": "assets/images/letter/19/letter19.jpg",
     "images": [],
     "description": "19 from letter"
   },
@@ -922,7 +922,7 @@
     "name": "2",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/2/letter2.jpg",
+    "mainImage": "assets/images/letter/2/letter2.jpg",
     "images": [],
     "description": "2 from letter"
   },
@@ -931,8 +931,10 @@
     "name": "20",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/20/letter20.jpg",
-    "images": [],
+    "mainImage": "assets/images/letter/20/letter23.jpg",
+    "images": [
+      "assets/images/letter/20/letter20.jpg"
+    ],
     "description": "20 from letter"
   },
   {
@@ -940,7 +942,7 @@
     "name": "21",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/21/letter21.jpg",
+    "mainImage": "assets/images/letter/21/letter21.jpg",
     "images": [],
     "description": "21 from letter"
   },
@@ -949,7 +951,7 @@
     "name": "22",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/22/letter22.jpg",
+    "mainImage": "assets/images/letter/22/letter22.jpg",
     "images": [],
     "description": "22 from letter"
   },
@@ -958,7 +960,7 @@
     "name": "3",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/3/letter3.jpg",
+    "mainImage": "assets/images/letter/3/letter3.jpg",
     "images": [],
     "description": "3 from letter"
   },
@@ -967,7 +969,7 @@
     "name": "4",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/4/letter4.jpg",
+    "mainImage": "assets/images/letter/4/letter4.jpg",
     "images": [],
     "description": "4 from letter"
   },
@@ -976,7 +978,7 @@
     "name": "5",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/5/letter5.jpg",
+    "mainImage": "assets/images/letter/5/letter5.jpg",
     "images": [],
     "description": "5 from letter"
   },
@@ -985,7 +987,7 @@
     "name": "6",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/6/letter6.jpg",
+    "mainImage": "assets/images/letter/6/letter6.jpg",
     "images": [],
     "description": "6 from letter"
   },
@@ -994,7 +996,7 @@
     "name": "7",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/7/letter7.jpg",
+    "mainImage": "assets/images/letter/7/letter7.jpg",
     "images": [],
     "description": "7 from letter"
   },
@@ -1003,7 +1005,7 @@
     "name": "8",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/8/letter8.jpg",
+    "mainImage": "assets/images/letter/8/letter8.jpg",
     "images": [],
     "description": "8 from letter"
   },
@@ -1012,7 +1014,7 @@
     "name": "9",
     "category": "letter",
     "price": 999,
-    "mainImage": "assets/images//letter/9/img_2345.jpg",
+    "mainImage": "assets/images/letter/9/img_2345.jpg",
     "images": [],
     "description": "9 from letter"
   },
@@ -1021,11 +1023,11 @@
     "name": "N1",
     "category": "nails",
     "price": 999,
-    "mainImage": "assets/images//nails/n1/nail1.jpg",
+    "mainImage": "assets/images/nails/n1/nail1.jpg",
     "images": [
       "assets/images/nails/n1/ndiff1/nail11.jpg",
-      "assets/images/nails/n1/ndiff1/nail12.jpg",
-      "assets/images/nails/n1/ndiff1/nail13.jpg"
+      "assets/images/nails/n1/ndiff1/nail13.jpg",
+      "assets/images/nails/n1/ndiff1/nail12.jpg"
     ],
     "description": "n1 from nails"
   },
@@ -1034,11 +1036,11 @@
     "name": "N2",
     "category": "nails",
     "price": 999,
-    "mainImage": "assets/images//nails/n2/nail2.jpg",
+    "mainImage": "assets/images/nails/n2/nail2.jpg",
     "images": [
-      "assets/images/nails/n2/ndiff2/nail21.jpg",
+      "assets/images/nails/n2/ndiff2/nail23.jpg",
       "assets/images/nails/n2/ndiff2/nail22.jpg",
-      "assets/images/nails/n2/ndiff2/nail23.jpg"
+      "assets/images/nails/n2/ndiff2/nail21.jpg"
     ],
     "description": "n2 from nails"
   },
@@ -1047,7 +1049,7 @@
     "name": "N3",
     "category": "nails",
     "price": 999,
-    "mainImage": "assets/images//nails/n3/nail3.jpg",
+    "mainImage": "assets/images/nails/n3/nail3.jpg",
     "images": [
       "assets/images/nails/n3/ndiff3/nail31.jpg",
       "assets/images/nails/n3/ndiff3/nail32.jpg",
@@ -1060,11 +1062,11 @@
     "name": "N4",
     "category": "nails",
     "price": 999,
-    "mainImage": "assets/images//nails/n4/nail4.jpg",
+    "mainImage": "assets/images/nails/n4/nail4.jpg",
     "images": [
       "assets/images/nails/n4/ndiff4/nail41.jpg",
-      "assets/images/nails/n4/ndiff4/nail42.jpg",
-      "assets/images/nails/n4/ndiff4/nail43.jpg"
+      "assets/images/nails/n4/ndiff4/nail43.jpg",
+      "assets/images/nails/n4/ndiff4/nail42.jpg"
     ],
     "description": "n4 from nails"
   },
@@ -1073,11 +1075,11 @@
     "name": "N5",
     "category": "nails",
     "price": 999,
-    "mainImage": "assets/images//nails/n5/nail5.jpg",
+    "mainImage": "assets/images/nails/n5/nail5.jpg",
     "images": [
-      "assets/images/nails/n5/ndiff5/nail51.jpg",
       "assets/images/nails/n5/ndiff5/nail52.jpg",
-      "assets/images/nails/n5/ndiff5/nail53.jpg"
+      "assets/images/nails/n5/ndiff5/nail53.jpg",
+      "assets/images/nails/n5/ndiff5/nail51.jpg"
     ],
     "description": "n5 from nails"
   },
@@ -1086,7 +1088,7 @@
     "name": "N6",
     "category": "nails",
     "price": 999,
-    "mainImage": "assets/images//nails/n6/nail6.jpg",
+    "mainImage": "assets/images/nails/n6/nail6.jpg",
     "images": [
       "assets/images/nails/n6/ndiff6/nail61.jpg",
       "assets/images/nails/n6/ndiff6/nail62.jpg",
@@ -1099,11 +1101,11 @@
     "name": "N7",
     "category": "nails",
     "price": 999,
-    "mainImage": "assets/images//nails/n7/nail7.jpg",
+    "mainImage": "assets/images/nails/n7/nail7.jpg",
     "images": [
-      "assets/images/nails/n7/ndiff7/nail71.jpg",
+      "assets/images/nails/n7/ndiff7/nail73.jpg",
       "assets/images/nails/n7/ndiff7/nail72.jpg",
-      "assets/images/nails/n7/ndiff7/nail73.jpg"
+      "assets/images/nails/n7/ndiff7/nail71.jpg"
     ],
     "description": "n7 from nails"
   },
@@ -1112,11 +1114,11 @@
     "name": "N8",
     "category": "nails",
     "price": 999,
-    "mainImage": "assets/images//nails/n8/nail8.jpg",
+    "mainImage": "assets/images/nails/n8/nail8.jpg",
     "images": [
-      "assets/images/nails/n8/ndiff8/nail81.jpg",
+      "assets/images/nails/n8/ndiff8/nail83.jpg",
       "assets/images/nails/n8/ndiff8/nail82.jpg",
-      "assets/images/nails/n8/ndiff8/nail83.jpg"
+      "assets/images/nails/n8/ndiff8/nail81.jpg"
     ],
     "description": "n8 from nails"
   },
@@ -1125,7 +1127,7 @@
     "name": "P1",
     "category": "plusie",
     "price": 999,
-    "mainImage": "assets/images//plusie/p1/cat.jpg",
+    "mainImage": "assets/images/plusie/p1/cat.jpg",
     "images": [
       "assets/images/plusie/p1/diff1/cat1.jpg",
       "assets/images/plusie/p1/diff1/cat2.jpg",
@@ -1138,7 +1140,7 @@
     "name": "P2",
     "category": "plusie",
     "price": 999,
-    "mainImage": "assets/images//plusie/p2/dino.jpg",
+    "mainImage": "assets/images/plusie/p2/dino.jpg",
     "images": [
       "assets/images/plusie/p2/diff2/dino1.jpg",
       "assets/images/plusie/p2/diff2/dino2.jpg",
@@ -1151,11 +1153,11 @@
     "name": "P3",
     "category": "plusie",
     "price": 999,
-    "mainImage": "assets/images//plusie/p3/deer.jpg",
+    "mainImage": "assets/images/plusie/p3/deer.jpg",
     "images": [
       "assets/images/plusie/p3/untitled folder/deer1.jpg",
-      "assets/images/plusie/p3/untitled folder/deer2.jpg",
-      "assets/images/plusie/p3/untitled folder/deer3.jpg"
+      "assets/images/plusie/p3/untitled folder/deer3.jpg",
+      "assets/images/plusie/p3/untitled folder/deer2.jpg"
     ],
     "description": "p3 from plusie"
   },
@@ -1164,11 +1166,11 @@
     "name": "P4",
     "category": "plusie",
     "price": 999,
-    "mainImage": "assets/images//plusie/p4/horn.jpg",
+    "mainImage": "assets/images/plusie/p4/horn.jpg",
     "images": [
-      "assets/images/plusie/p4/diff4/horn1.jpg",
+      "assets/images/plusie/p4/diff4/horn3.jpg",
       "assets/images/plusie/p4/diff4/horn2.jpg",
-      "assets/images/plusie/p4/diff4/horn3.jpg"
+      "assets/images/plusie/p4/diff4/horn1.jpg"
     ],
     "description": "p4 from plusie"
   },
@@ -1177,11 +1179,11 @@
     "name": "P5",
     "category": "plusie",
     "price": 999,
-    "mainImage": "assets/images//plusie/p5/rabbit.jpg",
+    "mainImage": "assets/images/plusie/p5/rabbit.jpg",
     "images": [
-      "assets/images/plusie/p5/diff5/rabbit1.jpg",
+      "assets/images/plusie/p5/diff5/rabbit3.jpg",
       "assets/images/plusie/p5/diff5/rabbit2.jpg",
-      "assets/images/plusie/p5/diff5/rabbit3.jpg"
+      "assets/images/plusie/p5/diff5/rabbit1.jpg"
     ],
     "description": "p5 from plusie"
   },
@@ -1190,11 +1192,11 @@
     "name": "P6",
     "category": "plusie",
     "price": 999,
-    "mainImage": "assets/images//plusie/p6/racoon.jpg",
+    "mainImage": "assets/images/plusie/p6/racoon.jpg",
     "images": [
-      "assets/images/plusie/p6/diff6/racoon1.jpg",
+      "assets/images/plusie/p6/diff6/racooon3.jpg",
       "assets/images/plusie/p6/diff6/racoon2.jpg",
-      "assets/images/plusie/p6/diff6/racooon3.jpg"
+      "assets/images/plusie/p6/diff6/racoon1.jpg"
     ],
     "description": "p6 from plusie"
   },
@@ -1203,11 +1205,11 @@
     "name": "P7",
     "category": "plusie",
     "price": 999,
-    "mainImage": "assets/images//plusie/p7/doggy.jpg",
+    "mainImage": "assets/images/plusie/p7/doggy.jpg",
     "images": [
-      "assets/images/plusie/p7/diff7/doggy1.jpg",
       "assets/images/plusie/p7/diff7/doggy2.jpg",
-      "assets/images/plusie/p7/diff7/doggy3.jpg"
+      "assets/images/plusie/p7/diff7/doggy3.jpg",
+      "assets/images/plusie/p7/diff7/doggy1.jpg"
     ],
     "description": "p7 from plusie"
   },
@@ -1216,11 +1218,11 @@
     "name": "P8",
     "category": "plusie",
     "price": 999,
-    "mainImage": "assets/images//plusie/p8/rabbitfruit.jpg",
+    "mainImage": "assets/images/plusie/p8/rabbitfruit.jpg",
     "images": [
       "assets/images/plusie/p8/untitled folder/rabbitfruit1.jpg",
-      "assets/images/plusie/p8/untitled folder/rabbitfruit2.jpg",
-      "assets/images/plusie/p8/untitled folder/rabbitfruit3.jpg"
+      "assets/images/plusie/p8/untitled folder/rabbitfruit3.jpg",
+      "assets/images/plusie/p8/untitled folder/rabbitfruit2.jpg"
     ],
     "description": "p8 from plusie"
   }
