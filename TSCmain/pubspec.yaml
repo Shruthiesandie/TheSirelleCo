@@ -39,7 +39,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/all_categories/
+    - assets/images/
     - assets/data/
     - assets/logo/
     - assets/splash/
