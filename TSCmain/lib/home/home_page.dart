@@ -13,6 +13,8 @@ import '../widgets/top_bar/home_top_bar.dart';
 import '../widgets/bottom_nav/home_bottom_nav_bar.dart';
 import '../widgets/drawer/home_drawer.dart';
 
+import '../services/product_service.dart';
+import '../widgets/product/product_card.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 

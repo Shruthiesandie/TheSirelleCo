@@ -12,6 +12,9 @@ import 'pages/allcategories_page.dart';
 import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
+import 'services/product_service.dart';
+import 'widgets/product/product_card.dart';
+
 
 
 
