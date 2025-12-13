@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage>
 
     // Build the tab pages, including callback for AllCategories
     screens = [
-      const Center(child: Text("Home Page")),
+      _buildHomeProducts(),
       const Center(child: Text("Favourite Page")),
       AllCategoriesPage(
         onBackToHome: () {
@@ -141,6 +141,37 @@ class _HomePageState extends State<HomePage>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildHomeProducts() {
+    return FutureBuilder(
+      future: ProductService.loadProducts(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text("No products found"));
+        }
+
+        final products = snapshot.data!;
+
+        return GridView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 0.65,
+          ),
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            return ProductCard(product: products[index]);
+          },
+        );
+      },
     );
   }
 
