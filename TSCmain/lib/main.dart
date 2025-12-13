@@ -14,18 +14,18 @@ import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
+
 Future<void> dumpAssetManifest() async {
   final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
 
-  final keys = manifest
+  final assets = manifest
       .listAssets()
-      .where((k) => k.contains('all_categories'))
-      .take(30)
+      .where((a) => a.contains('all_categories'))
       .toList();
 
-  print('📦 ASSETS FOUND (${keys.length} shown):');
-  for (final k in keys) {
-    print(k);
+  debugPrint('📦 ASSETS FOUND (${assets.length}):');
+  for (final a in assets.take(30)) {
+    debugPrint(a);
   }
 }
 
