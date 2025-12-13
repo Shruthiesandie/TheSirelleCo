@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:convert';
 import 'splash/splash_screen.dart';
 
 // Pages
@@ -14,22 +15,29 @@ import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
-Future<void> debugAssetCheck() async {
+Future<void> dumpAssetManifest() async {
   try {
-    await rootBundle.load(
-      'assets/images/all_categories/bottles/b1/bottle.jpg',
-    );
-    debugPrint('✅ ASSET EXISTS');
+    final manifestContent =
+        await rootBundle.loadString('AssetManifest.json');
+    final manifestMap = json.decode(manifestContent) as Map<String, dynamic>;
+
+    final keys = manifestMap.keys
+        .where((k) => k.contains('all_categories'))
+        .take(30)
+        .toList();
+
+    print('📦 ASSETS FOUND (${keys.length} shown):');
+    for (final k in keys) {
+      print(k);
+    }
   } catch (e) {
-    debugPrint('❌ ASSET MISSING: $e');
+    print('❌ FAILED TO LOAD AssetManifest.json: $e');
   }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await debugAssetCheck();
-
+  await dumpAssetManifest();
   runApp(const MyApp());
 }
 
