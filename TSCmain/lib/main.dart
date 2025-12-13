@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'splash/splash_screen.dart';
 
 // Pages
@@ -14,21 +13,6 @@ import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
-
-Future<void> dumpSomeAssets() async {
-  final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-  final assets = manifest.listAssets();
-
-  print('📦 FIRST 50 ASSETS:');
-  for (final a in assets.take(50)) {
-    print(a);
-  }
-}
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await dumpSomeAssets();
-  runApp(const MyApp());
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
