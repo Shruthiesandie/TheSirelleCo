@@ -14,19 +14,21 @@ import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
-
+Future<void> debugAssetCheck() async {
+  try {
+    await rootBundle.load(
+      'assets/images/all_categories/bottles/b1/bottle.jpg',
+    );
+    debugPrint('✅ ASSET EXISTS');
+  } catch (e) {
+    debugPrint('❌ ASSET MISSING: $e');
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await rootBundle.load(
-      'assets/images/all_categories/hair_accessories/h2/band1.webp',
-    );
-    debugPrint('ASSET CHECK (hair band): LOADED ✅');
-  } catch (e) {
-    debugPrint('ASSET CHECK (hair band): FAILED ❌ -> $e');
-  }
+  await debugAssetCheck();
 
   runApp(const MyApp());
 }
