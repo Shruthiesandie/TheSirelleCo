@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:convert';
 import 'splash/splash_screen.dart';
 
 // Pages
@@ -16,22 +15,15 @@ import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
 Future<void> dumpAssetManifest() async {
-  try {
-    final manifestContent =
-        await rootBundle.loadString('AssetManifest.json');
-    final manifestMap = json.decode(manifestContent) as Map<String, dynamic>;
+  final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+  final keys = manifest.keys
+      .where((k) => k.contains('all_categories'))
+      .take(30)
+      .toList();
 
-    final keys = manifestMap.keys
-        .where((k) => k.contains('all_categories'))
-        .take(30)
-        .toList();
-
-    print('📦 ASSETS FOUND (${keys.length} shown):');
-    for (final k in keys) {
-      print(k);
-    }
-  } catch (e) {
-    print('❌ FAILED TO LOAD AssetManifest.json: $e');
+  print('📦 ASSETS FOUND (${keys.length} shown):');
+  for (final k in keys) {
+    print(k);
   }
 }
 
