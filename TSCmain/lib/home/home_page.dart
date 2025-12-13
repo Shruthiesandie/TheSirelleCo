@@ -157,6 +157,7 @@ class _HomePageState extends State<HomePage>
         }
 
         final products = snapshot.data!;
+        debugPrint("🟢 PRODUCTS LOADED IN HOME PAGE: ${products.length}");
 
         return GridView.builder(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
