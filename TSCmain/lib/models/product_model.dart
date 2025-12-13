@@ -19,22 +19,34 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     String normalize(String path) {
-      if (path.startsWith('assets/')) {
-        return path.replaceFirst('assets/', '');
+      var p = path.trim();
+      p = p.replaceAll('\\', '/');
+      if (p.startsWith('/')) {
+        p = p.substring(1);
       }
-      return path;
+      if (p.startsWith('assets/')) {
+        p = p.replaceFirst('assets/', '');
+      }
+      return p;
     }
 
+    final imagesRaw = json['images'];
+    final imagesList = imagesRaw is List
+        ? imagesRaw.whereType<String>().map(normalize).toList()
+        : <String>[];
+
     return Product(
-      id: json['id'],
-      name: json['name'],
-      category: json['category'],
-      price: (json['price'] as num).toDouble(),
-      mainImage: normalize(json['mainImage']),
-      images: (json['images'] as List)
-          .map((e) => normalize(e as String))
-          .toList(),
-      description: json['description'],
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      category: json['category']?.toString() ?? '',
+      price: (json['price'] is num)
+          ? (json['price'] as num).toDouble()
+          : 0.0,
+      mainImage: json['mainImage'] is String
+          ? normalize(json['mainImage'])
+          : '',
+      images: imagesList,
+      description: json['description']?.toString() ?? '',
     );
   }
 }
