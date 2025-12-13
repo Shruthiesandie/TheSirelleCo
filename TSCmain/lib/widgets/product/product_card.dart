@@ -21,9 +21,14 @@ class ProductCard extends StatelessWidget {
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(16)),
               child: Image.asset(
-                'assets/${product.mainImage}',
+                product.mainImage,
                 width: double.infinity,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Icon(Icons.image_not_supported),
+                  );
+                },
               ),
             ),
           ),
