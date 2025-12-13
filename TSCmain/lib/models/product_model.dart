@@ -19,14 +19,18 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     String normalize(String path) {
-      var p = path.trim();
-      p = p.replaceAll('\\', '/');
+      var p = path.trim().replaceAll('\\', '/');
+
+      // remove leading slash if any
       if (p.startsWith('/')) {
         p = p.substring(1);
       }
-      if (p.startsWith('assets/')) {
-        p = p.replaceFirst('assets/', '');
+
+      // ensure path ALWAYS starts with assets/
+      if (!p.startsWith('assets/')) {
+        p = 'assets/$p';
       }
+
       return p;
     }
 
