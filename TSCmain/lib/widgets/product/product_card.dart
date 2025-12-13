@@ -25,6 +25,7 @@ class ProductCard extends StatelessWidget {
                 width: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
+                  debugPrint("❌ IMAGE FAILED TO LOAD: ${product.mainImage}");
                   return Container(
                     color: Colors.grey.shade200,
                     alignment: Alignment.center,
