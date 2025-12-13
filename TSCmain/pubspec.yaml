@@ -39,7 +39,15 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/all_categories/
+    - assets/images/all_categories/bottles/
+    - assets/images/all_categories/candle/
+    - assets/images/all_categories/caps/
+    - assets/images/all_categories/ceramic/
+    - assets/images/all_categories/hair_accessories/
+    - assets/images/all_categories/key_chain/
+    - assets/images/all_categories/letter/
+    - assets/images/all_categories/nails/
+    - assets/images/all_categories/plusie/
     - assets/data/
     - assets/logo/
     - assets/splash/
