@@ -15,20 +15,22 @@ import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
 
+import 'package:flutter/services.dart';
+
 Future<void> dumpAssetManifest() async {
   final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+  final assets = manifest.listAssets();
 
-  final assets = manifest
-      .listAssets()
-      .where((a) => a.contains('all_categories'))
+  final filtered = assets
+      .where((a) => a.contains('assets/images/all_categories'))
+      .take(30)
       .toList();
 
-  debugPrint('📦 ASSETS FOUND (${assets.length}):');
-  for (final a in assets.take(30)) {
-    debugPrint(a);
+  print('📦 ASSETS FOUND (${filtered.length}):');
+  for (final a in filtered) {
+    print(a);
   }
 }
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dumpAssetManifest();
