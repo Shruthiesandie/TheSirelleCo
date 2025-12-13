@@ -17,7 +17,23 @@ import 'pages/username_page.dart';
 
 
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    final manifest = await DefaultAssetBundle.of(
+      WidgetsBinding.instance.rootElement!,
+    ).loadString('AssetManifest.json');
+
+    debugPrint(
+      'ASSET CHECK (hair band): ${manifest.contains(
+        "assets/images/all_categories/hair_accessories/h2/band1.webp",
+      )}',
+    );
+  } catch (e) {
+    debugPrint('ASSET MANIFEST LOAD ERROR: $e');
+  }
+
   runApp(const MyApp());
 }
 
