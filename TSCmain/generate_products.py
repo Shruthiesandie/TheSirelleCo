@@ -1,13 +1,13 @@
 import os
 import json
 
-BASE_DIR = "assets/images/"
+BASE_DIR = "assets/images"
 OUTPUT_FILE = "assets/data/products.json"
-PRICE = 999
-
-IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
 
 products = []
+
+def norm(path):
+    return path.replace("\\", "/").lower()
 
 for category in sorted(os.listdir(BASE_DIR)):
     category_path = os.path.join(BASE_DIR, category)
@@ -19,41 +19,33 @@ for category in sorted(os.listdir(BASE_DIR)):
         if not os.path.isdir(product_path):
             continue
 
-        # main image = first image in product folder
+        images = []
         main_image = None
-        for file in sorted(os.listdir(product_path)):
-            if file.lower().endswith(IMAGE_EXTS):
-                main_image = f"{BASE_DIR}/{category}/{product}/{file}"
-                break
+
+        for root, _, files in os.walk(product_path):
+            for file in files:
+                if file.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+                    full = norm(os.path.join(root, file))
+                    if main_image is None:
+                        main_image = full
+                    else:
+                        images.append(full)
 
         if not main_image:
-            print(f"⚠️ Skipping {category}/{product} (no main image)")
             continue
 
-        # collect extra images from subfolders
-        extra_images = []
-        for root, _, files in os.walk(product_path):
-            if root == product_path:
-                continue
-            for f in sorted(files):
-                if f.lower().endswith(IMAGE_EXTS):
-                    rel_path = os.path.join(root, f).replace("\\", "/")
-                    extra_images.append(rel_path)
-
-        product_data = {
+        products.append({
             "id": f"{category}_{product}",
             "name": product.upper(),
             "category": category,
-            "price": PRICE,
-            "mainImage": main_image.replace("\\", "/"),
-            "images": extra_images,
+            "price": 999,
+            "mainImage": main_image,
+            "images": images,
             "description": f"{product} from {category}"
-        }
+        })
 
-        products.append(product_data)
+os.makedirs("assets/data", exist_ok=True)
 
-# write JSON
-os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
 with open(OUTPUT_FILE, "w") as f:
     json.dump(products, f, indent=2)
 
