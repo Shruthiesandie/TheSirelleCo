@@ -15,8 +15,8 @@ dependencies:
   country_picker: ^2.0.21
   shimmer: ^3.0.0
   shared_preferences: ^2.2.2
-  confetti: ^0.6.0
-  intl: ^0.18.0
+  confetti: ^0.8.0
+  intl: ^0.20.2
   google_fonts: ^6.2.0
   marquee: ^2.2.3
   lottie: ^3.1.0
@@ -26,7 +26,7 @@ dependencies:
 
   # Add these packages for OpenAI support
   http: ^1.1.0
-  dart_openai: ^5.0.0
+  dart_openai: ^6.1.1
   flutter_dotenv: ^6.0.0
 
 dev_dependencies:
