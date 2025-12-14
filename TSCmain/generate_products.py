@@ -18,24 +18,14 @@ for category in sorted(os.listdir(BASE_PATH)):
             continue
 
         thumbnail = f"assets/images/{category}/{folder}/bottle.jpg"
-
         images = [thumbnail]
 
-        # 1️⃣ Add images directly inside product folder (except bottle.jpg)
-        for file in sorted(os.listdir(product_path)):
-            if file.lower() == "bottle.jpg":
-                continue
-
-            file_path = os.path.join(product_path, file)
-            if os.path.isfile(file_path) and file.lower().endswith(IMAGE_EXTENSIONS):
-                images.append(
-                    f"assets/images/{category}/{folder}/{file}"
-                )
-
-        # 2️⃣ Add images from bdiff1 folder (if exists)
+        # Add images from bdiff1 (skip bottle.jpg)
         diff_folder = os.path.join(product_path, "bdiff1")
         if os.path.exists(diff_folder):
             for img in sorted(os.listdir(diff_folder)):
+                if img.lower() == "bottle.jpg":
+                    continue
                 if img.lower().endswith(IMAGE_EXTENSIONS):
                     images.append(
                         f"assets/images/{category}/{folder}/bdiff1/{img}"
@@ -63,4 +53,4 @@ final List<Product> allProducts = [
 with open(OUTPUT_FILE, "w") as f:
     f.write(dart_file)
 
-print("✅ product_data.dart generated with ALL images")
+print("✅ product_data.dart generated correctly with gallery images")
