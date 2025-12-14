@@ -7,7 +7,7 @@ OUTPUT_FILE = "assets/data/products.json"
 products = []
 
 def norm(path):
-    return path.replace("\\", "/").lower()
+    return path.replace("\\", "/")
 
 for category in sorted(os.listdir(BASE_DIR)):
     category_path = os.path.join(BASE_DIR, category)
