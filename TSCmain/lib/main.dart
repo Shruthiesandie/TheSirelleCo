@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'splash/splash_screen.dart';
 
 // Pages
@@ -14,18 +13,8 @@ import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-  final assetPaths = manifest.listAssets();
-  debugPrint('📦 ASSET MANIFEST (${assetPaths.length} assets):');
-  for (final p in assetPaths) {
-    if (p.startsWith('assets/images/')) {
-      debugPrint(p);
-    }
-  }
-
   runApp(const MyApp());
 }
 
@@ -36,15 +25,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+
       /// ⭐ Splash loader remains your home launcher
-      home: Scaffold(
-        body: Center(
-          child: Image.asset(
-            'assets/images/bottles/b1/bottle.jpg',
-            errorBuilder: (_, __, ___) => const Text("FAILED"),
-          ),
-        ),
-      ),
+      home: const SplashScreen(),
+
       /// ⭐ Your full routing system preserved
       routes: {
         "/home": (_) => const HomePage(),
