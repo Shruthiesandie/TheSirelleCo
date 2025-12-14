@@ -8,7 +8,7 @@ final List<Product> allProducts = [
     category: 'Bottles',
     price: 899,
     thumbnail: 'assets/images/bottles/b1/bottle.jpg',
-    images: ['assets/images/bottles/b1/bdiff1/bottle11.jpg', 'assets/images/bottles/b1/bdiff1/bottle12.png', 'assets/images/bottles/b1/bdiff1/bottle13.jpg'],
+    images: ['assets/images/bottles/b1/bdiff1/bottle11.jpg', 'assets/images/bottles/b1/bdiff1/bottle12.jpg', 'assets/images/bottles/b1/bdiff1/bottle13.jpg'],
   ),
 
   Product(
@@ -16,8 +16,8 @@ final List<Product> allProducts = [
     name: 'B2',
     category: 'Bottles',
     price: 899,
-    thumbnail: 'assets/images/bottles/b2/bottle2.png',
-    images: ['assets/images/bottles/b2/bdiff2/bottle21.png', 'assets/images/bottles/b2/bdiff2/bottle22.png', 'assets/images/bottles/b2/bdiff2/bottle23.png'],
+    thumbnail: 'assets/images/bottles/b2/bottle2.jpg',
+    images: ['assets/images/bottles/b2/bdiff2/bottle21.jpg', 'assets/images/bottles/b2/bdiff2/bottle22.jpg', 'assets/images/bottles/b2/bdiff2/bottle23.jpg'],
   ),
 
   Product(
@@ -25,8 +25,8 @@ final List<Product> allProducts = [
     name: 'B3',
     category: 'Bottles',
     price: 899,
-    thumbnail: 'assets/images/bottles/b3/bottle3.png',
-    images: ['assets/images/bottles/b3/bdiff3/bottle31.png', 'assets/images/bottles/b3/bdiff3/bottle32.png', 'assets/images/bottles/b3/bdiff3/bottle33.png'],
+    thumbnail: 'assets/images/bottles/b3/bottle3.jpg',
+    images: ['assets/images/bottles/b3/bdiff3/bottle31.jpg', 'assets/images/bottles/b3/bdiff3/bottle32.jpg', 'assets/images/bottles/b3/bdiff3/bottle33.jpg'],
   ),
 
   Product(
@@ -34,8 +34,8 @@ final List<Product> allProducts = [
     name: 'B4',
     category: 'Bottles',
     price: 899,
-    thumbnail: 'assets/images/bottles/b4/bottle4.png',
-    images: ['assets/images/bottles/b4/bdiff4/bottle41.png', 'assets/images/bottles/b4/bdiff4/bottle42.png', 'assets/images/bottles/b4/bdiff4/bottle43.png'],
+    thumbnail: 'assets/images/bottles/b4/bottle4.jpg',
+    images: ['assets/images/bottles/b4/bdiff4/bottle41.jpg', 'assets/images/bottles/b4/bdiff4/bottle42.jpg', 'assets/images/bottles/b4/bdiff4/bottle43.jpg'],
   ),
 
   Product(
@@ -43,8 +43,8 @@ final List<Product> allProducts = [
     name: 'B5',
     category: 'Bottles',
     price: 899,
-    thumbnail: 'assets/images/bottles/b5/bottle5.png',
-    images: ['assets/images/bottles/b5/bdiff5/bottle51.png', 'assets/images/bottles/b5/bdiff5/bottle52.png', 'assets/images/bottles/b5/bdiff5/bottle53.png'],
+    thumbnail: 'assets/images/bottles/b5/bottle5.jpg',
+    images: ['assets/images/bottles/b5/bdiff5/bottle51.jpg', 'assets/images/bottles/b5/bdiff5/bottle52.jpg', 'assets/images/bottles/b5/bdiff5/bottle53.jpg'],
   ),
 
   Product(
@@ -52,8 +52,8 @@ final List<Product> allProducts = [
     name: 'B6',
     category: 'Bottles',
     price: 899,
-    thumbnail: 'assets/images/bottles/b6/bottle61.png',
-    images: ['assets/images/bottles/b6/bdiff6/bottle62.png', 'assets/images/bottles/b6/bdiff6/bottle63.png'],
+    thumbnail: 'assets/images/bottles/b6/bottle61.jpg',
+    images: ['assets/images/bottles/b6/bdiff6/bottle62.jpg', 'assets/images/bottles/b6/bdiff6/bottle63.jpg'],
   ),
 
   Product(
@@ -70,8 +70,8 @@ final List<Product> allProducts = [
     name: 'B8',
     category: 'Bottles',
     price: 899,
-    thumbnail: 'assets/images/bottles/b8/bottle8.png',
-    images: ['assets/images/bottles/b8/bdiff8/bottle81.png', 'assets/images/bottles/b8/bdiff8/bottle82.png', 'assets/images/bottles/b8/bdiff8/bottle83.png'],
+    thumbnail: 'assets/images/bottles/b8/bottle8.jpg',
+    images: ['assets/images/bottles/b8/bdiff8/bottle81.jpg', 'assets/images/bottles/b8/bdiff8/bottle82.jpg', 'assets/images/bottles/b8/bdiff8/bottle83.jpg'],
   ),
 
   Product(
@@ -304,8 +304,8 @@ final List<Product> allProducts = [
     name: 'CA3',
     category: 'Caps',
     price: 899,
-    thumbnail: 'assets/images/caps/ca3/cap3.png',
-    images: ['assets/images/caps/ca3/cadiff3/cap31.png', 'assets/images/caps/ca3/cadiff3/cap32.png', 'assets/images/caps/ca3/cadiff3/cap33.png'],
+    thumbnail: 'assets/images/caps/ca3/cap3.jpg',
+    images: ['assets/images/caps/ca3/cadiff3/cap31.jpg', 'assets/images/caps/ca3/cadiff3/cap32.jpg', 'assets/images/caps/ca3/cadiff3/cap33.jpg'],
   ),
 
   Product(
@@ -313,8 +313,8 @@ final List<Product> allProducts = [
     name: 'CA4',
     category: 'Caps',
     price: 899,
-    thumbnail: 'assets/images/caps/ca4/cap4.png',
-    images: ['assets/images/caps/ca4/cadiff4/cap41.png', 'assets/images/caps/ca4/cadiff4/cap42.png', 'assets/images/caps/ca4/cadiff4/cap43.jpg'],
+    thumbnail: 'assets/images/caps/ca4/cap4.jpg',
+    images: ['assets/images/caps/ca4/cadiff4/cap41.jpg', 'assets/images/caps/ca4/cadiff4/cap42.jpg', 'assets/images/caps/ca4/cadiff4/cap43.jpg'],
   ),
 
   Product(
@@ -331,8 +331,8 @@ final List<Product> allProducts = [
     name: 'CA6',
     category: 'Caps',
     price: 899,
-    thumbnail: 'assets/images/caps/ca6/cap6.png',
-    images: ['assets/images/caps/ca6/cadiff6/cap61.jpg', 'assets/images/caps/ca6/cadiff6/cap62.png', 'assets/images/caps/ca6/cadiff6/cap63.png'],
+    thumbnail: 'assets/images/caps/ca6/cap6.jpg',
+    images: ['assets/images/caps/ca6/cadiff6/cap61.jpg', 'assets/images/caps/ca6/cadiff6/cap62.jpg', 'assets/images/caps/ca6/cadiff6/cap63.jpg'],
   ),
 
   Product(
@@ -385,8 +385,8 @@ final List<Product> allProducts = [
     name: 'CE4',
     category: 'Ceramic',
     price: 899,
-    thumbnail: 'assets/images/ceramic/ce4/cup4.webp',
-    images: ['assets/images/ceramic/ce4/cediff4/cup41.webp', 'assets/images/ceramic/ce4/cediff4/cup42.webp', 'assets/images/ceramic/ce4/cediff4/cup43.webp'],
+    thumbnail: 'assets/images/ceramic/ce4/cup4.jpg',
+    images: ['assets/images/ceramic/ce4/cediff4/cup41.jpg', 'assets/images/ceramic/ce4/cediff4/cup42.jpg', 'assets/images/ceramic/ce4/cediff4/cup43.jpg'],
   ),
 
   Product(
@@ -430,8 +430,8 @@ final List<Product> allProducts = [
     name: 'H1',
     category: 'Hair accessories',
     price: 899,
-    thumbnail: 'assets/images/hair_accessories/h1/bearband.webp',
-    images: ['assets/images/hair_accessories/h1/hdiff1/bearband1.webp', 'assets/images/hair_accessories/h1/hdiff1/bearband2.webp', 'assets/images/hair_accessories/h1/hdiff1/bearband3.webp'],
+    thumbnail: 'assets/images/hair_accessories/h1/bearband.jpg',
+    images: ['assets/images/hair_accessories/h1/hdiff1/bearband1.jpg', 'assets/images/hair_accessories/h1/hdiff1/bearband2.jpg', 'assets/images/hair_accessories/h1/hdiff1/bearband3.jpg'],
   ),
 
   Product(
@@ -439,8 +439,8 @@ final List<Product> allProducts = [
     name: 'H2',
     category: 'Hair accessories',
     price: 899,
-    thumbnail: 'assets/images/hair_accessories/h2/band1.webp',
-    images: ['assets/images/hair_accessories/h2/hdiff2/band11.webp', 'assets/images/hair_accessories/h2/hdiff2/band12.webp', 'assets/images/hair_accessories/h2/hdiff2/band13.webp'],
+    thumbnail: 'assets/images/hair_accessories/h2/band1.jpg',
+    images: ['assets/images/hair_accessories/h2/hdiff2/band11.jpg', 'assets/images/hair_accessories/h2/hdiff2/band12.jpg', 'assets/images/hair_accessories/h2/hdiff2/band13.jpg'],
   ),
 
   Product(
@@ -484,8 +484,8 @@ final List<Product> allProducts = [
     name: 'H7',
     category: 'Hair accessories',
     price: 899,
-    thumbnail: 'assets/images/hair_accessories/h7/band3.webp',
-    images: ['assets/images/hair_accessories/h7/hdiff7/band31.webp', 'assets/images/hair_accessories/h7/hdiff7/band32.webp', 'assets/images/hair_accessories/h7/hdiff7/band33.webp'],
+    thumbnail: 'assets/images/hair_accessories/h7/band3.jpg',
+    images: ['assets/images/hair_accessories/h7/hdiff7/band31.jpg', 'assets/images/hair_accessories/h7/hdiff7/band32.jpg', 'assets/images/hair_accessories/h7/hdiff7/band33.jpg'],
   ),
 
   Product(
@@ -863,7 +863,7 @@ final List<Product> allProducts = [
     category: 'Plusie',
     price: 899,
     thumbnail: 'assets/images/plusie/p3/deer.jpg',
-    images: ['assets/images/plusie/p3/untitled folder/deer1.jpg', 'assets/images/plusie/p3/untitled folder/deer2.jpg', 'assets/images/plusie/p3/untitled folder/deer3.jpg'],
+    images: ['assets/images/plusie/p3/diff3/deer1.jpg', 'assets/images/plusie/p3/diff3/deer2.jpg', 'assets/images/plusie/p3/diff3/deer3.jpg'],
   ),
 
   Product(
@@ -908,7 +908,7 @@ final List<Product> allProducts = [
     category: 'Plusie',
     price: 899,
     thumbnail: 'assets/images/plusie/p8/rabbitfruit.jpg',
-    images: ['assets/images/plusie/p8/untitled folder/rabbitfruit1.jpg', 'assets/images/plusie/p8/untitled folder/rabbitfruit2.jpg', 'assets/images/plusie/p8/untitled folder/rabbitfruit3.jpg'],
+    images: ['assets/images/plusie/p8/diff8/rabbitfruit1.jpg', 'assets/images/plusie/p8/diff8/rabbitfruit2.jpg', 'assets/images/plusie/p8/diff8/rabbitfruit3.jpg'],
   ),
 
 ];
