@@ -19,8 +19,13 @@ import 'pages/username_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final service = ProductService();
-  await service.insertProducts(seedProducts);
+  try {
+    final service = ProductService();
+    await service.init();
+    await service.insertProducts(seedProducts);
+  } catch (e) {
+    debugPrint('Product DB init error: $e');
+  }
 
   runApp(const MyApp());
 }
