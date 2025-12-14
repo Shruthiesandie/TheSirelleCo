@@ -1,5 +1,5 @@
 // ignore_for_file: deprecated_member_use
-
+import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 // Pages
@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage>
     super.initState();
 
     screens = [
-      const SizedBox.shrink(), // Home screen intentionally empty
+      Container(), // Home screen EMPTY — products removed
       const SizedBox.shrink(), // Favourite screen empty for now
       AllCategoriesPage(
         onBackToHome: () {
@@ -105,10 +105,12 @@ class _HomePageState extends State<HomePage>
                 ],
 
                 Expanded(
-                  child: IndexedStack(
-                    index: selectedIndex,
-                    children: screens,
-                  ),
+                  child: selectedIndex == 0
+                      ? const SizedBox.shrink() // Home = EMPTY (no Product 1–7)
+                      : IndexedStack(
+                          index: selectedIndex,
+                          children: screens,
+                        ),
                 ),
               ],
             ),
@@ -141,52 +143,55 @@ class _HomePageState extends State<HomePage>
     return SizedBox(
       height: 48,
       child: NotificationListener<ScrollNotification>(
-        onNotification: (_) => false,
-        child: Listener(
-          onPointerDown: (_) => _userScrollingRibbon = true,
-          onPointerUp: (_) => _userScrollingRibbon = false,
-          onPointerCancel: (_) => _userScrollingRibbon = false,
-          child: ListView.builder(
-            controller: _scrollController,
-            physics: const BouncingScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            itemCount: 1000,
-            itemBuilder: (_, i) {
-              final offer = offers[i % offers.length];
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFFFF6FAF),
-                      Color(0xFFFF9AD5),
-                      Color(0xFFFFC1E3),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0xFFFF6FAF).withOpacity(0.35),
-                      blurRadius: 14,
-                      offset: Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  offer,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    fontSize: 13.5,
-                  ),
-                ),
-              );
-            },
+        onNotification: (notification) {
+          if (notification is UserScrollNotification) {
+            _userScrollingRibbon =
+                notification.direction != ScrollDirection.idle;
+          }
+          return false;
+        },
+        child: ListView.builder(
+          controller: _scrollController,
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
           ),
+          scrollDirection: Axis.horizontal,
+          itemCount: 1000,
+          itemBuilder: (_, i) {
+            final offer = offers[i % offers.length];
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFFFF6FAF),
+                    Color(0xFFFF9AD5),
+                    Color(0xFFFFC1E3),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xFFFF6FAF).withOpacity(0.35),
+                    blurRadius: 14,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Text(
+                offer,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  fontSize: 13.5,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
