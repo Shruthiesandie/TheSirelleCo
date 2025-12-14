@@ -151,8 +151,10 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+ // ⭐ BEAUTIFUL PREMIUM AUTO-SCROLL + USER-SCROLL OFFER RIBBON
+  // -------------------------------------------------------------------
   Widget _premiumOfferRibbon() {
-    final offers = [
+    List<String> offers = [
       "💗 Flat 10% OFF on ₹1000+ orders",
       "✨ 20% OFF on ₹4000+ purchases",
       "⭐ Members get extra 5% cashback",
@@ -161,56 +163,84 @@ class _HomePageState extends State<HomePage>
 
     return SizedBox(
       height: 48,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          if (notification is UserScrollNotification) {
-            _userScrollingRibbon =
-                notification.direction != ScrollDirection.idle;
-          }
-          return false;
-        },
-        child: ListView.builder(
-          controller: _scrollController,
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          scrollDirection: Axis.horizontal,
-          itemCount: 1000,
-          itemBuilder: (_, i) {
-            final offer = offers[i % offers.length];
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFFFF6FAF),
-                    Color(0xFFFF9AD5),
-                    Color(0xFFFFC1E3),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xFFFF6FAF).withOpacity(0.35),
-                    blurRadius: 14,
-                    offset: Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Text(
-                offer,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  fontSize: 13.5,
-                ),
-              ),
+      child: Listener(
+        // 👇 allows horizontal drag to manually scroll ribbon
+        onPointerMove: (details) {
+          if (_scrollController.hasClients) {
+            _scrollController.jumpTo(
+              _scrollController.offset - details.delta.dx,
             );
-          },
+          }
+        },
+        child: Stack(
+          children: [
+            ListView.builder(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: 9999,
+              itemBuilder: (_, i) {
+                String offer = offers[i % offers.length];
+
+                return Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.pinkAccent.withOpacity(0.17),
+                        Colors.white.withOpacity(0.9),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pinkAccent.withOpacity(0.15),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    offer,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.pink.shade900,
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            /// ⭐ Soft fade edges — aesthetic, not blocking scroll
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Colors.white.withOpacity(0.9),
+                        Colors.white.withOpacity(0.0),
+                        Colors.white.withOpacity(0.0),
+                        Colors.white.withOpacity(0.9),
+                      ],
+                      stops: const [0.0, 0.12, 0.88, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
