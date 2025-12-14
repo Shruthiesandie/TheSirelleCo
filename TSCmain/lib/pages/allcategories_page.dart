@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import '../models/product.dart';
 import '../services/product_service.dart';
+import '../data/seed_products.dart';
 
 class AllCategoriesPage extends StatefulWidget {
   final VoidCallback? onBackToHome;
@@ -70,7 +71,12 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
     final data = await service.getAllProducts();
 
     setState(() {
-      _products = data;
+      if (data.isEmpty) {
+        // 🔴 Fallback so UI never stays blank
+        _products = seedProducts;
+      } else {
+        _products = data;
+      }
       _loading = false;
     });
   }

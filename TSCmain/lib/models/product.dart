@@ -2,9 +2,9 @@ class Product {
   final String id;
   final String name;
   final String category;
-  final double price;
+  final int price;
   final String thumbnail;
-  final List<String> images;
+  final List<String> images; // ✅ ADD THIS
 
   Product({
     required this.id,
@@ -12,10 +12,9 @@ class Product {
     required this.category,
     required this.price,
     required this.thumbnail,
-    required this.images,
+    required this.images, // ✅ ADD
   });
 
-  // Convert DB row → Product
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(
       id: map['id'],
@@ -23,11 +22,10 @@ class Product {
       category: map['category'],
       price: map['price'],
       thumbnail: map['thumbnail'],
-      images: (map['images'] as String).split(','),
+      images: (map['images'] as String).split(','), // ✅ ADD
     );
   }
 
-  // Convert Product → DB row
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -35,7 +33,7 @@ class Product {
       'category': category,
       'price': price,
       'thumbnail': thumbnail,
-      'images': images.join(','),
+      'images': images.join(','), // ✅ ADD
     };
   }
 }
