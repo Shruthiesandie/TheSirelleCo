@@ -6,9 +6,9 @@ final List<Product> seedProducts = [
     name: 'Ceramic Bottle – Rose',
     category: 'Bottles',
     price: 899,
-    thumbnail: 'assets/images/bottles/b1/bottle.jpg',
+    thumbnail: 'assets/images/bottles/b1/bottle.png',
     images: [
-      'assets/images/bottles/b1/bottle.jpg',
+      'assets/images/bottles/b1/bottle.png',
     ],
   ),
   Product(
@@ -16,9 +16,9 @@ final List<Product> seedProducts = [
     name: 'Ceramic Bottle – Black',
     category: 'Bottles',
     price: 999,
-    thumbnail: 'assets/images/bottles/b2/bottle.jpg',
+    thumbnail: 'assets/images/bottles/b2/bottle.png',
     images: [
-      'assets/images/bottles/b2/bottle.jpg',
+      'assets/images/bottles/b2/bottle.png',
     ],
   ),
 ];
