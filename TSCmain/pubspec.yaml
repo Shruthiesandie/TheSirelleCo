@@ -21,7 +21,8 @@ dependencies:
   marquee: ^2.2.3
   lottie: ^3.1.0
   country_icons: ^3.0.0   # or whatever version you use
-
+  sqflite: ^2.3.3
+  path: ^1.9.0
   cupertino_icons: ^1.0.8
 
   # Add these packages for OpenAI support

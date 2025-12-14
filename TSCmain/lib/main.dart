@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'splash/splash_screen.dart';
 
+import 'services/product_service.dart';
+import 'data/seed_products.dart';
+
 // Pages
 import 'home/home_page.dart';
 import 'pages/membership_page.dart';
@@ -13,8 +16,12 @@ import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final productService = ProductService();
+  await productService.seedIfEmpty(seedProducts);
+
   runApp(const MyApp());
 }
 
