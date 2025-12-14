@@ -25,10 +25,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
       /// ⭐ Splash loader remains your home launcher
-      home: const SplashScreen(),
-
+      home: Scaffold(
+        body: Center(
+          child: Image.asset(
+            'assets/images/bottles/b1/bottle.jpg',
+            errorBuilder: (_, __, ___) => const Text("FAILED"),
+          ),
+        ),
+      ),
       /// ⭐ Your full routing system preserved
       routes: {
         "/home": (_) => const HomePage(),

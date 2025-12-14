@@ -159,18 +159,40 @@ class _HomePageState extends State<HomePage>
         final products = snapshot.data!;
         debugPrint("🟢 PRODUCTS LOADED IN HOME PAGE: ${products.length}");
 
-        return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.65,
-          ),
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            return ProductCard(product: products[index]);
-          },
+        return Column(
+          children: [
+            const SizedBox(height: 12),
+
+            // 🔴 ASSET SANITY CHECK — DO NOT REMOVE YET
+            Center(
+              child: Image.asset(
+                'assets/images/bottles/b1/bottle.jpg',
+                height: 120,
+                errorBuilder: (_, __, ___) => const Text(
+                  "FAILED",
+                  style: TextStyle(color: Colors.red, fontSize: 18),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.65,
+                ),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  return ProductCard(product: products[index]);
+                },
+              ),
+            ),
+          ],
         );
       },
     );
