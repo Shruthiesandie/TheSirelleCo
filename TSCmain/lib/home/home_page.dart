@@ -32,9 +32,6 @@ class _HomePageState extends State<HomePage>
 
   late final List<Widget> screens;
 
-  bool _userScrollingRibbon = false;
-  Timer? _autoScrollTimer;
-
   @override
   void initState() {
     super.initState();
@@ -58,26 +55,19 @@ class _HomePageState extends State<HomePage>
     WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoScroll());
   }
 
-  void _startAutoScroll() {
-    _autoScrollTimer?.cancel();
-
-    _autoScrollTimer = Timer.periodic(
-      const Duration(milliseconds: 16), // 60 FPS
-      (_) {
-        if (!_scrollController.hasClients || _userScrollingRibbon) return;
-
-        final newOffset = _scrollController.offset + 5.8; // 🔥 SPEED HERE
-
-        _scrollController.jumpTo(newOffset);
-      },
-    );
+  void _startAutoScroll() async {
+    while (mounted) {
+      await Future.delayed(const Duration(milliseconds: 40));
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.offset + 1);
+      }
+    }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     _marqueeController.dispose();
-    _autoScrollTimer?.cancel();
     super.dispose();
   }
 
@@ -158,9 +148,6 @@ class _HomePageState extends State<HomePage>
     return SizedBox(
       height: 42,
       child: Listener(
-        onPointerDown: (_) => _userScrollingRibbon = true,
-        onPointerUp: (_) => _userScrollingRibbon = false,
-        onPointerCancel: (_) => _userScrollingRibbon = false,
         onPointerMove: (details) {
           if (_scrollController.hasClients) {
             _scrollController.jumpTo(
