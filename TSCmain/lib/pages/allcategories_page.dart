@@ -24,6 +24,16 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
   int selectedCategoryIndex = -1;
 
+final List<String> allImages = [
+  'assets/images/bottles/b1/bottle.png',
+  'assets/images/bottles/b2/bottle2.png',
+  'assets/images/bottles/b3/bottle3.png',
+  'assets/images/bottles/b4/bottle4.png',
+  'assets/images/bottles/b5/bottle5.png',
+  'assets/images/bottles/b6/bottle61.png',
+  'assets/images/bottles/b7/bottle7.png',
+  'assets/images/bottles/b8/bottle8.png',
+];
 
   final List<String> categories = [
     "All",
@@ -303,6 +313,37 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
             ),
 
             
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: GridView.builder(
+                  itemCount: allImages.length,
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                  ),
+                  itemBuilder: (context, index) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        color: Colors.white,
+                        child: Image.asset(
+                          allImages[index],
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) {
+                            return const Center(
+                              child: Icon(Icons.broken_image, size: 30),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
           ],
         ),
       ),
