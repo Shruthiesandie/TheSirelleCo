@@ -62,19 +62,13 @@ class _HomePageState extends State<HomePage>
     _autoScrollTimer?.cancel();
 
     _autoScrollTimer = Timer.periodic(
-      const Duration(milliseconds: 25),
+      const Duration(milliseconds: 16), // 60 FPS
       (_) {
         if (!_scrollController.hasClients || _userScrollingRibbon) return;
 
-        final position = _scrollController.position;
-        final max = position.maxScrollExtent;
-        final next = position.pixels + 4.5;
+        final newOffset = _scrollController.offset + 5.8; // 🔥 SPEED HERE
 
-        _scrollController.animateTo(
-          next >= max ? 0 : next,
-          duration: const Duration(milliseconds: 25),
-          curve: Curves.linear,
-        );
+        _scrollController.jumpTo(newOffset);
       },
     );
   }
@@ -164,7 +158,9 @@ class _HomePageState extends State<HomePage>
     return SizedBox(
       height: 42,
       child: Listener(
-        // 👇 allows horizontal drag to manually scroll ribbon
+        onPointerDown: (_) => _userScrollingRibbon = true,
+        onPointerUp: (_) => _userScrollingRibbon = false,
+        onPointerCancel: (_) => _userScrollingRibbon = false,
         onPointerMove: (details) {
           if (_scrollController.hasClients) {
             _scrollController.jumpTo(
