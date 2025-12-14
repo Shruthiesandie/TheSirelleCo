@@ -13,7 +13,6 @@ import '../widgets/top_bar/home_top_bar.dart';
 import '../widgets/bottom_nav/home_bottom_nav_bar.dart';
 import '../widgets/drawer/home_drawer.dart';
 
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -28,45 +27,33 @@ class _HomePageState extends State<HomePage>
   int selectedIndex = 0;
 
   late final AnimationController _marqueeController;
-
-  /// Controller for auto scrolling ribbon
   final ScrollController _scrollController = ScrollController();
 
-  /// Tabs/pages (initialized in initState so we can pass callbacks)
   late final List<Widget> screens;
 
   @override
   void initState() {
     super.initState();
 
-    // Build the tab pages, including callback for AllCategories
     screens = [
       _buildHomeProducts(),
       const Center(child: Text("Favourite Page")),
       AllCategoriesPage(
         onBackToHome: () {
-          // 👈 This is what the back button in AllCategories will call
-          if (!mounted) return;
-          setState(() {
-            selectedIndex = 0;
-          });
+          setState(() => selectedIndex = 0);
         },
       ),
       const CartPage(),
       const ProfilePage(),
     ];
 
-    /// Kept for future use (not actually driving ribbon now)
     _marqueeController =
         AnimationController(vsync: this, duration: const Duration(seconds: 6))
           ..repeat();
 
-
-    /// Start auto scrolling the ribbon
     WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoScroll());
   }
 
-  /// Auto-scroll smooth movement for the offer ribbon
   void _startAutoScroll() async {
     while (mounted) {
       await Future.delayed(const Duration(milliseconds: 40));
@@ -88,22 +75,20 @@ class _HomePageState extends State<HomePage>
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
-      drawerScrimColor: Colors.transparent,
       drawer: const HomeDrawer(),
 
       body: SafeArea(
-        top: true,
-        bottom: false,
         child: Stack(
           children: [
             Column(
               children: [
-                /// ⭐ HOME page only: offer ribbon + curved top bar
                 if (selectedIndex == 0) ...[
                   _premiumOfferRibbon(),
                   HomeTopBar(
-                    onMenuTap: () => _scaffoldKey.currentState!.openDrawer(),
-                    onSearchTap: () => Navigator.pushNamed(context, "/search"),
+                    onMenuTap: () =>
+                        _scaffoldKey.currentState!.openDrawer(),
+                    onSearchTap: () =>
+                        Navigator.pushNamed(context, "/search"),
                     onMembershipTap: () {
                       Navigator.push(
                         context,
@@ -115,7 +100,6 @@ class _HomePageState extends State<HomePage>
                   ),
                 ],
 
-                /// Content of the selected tab
                 Expanded(
                   child: IndexedStack(
                     index: selectedIndex,
@@ -125,7 +109,6 @@ class _HomePageState extends State<HomePage>
               ],
             ),
 
-            /// ⭐ Bottom Navigation Bar
             Positioned(
               left: 0,
               right: 0,
@@ -143,43 +126,48 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  // ✅ SIMPLE, STABLE HOME CONTENT
   Widget _buildHomeProducts() {
-    return FutureBuilder(
-      future: ProductService.loadProducts(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("No products found"));
-        }
-
-        final products = snapshot.data!;
-        debugPrint("🟢 PRODUCTS LOADED IN HOME PAGE: ${products.length}");
-
-        return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.65,
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.7,
+      ),
+      itemCount: 8,
+      itemBuilder: (context, index) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 6,
+                offset: Offset(0, 3),
+              ),
+            ],
           ),
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            return ProductCard(product: products[index]);
-          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.shopping_bag, size: 40),
+              const SizedBox(height: 8),
+              Text(
+                "Product ${index + 1}",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         );
       },
     );
   }
 
-  // -------------------------------------------------------------------
-  // ⭐ BEAUTIFUL PREMIUM AUTO-SCROLL + USER-SCROLL OFFER RIBBON
-  // -------------------------------------------------------------------
   Widget _premiumOfferRibbon() {
-    List<String> offers = [
+    final offers = [
       "💗 Flat 10% OFF on ₹1000+ orders",
       "✨ 20% OFF on ₹4000+ purchases",
       "⭐ Members get extra 5% cashback",
@@ -188,85 +176,29 @@ class _HomePageState extends State<HomePage>
 
     return SizedBox(
       height: 48,
-      child: Listener(
-        // 👇 allows horizontal drag to manually scroll ribbon
-        onPointerMove: (details) {
-          if (_scrollController.hasClients) {
-            _scrollController.jumpTo(
-              _scrollController.offset - details.delta.dx,
-            );
-          }
+      child: ListView.builder(
+        controller: _scrollController,
+        scrollDirection: Axis.horizontal,
+        itemCount: 1000,
+        itemBuilder: (_, i) {
+          final offer = offers[i % offers.length];
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 6),
+              ],
+            ),
+            child: Text(
+              offer,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          );
         },
-        child: Stack(
-          children: [
-            ListView.builder(
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: 9999,
-              itemBuilder: (_, i) {
-                String offer = offers[i % offers.length];
-
-                return Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.pinkAccent.withOpacity(0.17),
-                        Colors.white.withOpacity(0.9),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.pinkAccent.withOpacity(0.15),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    offer,
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.pink.shade900,
-                    ),
-                  ),
-                );
-              },
-            ),
-
-            /// ⭐ Soft fade edges — aesthetic, not blocking scroll
-            Positioned.fill(
-              child: IgnorePointer(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.white.withOpacity(0.9),
-                        Colors.white.withOpacity(0.0),
-                        Colors.white.withOpacity(0.0),
-                        Colors.white.withOpacity(0.9),
-                      ],
-                      stops: const [0.0, 0.12, 0.88, 1.0],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
