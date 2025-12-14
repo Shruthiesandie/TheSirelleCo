@@ -3,6 +3,8 @@ import os
 BASE_PATH = "assets/images"
 OUTPUT_FILE = "lib/data/product_data.dart"
 
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp")
+
 products = []
 
 for category in sorted(os.listdir(BASE_PATH)):
@@ -19,18 +21,31 @@ for category in sorted(os.listdir(BASE_PATH)):
 
         images = [thumbnail]
 
+        # 1️⃣ Add images directly inside product folder (except bottle.jpg)
+        for file in sorted(os.listdir(product_path)):
+            if file.lower() == "bottle.jpg":
+                continue
+
+            file_path = os.path.join(product_path, file)
+            if os.path.isfile(file_path) and file.lower().endswith(IMAGE_EXTENSIONS):
+                images.append(
+                    f"assets/images/{category}/{folder}/{file}"
+                )
+
+        # 2️⃣ Add images from bdiff1 folder (if exists)
         diff_folder = os.path.join(product_path, "bdiff1")
         if os.path.exists(diff_folder):
             for img in sorted(os.listdir(diff_folder)):
-                images.append(
-                    f"assets/images/{category}/{folder}/bdiff1/{img}"
-                )
+                if img.lower().endswith(IMAGE_EXTENSIONS):
+                    images.append(
+                        f"assets/images/{category}/{folder}/bdiff1/{img}"
+                    )
 
         product = f"""
   Product(
     id: '{folder}',
     name: '{folder.upper()}',
-    category: '{category.capitalize()}',
+    category: '{category.replace("_", " ").capitalize()}',
     price: 899,
     thumbnail: '{thumbnail}',
     images: {images},
@@ -48,4 +63,4 @@ final List<Product> allProducts = [
 with open(OUTPUT_FILE, "w") as f:
     f.write(dart_file)
 
-print("✅ All categories product_data.dart generated successfully")
+print("✅ product_data.dart generated with ALL images")
