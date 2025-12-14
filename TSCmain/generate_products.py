@@ -17,19 +17,34 @@ for category in sorted(os.listdir(BASE_PATH)):
         if not os.path.isdir(product_path):
             continue
 
-        thumbnail = f"assets/images/{category}/{folder}/bottle.jpg"
+        # Find main image (thumbnail) from product root
+        thumbnail = None
+        for file in sorted(os.listdir(product_path)):
+            file_path = os.path.join(product_path, file)
+            if os.path.isfile(file_path) and file.lower().endswith(IMAGE_EXTENSIONS):
+                thumbnail = f"assets/images/{category}/{folder}/{file}"
+                break
+
         images = []
 
-        # Add images from bdiff1 (skip bottle.jpg)
-        diff_folder = os.path.join(product_path, "bdiff1")
-        if os.path.exists(diff_folder):
-            for img in sorted(os.listdir(diff_folder)):
-                if img.lower() == "bottle.jpg":
-                    continue
-                if img.lower().endswith(IMAGE_EXTENSIONS):
+        # Collect gallery images from ALL subfolders (excluding thumbnail)
+        thumb_name = os.path.basename(thumbnail) if thumbnail else None
+
+        for sub in sorted(os.listdir(product_path)):
+            sub_path = os.path.join(product_path, sub)
+            if os.path.isdir(sub_path):
+                for img in sorted(os.listdir(sub_path)):
+                    if not img.lower().endswith(IMAGE_EXTENSIONS):
+                        continue
+                    if img == thumb_name:
+                        continue
                     images.append(
-                        f"assets/images/{category}/{folder}/bdiff1/{img}"
+                        f"assets/images/{category}/{folder}/{sub}/{img}"
                     )
+
+        # If no gallery images found, use thumbnail as image
+        if not images and thumbnail is not None:
+            images.append(thumbnail)
 
         product = f"""
   Product(
