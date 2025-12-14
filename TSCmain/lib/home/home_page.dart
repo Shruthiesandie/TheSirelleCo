@@ -36,8 +36,8 @@ class _HomePageState extends State<HomePage>
     super.initState();
 
     screens = [
-      _buildHomeProducts(),
-      const Center(child: Text("Favourite Page")),
+      const SizedBox.shrink(), // Home screen intentionally empty
+      const SizedBox.shrink(), // Favourite screen empty for now
       AllCategoriesPage(
         onBackToHome: () {
           setState(() => selectedIndex = 0);
@@ -126,46 +126,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ✅ SIMPLE, STABLE HOME CONTENT
-  Widget _buildHomeProducts() {
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.7,
-      ),
-      itemCount: 8,
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 6,
-                offset: Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.shopping_bag, size: 40),
-              const SizedBox(height: 8),
-              Text(
-                "Product ${index + 1}",
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _premiumOfferRibbon() {
     final offers = [
       "💗 Flat 10% OFF on ₹1000+ orders",
@@ -187,15 +147,31 @@ class _HomePageState extends State<HomePage>
             padding:
                 const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white,
               borderRadius: BorderRadius.circular(28),
-              boxShadow: const [
-                BoxShadow(color: Colors.black12, blurRadius: 6),
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFFF6FAF),
+                  Color(0xFFFF9AD5),
+                  Color(0xFFFFC1E3),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFFFF6FAF).withOpacity(0.35),
+                  blurRadius: 14,
+                  offset: Offset(0, 6),
+                ),
               ],
             ),
             child: Text(
               offer,
-              style: const TextStyle(fontWeight: FontWeight.w700),
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                fontSize: 13.5,
+              ),
             ),
           );
         },
