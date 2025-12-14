@@ -24,7 +24,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
   int selectedCategoryIndex = -1;
 
-  List<Product> _visibleProducts = [];
 
   final List<String> categories = [
     "All",
@@ -59,25 +58,8 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
       curve: Curves.easeOut,
     ));
 
-    _visibleProducts = List.from(allProducts);
-    _searchController.addListener(_applyFilters);
   }
 
-  void _applyFilters() {
-    final query = _searchController.text.toLowerCase();
-
-    setState(() {
-      _visibleProducts = allProducts.where((product) {
-        final matchesSearch = product.name.toLowerCase().contains(query);
-        final matchesCategory = selectedCategoryIndex <= 0
-            ? true
-            : product.category ==
-                categories[selectedCategoryIndex];
-
-        return matchesSearch && matchesCategory;
-      }).toList();
-    });
-  }
 
   @override
   void dispose() {
@@ -222,7 +204,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                       setState(() {
                         selectedCategoryIndex = index;
                       });
-                      _applyFilters();
                     },
                     child: Padding(
                       padding: const EdgeInsets.only(right: 12),
@@ -321,82 +302,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               ),
             ),
 
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _visibleProducts.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.72,
-                ),
-                itemBuilder: (context, index) {
-                  final product = _visibleProducts[index];
-
-                  return GestureDetector(
-                    onTap: () {
-                      // navigate to product detail later
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius:
-                                  const BorderRadius.vertical(top: Radius.circular(18)),
-                              child: Image.asset(
-                                product.thumbnail,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  product.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "₹${product.price}",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.pinkAccent,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            
           ],
         ),
       ),
