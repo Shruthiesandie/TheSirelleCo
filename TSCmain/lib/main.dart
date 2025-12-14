@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'splash/splash_screen.dart';
 
 // Pages
@@ -13,8 +14,18 @@ import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+  final assetPaths = manifest.listAssets();
+  debugPrint('📦 ASSET MANIFEST (${assetPaths.length} assets):');
+  for (final p in assetPaths) {
+    if (p.startsWith('assets/images/')) {
+      debugPrint(p);
+    }
+  }
+
   runApp(const MyApp());
 }
 
