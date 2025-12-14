@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 // Pages
 import '../pages/membership_page.dart';
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage>
   late final List<Widget> screens;
 
   bool _userScrollingRibbon = false;
+  Timer? _autoScrollTimer;
 
   @override
   void initState() {
@@ -56,21 +58,32 @@ class _HomePageState extends State<HomePage>
     WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoScroll());
   }
 
-  void _startAutoScroll() async {
-    while (mounted) {
-      await Future.delayed(const Duration(milliseconds: 40));
-      if (_scrollController.hasClients && !_userScrollingRibbon) {
-        final max = _scrollController.position.maxScrollExtent;
-        final next = _scrollController.offset + 0.8;
-        _scrollController.jumpTo(next >= max ? 0 : next);
-      }
-    }
+  void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
+
+    _autoScrollTimer = Timer.periodic(
+      const Duration(milliseconds: 60),
+      (_) {
+        if (!_scrollController.hasClients || _userScrollingRibbon) return;
+
+        final position = _scrollController.position;
+        final max = position.maxScrollExtent;
+        final next = position.pixels + 0.6;
+
+        _scrollController.animateTo(
+          next >= max ? 0 : next,
+          duration: const Duration(milliseconds: 80),
+          curve: Curves.linear,
+        );
+      },
+    );
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     _marqueeController.dispose();
+    _autoScrollTimer?.cancel();
     super.dispose();
   }
 
@@ -80,39 +93,45 @@ class _HomePageState extends State<HomePage>
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
       drawer: const HomeDrawer(),
+      extendBody: true,
 
-      body: SafeArea(
+      body: MediaQuery.removePadding(
+        context: context,
+        removeBottom: true,
         child: Stack(
           children: [
-            Column(
-              children: [
-                if (selectedIndex == 0) ...[
-                  _premiumOfferRibbon(),
-                  HomeTopBar(
-                    onMenuTap: () =>
-                        _scaffoldKey.currentState!.openDrawer(),
-                    onSearchTap: () =>
-                        Navigator.pushNamed(context, "/search"),
-                    onMembershipTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const MembershipPage(),
-                        ),
-                      );
-                    },
+            SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
+                  if (selectedIndex == 0) ...[
+                    _premiumOfferRibbon(),
+                    HomeTopBar(
+                      onMenuTap: () =>
+                          _scaffoldKey.currentState!.openDrawer(),
+                      onSearchTap: () =>
+                          Navigator.pushNamed(context, "/search"),
+                      onMembershipTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MembershipPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+
+                  Expanded(
+                    child: selectedIndex == 0
+                        ? const SizedBox.shrink() // Home = EMPTY (no Product 1–7)
+                        : IndexedStack(
+                            index: selectedIndex,
+                            children: screens,
+                          ),
                   ),
                 ],
-
-                Expanded(
-                  child: selectedIndex == 0
-                      ? const SizedBox.shrink() // Home = EMPTY (no Product 1–7)
-                      : IndexedStack(
-                          index: selectedIndex,
-                          children: screens,
-                        ),
-                ),
-              ],
+              ),
             ),
 
             Positioned(
