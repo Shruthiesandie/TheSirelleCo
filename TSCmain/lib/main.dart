@@ -19,8 +19,8 @@ import 'pages/username_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final productService = ProductService();
-  await productService.seedIfEmpty(seedProducts);
+  final service = ProductService();
+  await service.insertProducts(seedProducts);
 
   runApp(const MyApp());
 }

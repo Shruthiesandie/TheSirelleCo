@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 
+import '../models/product.dart';
+import '../services/product_service.dart';
 
 class AllCategoriesPage extends StatefulWidget {
   final VoidCallback? onBackToHome;
@@ -24,16 +26,8 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
   int selectedCategoryIndex = -1;
 
-final List<String> allImages = [
-  'assets/images/bottles/b1/bottle.png',
-  'assets/images/bottles/b2/bottle2.png',
-  'assets/images/bottles/b3/bottle3.png',
-  'assets/images/bottles/b4/bottle4.png',
-  'assets/images/bottles/b5/bottle5.png',
-  'assets/images/bottles/b6/bottle61.png',
-  'assets/images/bottles/b7/bottle7.png',
-  'assets/images/bottles/b8/bottle8.png',
-];
+  List<Product> _products = [];
+  bool _loading = true;
 
   final List<String> categories = [
     "All",
@@ -68,8 +62,18 @@ final List<String> allImages = [
       curve: Curves.easeOut,
     ));
 
+    _loadProducts();
   }
 
+  Future<void> _loadProducts() async {
+    final service = ProductService();
+    final data = await service.getAllProducts();
+
+    setState(() {
+      _products = data;
+      _loading = false;
+    });
+  }
 
   @override
   void dispose() {
@@ -312,36 +316,38 @@ final List<String> allImages = [
               ),
             ),
 
-            
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: GridView.builder(
-                  itemCount: allImages.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                  ),
-                  itemBuilder: (context, index) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
-                      child: Container(
-                        color: Colors.white,
-                        child: Image.asset(
-                          allImages[index],
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) {
-                            return const Center(
-                              child: Icon(Icons.broken_image, size: 30),
-                            );
-                          },
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : GridView.builder(
+                        itemCount: _products.length,
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
                         ),
+                        itemBuilder: (context, index) {
+                          final product = _products[index];
+
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(18),
+                            child: Container(
+                              color: Colors.white,
+                              child: Image.asset(
+                                product.thumbnail,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) {
+                                  return const Center(
+                                    child: Icon(Icons.broken_image, size: 30),
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
             ),
           ],
