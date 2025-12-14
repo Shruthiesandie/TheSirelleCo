@@ -31,6 +31,8 @@ class _HomePageState extends State<HomePage>
 
   late final List<Widget> screens;
 
+  bool _userScrollingRibbon = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,8 +59,10 @@ class _HomePageState extends State<HomePage>
   void _startAutoScroll() async {
     while (mounted) {
       await Future.delayed(const Duration(milliseconds: 40));
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.offset + 1);
+      if (_scrollController.hasClients && !_userScrollingRibbon) {
+        final max = _scrollController.position.maxScrollExtent;
+        final next = _scrollController.offset + 0.8;
+        _scrollController.jumpTo(next >= max ? 0 : next);
       }
     }
   }
@@ -136,45 +140,54 @@ class _HomePageState extends State<HomePage>
 
     return SizedBox(
       height: 48,
-      child: ListView.builder(
-        controller: _scrollController,
-        scrollDirection: Axis.horizontal,
-        itemCount: 1000,
-        itemBuilder: (_, i) {
-          final offer = offers[i % offers.length];
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFFF6FAF),
-                  Color(0xFFFF9AD5),
-                  Color(0xFFFFC1E3),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0xFFFF6FAF).withOpacity(0.35),
-                  blurRadius: 14,
-                  offset: Offset(0, 6),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (_) => false,
+        child: Listener(
+          onPointerDown: (_) => _userScrollingRibbon = true,
+          onPointerUp: (_) => _userScrollingRibbon = false,
+          onPointerCancel: (_) => _userScrollingRibbon = false,
+          child: ListView.builder(
+            controller: _scrollController,
+            physics: const BouncingScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            itemCount: 1000,
+            itemBuilder: (_, i) {
+              final offer = offers[i % offers.length];
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFFFF6FAF),
+                      Color(0xFFFF9AD5),
+                      Color(0xFFFFC1E3),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFFFF6FAF).withOpacity(0.35),
+                      blurRadius: 14,
+                      offset: Offset(0, 6),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Text(
-              offer,
-              style: const TextStyle(
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                fontSize: 13.5,
-              ),
-            ),
-          );
-        },
+                child: Text(
+                  offer,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    fontSize: 13.5,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
