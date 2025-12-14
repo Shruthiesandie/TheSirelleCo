@@ -40,7 +40,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/data/
     - assets/logo/
     - assets/splash/
     - assets/animation/
