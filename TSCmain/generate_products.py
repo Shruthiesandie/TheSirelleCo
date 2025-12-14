@@ -18,7 +18,7 @@ for category in sorted(os.listdir(BASE_PATH)):
             continue
 
         thumbnail = f"assets/images/{category}/{folder}/bottle.jpg"
-        images = [thumbnail]
+        images = []
 
         # Add images from bdiff1 (skip bottle.jpg)
         diff_folder = os.path.join(product_path, "bdiff1")
