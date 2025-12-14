@@ -62,17 +62,17 @@ class _HomePageState extends State<HomePage>
     _autoScrollTimer?.cancel();
 
     _autoScrollTimer = Timer.periodic(
-      const Duration(milliseconds: 60),
+      const Duration(milliseconds: 25),
       (_) {
         if (!_scrollController.hasClients || _userScrollingRibbon) return;
 
         final position = _scrollController.position;
         final max = position.maxScrollExtent;
-        final next = position.pixels + 0.6;
+        final next = position.pixels + 4.5;
 
         _scrollController.animateTo(
           next >= max ? 0 : next,
-          duration: const Duration(milliseconds: 80),
+          duration: const Duration(milliseconds: 25),
           curve: Curves.linear,
         );
       },
@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage>
     ];
 
     return SizedBox(
-      height: 48,
+      height: 42,
       child: Listener(
         // 👇 allows horizontal drag to manually scroll ribbon
         onPointerMove: (details) {
@@ -185,10 +185,10 @@ class _HomePageState extends State<HomePage>
 
                 return Container(
                   margin:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 10,
+                    horizontal: 16,
+                    vertical: 8,
                   ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(28),
@@ -211,8 +211,8 @@ class _HomePageState extends State<HomePage>
                   child: Text(
                     offer,
                     style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 12.8,
+                      fontWeight: FontWeight.w600,
                       color: Colors.pink.shade900,
                     ),
                   ),
