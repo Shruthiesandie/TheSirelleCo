@@ -15,6 +15,11 @@ class ProductService {
     return _db!;
   }
 
+  /// Initialize the DB (keeps compatibility with callers using `init`)
+  Future<void> init() async {
+    await database;
+  }
+
   Future<Database> _initDB() async {
     final path = join(await getDatabasesPath(), 'products.db');
 
