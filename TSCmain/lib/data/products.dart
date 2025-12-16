@@ -6,9 +6,9 @@ final List<Product> products = [
     name: "Bottle 1",
     thumbnail: "assets/splash/123.png",
     images: [
-      "assets/images/bottle/b1/bottle.png",
-      "assets/images/bottle/b1/bdiff1/bottle11.png",
-      "assets/images/bottle/b1/bdiff1/bottle12.png",
+      "assets/images/bottles/b1/bottle.png",
+      "assets/images/bottles/b1/bdiff1/bottle11.png",
+      "assets/images/bottles/b1/bdiff1/bottle12.png",
       "assets/images/bottle/b1/bdiff1/bottle13.png",
     ],
   ),
@@ -16,12 +16,12 @@ final List<Product> products = [
   Product(
     id: "b2",
     name: "Bottle 2",
-    thumbnail: "assets/images/bottle/b2/bottle.png",
+    thumbnail: "assets/splash/123.png",
     images: [
-      "assets/images/bottle/b2/bottle2.png",
-      "assets/images/bottle/b2/bdiff2/bottle21.png",
-      "assets/images/bottle/b2/bdiff2/bottle22.png",
-      "assets/images/bottle/b2/bdiff2/bottle23.png",
+      "assets/images/bottles/b2/bottle2.png",
+      "assets/splash/123.png",
+      "assets/splash/123.png",
+      "assets/splash/123.png",
     ],
   ),
 
