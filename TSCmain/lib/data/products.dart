@@ -18,7 +18,7 @@ final List<Product> products = [
     name: "Bottle 2",
     thumbnail: "assets/images/bottle/b2/bottle.png",
     images: [
-      "assets/images/bottle/b2/main.png",
+      "assets/images/bottle/b2/bottle2.png",
       "assets/images/bottle/b2/bdiff2/bottle21.png",
       "assets/images/bottle/b2/bdiff2/bottle22.png",
       "assets/images/bottle/b2/bdiff2/bottle23.png",
