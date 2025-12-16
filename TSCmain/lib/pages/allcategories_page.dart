@@ -298,28 +298,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               ),
             ),
 
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.zero,
-                child: GridView.builder(
-                  itemCount: 6,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                  ),
-                  itemBuilder: (context, index) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
-                      child: Container(
-                        color: Colors.white,
-                        child: const SizedBox.shrink(),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
           ],
         ),
       ),
