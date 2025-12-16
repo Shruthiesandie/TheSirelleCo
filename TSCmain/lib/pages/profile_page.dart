@@ -369,44 +369,6 @@ class _ProfilePageState extends State<ProfilePage>
                       ],
                     ),
 
-                    // ======= Address & Delivery =======
-                    ProfileSection(
-                      title: 'Address & Delivery',
-                      children: [
-                        profileOptionTile(
-                          context,
-                          Icons.location_on_outlined,
-                          'Address',
-                          onTap: () {
-                            /* open address manager */
-                          },
-                        ),
-                      ],
-                    ),
-
-                    // ======= Payment =======
-                    ProfileSection(
-                      title: 'Payment',
-                      children: [
-                        profileOptionTile(
-                          context,
-                          Icons.payment,
-                          'Payment Methods',
-                          onTap: () {
-                            /* open payment manager */
-                          },
-                        ),
-                        profileOptionTile(
-                          context,
-                          Icons.account_balance_wallet_outlined,
-                          'Payments / Wallet',
-                          onTap: () {
-                            /* wallet */
-                          },
-                        ),
-                      ],
-                    ),
-
                     // ======= Offers & Wallet =======
                     ProfileSection(
                       title: 'Offers & Wallet',
@@ -441,6 +403,44 @@ class _ProfilePageState extends State<ProfilePage>
                           'Rewards / Loyalty Points',
                           onTap: () {
                             /* rewards */
+                          },
+                        ),
+                      ],
+                    ),              
+
+                    // ======= Address & Delivery =======
+                    ProfileSection(
+                      title: 'Address & Delivery',
+                      children: [
+                        profileOptionTile(
+                          context,
+                          Icons.location_on_outlined,
+                          'Address',
+                          onTap: () {
+                            /* open address manager */
+                          },
+                        ),
+                      ],
+                    ),
+
+                    // ======= Payment =======
+                    ProfileSection(
+                      title: 'Payment',
+                      children: [
+                        profileOptionTile(
+                          context,
+                          Icons.payment,
+                          'Payment Methods',
+                          onTap: () {
+                            /* open payment manager */
+                          },
+                        ),
+                        profileOptionTile(
+                          context,
+                          Icons.account_balance_wallet_outlined,
+                          'Payments / Wallet',
+                          onTap: () {
+                            /* wallet */
                           },
                         ),
                       ],
