@@ -3,10 +3,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 
-import '../models/product.dart';
-import '../services/product_service.dart';
-import '../data/seed_products.dart';
-
 class AllCategoriesPage extends StatefulWidget {
   final VoidCallback? onBackToHome;
 
@@ -26,9 +22,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
   final TextEditingController _searchController = TextEditingController();
 
   int selectedCategoryIndex = -1;
-
-  List<Product> _products = [];
-  bool _loading = true;
 
   final List<String> categories = [
     "All",
@@ -62,23 +55,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
       parent: _animController,
       curve: Curves.easeOut,
     ));
-
-    _loadProducts();
-  }
-
-  Future<void> _loadProducts() async {
-    final service = ProductService();
-    final data = await service.getAllProducts();
-
-    setState(() {
-      if (data.isEmpty) {
-        // 🔴 Fallback so UI never stays blank
-        _products = seedProducts;
-      } else {
-        _products = data;
-      }
-      _loading = false;
-    });
   }
 
   @override
@@ -325,35 +301,29 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : GridView.builder(
-                        itemCount: _products.length,
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 14,
+                child: GridView.builder(
+                  itemCount: 6,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                  ),
+                  itemBuilder: (context, index) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        color: Colors.white,
+                        child: const Center(
+                          child: Icon(
+                            Icons.image_outlined,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
                         ),
-                        itemBuilder: (context, index) {
-                          final product = _products[index];
-
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(18),
-                            child: Container(
-                              color: Colors.white,
-                              child: Image.asset(
-                                product.thumbnail,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) {
-                                  return const Center(
-                                    child: Icon(Icons.broken_image, size: 30),
-                                  );
-                                },
-                              ),
-                            ),
-                          );
-                        },
                       ),
+                    );
+                  },
+                ),
               ),
             ),
           ],

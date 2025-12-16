@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'splash/splash_screen.dart';
 
-import 'services/product_service.dart';
-import 'data/seed_products.dart';
-
 // Pages
 import 'home/home_page.dart';
 import 'pages/membership_page.dart';
@@ -18,14 +15,6 @@ import 'pages/username_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  try {
-    final service = ProductService();
-    await service.init();
-    await service.insertProducts(seedProducts);
-  } catch (e) {
-    debugPrint('Product DB init error: $e');
-  }
 
   runApp(const MyApp());
 }
