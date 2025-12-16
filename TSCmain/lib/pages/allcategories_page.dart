@@ -300,7 +300,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.zero,
                 child: GridView.builder(
                   itemCount: 6,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -313,13 +313,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                       borderRadius: BorderRadius.circular(18),
                       child: Container(
                         color: Colors.white,
-                        child: const Center(
-                          child: Icon(
-                            Icons.image_outlined,
-                            size: 40,
-                            color: Colors.grey,
-                          ),
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     );
                   },
