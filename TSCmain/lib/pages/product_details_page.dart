@@ -20,6 +20,15 @@ class ProductDetailsPage extends StatelessWidget {
                 return Image.asset(
                   product.images[index],
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Icon(
+                        Icons.broken_image,
+                        color: Colors.grey,
+                        size: 40,
+                      ),
+                    );
+                  },
                 );
               },
             ),
