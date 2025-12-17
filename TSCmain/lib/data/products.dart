@@ -2,14 +2,14 @@ import '../models/product.dart';
 
 final List<Product> products = [
   Product(
-    id: "b1",
-    name: "Bottle 1",
-    thumbnail: "assets/images/123.png",
+    id: "c1",
+    name: "candle 1",
+    thumbnail: "assets/images/candle/c1/glass1.png",
     images: [
-      "assets/images/bottles/b1/bottle.JPG",
-      "assets/images/bottles/b1/bdiff1/bottle11.jpg",
-      "assets/images/bottles/b1/bdiff1/bottle12.PNG",
-      "assets/images/bottle/b1/bdiff1/bottle13.JPG",
+      "assets/images/candle/c1/glass1.png",
+      "assets/images/candle/c1/cdiff/glass11.png",
+      "assets/images/candle/c1/cdiff/glass12.png",
+      "assets/images/candle/c1/cdiff/glass13.png",
     ],
   ),
 
