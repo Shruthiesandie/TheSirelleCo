@@ -7,9 +7,9 @@ final List<Product> products = [
     thumbnail: "assets/images/candle/c1/glass1.png",
     images: [
       "assets/images/candle/c1/glass1.png",
-      "assets/images/candle/c1/cdiff/glass11.png",
-      "assets/images/candle/c1/cdiff/glass12.png",
-      "assets/images/candle/c1/cdiff/glass13.png",
+      "assets/images/candle/c1/cdiff1/glass11.png",
+      "assets/images/candle/c1/cdiff1/glass12.png",
+      "assets/images/candle/c1/cdiff1/glass13.png",
     ],
   ),
 
