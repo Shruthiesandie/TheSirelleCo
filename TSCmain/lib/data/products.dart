@@ -4,7 +4,7 @@ final List<Product> products = [
   Product(
     id: "c1",
     name: "candle 1",
-    thumbnail: "assets/images/candle/c1/glass1.png",
+    thumbnail: "assets/images/candle/c1/candlee.jpeg",
     images: [
       "assets/images/candle/c1/glass1.png",
       "assets/images/candle/c1/cdiff1/glass11.png",
