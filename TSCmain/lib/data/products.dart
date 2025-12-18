@@ -90,4 +90,39 @@ Product(
     "assets/images/bottle/b8/bdiff/bottle83.png",
   ],
   ),
+
+  Product(
+  id: "c1",
+  name: "Candle 1",
+  thumbnail: "assets/images/candle/c1/glass1.png",
+  images: [
+    "assets/images/candle/c1/candle.png",
+    "assets/images/candle/c1/cdiff/glass11.png",
+    "assets/images/candle/c1/cdiff/glass12.png",
+    "assets/images/candle/c1/cdiff/glass13.png",
+  ],
+  ),
+  Product(
+    id: "c2",
+    name: "Candle 2",
+    thumbnail: "assets/images/candle/c2/glass2.png",
+    images: [
+      "assets/images/candle/c2/candle2.png",
+      "assets/images/candle/c2/cdiff2/glass21.png",
+      "assets/images/candle/c2/cdiff2/glass22.png",
+      "assets/images/candle/c2/cdiff2/glass23.png",
+  ],
+  ),
+  Product(
+    id: "c3",
+    name: "Candle 3",
+    thumbnail: "assets/images/candle/c3/cake1.png",
+    images: [
+      "assets/images/candle/c3/candle3.png",
+      "assets/images/candle/c3/cdiff3/glass31.png",
+      "assets/images/candle/c3/cdiff3/glass32.png",
+      "assets/images/candle/c3/cdiff3/glass33.png",
+    ],
+  ),
+
 ];
