@@ -6,10 +6,9 @@ final List<Product> products = [
     name: "candle 1",
     thumbnail: "assets/images/bottles/b1/candlee.png",
     images: [
-      "assets/images/candle/c1/glass1.png",
-      "assets/images/candle/c1/cdiff1/glass11.png",
-      "assets/images/candle/c1/cdiff1/glass12.png",
-      "assets/images/candle/c1/cdiff1/glass13.png",
+      "assets/images/bottle/b1/bdiff/glass11.png",
+      "assets/images/bottle/b1/bdiff/glass12.png",
+      "assets/images/bottle/b1/bdiff/glass13.png",
     ],
   ),
 
