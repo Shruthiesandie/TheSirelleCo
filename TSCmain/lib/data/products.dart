@@ -3,7 +3,7 @@ import '../models/product.dart';
 final List<Product> products = [
   Product(
     id: "b1",
-    name: "candle 1",
+    name: "bottle 1",
     thumbnail: "assets/images/bottles/b1/candlee.png",
     images: [
       "assets/images/bottle/b1/bdiff1/bottle11.png",
