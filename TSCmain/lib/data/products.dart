@@ -15,12 +15,12 @@ final List<Product> products = [
   Product(
     id: "b2",
     name: "Bottle 2",
-    thumbnail: "assets/splash/candlee.png",
+    thumbnail: "assets/images/bottles/b2/bottle2.png",
     images: [
-      "assets/images/bottles/b2/bottle.png",
-      "assets/splash/123.png",
-      "assets/splash/123.png",
-      "assets/splash/123.png",
+      "assets/images/bottle/b2/bdiff/bottle21.png",
+      "assets/images/bottle/b2/bdiff/bottle22.png",
+      "assets/images/bottle/b2/bdiff/bottle23.png",
+      "assets/images/bottle/b2/bdiff/bottle24.png",
     ],
   ),
 
