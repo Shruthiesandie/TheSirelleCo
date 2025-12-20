@@ -1,10 +1,8 @@
-import '../models/product.dart';
-
 final List<Product> products = [
 
   Product(
     id: "b1",
-    name: "Minimal Steel Water Bottle",
+    name: "Bottles 1",
     thumbnail: "assets/images/bottles/b1/bottle11.png",
     images: [
       "assets/images/bottles/b1/bottle11.png",
@@ -17,7 +15,7 @@ final List<Product> products = [
 
   Product(
     id: "b2",
-    name: "Matte Finish Water Bottle",
+    name: "Bottles 2",
     thumbnail: "assets/images/bottles/b2/bottle2.png",
     images: [
       "assets/images/bottles/b2/bottle2.png",
@@ -30,7 +28,7 @@ final List<Product> products = [
 
   Product(
     id: "b3",
-    name: "Classic Everyday Bottle",
+    name: "Bottles 3",
     thumbnail: "assets/images/bottles/b3/bottle3.png",
     images: [
       "assets/images/bottles/b3/bottle3.png",
@@ -43,7 +41,7 @@ final List<Product> products = [
 
   Product(
     id: "b4",
-    name: "Slim Grip Water Bottle",
+    name: "Bottles 4",
     thumbnail: "assets/images/bottles/b4/bottle4.png",
     images: [
       "assets/images/bottles/b4/bottle4.png",
@@ -56,7 +54,7 @@ final List<Product> products = [
 
   Product(
     id: "b5",
-    name: "Pastel Leakproof Bottle",
+    name: "Bottles 5",
     thumbnail: "assets/images/bottles/b5/bottle5.png",
     images: [
       "assets/images/bottles/b5/bottle5.png",
@@ -69,7 +67,7 @@ final List<Product> products = [
 
   Product(
     id: "b6",
-    name: "Premium Travel Bottle",
+    name: "Bottles 6",
     thumbnail: "assets/images/bottles/b6/bottle6.png",
     images: [
       "assets/images/bottles/b6/bottle6.png",
@@ -82,7 +80,7 @@ final List<Product> products = [
 
   Product(
     id: "b7",
-    name: "Soft Touch Water Bottle",
+    name: "Bottles 7",
     thumbnail: "assets/images/bottles/b7/bottle7.png",
     images: [
       "assets/images/bottles/b7/bottle7.png",
@@ -95,7 +93,7 @@ final List<Product> products = [
 
   Product(
     id: "b8",
-    name: "Compact Daily Bottle",
+    name: "Bottles 8",
     thumbnail: "assets/images/bottles/b8/bottle8.png",
     images: [
       "assets/images/bottles/b8/bottle8.png",
@@ -108,7 +106,7 @@ final List<Product> products = [
 
   Product(
     id: "c1",
-    name: "Glass Jar Scented Candle",
+    name: "Candle 1",
     thumbnail: "assets/images/candle/c1/glass1.png",
     images: [
       "assets/images/candle/c1/glass1.png",
@@ -121,7 +119,7 @@ final List<Product> products = [
 
   Product(
     id: "c10",
-    name: "Cake Candle – Vanilla",
+    name: "Candle 10",
     thumbnail: "assets/images/candle/c10/cake2.png",
     images: [
       "assets/images/candle/c10/cake2.png",
@@ -134,7 +132,7 @@ final List<Product> products = [
 
   Product(
     id: "c11",
-    name: "Cake Candle – Chocolate",
+    name: "Candle 11",
     thumbnail: "assets/images/candle/c11/cake3.png",
     images: [
       "assets/images/candle/c11/cake3.png",
@@ -147,7 +145,7 @@ final List<Product> products = [
 
   Product(
     id: "c12",
-    name: "Soft Glow Glass Candle",
+    name: "Candle 12",
     thumbnail: "assets/images/candle/c12/glass5.png",
     images: [
       "assets/images/candle/c12/glass5.png",
@@ -160,7 +158,7 @@ final List<Product> products = [
 
   Product(
     id: "c13",
-    name: "Cake Candle – Rose",
+    name: "Candle 13",
     thumbnail: "assets/images/candle/c13/cake4.png",
     images: [
       "assets/images/candle/c13/cake4.png",
@@ -173,7 +171,7 @@ final List<Product> products = [
 
   Product(
     id: "c14",
-    name: "Cake Candle – Strawberry",
+    name: "Candle 14",
     thumbnail: "assets/images/candle/c14/cake5.png",
     images: [
       "assets/images/candle/c14/cake5.png",
@@ -186,7 +184,7 @@ final List<Product> products = [
 
   Product(
     id: "c15",
-    name: "Glass Aroma Candle",
+    name: "Candle 15",
     thumbnail: "assets/images/candle/c15/glass6.png",
     images: [
       "assets/images/candle/c15/glass6.png",
@@ -199,7 +197,7 @@ final List<Product> products = [
 
   Product(
     id: "c16",
-    name: "Cake Candle – Caramel",
+    name: "Candle 16",
     thumbnail: "assets/images/candle/c16/cake6.png",
     images: [
       "assets/images/candle/c16/cake6.png",
@@ -212,7 +210,7 @@ final List<Product> products = [
 
   Product(
     id: "c17",
-    name: "Cake Candle – Berry",
+    name: "Candle 17",
     thumbnail: "assets/images/candle/c17/cake7.png",
     images: [
       "assets/images/candle/c17/cake7.png",
@@ -225,7 +223,7 @@ final List<Product> products = [
 
   Product(
     id: "c18",
-    name: "Cake Candle – Citrus",
+    name: "Candle 18",
     thumbnail: "assets/images/candle/c18/cake8.png",
     images: [
       "assets/images/candle/c18/cake8.png",
@@ -238,7 +236,7 @@ final List<Product> products = [
 
   Product(
     id: "c19",
-    name: "Cake Candle – Mocha",
+    name: "Candle 19",
     thumbnail: "assets/images/candle/c19/cake9.png",
     images: [
       "assets/images/candle/c19/cake9.png",
@@ -251,7 +249,7 @@ final List<Product> products = [
 
   Product(
     id: "c2",
-    name: "Minimal Aroma Candle",
+    name: "Candle 2",
     thumbnail: "assets/images/candle/c2/glass2.png",
     images: [
       "assets/images/candle/c2/glass2.png",
@@ -264,7 +262,7 @@ final List<Product> products = [
 
   Product(
     id: "c20",
-    name: "Cake Candle – Cream",
+    name: "Candle 20",
     thumbnail: "assets/images/candle/c20/cake10.png",
     images: [
       "assets/images/candle/c20/cake10.png",
@@ -277,7 +275,7 @@ final List<Product> products = [
 
   Product(
     id: "c21",
-    name: "Cake Candle – Honey",
+    name: "Candle 21",
     thumbnail: "assets/images/candle/c21/cake11.png",
     images: [
       "assets/images/candle/c21/cake11.png",
@@ -290,7 +288,7 @@ final List<Product> products = [
 
   Product(
     id: "c22",
-    name: "Cake Candle – Almond",
+    name: "Candle 22",
     thumbnail: "assets/images/candle/c22/cake12.png",
     images: [
       "assets/images/candle/c22/cake12.png",
@@ -303,7 +301,7 @@ final List<Product> products = [
 
   Product(
     id: "c23",
-    name: "Cake Candle – Lavender",
+    name: "Candle 23",
     thumbnail: "assets/images/candle/c23/cake13.png",
     images: [
       "assets/images/candle/c23/cake13.png",
@@ -316,7 +314,7 @@ final List<Product> products = [
 
   Product(
     id: "c3",
-    name: "Cake Style Candle",
+    name: "Candle 3",
     thumbnail: "assets/images/candle/c3/cake1.png",
     images: [
       "assets/images/candle/c3/cake1.png",
@@ -329,7 +327,7 @@ final List<Product> products = [
 
   Product(
     id: "c4",
-    name: "Classic Glass Candle",
+    name: "Candle 4",
     thumbnail: "assets/images/candle/c4/glass3.png",
     images: [
       "assets/images/candle/c4/glass3.png",
@@ -342,7 +340,7 @@ final List<Product> products = [
 
   Product(
     id: "c5",
-    name: "Macaron Scented Candle",
+    name: "Candle 5",
     thumbnail: "assets/images/candle/c5/macarron.png",
     images: [
       "assets/images/candle/c5/macarron.png",
@@ -355,7 +353,7 @@ final List<Product> products = [
 
   Product(
     id: "c6",
-    name: "Popcorn Aroma Candle",
+    name: "Candle 6",
     thumbnail: "assets/images/candle/c6/popcorn.png",
     images: [
       "assets/images/candle/c6/popcorn.png",
@@ -368,7 +366,7 @@ final List<Product> products = [
 
   Product(
     id: "c7",
-    name: "Croissant Candle",
+    name: "Candle 7",
     thumbnail: "assets/images/candle/c7/crossaint.png",
     images: [
       "assets/images/candle/c7/crossaint.png",
@@ -381,7 +379,7 @@ final List<Product> products = [
 
   Product(
     id: "c8",
-    name: "Lemon Decor Candle",
+    name: "Candle 8",
     thumbnail: "assets/images/candle/c8/lemon.png",
     images: [
       "assets/images/candle/c8/lemon.png",
@@ -394,7 +392,7 @@ final List<Product> products = [
 
   Product(
     id: "c9",
-    name: "Elegant Glass Candle",
+    name: "Candle 9",
     thumbnail: "assets/images/candle/c9/glass4.png",
     images: [
       "assets/images/candle/c9/glass4.png",
@@ -407,7 +405,7 @@ final List<Product> products = [
 
   Product(
     id: "ca1",
-    name: "Everyday Cotton Cap",
+    name: "Caps a1",
     thumbnail: "assets/images/caps/ca1/cap1.png",
     images: [
       "assets/images/caps/ca1/cap1.png",
@@ -420,7 +418,7 @@ final List<Product> products = [
 
   Product(
     id: "ca2",
-    name: "Street Style Baseball Cap",
+    name: "Caps a2",
     thumbnail: "assets/images/caps/ca2/cap2.png",
     images: [
       "assets/images/caps/ca2/cap2.png",
@@ -433,7 +431,7 @@ final List<Product> products = [
 
   Product(
     id: "ca3",
-    name: "Minimal Logo Cap",
+    name: "Caps a3",
     thumbnail: "assets/images/caps/ca3/cap3.png",
     images: [
       "assets/images/caps/ca3/cap3.png",
@@ -446,7 +444,7 @@ final List<Product> products = [
 
   Product(
     id: "ca4",
-    name: "Vintage Washed Cap",
+    name: "Caps a4",
     thumbnail: "assets/images/caps/ca4/cap4.png",
     images: [
       "assets/images/caps/ca4/cap4.png",
@@ -459,7 +457,7 @@ final List<Product> products = [
 
   Product(
     id: "ca5",
-    name: "Soft Fit Casual Cap",
+    name: "Caps a5",
     thumbnail: "assets/images/caps/ca5/cap5.png",
     images: [
       "assets/images/caps/ca5/cap5.png",
@@ -472,7 +470,7 @@ final List<Product> products = [
 
   Product(
     id: "ca6",
-    name: "Premium Everyday Cap",
+    name: "Caps a6",
     thumbnail: "assets/images/caps/ca6/cap6.png",
     images: [
       "assets/images/caps/ca6/cap6.png",
@@ -485,7 +483,7 @@ final List<Product> products = [
 
   Product(
     id: "ca7",
-    name: "Urban Classic Cap",
+    name: "Caps a7",
     thumbnail: "assets/images/caps/ca7/cap7.png",
     images: [
       "assets/images/caps/ca7/cap7.png",
@@ -498,7 +496,7 @@ final List<Product> products = [
 
   Product(
     id: "ca8",
-    name: "Relaxed Fit Street Cap",
+    name: "Caps a8",
     thumbnail: "assets/images/caps/ca8/cap8.png",
     images: [
       "assets/images/caps/ca8/cap8.png",
@@ -511,7 +509,7 @@ final List<Product> products = [
 
   Product(
     id: "ce1",
-    name: "Handcrafted Ceramic Mug",
+    name: "Ceramic e1",
     thumbnail: "assets/images/ceramic/ce1/cup1.png",
     images: [
       "assets/images/ceramic/ce1/cup1.png",
@@ -524,7 +522,7 @@ final List<Product> products = [
 
   Product(
     id: "ce2",
-    name: "Minimal Ceramic Cup",
+    name: "Ceramic e2",
     thumbnail: "assets/images/ceramic/ce2/cup2.png",
     images: [
       "assets/images/ceramic/ce2/cup2.png",
@@ -537,7 +535,7 @@ final List<Product> products = [
 
   Product(
     id: "ce3",
-    name: "Classic Coffee Mug",
+    name: "Ceramic e3",
     thumbnail: "assets/images/ceramic/ce3/cup3.png",
     images: [
       "assets/images/ceramic/ce3/cup3.png",
@@ -550,7 +548,7 @@ final List<Product> products = [
 
   Product(
     id: "ce4",
-    name: "Elegant Ceramic Cup",
+    name: "Ceramic e4",
     thumbnail: "assets/images/ceramic/ce4/cup4.png",
     images: [
       "assets/images/ceramic/ce4/cup4.png",
@@ -563,7 +561,7 @@ final List<Product> products = [
 
   Product(
     id: "ce5",
-    name: "Soft Glaze Ceramic Mug",
+    name: "Ceramic e5",
     thumbnail: "assets/images/ceramic/ce5/cup5.png",
     images: [
       "assets/images/ceramic/ce5/cup5.png",
@@ -576,7 +574,7 @@ final List<Product> products = [
 
   Product(
     id: "ce6",
-    name: "Premium Ceramic Mug",
+    name: "Ceramic e6",
     thumbnail: "assets/images/ceramic/ce6/cup6.png",
     images: [
       "assets/images/ceramic/ce6/cup6.png",
@@ -589,7 +587,7 @@ final List<Product> products = [
 
   Product(
     id: "ce7",
-    name: "Modern Tea Cup",
+    name: "Ceramic e7",
     thumbnail: "assets/images/ceramic/ce7/cup7.png",
     images: [
       "assets/images/ceramic/ce7/cup7.png",
@@ -602,7 +600,7 @@ final List<Product> products = [
 
   Product(
     id: "ce8",
-    name: "Pastel Ceramic Cup",
+    name: "Ceramic e8",
     thumbnail: "assets/images/ceramic/ce8/cup8.png",
     images: [
       "assets/images/ceramic/ce8/cup8.png",
@@ -615,7 +613,7 @@ final List<Product> products = [
 
   Product(
     id: "h1",
-    name: "Cute Bear Hair Band",
+    name: "Hair_accessories 1",
     thumbnail: "assets/images/hair_accessories/h1/bearband.png",
     images: [
       "assets/images/hair_accessories/h1/bearband.png",
@@ -628,7 +626,7 @@ final List<Product> products = [
 
   Product(
     id: "h2",
-    name: "Soft Fabric Hair Band",
+    name: "Hair_accessories 2",
     thumbnail: "assets/images/hair_accessories/h2/band1.png",
     images: [
       "assets/images/hair_accessories/h2/band1.png",
@@ -641,7 +639,7 @@ final List<Product> products = [
 
   Product(
     id: "h3",
-    name: "Minimal Hair Clip",
+    name: "Hair_accessories 3",
     thumbnail: "assets/images/hair_accessories/h3/clip.png",
     images: [
       "assets/images/hair_accessories/h3/clip.png",
@@ -654,7 +652,7 @@ final List<Product> products = [
 
   Product(
     id: "h4",
-    name: "Princess Crown Clip",
+    name: "Hair_accessories 4",
     thumbnail: "assets/images/hair_accessories/h4/crown.png",
     images: [
       "assets/images/hair_accessories/h4/crown.png",
@@ -667,7 +665,7 @@ final List<Product> products = [
 
   Product(
     id: "h5",
-    name: "Daily Wear Hair Band",
+    name: "Hair_accessories 5",
     thumbnail: "assets/images/hair_accessories/h5/band2.png",
     images: [
       "assets/images/hair_accessories/h5/band2.png",
@@ -680,7 +678,7 @@ final List<Product> products = [
 
   Product(
     id: "h6",
-    name: "Classic Hair Clutch",
+    name: "Hair_accessories 6",
     thumbnail: "assets/images/hair_accessories/h6/clutch.png",
     images: [
       "assets/images/hair_accessories/h6/clutch.png",
@@ -693,7 +691,7 @@ final List<Product> products = [
 
   Product(
     id: "h7",
-    name: "Striped Hair Band",
+    name: "Hair_accessories 7",
     thumbnail: "assets/images/hair_accessories/h7/band3.png",
     images: [
       "assets/images/hair_accessories/h7/band3.png",
@@ -706,7 +704,7 @@ final List<Product> products = [
 
   Product(
     id: "h8",
-    name: "Pastel Hair Clutch",
+    name: "Hair_accessories 8",
     thumbnail: "assets/images/hair_accessories/h8/clutch2.png",
     images: [
       "assets/images/hair_accessories/h8/clutch2.png",
@@ -719,7 +717,7 @@ final List<Product> products = [
 
   Product(
     id: "k1",
-    name: "Star Plush Keychain",
+    name: "Key_chain 1",
     thumbnail: "assets/images/key_chain/k1/star.png",
     images: [
       "assets/images/key_chain/k1/star.png",
@@ -732,7 +730,7 @@ final List<Product> products = [
 
   Product(
     id: "k2",
-    name: "Mini ID Pouch Keychain",
+    name: "Key_chain 2",
     thumbnail: "assets/images/key_chain/k2/idbag.png",
     images: [
       "assets/images/key_chain/k2/idbag.png",
@@ -745,7 +743,7 @@ final List<Product> products = [
 
   Product(
     id: "k3",
-    name: "Cute Cat Keychain",
+    name: "Key_chain 3",
     thumbnail: "assets/images/key_chain/k3/catkey.png",
     images: [
       "assets/images/key_chain/k3/catkey.png",
@@ -758,7 +756,7 @@ final List<Product> products = [
 
   Product(
     id: "k4",
-    name: "Dog Charm Keychain",
+    name: "Key_chain 4",
     thumbnail: "assets/images/key_chain/k4/dogkey.png",
     images: [
       "assets/images/key_chain/k4/dogkey.png",
@@ -771,7 +769,7 @@ final List<Product> products = [
 
   Product(
     id: "k5",
-    name: "Teddy Bear Keychain",
+    name: "Key_chain 5",
     thumbnail: "assets/images/key_chain/k5/teddykey.png",
     images: [
       "assets/images/key_chain/k5/teddykey.png",
@@ -784,7 +782,7 @@ final List<Product> products = [
 
   Product(
     id: "k6",
-    name: "Plush Man Keychain",
+    name: "Key_chain 6",
     thumbnail: "assets/images/key_chain/k6/teddyman.png",
     images: [
       "assets/images/key_chain/k6/teddyman.png",
@@ -797,7 +795,7 @@ final List<Product> products = [
 
   Product(
     id: "k7",
-    name: "Cat Face Keychain",
+    name: "Key_chain 7",
     thumbnail: "assets/images/key_chain/k7/cattykey.png",
     images: [
       "assets/images/key_chain/k7/cattykey.png",
@@ -810,7 +808,7 @@ final List<Product> products = [
 
   Product(
     id: "k8",
-    name: "Alpaca Plush Keychain",
+    name: "Key_chain 8",
     thumbnail: "assets/images/key_chain/k8/alpa.png",
     images: [
       "assets/images/key_chain/k8/alpa.png",
@@ -823,7 +821,7 @@ final List<Product> products = [
 
   Product(
     id: "1",
-    name: "Monogram Letter – A",
+    name: "Letter ",
     thumbnail: "assets/images/letter/1/letter1.png",
     images: [
       "assets/images/letter/1/letter1.png"
@@ -833,7 +831,7 @@ final List<Product> products = [
 
   Product(
     id: "10",
-    name: "Monogram Letter – J",
+    name: "Letter 0",
     thumbnail: "assets/images/letter/10/letter10.png",
     images: [
       "assets/images/letter/10/letter10.png"
@@ -843,7 +841,7 @@ final List<Product> products = [
 
   Product(
     id: "11",
-    name: "Monogram Letter – K",
+    name: "Letter 1",
     thumbnail: "assets/images/letter/11/letter11.png",
     images: [
       "assets/images/letter/11/letter11.png"
@@ -853,7 +851,7 @@ final List<Product> products = [
 
   Product(
     id: "12",
-    name: "Monogram Letter – L",
+    name: "Letter 2",
     thumbnail: "assets/images/letter/12/letter12.png",
     images: [
       "assets/images/letter/12/letter12.png"
@@ -863,7 +861,7 @@ final List<Product> products = [
 
   Product(
     id: "13",
-    name: "Monogram Letter – M",
+    name: "Letter 3",
     thumbnail: "assets/images/letter/13/letter13.png",
     images: [
       "assets/images/letter/13/letter13.png"
@@ -873,7 +871,7 @@ final List<Product> products = [
 
   Product(
     id: "14",
-    name: "Monogram Letter – N",
+    name: "Letter 4",
     thumbnail: "assets/images/letter/14/letter14.png",
     images: [
       "assets/images/letter/14/letter14.png"
@@ -883,7 +881,7 @@ final List<Product> products = [
 
   Product(
     id: "15",
-    name: "Monogram Letter – O",
+    name: "Letter 5",
     thumbnail: "assets/images/letter/15/letter15.png",
     images: [
       "assets/images/letter/15/letter15.png"
@@ -893,7 +891,7 @@ final List<Product> products = [
 
   Product(
     id: "16",
-    name: "Monogram Letter – P",
+    name: "Letter 6",
     thumbnail: "assets/images/letter/16/letter16.png",
     images: [
       "assets/images/letter/16/letter16.png"
@@ -903,7 +901,7 @@ final List<Product> products = [
 
   Product(
     id: "17",
-    name: "Monogram Letter – Q",
+    name: "Letter 7",
     thumbnail: "assets/images/letter/17/letter17.png",
     images: [
       "assets/images/letter/17/letter17.png"
@@ -913,7 +911,7 @@ final List<Product> products = [
 
   Product(
     id: "18",
-    name: "Monogram Letter – R",
+    name: "Letter 8",
     thumbnail: "assets/images/letter/18/letter18.png",
     images: [
       "assets/images/letter/18/letter18.png"
@@ -923,7 +921,7 @@ final List<Product> products = [
 
   Product(
     id: "19",
-    name: "Monogram Letter – S",
+    name: "Letter 9",
     thumbnail: "assets/images/letter/19/letter19.png",
     images: [
       "assets/images/letter/19/letter19.png"
@@ -933,7 +931,7 @@ final List<Product> products = [
 
   Product(
     id: "2",
-    name: "Monogram Letter – B",
+    name: "Letter ",
     thumbnail: "assets/images/letter/2/letter2.png",
     images: [
       "assets/images/letter/2/letter2.png"
@@ -943,7 +941,7 @@ final List<Product> products = [
 
   Product(
     id: "20",
-    name: "Monogram Letter – T",
+    name: "Letter 0",
     thumbnail: "assets/images/letter/20/letter20.png",
     images: [
       "assets/images/letter/20/letter20.png",
@@ -954,7 +952,7 @@ final List<Product> products = [
 
   Product(
     id: "21",
-    name: "Monogram Letter – U",
+    name: "Letter 1",
     thumbnail: "assets/images/letter/21/letter21.png",
     images: [
       "assets/images/letter/21/letter21.png"
@@ -964,7 +962,7 @@ final List<Product> products = [
 
   Product(
     id: "22",
-    name: "Monogram Letter – V",
+    name: "Letter 2",
     thumbnail: "assets/images/letter/22/letter22.png",
     images: [
       "assets/images/letter/22/letter22.png"
@@ -974,7 +972,7 @@ final List<Product> products = [
 
   Product(
     id: "3",
-    name: "Monogram Letter – C",
+    name: "Letter ",
     thumbnail: "assets/images/letter/3/letter3.png",
     images: [
       "assets/images/letter/3/letter3.png"
@@ -984,7 +982,7 @@ final List<Product> products = [
 
   Product(
     id: "4",
-    name: "Monogram Letter – D",
+    name: "Letter ",
     thumbnail: "assets/images/letter/4/letter4.png",
     images: [
       "assets/images/letter/4/letter4.png"
@@ -994,7 +992,7 @@ final List<Product> products = [
 
   Product(
     id: "5",
-    name: "Monogram Letter – E",
+    name: "Letter ",
     thumbnail: "assets/images/letter/5/letter5.png",
     images: [
       "assets/images/letter/5/letter5.png"
@@ -1004,7 +1002,7 @@ final List<Product> products = [
 
   Product(
     id: "6",
-    name: "Monogram Letter – F",
+    name: "Letter ",
     thumbnail: "assets/images/letter/6/letter6.png",
     images: [
       "assets/images/letter/6/letter6.png"
@@ -1014,7 +1012,7 @@ final List<Product> products = [
 
   Product(
     id: "7",
-    name: "Monogram Letter – G",
+    name: "Letter ",
     thumbnail: "assets/images/letter/7/letter7.png",
     images: [
       "assets/images/letter/7/letter7.png"
@@ -1024,7 +1022,7 @@ final List<Product> products = [
 
   Product(
     id: "8",
-    name: "Monogram Letter – H",
+    name: "Letter ",
     thumbnail: "assets/images/letter/8/letter8.png",
     images: [
       "assets/images/letter/8/letter8.png"
@@ -1034,7 +1032,7 @@ final List<Product> products = [
 
   Product(
     id: "9",
-    name: "Monogram Letter – I",
+    name: "Letter ",
     thumbnail: "assets/images/letter/9/img_2345.png",
     images: [
       "assets/images/letter/9/img_2345.png"
@@ -1044,7 +1042,7 @@ final List<Product> products = [
 
   Product(
     id: "n1",
-    name: "Glossy Press-On Nails",
+    name: "Nails 1",
     thumbnail: "assets/images/nails/n1/nail1.png",
     images: [
       "assets/images/nails/n1/nail1.png",
@@ -1057,7 +1055,7 @@ final List<Product> products = [
 
   Product(
     id: "n2",
-    name: "Soft Pink Nail Set",
+    name: "Nails 2",
     thumbnail: "assets/images/nails/n2/nail2.png",
     images: [
       "assets/images/nails/n2/nail2.png",
@@ -1070,7 +1068,7 @@ final List<Product> products = [
 
   Product(
     id: "n3",
-    name: "Minimal Nude Nails",
+    name: "Nails 3",
     thumbnail: "assets/images/nails/n3/nail3.png",
     images: [
       "assets/images/nails/n3/nail3.png",
@@ -1083,7 +1081,7 @@ final List<Product> products = [
 
   Product(
     id: "n4",
-    name: "Classic French Nails",
+    name: "Nails 4",
     thumbnail: "assets/images/nails/n4/nail4.png",
     images: [
       "assets/images/nails/n4/nail4.png",
@@ -1096,7 +1094,7 @@ final List<Product> products = [
 
   Product(
     id: "n5",
-    name: "Pastel Nail Art Set",
+    name: "Nails 5",
     thumbnail: "assets/images/nails/n5/nail5.png",
     images: [
       "assets/images/nails/n5/nail5.png",
@@ -1109,7 +1107,7 @@ final List<Product> products = [
 
   Product(
     id: "n6",
-    name: "Elegant Nail Set",
+    name: "Nails 6",
     thumbnail: "assets/images/nails/n6/nail6.png",
     images: [
       "assets/images/nails/n6/nail6.png",
@@ -1122,7 +1120,7 @@ final List<Product> products = [
 
   Product(
     id: "n7",
-    name: "Trendy Nail Art",
+    name: "Nails 7",
     thumbnail: "assets/images/nails/n7/nail7.png",
     images: [
       "assets/images/nails/n7/nail7.png",
@@ -1135,7 +1133,7 @@ final List<Product> products = [
 
   Product(
     id: "n8",
-    name: "Luxury Nail Finish",
+    name: "Nails 8",
     thumbnail: "assets/images/nails/n8/nail8.png",
     images: [
       "assets/images/nails/n8/nail8.png",
@@ -1148,7 +1146,7 @@ final List<Product> products = [
 
   Product(
     id: "p1",
-    name: "Cute Cat Plush Toy",
+    name: "Plusie 1",
     thumbnail: "assets/images/plusie/p1/cat.png",
     images: [
       "assets/images/plusie/p1/cat.png",
@@ -1161,7 +1159,7 @@ final List<Product> products = [
 
   Product(
     id: "p2",
-    name: "Dino Soft Plush",
+    name: "Plusie 2",
     thumbnail: "assets/images/plusie/p2/dino.png",
     images: [
       "assets/images/plusie/p2/dino.png",
@@ -1174,7 +1172,7 @@ final List<Product> products = [
 
   Product(
     id: "p3",
-    name: "Deer Plush Toy",
+    name: "Plusie 3",
     thumbnail: "assets/images/plusie/p3/deer.png",
     images: [
       "assets/images/plusie/p3/deer.png",
@@ -1187,7 +1185,7 @@ final List<Product> products = [
 
   Product(
     id: "p4",
-    name: "Unicorn Plush Toy",
+    name: "Plusie 4",
     thumbnail: "assets/images/plusie/p4/horn.png",
     images: [
       "assets/images/plusie/p4/horn.png",
@@ -1200,7 +1198,7 @@ final List<Product> products = [
 
   Product(
     id: "p5",
-    name: "Rabbit Plush Toy",
+    name: "Plusie 5",
     thumbnail: "assets/images/plusie/p5/rabbit.png",
     images: [
       "assets/images/plusie/p5/rabbit.png",
@@ -1213,7 +1211,7 @@ final List<Product> products = [
 
   Product(
     id: "p6",
-    name: "Raccoon Plush Toy",
+    name: "Plusie 6",
     thumbnail: "assets/images/plusie/p6/racoon.png",
     images: [
       "assets/images/plusie/p6/racoon.png",
@@ -1226,7 +1224,7 @@ final List<Product> products = [
 
   Product(
     id: "p7",
-    name: "Dog Plush Toy",
+    name: "Plusie 7",
     thumbnail: "assets/images/plusie/p7/doggy.png",
     images: [
       "assets/images/plusie/p7/doggy.png",
@@ -1239,7 +1237,7 @@ final List<Product> products = [
 
   Product(
     id: "p8",
-    name: "Fruit Bunny Plush",
+    name: "Plusie 8",
     thumbnail: "assets/images/plusie/p8/rabbitfruit.png",
     images: [
       "assets/images/plusie/p8/rabbitfruit.png",

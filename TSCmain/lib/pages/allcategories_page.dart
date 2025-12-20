@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:math';
 
 import '../data/products.dart';
 import 'product_details_page.dart';
@@ -17,6 +18,7 @@ class AllCategoriesPage extends StatefulWidget {
 
 class _AllCategoriesPageState extends State<AllCategoriesPage>
     with SingleTickerProviderStateMixin {
+  late List<String> _allCategoryCachedThumbs;
   bool showSearch = false;
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
@@ -24,22 +26,43 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
   final TextEditingController _searchController = TextEditingController();
 
-  int selectedCategoryIndex = -1;
+  int selectedCategoryIndex = 0;
+  String selectedCategory = "All";
+
+  // Wishlist UI-only state
+  final Set<String> _wishlist = {};
+
+  // Badge helper (randomized but stable per product)
+  String? _badgeFor(product) {
+    final r = product.id.hashCode % 5;
+    if (r == 0) return "NEW";
+    if (r == 1) return "-20%";
+    if (r == 2) return "BESTSELLER";
+    return null;
+  }
 
   final List<String> categories = [
     "All",
-    "Dresses",
-    "Jewellery",
-    "Tops",
-    "Hoodies",
-    "Shoes",
-    "Bags",
-    "Accessories"
+    "bottles",
+    "candle",
+    "caps",
+    "ceramic",
+    "hair_accessories",
+    "key_chain",
+    "letter",
+    "nails",
+    "plusie",
   ];
 
   @override
   void initState() {
     super.initState();
+
+    _allCategoryCachedThumbs = products
+        .map((p) => p.thumbnail)
+        .where((t) => t.isNotEmpty)
+        .toList();
+    _allCategoryCachedThumbs.shuffle(Random());
 
     _animController = AnimationController(
       vsync: this,
@@ -67,12 +90,126 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
     super.dispose();
   }
 
+  // Helper to get a category thumbnail image from first product in that category
+  String? _categoryThumbnail(String category) {
+    if (category == "All") {
+      return products.isNotEmpty ? products.first.thumbnail : null;
+    }
+
+    try {
+      final match = products.firstWhere(
+        (p) {
+          final parts = p.thumbnail.split("/");
+          return parts.length > 3 && parts[2] == category;
+        },
+      );
+      return match.thumbnail;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // Helper to get multiple thumbnails for "All" category (creative collage)
+  List<String> _allCategoryThumbnails({int limit = 4}) {
+    return _allCategoryCachedThumbs.length > limit
+        ? _allCategoryCachedThumbs.sublist(0, limit)
+        : _allCategoryCachedThumbs;
+  }
+
+  // Build category content with frosted glass and product image thumbnail
+  Widget _buildCategoryContent(String category, bool isActive) {
+    // Special creative collage for "All"
+    if (category == "All") {
+      final thumbs = _allCategoryThumbnails();
+
+      return ClipOval(
+        child: GridView.count(
+          crossAxisCount: 2,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 1,
+          crossAxisSpacing: 1,
+          children: thumbs.map((t) {
+            return Container(
+              color: Colors.white.withOpacity(0.6),
+              child: Image.asset(
+                t,
+                fit: BoxFit.cover,
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    // Normal category: single product image
+    final thumb = _categoryThumbnail(category);
+
+    return ClipOval(
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: thumb != null
+                ? Image.asset(
+                    thumb,
+                    fit: BoxFit.cover,
+                  )
+                : Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.pink.shade300,
+                          Colors.purple.shade300,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                  ),
+          ),
+
+          if (isActive)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      Colors.white.withOpacity(0.45),
+                      Colors.transparent,
+                    ],
+                    radius: 0.6,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final filteredProducts = selectedCategory == "All"
+        ? products
+        : products.where((p) {
+            final parts = p.thumbnail.split("/");
+            return parts.length > 3 && parts[2] == selectedCategory;
+          }).toList();
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFCEEEE),
+      backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Column(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFFFCEEEE),
+                Color(0xFFFFF6F6),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Column(
           children: [
             // Curved top bar with gradient glow
             Container(
@@ -179,7 +316,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                           decoration: const InputDecoration(
                             prefixIcon: Icon(Icons.search,
                                 color: Colors.pinkAccent),
-                            hintText: "Search products...",
+                            hintText: "Search the collection",
                             hintStyle: TextStyle(color: Colors.black54),
                             border: InputBorder.none,
                           ),
@@ -191,17 +328,36 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               ),
             ),
 
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text(
+                    "Shop by Category",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             SizedBox(
               height: 125,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: 10, // 10 aesthetic circular categories
+                physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () {
                       setState(() {
                         selectedCategoryIndex = index;
+                        selectedCategory = categories[index];
                       });
                     },
                     child: Padding(
@@ -215,7 +371,8 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                               height: 85.5,
                               width: 85.5,
                               transform: Matrix4.identity()
-                                ..rotateZ(selectedCategoryIndex == index ? 0.05 : 0.0),
+                                ..scale(selectedCategoryIndex == index ? 1.08 : 1.0)
+                                ..rotateZ(selectedCategoryIndex == index ? 0.04 : 0.0),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
@@ -231,9 +388,12 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.pink.withOpacity(0.25),
-                                    blurRadius: 6,
-                                    offset: Offset(0, 4),
+                                    color: selectedCategoryIndex == index
+                                        ? Colors.pinkAccent.withOpacity(0.6)
+                                        : Colors.pink.withOpacity(0.25),
+                                    blurRadius: selectedCategoryIndex == index ? 18 : 6,
+                                    spreadRadius: selectedCategoryIndex == index ? 2 : 0,
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
@@ -243,7 +403,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                                     // shimmer background
                                     AnimatedOpacity(
                                       duration: Duration(milliseconds: 600),
-                                      opacity: 0.6,
+                                      opacity: 0.25,
                                       child: Container(
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
@@ -271,12 +431,10 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                                         ),
                                       ),
                                     ),
-                                    // placeholder icon
-                                    Center(
-                                      child: Icon(
-                                        Icons.image_outlined,
-                                        size: 34,
-                                        color: Colors.grey.shade500,
+                                    Positioned.fill(
+                                      child: _buildCategoryContent(
+                                        categories[index],
+                                        selectedCategoryIndex == index,
                                       ),
                                     ),
                                   ],
@@ -286,13 +444,23 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            "Item ${index + 1}",
+                            categories[index].replaceAll("_", " ").toUpperCase(),
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
                             ),
-                          )
+                          ),
+                          if (selectedCategoryIndex == index)
+                            Container(
+                              margin: const EdgeInsets.only(top: 4),
+                              height: 4,
+                              width: 4,
+                              decoration: const BoxDecoration(
+                                color: Colors.pinkAccent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -303,16 +471,17 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
             Expanded(
               child: GridView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: products.length,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                itemCount: filteredProducts.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
                   childAspectRatio: 0.75,
                 ),
+                physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
-                  final product = products[index];
+                  final product = filteredProducts[index];
 
                   return GestureDetector(
                     onTap: () {
@@ -323,33 +492,135 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                         ),
                       );
                     },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image.asset(
-                              product.thumbnail,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Center(
-                                  child: Icon(
-                                    Icons.broken_image,
-                                    color: Colors.grey,
-                                    size: 40,
-                                  ),
-                                );
-                              },
-                            ),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 140),
+                      transform: Matrix4.identity()
+                        ..translate(0.0, -2.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.10),
+                            blurRadius: 24,
+                            offset: const Offset(0, 12),
                           ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(22),
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: Image.asset(
+                                product.thumbnail,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+
+                            Positioned.fill(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.black.withOpacity(0.55),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // Wishlist
+                            Positioned(
+                              top: 10,
+                              left: 10,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _wishlist.contains(product.id)
+                                        ? _wishlist.remove(product.id)
+                                        : _wishlist.add(product.id);
+                                  });
+                                },
+                                child: Icon(
+                                  _wishlist.contains(product.id)
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: _wishlist.contains(product.id)
+                                      ? Colors.pinkAccent
+                                      : Colors.white,
+                                ),
+                              ),
+                            ),
+
+                            // Badge
+                            if (_badgeFor(product) != null)
+                              Positioned(
+                                top: 10,
+                                right: 10,
+                                child: Container(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.9),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    _badgeFor(product)!,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.6,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                            // Price at top-right, below badge if present
+                            Positioned(
+                              top: _badgeFor(product) != null ? 44 : 10,
+                              right: 10,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.75),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  "₹${product.price}",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // Name
+                            Positioned(
+                              left: 12,
+                              right: 12,
+                              bottom: 12,
+                              child: Text(
+                                product.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          product.name,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
+                      ),
                     ),
                   );
                 },
@@ -358,7 +629,8 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
           ],
         ),
-      ),
-    );
-  }
+      ), // <-- closes Container
+    ),   // <-- closes SafeArea
+  );
+}
 }

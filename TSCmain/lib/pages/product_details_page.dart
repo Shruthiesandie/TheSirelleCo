@@ -1,40 +1,406 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 
-class ProductDetailsPage extends StatelessWidget {
+class ProductDetailsPage extends StatefulWidget {
   final Product product;
 
   const ProductDetailsPage({super.key, required this.product});
 
   @override
+  State<ProductDetailsPage> createState() => _ProductDetailsPageState()
+  ;
+}
+
+class _ProductDetailsPageState extends State<ProductDetailsPage>
+    with SingleTickerProviderStateMixin {
+  int _currentIndex = 0;
+  bool _wishlisted = false;
+
+  late final ScrollController _scrollController;
+
+  late AnimationController _heartController;
+  late Animation<double> _heartScale;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+
+    _heartController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 260),
+    );
+
+    _heartScale = Tween<double>(begin: 1.0, end: 1.3)
+        .chain(CurveTween(curve: Curves.easeOutBack))
+        .animate(_heartController);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _heartController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final product = widget.product;
+
     return Scaffold(
-      appBar: AppBar(title: Text(product.name)),
-      body: Column(
-        children: [
-          SizedBox(
-            height: 320,
-            child: PageView.builder(
-              itemCount: product.images.length,
-              itemBuilder: (context, index) {
-                return Image.asset(
-                  product.images[index],
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(
-                        Icons.broken_image,
-                        color: Colors.grey,
-                        size: 40,
+      backgroundColor: Colors.white,
+      body: CustomScrollView(
+        slivers: [
+          // COLLAPSING HERO IMAGE
+          SliverAppBar(
+            automaticallyImplyLeading: false,
+            pinned: true,
+            expandedHeight: MediaQuery.of(context).size.height * 0.6,
+            backgroundColor: Colors.white,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                children: [
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final delta =
+                          (constraints.maxHeight - kToolbarHeight).clamp(0.0, 300.0);
+
+                      return PageView.builder(
+                        itemCount: product.images.length,
+                        onPageChanged: (i) =>
+                            setState(() => _currentIndex = i),
+                        itemBuilder: (context, index) {
+                          return Transform.translate(
+                            offset: Offset(0, -delta * 0.15),
+                            child: Image.asset(
+                              product.images[index],
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const Center(
+                                    child: Icon(Icons.broken_image, size: 40),
+                                  ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+
+                  // TOP ACTIONS
+                  Positioned(
+                    top: 40,
+                    left: 16,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        onTap: () => Navigator.pop(context),
+                        child: _circleIcon(Icons.arrow_back_ios_new),
                       ),
-                    );
-                  },
-                );
-              },
+                    ),
+                  ),
+                  Positioned(
+                    top: 40,
+                    right: 16,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        onTap: () {
+                          setState(() => _wishlisted = !_wishlisted);
+                          _heartController.forward(from: 0);
+                        },
+                        child: ScaleTransition(
+                          scale: _heartScale,
+                          child: _circleIcon(
+                            _wishlisted
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            active: _wishlisted,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // PAGE INDICATORS
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  product.images.length,
+                  (i) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: _currentIndex == i ? 18 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color:
+                          _currentIndex == i ? Colors.black : Colors.black26,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // DETAILS CONTENT
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  // NAME
+                  Text(
+                    product.name,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // PRICE
+                  Text(
+                    "₹${product.price}",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+                  const Divider(height: 1),
+                  const SizedBox(height: 14),
+
+                  // DESCRIPTION
+                  const Text(
+                    "Designed with intention. Crafted to elevate your everyday style. "
+                    "A perfect balance of form, function, and finish.",
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.6,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // DETAILS SECTION
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          "THE DETAILS",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        _DetailRow(text: "Handcrafted premium finish"),
+                        _DetailRow(text: "Designed for everyday use"),
+                        _DetailRow(text: "Carefully quality-checked"),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // WHY YOU’LL LOVE IT
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        "WHY YOU’LL LOVE IT",
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      _LoveChip(text: "Perfect for gifting"),
+                      _LoveChip(text: "Minimal & aesthetic design"),
+                      _LoveChip(text: "Thoughtful craftsmanship"),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // DELIVERY INFO
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      _InfoBadge(
+                          icon: Icons.local_shipping_outlined,
+                          text: "Free delivery"),
+                      _InfoBadge(
+                          icon: Icons.refresh_outlined,
+                          text: "7-day returns"),
+                      _InfoBadge(
+                          icon: Icons.verified_outlined,
+                          text: "Quality checked"),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
+      // STICKY CTA (Nike / Zara style)
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 20,
+              offset: const Offset(0, -8),
+            ),
+          ],
+        ),
+        child: SizedBox(
+          height: 54,
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+            ),
+            child: const Text(
+              "Add to Bag",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _circleIcon(
+    IconData icon, {
+    bool active = false,
+  }) {
+    return Container(
+      height: 40,
+      width: 40,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.92),
+        shape: BoxShape.circle,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: Icon(
+        icon,
+        size: 18,
+        color: active ? Colors.pinkAccent : Colors.black,
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final String text;
+  const _DetailRow({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle,
+              size: 16, color: Colors.black87),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LoveChip extends StatelessWidget {
+  final String text;
+  const _LoveChip({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            height: 6,
+            width: 6,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoBadge extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _InfoBadge({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, size: 20),
+        const SizedBox(height: 6),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }
