@@ -6,6 +6,7 @@ import 'dart:math';
 
 import '../data/products.dart';
 import 'product_details_page.dart';
+import '../models/product.dart';
 
 class AllCategoriesPage extends StatefulWidget {
   final VoidCallback? onBackToHome;
@@ -90,110 +91,51 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
     super.dispose();
   }
 
-  // Helper to get a category thumbnail image from first product in that category
-  String? _categoryThumbnail(String category) {
-    if (category == "All") {
-      return products.isNotEmpty ? products.first.thumbnail : null;
+
+  String _categoryIcon(String category) {
+    switch (category) {
+      case "All":
+        return "assets/icons/all.png";
+      case "bottles":
+        return "assets/icons/bottel.png";
+      case "candle":
+        return "assets/icons/candle.png";
+      case "caps":
+        return "assets/icons/caps.png";
+      case "ceramic":
+        return "assets/icons/ceramic.png";
+      case "hair_accessories":
+        return "assets/icons/hair_accessories.png";
+      case "key_chain":
+        return "assets/icons/key_chain.png";
+      case "letter":
+        return "assets/icons/letter.png";
+      case "nails":
+        return "assets/icons/nail.png";
+      case "plusie":
+        return "assets/icons/plusie.png";
+      default:
+        return "assets/icons/all.png";
     }
-
-    try {
-      final match = products.firstWhere(
-        (p) {
-          final parts = p.thumbnail.split("/");
-          return parts.length > 3 && parts[2] == category;
-        },
-      );
-      return match.thumbnail;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  // Helper to get multiple thumbnails for "All" category (creative collage)
-  List<String> _allCategoryThumbnails({int limit = 4}) {
-    return _allCategoryCachedThumbs.length > limit
-        ? _allCategoryCachedThumbs.sublist(0, limit)
-        : _allCategoryCachedThumbs;
-  }
-
-  // Build category content with frosted glass and product image thumbnail
-  Widget _buildCategoryContent(String category, bool isActive) {
-    // Special creative collage for "All"
-    if (category == "All") {
-      final thumbs = _allCategoryThumbnails();
-
-      return ClipOval(
-        child: GridView.count(
-          crossAxisCount: 2,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 1,
-          crossAxisSpacing: 1,
-          children: thumbs.map((t) {
-            return Container(
-              color: Colors.white.withOpacity(0.6),
-              child: Image.asset(
-                t,
-                fit: BoxFit.cover,
-              ),
-            );
-          }).toList(),
-        ),
-      );
-    }
-
-    // Normal category: single product image
-    final thumb = _categoryThumbnail(category);
-
-    return ClipOval(
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: thumb != null
-                ? Image.asset(
-                    thumb,
-                    fit: BoxFit.cover,
-                  )
-                : Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.pink.shade300,
-                          Colors.purple.shade300,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                  ),
-          ),
-
-          if (isActive)
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    colors: [
-                      Colors.white.withOpacity(0.45),
-                      Colors.transparent,
-                    ],
-                    radius: 0.6,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredProducts = selectedCategory == "All"
-        ? products
-        : products.where((p) {
-            final parts = p.thumbnail.split("/");
-            return parts.length > 3 && parts[2] == selectedCategory;
-          }).toList();
+    final List<Product> filteredProducts;
+
+    if (selectedCategory == "All") {
+      // Randomized once per app launch (cached in initState)
+      filteredProducts = _allCategoryCachedThumbs
+          .map((thumb) =>
+              products.firstWhere((p) => p.thumbnail == thumb))
+          .toList();
+    } else {
+      // Keep category-specific products in natural order
+      filteredProducts = products.where((p) {
+        final parts = p.thumbnail.split("/");
+        return parts.length > 3 && parts[2] == selectedCategory;
+      }).toList();
+    }
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -398,46 +340,11 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                                 ],
                               ),
                               child: ClipOval(
-                                child: Stack(
-                                  children: [
-                                    // shimmer background
-                                    AnimatedOpacity(
-                                      duration: Duration(milliseconds: 600),
-                                      opacity: 0.25,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [Colors.white, Colors.grey.shade200, Colors.white],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned.fill(
-                                      child: AnimatedOpacity(
-                                        duration: Duration(milliseconds: 300),
-                                        opacity: selectedCategoryIndex == index ? 0.3 : 0,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            gradient: RadialGradient(
-                                              colors: [
-                                                Colors.white.withOpacity(0.6),
-                                                Colors.transparent,
-                                              ],
-                                              radius: 0.6,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned.fill(
-                                      child: _buildCategoryContent(
-                                        categories[index],
-                                        selectedCategoryIndex == index,
-                                      ),
-                                    ),
-                                  ],
+                                child: Image.asset(
+                                  _categoryIcon(categories[index]),
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
                                 ),
                               ),
                             ),

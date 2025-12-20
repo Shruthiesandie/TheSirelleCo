@@ -45,6 +45,7 @@ flutter:
     - assets/logo/
     - assets/splash/
     - assets/animation/
+    - assets/icons/
 
     - assets/images/bottles/b1/
     - assets/images/bottles/b2/
