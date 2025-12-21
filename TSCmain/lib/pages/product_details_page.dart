@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/product.dart';
+import '../data/products.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final Product product;
@@ -15,16 +17,26 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
     with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
   bool _wishlisted = false;
+  bool _showHeartBurst = false;
 
   late final ScrollController _scrollController;
 
   late AnimationController _heartController;
   late Animation<double> _heartScale;
 
+  double _headerOpacity = 0.0;
+
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+
+    _scrollController.addListener(() {
+      final offset = _scrollController.offset;
+      setState(() {
+        _headerOpacity = (offset / 120).clamp(0.0, 1.0);
+      });
+    });
 
     _heartController = AnimationController(
       vsync: this,
@@ -50,13 +62,27 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
     return Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           // COLLAPSING HERO IMAGE
           SliverAppBar(
             automaticallyImplyLeading: false,
             pinned: true,
             expandedHeight: MediaQuery.of(context).size.height * 0.6,
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            title: AnimatedOpacity(
+              duration: const Duration(milliseconds: 180),
+              opacity: _headerOpacity,
+              child: Text(
+                product.name,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 children: [
@@ -72,13 +98,26 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                         itemBuilder: (context, index) {
                           return Transform.translate(
                             offset: Offset(0, -delta * 0.15),
-                            child: Image.asset(
-                              product.images[index],
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  const Center(
-                                    child: Icon(Icons.broken_image, size: 40),
-                                  ),
+                            child: GestureDetector(
+                              onDoubleTap: () {
+                                HapticFeedback.lightImpact();
+                                setState(() {
+                                  _wishlisted = !_wishlisted;
+                                  _showHeartBurst = true;
+                                });
+                                _heartController.forward(from: 0);
+                                Future.delayed(const Duration(milliseconds: 700), () {
+                                  if (mounted) setState(() => _showHeartBurst = false);
+                                });
+                              },
+                              child: Image.asset(
+                                product.images[index],
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    const Center(
+                                      child: Icon(Icons.broken_image, size: 40),
+                                    ),
+                              ),
                             ),
                           );
                         },
@@ -86,38 +125,43 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                     },
                   ),
 
+                  // HEART BURST OVERLAY
+                  if (_showHeartBurst)
+                    Center(
+                      child: ScaleTransition(
+                        scale: _heartScale,
+                        child: Icon(
+                          Icons.favorite,
+                          color: Colors.pinkAccent.withOpacity(0.85),
+                          size: 96,
+                        ),
+                      ),
+                    ),
+
                   // TOP ACTIONS
                   Positioned(
                     top: 40,
                     left: 16,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(24),
-                        onTap: () => Navigator.pop(context),
-                        child: _circleIcon(Icons.arrow_back_ios_new),
-                      ),
+                    child: _topActionButton(
+                      onTap: () => Navigator.pop(context),
+                      child: _circleIcon(Icons.arrow_back_ios_new),
                     ),
                   ),
                   Positioned(
                     top: 40,
                     right: 16,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(24),
-                        onTap: () {
-                          setState(() => _wishlisted = !_wishlisted);
-                          _heartController.forward(from: 0);
-                        },
-                        child: ScaleTransition(
-                          scale: _heartScale,
-                          child: _circleIcon(
-                            _wishlisted
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            active: _wishlisted,
-                          ),
+                    child: _topActionButton(
+                      onTap: () {
+                        setState(() => _wishlisted = !_wishlisted);
+                        _heartController.forward(from: 0);
+                      },
+                      child: ScaleTransition(
+                        scale: _heartScale,
+                        child: _circleIcon(
+                          _wishlisted
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          active: _wishlisted,
                         ),
                       ),
                     ),
@@ -136,7 +180,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                 children: List.generate(
                   product.images.length,
                   (i) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
+                    duration: const Duration(milliseconds: 280),
+                    curve: Curves.easeOutCubic,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     width: _currentIndex == i ? 18 : 6,
                     height: 6,
@@ -157,29 +202,39 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
             sliver: SliverList(
               delegate: SliverChildListDelegate(
                 [
-                  // NAME
+                  // NAME & SUBTITLE & PRICE
                   Text(
                     product.name,
                     style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.3,
+                      fontSize: 23,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.2,
                     ),
                   ),
-
-                  const SizedBox(height: 6),
-
-                  // PRICE
+                  const SizedBox(height: 4),
+                  const Text(
+                    "Handcrafted · Limited Edition",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.black54,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Text(
                     "₹${product.price}",
                     style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.4,
                     ),
                   ),
 
                   const SizedBox(height: 14),
-                  const Divider(height: 1),
+                  Divider(
+                    height: 1,
+                    color: Colors.grey.shade300,
+                  ),
                   const SizedBox(height: 14),
 
                   // DESCRIPTION
@@ -192,7 +247,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 26),
 
                   // DETAILS SECTION
                   Container(
@@ -207,9 +262,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                         Text(
                           "THE DETAILS",
                           style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.4,
+                            color: Colors.black54,
                           ),
                         ),
                         SizedBox(height: 10),
@@ -220,7 +276,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 26),
 
                   // WHY YOU’LL LOVE IT
                   Column(
@@ -241,7 +297,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 26),
 
                   // DELIVERY INFO
                   Row(
@@ -257,6 +313,81 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                           icon: Icons.verified_outlined,
                           text: "Quality checked"),
                     ],
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // SIMILAR PRODUCTS
+                  Text(
+                    "You may also like",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    height: 220,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _similarProducts().length,
+                      itemBuilder: (context, index) {
+                        final item = _similarProducts()[index];
+
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ProductDetailsPage(product: item),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: 150,
+                            margin: EdgeInsets.only(
+                              right: index == _similarProducts().length - 1 ? 0 : 14,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Image.asset(
+                                    item.thumbnail,
+                                    height: 150,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        const Icon(Icons.broken_image),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  item.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "₹${item.price}",
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -280,26 +411,48 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
         child: SizedBox(
           height: 54,
           width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-            ),
-            child: const Text(
-              "Add to Bag",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.4,
+          child: GestureDetector(
+            onTapDown: (_) => setState(() {}),
+            child: AnimatedScale(
+              scale: 1.0,
+              duration: const Duration(milliseconds: 120),
+              curve: Curves.easeOut,
+              child: ElevatedButton(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                ),
+                child: const Text(
+                  "Add to Bag",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.4,
+                  ),
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  List<Product> _similarProducts() {
+    // Same first letter category (b, c, etc.)
+    final currentId = widget.product.id[0];
+
+    return products
+        .where((p) =>
+            p.id != widget.product.id &&
+            p.id.startsWith(currentId))
+        .take(6)
+        .toList();
   }
 
   Widget _circleIcon(
@@ -323,6 +476,26 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
         icon,
         size: 18,
         color: active ? Colors.pinkAccent : Colors.black,
+      ),
+    );
+  }
+
+  Widget _topActionButton({
+    required Widget child,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkResponse(
+        onTap: onTap,
+        radius: 28,
+        containedInkWell: false,
+        highlightShape: BoxShape.circle,
+        child: SizedBox(
+          height: 48,
+          width: 48,
+          child: Center(child: child),
+        ),
       ),
     );
   }
