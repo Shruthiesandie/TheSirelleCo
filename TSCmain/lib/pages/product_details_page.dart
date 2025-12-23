@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/product.dart';
 import '../data/products.dart';
+import '../controllers/cart_controllers.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final Product product;
@@ -18,6 +19,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
   int _currentIndex = 0;
   bool _wishlisted = false;
   bool _showHeartBurst = false;
+  bool _addedFeedback = false;
+  int _quantity = 0;
 
   late final ScrollController _scrollController;
 
@@ -411,32 +414,84 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
         child: SizedBox(
           height: 54,
           width: double.infinity,
-          child: GestureDetector(
-            onTapDown: (_) => setState(() {}),
-            child: AnimatedScale(
-              scale: 1.0,
-              duration: const Duration(milliseconds: 120),
-              curve: Curves.easeOut,
-              child: ElevatedButton(
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
+          child: ValueListenableBuilder<List<CartItem>>(
+            valueListenable: CartController.items,
+            builder: (context, items, _) {
+              final cartItem = items.where((c) => c.product.id == product.id).toList();
+              _quantity = cartItem.isEmpty ? 0 : cartItem.first.quantity;
+
+              if (_quantity == 0) {
+                return ElevatedButton(
+                  onPressed: () {
+                    CartController.add(product);
+                    HapticFeedback.mediumImpact();
+                    setState(() => _addedFeedback = true);
+                    Future.delayed(const Duration(milliseconds: 800), () {
+                      if (mounted) setState(() => _addedFeedback = false);
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  "Add to Bag",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.4,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    child: _addedFeedback
+                        ? const Row(
+                            key: ValueKey("added"),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.check_circle, color: Colors.white, size: 18),
+                              SizedBox(width: 8),
+                              Text("Added"),
+                            ],
+                          )
+                        : const Text(
+                            "Add to Bag",
+                            key: ValueKey("add"),
+                          ),
                   ),
+                );
+              }
+
+              return Container(
+                height: 54,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: Colors.black),
                 ),
-              ),
-            ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove),
+                      onPressed: () {
+                        CartController.decrease(product);
+                        HapticFeedback.lightImpact();
+                      },
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          "$_quantity in Cart",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () {
+                        CartController.add(product);
+                        HapticFeedback.lightImpact();
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),

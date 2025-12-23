@@ -4,14 +4,21 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:math';
 
+
+
 import '../data/products.dart';
 import 'product_details_page.dart';
 import '../models/product.dart';
 
 class AllCategoriesPage extends StatefulWidget {
   final VoidCallback? onBackToHome;
+  final String? initialCategory;
 
-  const AllCategoriesPage({super.key, this.onBackToHome});
+  const AllCategoriesPage({
+    super.key,
+    this.onBackToHome,
+    this.initialCategory,
+  });
 
   @override
   State<AllCategoriesPage> createState() => _AllCategoriesPageState();
@@ -82,6 +89,16 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
       parent: _animController,
       curve: Curves.easeOut,
     ));
+    if (widget.initialCategory != null) {
+      final index = categories.indexWhere(
+        (c) => c == widget.initialCategory,
+      );
+
+      if (index != -1) {
+        selectedCategoryIndex = index;
+        selectedCategory = categories[index];
+      }
+    }
   }
 
   @override
@@ -138,18 +155,11 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
     }
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFFFCEEEE),
-                Color(0xFFFFF6F6),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+            color: Colors.white,
           ),
           child: Column(
           children: [
@@ -425,20 +435,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                               ),
                             ),
 
-                            Positioned.fill(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.transparent,
-                                      Colors.black.withOpacity(0.55),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
 
                             // Wishlist
                             Positioned(
@@ -507,6 +503,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                                 ),
                               ),
                             ),
+
 
                             // Name
                             Positioned(

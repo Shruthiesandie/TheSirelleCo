@@ -3,16 +3,23 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+import '../controllers/cart_controllers.dart';
+import 'package:flutter/services.dart';
+
 // Pages
 import '../pages/membership_page.dart';
 import '../pages/cart_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/allcategories_page.dart';
+import '../pages/product_details_page.dart';
 
 // Widgets
 import '../widgets/top_bar/home_top_bar.dart';
 import '../widgets/bottom_nav/home_bottom_nav_bar.dart';
 import '../widgets/drawer/home_drawer.dart';
+
+import '../data/products.dart';
+import '../models/product.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -108,7 +115,7 @@ class _HomePageState extends State<HomePage>
 
                   Expanded(
                     child: selectedIndex == 0
-                        ? const SizedBox.shrink() // Home = EMPTY (no Product 1–7)
+                        ? _HomeContent()
                         : IndexedStack(
                             index: selectedIndex,
                             children: screens,
@@ -226,6 +233,978 @@ class _HomePageState extends State<HomePage>
           ],
         ),
       ),
+    );
+  }
+}
+
+class _HomeContent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final List<Product> shuffled = List<Product>.from(products)..shuffle();
+
+    final month = DateTime.now().month;
+    final bool festive = (month == 10 || month == 11); // Diwali window
+    final bool valentine = (month == 2);
+
+    final heroGradient = festive
+        ? const LinearGradient(
+            colors: [Color(0xFFFFE082), Color(0xFFFFF7E0)],
+          )
+        : valentine
+            ? const LinearGradient(
+                colors: [Color(0xFFFFC1D9), Color(0xFFFFF1F6)],
+              )
+            : const LinearGradient(
+                colors: [Color(0xFFFFE3EC), Color(0xFFFFFFFF)],
+              );
+
+    final heroTag = festive
+        ? "Festive Picks · Limited"
+        : valentine
+            ? "Valentine Specials"
+            : "New Arrivals · Limited Stock";
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      padding: const EdgeInsets.only(bottom: 90),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+
+          // 1️⃣ HERO / FEATURED
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 0),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (_) => false,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProductDetailsPage(product: shuffled.first),
+                    ),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  height: 260,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    gradient: heroGradient,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pinkAccent.withOpacity(0.15),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(28),
+                          child: Transform.translate(
+                            offset: const Offset(0, -8),
+                            child: Image.asset(
+                              shuffled.first.thumbnail,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 20,
+                        bottom: 20,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.85),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Text(
+                            heroTag,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 28),
+
+          // 2️⃣ SHOP BY CATEGORY
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 80),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionHeader(context, "Shop by Category"),
+                const SizedBox(height: 14),
+                Transform.translate(
+                  offset: const Offset(0, -12),
+                  child: SizedBox(
+                    height: 110,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      children: const [
+                        _CategoryChip("Bottles", Icons.local_drink, "bottles"),
+                        _CategoryChip("Candles", Icons.local_fire_department, "candle"),
+                        _CategoryChip("Caps", Icons.checkroom, "caps"),
+                        _CategoryChip("Ceramic", Icons.coffee, "ceramic"),
+                        _CategoryChip("Hair", Icons.face, "hair_accessories"),
+                        _CategoryChip("Keychains", Icons.key, "key_chain"),
+                        _CategoryChip("Letters", Icons.text_fields, "letter"),
+                        _CategoryChip("Nails", Icons.brush, "nails"),
+                        _CategoryChip("Plushies", Icons.toys, "plusie"),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          // 3️⃣ TRENDING GRID
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 140),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionHeader(context, "Trending Right Now"),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 6,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.72,
+                    ),
+                    itemBuilder: (_, i) {
+                      final p = shuffled[i];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProductDetailsPage(product: p),
+                            ),
+                          );
+                        },
+                        child: AnimatedScale(
+                          scale: 1,
+                          duration: const Duration(milliseconds: 120),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(22),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 12,
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(22),
+                                    ),
+                                    child: Image.asset(
+                                      p.thumbnail,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        p.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        "₹${p.price}",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 36),
+
+          // ⭐ JUST DROPPED — HORIZONTAL SCROLL
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 180),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionHeader(context, "Just Dropped"),
+                const SizedBox(height: 14),
+                SizedBox(
+                  height: 240,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics(),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: 8,
+                    itemBuilder: (context, index) {
+                      final product = shuffled[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProductDetailsPage(product: product),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 170,
+                          margin: const EdgeInsets.only(right: 16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 14,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(24),
+                                  ),
+                                  child: Image.asset(
+                                    product.thumbnail,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Text(
+                                  product.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 36),
+              ],
+            ),
+          ),
+
+          // 🎁 GIFTING MOMENTS — EDITORIAL BLOCK
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 220),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(32),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFFFE4EC),
+                      Color(0xFFFFFFFF),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 18,
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        "Gifting Moments",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        "Birthdays, surprises, self‑love or just because — find something meaningful.",
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.45,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // 🎉 SHOP BY OCCASION
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 260),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionHeader(context, "Shop by Occasion"),
+                const SizedBox(height: 14),
+                SizedBox(
+                  height: 120,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    physics: const BouncingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics(),
+                    ),
+                    children: [
+                      _OccasionCard("Birthday Gifts"),
+                      _OccasionCard("Anniversary"),
+                      _OccasionCard("Self Care"),
+                      _OccasionCard("Cute Surprises"),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 36),
+              ],
+            ),
+          ),
+
+          // 4️⃣ BRAND STORY
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 200),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFF1F6), Color(0xFFFFFFFF)],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      "It’s Official — The Sirelle Co",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.pink, size: 18),
+                        Icon(Icons.star, color: Colors.pink, size: 18),
+                        Icon(Icons.star, color: Colors.pink, size: 18),
+                        Icon(Icons.star, color: Colors.pink, size: 18),
+                        Icon(Icons.star_half, color: Colors.pink, size: 18),
+                      ],
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      "Thoughtfully crafted pieces designed to feel personal, warm, and memorable.",
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.45,
+                        letterSpacing: 0.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 36),
+
+          // 5️⃣ CUSTOMISATION
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 260),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(26),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 16,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Customize Your Product",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Create personalised gifts that tell your story.",
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.45,
+                        letterSpacing: 0.1,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+                      child: const Text("Customise"),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 36),
+
+          // 6️⃣ STAMP / LOYALTY
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 320),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 18,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(50),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 14,
+                    ),
+                  ],
+                ),
+                child: const Text(
+                  "Stamp 10 / 30  •  Collect Rewards",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // 7️⃣ LOOKBOOK / MOOD STRIP
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 380),
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "The Sirelle Mood",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        height: 180,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics(),
+                          ),
+                          itemCount: 6,
+                          itemBuilder: (context, index) {
+                            final product = shuffled[index];
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProductDetailsPage(product: product),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                width: 150,
+                                margin: const EdgeInsets.only(right: 16),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(26),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.08),
+                                      blurRadius: 12,
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(26),
+                                  child: Image.asset(
+                                    product.thumbnail,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 8️⃣ EDITORIAL QUOTE BLOCK
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 440),
+            child: Column(
+              children: [
+                const SizedBox(height: 50),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Container(
+                    padding: const EdgeInsets.all(28),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(36),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFFFFEDF3),
+                          Color(0xFFFFFFFF),
+                        ],
+                      ),
+                    ),
+                    child: const Text(
+                      "“Every piece at The Sirelle Co is designed to be felt, not just owned.”",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 9️⃣ CUSTOMER LOVE STRIP
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 500),
+            child: Column(
+              children: [
+                const SizedBox(height: 50),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Loved by You",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        height: 140,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics(),
+                          ),
+                          children: [
+                            _testimonialCard("So aesthetic and premium ✨"),
+                            _testimonialCard("Perfect gifting option 💗"),
+                            _testimonialCard("Looks even better in real life"),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 60),
+
+          // 🔒 BRAND SEAL — LOGO END CAP (VISUAL ONLY)
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 560),
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+                Center(
+                  child: Container(
+                    height: 128,
+                    width: 128,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          Colors.white,
+                          Colors.pink.shade50,
+                          Colors.pink.shade100.withOpacity(0.6),
+                        ],
+                        radius: 0.85,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.pinkAccent.withOpacity(0.22),
+                          blurRadius: 26,
+                          spreadRadius: 6,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Container(
+                        height: 86,
+                        width: 86,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 12,
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(18),
+                          child: Image.asset(
+                            "assets/logo/logo.png",
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  "The Sirelle Co",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  "Thoughtfully made · Loved deeply",
+                  style: TextStyle(
+                    fontSize: 12,
+                    letterSpacing: 0.4,
+                    color: Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 60),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _sectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.4,
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AllCategoriesPage(),
+                ),
+              );
+            },
+            child: Text(
+              "View all",
+              style: TextStyle(
+                fontSize: 12,
+                letterSpacing: 0.6,
+                color: Colors.pink.shade400,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final String categoryKey;
+
+  const _CategoryChip(this.title, this.icon, this.categoryKey);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AllCategoriesPage(
+              initialCategory: categoryKey,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: 90,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 28),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Helper widget for testimonial cards
+Widget _testimonialCard(String text) {
+  return Container(
+    width: 220,
+    margin: const EdgeInsets.only(right: 16),
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(24),
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08),
+          blurRadius: 12,
+        ),
+      ],
+    ),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 14,
+        height: 1.45,
+        letterSpacing: 0.1,
+      ),
+    ),
+  );
+}
+
+// Occasion Card helper widget
+class _OccasionCard extends StatelessWidget {
+  final String title;
+  const _OccasionCard(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 160,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 14,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+// Scroll-in fade/slide animation for sections
+class _ScrollFadeIn extends StatefulWidget {
+  final Widget child;
+  final Duration delay;
+  const _ScrollFadeIn({required this.child, this.delay = Duration.zero});
+
+  @override
+  State<_ScrollFadeIn> createState() => _ScrollFadeInState();
+}
+
+class _ScrollFadeInState extends State<_ScrollFadeIn>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _c;
+  late Animation<double> _fade;
+  late Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    );
+    _fade = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _c, curve: Curves.easeOutCubic),
+    );
+
+    Future.delayed(widget.delay, () {
+      if (mounted) _c.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(position: _slide, child: widget.child),
     );
   }
 }
