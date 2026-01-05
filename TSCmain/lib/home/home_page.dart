@@ -1,10 +1,7 @@
 // ignore_for_file: deprecated_member_use
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import '../controllers/cart_controllers.dart';
-import 'package:flutter/services.dart';
 
 // Pages
 import '../pages/membership_page.dart';
