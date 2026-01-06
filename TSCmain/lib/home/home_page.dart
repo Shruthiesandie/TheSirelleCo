@@ -9,6 +9,7 @@ import '../pages/cart_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/allcategories_page.dart';
 import '../pages/product_details_page.dart';
+import '../pages/love_page.dart';
 
 // Widgets
 import '../widgets/top_bar/home_top_bar.dart';
@@ -43,7 +44,7 @@ class _HomePageState extends State<HomePage>
 
     screens = [
       Container(), // Home screen EMPTY — products removed
-      const SizedBox.shrink(), // Favourite screen empty for now
+      const LovePage(), // ❤️ Favourite screen
       AllCategoriesPage(
         onBackToHome: () {
           setState(() => selectedIndex = 0);
