@@ -306,11 +306,12 @@ class _HomeContent extends StatelessWidget {
                       Positioned.fill(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(28),
-                          child: Transform.translate(
-                            offset: const Offset(0, -8),
+                          child: AspectRatio(
+                            aspectRatio: 16 / 9,
                             child: Image.asset(
                               shuffled.first.thumbnail,
                               fit: BoxFit.cover,
+                              alignment: Alignment.center,
                             ),
                           ),
                         ),

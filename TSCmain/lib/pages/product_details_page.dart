@@ -358,13 +358,18 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(14),
-                                  child: Image.asset(
-                                    item.thumbnail,
-                                    height: 150,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) =>
-                                        const Icon(Icons.broken_image),
+                                  child: AspectRatio(
+                                    aspectRatio: 1 / 1.25,
+                                    child: Container(
+                                      color: Colors.grey.shade100,
+                                      child: Image.asset(
+                                        item.thumbnail,
+                                        fit: BoxFit.cover,
+                                        alignment: Alignment.center,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Center(child: Icon(Icons.broken_image)),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
