@@ -363,204 +363,239 @@ Widget _loyaltyCard() {
   final expiryDate =
       formattedDate(purchaseDate.add(const Duration(days: 365)));
 
-  return AnimatedBuilder(
-    animation: _bgAnimController,
-    builder: (context, child) {
-      final tilt = (_bgAnimController.value - 0.5) * 0.04;
-      return Transform(
-        alignment: Alignment.center,
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.001)
-          ..rotateX(tilt)
-          ..rotateY(-tilt),
-        child: child,
-      );
-    },
-    child: Transform.scale(
-      scale: 1.0,
-      alignment: Alignment.topCenter,
-      child: ShaderMask(
-        shaderCallback: (bounds) {
-          return const LinearGradient(
-            colors: [
-              Color(0x00FF4F9A),
-              Color(0x55FF4F9A),
-              Color(0x00FF4F9A),
-            ],
-            stops: [0.35, 0.5, 0.65],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ).createShader(bounds);
-        },
-        blendMode: BlendMode.srcATop,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
+  return TickerMode(
+    enabled: ModalRoute.of(context)?.isCurrent ?? true,
+    child: AnimatedBuilder(
+      animation: _bgAnimController,
+      builder: (context, child) {
+        final tilt = (_bgAnimController.value - 0.5) * 0.04;
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001)
+            ..rotateX(tilt)
+            ..rotateY(-tilt),
+          child: child,
+        );
+      },
+      child: Transform.scale(
+        scale: 1.0,
+        alignment: Alignment.topCenter,
+        child: ShaderMask(
+          shaderCallback: (bounds) {
+            return const LinearGradient(
               colors: [
-                Color(0xFFFF4F9A),
-                Color(0xFFE28BFF),
-                Color(0xFFF6C1FF),
+                Color(0x00FF4F9A),
+                Color(0x55FF4F9A),
+                Color(0x00FF4F9A),
               ],
+              stops: [0.35, 0.5, 0.65],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x66FF6FAF),
-                blurRadius: 18,
-                offset: Offset(0, 8),
+            ).createShader(bounds);
+          },
+          blendMode: BlendMode.srcATop,
+          child: GestureDetector(
+            onTap: () {
+              _bgAnimController.forward(from: 0.0);
+            },
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFFFF4F9A),
+                    Color(0xFFE28BFF),
+                    Color(0xFFF6C1FF),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x66FF6FAF),
+                    blurRadius: 18,
+                    offset: Offset(0, 8),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Stack(
-                    clipBehavior: Clip.none,
+                  Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFFFFA3C7),
-                              Color(0xFFFFD1E3),
-                            ],
-                          ),
-                        ),
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: const Color(0xFFFFFBFD),
-                          child: TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.85, end: 1.05),
-                            duration: const Duration(seconds: 2),
-                            curve: Curves.easeInOut,
-                            builder: (_, value, child) =>
-                                Transform.scale(scale: value, child: child),
-                            child: const Text(
-                              "S",
-                              style: TextStyle(
-                                fontSize: 34,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFB1005A),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFFFFA3C7),
+                                  Color(0xFFFFD1E3),
+                                ],
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 40,
+                              backgroundColor: const Color(0xFFFFFBFD),
+                              child: TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0.85, end: 1.05),
+                                duration: const Duration(seconds: 2),
+                                curve: Curves.easeInOut,
+                                builder: (_, value, child) =>
+                                    Transform.scale(scale: value, child: child),
+                                child: const Text(
+                                  "S",
+                                  style: TextStyle(
+                                    fontSize: 34,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFFB1005A),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      const Positioned(
-                        top: -6,
-                        right: -6,
-                        child: Icon(
-                          Icons.auto_awesome,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    "Sirelle Loyalty Card",
-                    style: TextStyle(
-                      color: Color(0xFF5A1036),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const Spacer(),
-                  AnimatedBuilder(
-                    animation: _bgAnimController,
-                    builder: (_, child) {
-                      final beat =
-                          1 + (0.12 * Curves.easeInOut.transform(_bgAnimController.value));
-                      return Opacity(
-                        opacity: beat > 1.05 ? 1.0 : 0.85,
-                        child: Transform.scale(
-                          scale: beat,
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: const Icon(
-                      Icons.favorite,
-                      size: 20,
-                      color: Color(0xFF9E4C73),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 22),
-              Row(
-                children: const [
-                  Expanded(
-                    child: Text(
-                      "5278  3940  8274  6193",
-                      style: TextStyle(
-                        color: Color(0xFF6A1F43),
-                        fontSize: 18,
-                        letterSpacing: 2,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    Icons.star_rounded,
-                    size: 18,
-                    color: Colors.white,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Container(
-                    height: 34,
-                    width: 50,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFFF3D6A3),
-                          Color(0xFFD8B16A),
+                          const Positioned(
+                            top: -6,
+                            right: -6,
+                            child: Icon(
+                              Icons.auto_awesome,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(7),
-                    ),
-                    child: const Icon(
-                      Icons.memory,
-                      size: 20,
-                      color: Color(0xFF6A4A1E),
-                    ),
-                  ),
-                  const Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        "Joined: $joinDate",
-                        style: const TextStyle(
-                          color: Color(0xFF7A3B58),
-                          fontSize: 11.5,
+                      const SizedBox(width: 12),
+                      const Text(
+                        "Sirelle Loyalty Card",
+                        style: TextStyle(
+                          color: Color(0xFF5A1036),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 3),
-                      Text(
-                        "Expires: $expiryDate",
-                        style: const TextStyle(
-                          color: Color(0xFF9A5E7A),
-                          fontSize: 11,
+                      const Spacer(),
+                      AnimatedBuilder(
+                        animation: _bgAnimController,
+                        builder: (_, child) {
+                          final t = _bgAnimController.value;
+                          final beat = 1 +
+                              (t < 0.25
+                                  ? 0.16 * Curves.easeOut.transform(t * 4)       // lub
+                                  : t < 0.45
+                                      ? 0.08 * Curves.easeOut.transform((t - 0.25) * 5) // dub
+                                      : 0.0);
+                          return Opacity(
+                            opacity: beat > 1.05 ? 1.0 : 0.85,
+                            child: Transform.scale(
+                              scale: beat,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: const Icon(
+                          Icons.favorite,
+                          size: 20,
+                          color: Color(0xFF9E4C73),
                         ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: const [
+                      Expanded(
+                        child: Text(
+                          "5278  3940  8274  6193",
+                          style: TextStyle(
+                            color: Color(0xFF6A1F43),
+                            fontSize: 18,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.star_rounded,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      // CHIP: sync glow with heartbeat
+                      AnimatedBuilder(
+                        animation: _bgAnimController,
+                        builder: (_, child) {
+                          final t = _bgAnimController.value;
+                          final beat = 1 +
+                              (t < 0.25
+                                  ? 0.16 * Curves.easeOut.transform(t * 4)
+                                  : t < 0.45
+                                      ? 0.08 * Curves.easeOut.transform((t - 0.25) * 5)
+                                      : 0.0);
+                          final glow = 6 + (8 * beat.clamp(0.0, 1.2));
+                          return Container(
+                            height: 34,
+                            width: 50,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFFF3D6A3),
+                                  Color(0xFFD8B16A),
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0x66FFD700),
+                                  blurRadius: glow,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            child: child,
+                          );
+                        },
+                        child: const Icon(
+                          Icons.memory,
+                          size: 20,
+                          color: Color(0xFF6A4A1E),
+                        ),
+                      ),
+                      const Spacer(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "Joined: $joinDate",
+                            style: const TextStyle(
+                              color: Color(0xFF7A3B58),
+                              fontSize: 11.5,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            "Expires: $expiryDate",
+                            style: const TextStyle(
+                              color: Color(0xFF9A5E7A),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
