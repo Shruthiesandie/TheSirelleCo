@@ -357,13 +357,14 @@ class _MembershipPageState extends State<MembershipPage>
   }
 // ---------------- Loyalty Card ----------------
 // ---------------- Loyalty Card (Pink Premium + Bigger) ----------------
+// ---------------- Loyalty Card (Pink Premium + Bigger) ----------------
 Widget _loyaltyCard() {
   final joinDate = formattedDate(purchaseDate);
   final expiryDate =
       formattedDate(purchaseDate.add(const Duration(days: 365)));
 
   return Transform.scale(
-    scale: 1.10, // ⬅️ 15% bigger
+    scale: 1.15, // ⬅️ 15% bigger
     alignment: Alignment.topCenter,
     child: _glassCard(
       child: Container(
@@ -418,7 +419,7 @@ Widget _loyaltyCard() {
                 const Spacer(),
                 const Icon(
                   Icons.credit_card,
-                  size: 18,
+                  size: 20,
                   color: Color(0xFF9E4C73),
                 ),
               ],
