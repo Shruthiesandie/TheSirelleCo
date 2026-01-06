@@ -35,6 +35,7 @@ class _MembershipPageState extends State<MembershipPage>
   static const int stampsPerCycle = 6;
   int purchasesInCycle = 0; // 0–6
   bool couponAvailable = false; // shown on home page
+  bool showLoyaltyBack = false; // card flip state
 
   @override
   void initState() {
@@ -359,261 +360,518 @@ class _MembershipPageState extends State<MembershipPage>
 // ---------------- Loyalty Card (Pink Premium + Bigger) ----------------
 // ---------------- Loyalty Card (Pink Premium + Bigger) ----------------
 Widget _loyaltyCard() {
+  return AspectRatio(
+    aspectRatio: 85.6 / 53.98, // real card ratio ≈ 1.586
+    child: Transform.scale(
+      scale: 1.0,
+      alignment: Alignment.topCenter,
+      child: ShaderMask(
+        shaderCallback: (bounds) {
+          return LinearGradient(
+            colors: [
+              Color(0x00FF4F9A), // transparent pink
+              Color(0x55FF4F9A), // soft hot-pink shimmer
+              Color(0x00FF4F9A),
+            ],
+            stops: const [0.35, 0.5, 0.65],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.srcATop,
+        child: GestureDetector(
+          onTap: () {
+            setState(() => showLoyaltyBack = !showLoyaltyBack);
+          },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                children: [
+                  SizedBox(
+                    height: constraints.maxHeight,
+                    width: constraints.maxWidth,
+                    child: Opacity(
+                      opacity: 0.0,
+                      child: _loyaltyCardFront(),
+                    ),
+                  ),
+                  // --- clean rim light (edge highlight) ---
+                  IgnorePointer(
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(
+                        begin: showLoyaltyBack ? 0.35 : 0.2,
+                        end: showLoyaltyBack ? 0.2 : 0.35,
+                      ),
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      builder: (context, opacity, _) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              width: 1.1,
+                              color: Colors.white.withOpacity(opacity),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: constraints.maxHeight,
+                    width: constraints.maxWidth,
+                    child: showLoyaltyBack
+                        ? _loyaltyCardBack()
+                        : _loyaltyCardFront(),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _loyaltyCardFront() {
   final joinDate = formattedDate(purchaseDate);
   final expiryDate =
       formattedDate(purchaseDate.add(const Duration(days: 365)));
-
-  return TickerMode(
-    enabled: ModalRoute.of(context)?.isCurrent ?? true,
-    child: AnimatedBuilder(
-      animation: _bgAnimController,
-      builder: (context, child) {
-        final tilt = (_bgAnimController.value - 0.5) * 0.04;
-        return Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001)
-            ..rotateX(tilt)
-            ..rotateY(-tilt),
-          child: child,
-        );
-      },
-      child: Transform.scale(
-        scale: 1.0,
-        alignment: Alignment.topCenter,
-        child: ShaderMask(
-          shaderCallback: (bounds) {
-            return const LinearGradient(
-              colors: [
-                Color(0x00FF4F9A),
-                Color(0x55FF4F9A),
-                Color(0x00FF4F9A),
-              ],
-              stops: [0.35, 0.5, 0.65],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ).createShader(bounds);
-          },
-          blendMode: BlendMode.srcATop,
-          child: GestureDetector(
-            onTap: () {
-              _bgAnimController.forward(from: 0.0);
-            },
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFFFF4F9A),
-                    Color(0xFFE28BFF),
-                    Color(0xFFF6C1FF),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x66FF6FAF),
-                    blurRadius: 18,
-                    offset: Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                colors: [
-                                  Color(0xFFFFA3C7),
-                                  Color(0xFFFFD1E3),
-                                ],
-                              ),
-                            ),
-                            child: CircleAvatar(
-                              radius: 40,
-                              backgroundColor: const Color(0xFFFFFBFD),
-                              child: TweenAnimationBuilder<double>(
-                                tween: Tween(begin: 0.85, end: 1.05),
-                                duration: const Duration(seconds: 2),
-                                curve: Curves.easeInOut,
-                                builder: (_, value, child) =>
-                                    Transform.scale(scale: value, child: child),
-                                child: const Text(
-                                  "S",
-                                  style: TextStyle(
-                                    fontSize: 34,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFFB1005A),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const Positioned(
-                            top: -6,
-                            right: -6,
-                            child: Icon(
-                              Icons.auto_awesome,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        "Sirelle Loyalty Card",
-                        style: TextStyle(
-                          color: Color(0xFF5A1036),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+  return Stack(
+    children: [
+      Container(
+        key: const ValueKey('front'),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFFFF4F9A), // premium hot pink
+              Color(0xFFE28BFF), // soft lavender
+              Color(0xFFF6C1FF), // light lavender-pink blend
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x66FF6FAF),
+              blurRadius: 18,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Row
+            Row(
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFFFFA3C7), // hot pink ring
+                            Color(0xFFFFD1E3), // rose ring
+                          ],
                         ),
                       ),
-                      const Spacer(),
-                      AnimatedBuilder(
-                        animation: _bgAnimController,
-                        builder: (_, child) {
-                          final t = _bgAnimController.value;
-                          final beat = 1 +
-                              (t < 0.25
-                                  ? 0.16 * Curves.easeOut.transform(t * 4)       // lub
-                                  : t < 0.45
-                                      ? 0.08 * Curves.easeOut.transform((t - 0.25) * 5) // dub
-                                      : 0.0);
-                          return Opacity(
-                            opacity: beat > 1.05 ? 1.0 : 0.85,
-                            child: Transform.scale(
-                              scale: beat,
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: const Icon(
-                          Icons.favorite,
-                          size: 20,
-                          color: Color(0xFF9E4C73),
+                      child: const CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Color(0xFFFFFBFD),
+                        child: Icon(
+                          Icons.person,
+                          color: Color(0xFFB1005A), // deep hot pink
+                          size: 46,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 22),
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          "5278  3940  8274  6193",
-                          style: TextStyle(
-                            color: Color(0xFF6A1F43),
-                            fontSize: 18,
-                            letterSpacing: 2,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      AnimatedBuilder(
-                        animation: _bgAnimController,
-                        builder: (_, child) {
-                          final t = _bgAnimController.value;
-                          final scale = 0.9 + (0.2 * Curves.easeInOut.transform(t));
-                          final opacity = 0.6 + (0.4 * Curves.easeInOut.transform(t));
-                          return Opacity(
-                            opacity: opacity,
-                            child: Transform.scale(
-                              scale: scale,
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: const Icon(
-                          Icons.star_rounded,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      // CHIP: sync glow with heartbeat
-                      AnimatedBuilder(
-                        animation: _bgAnimController,
-                        builder: (_, child) {
-                          final t = _bgAnimController.value;
-                          final beat = 1 +
-                              (t < 0.25
-                                  ? 0.16 * Curves.easeOut.transform(t * 4)
-                                  : t < 0.45
-                                      ? 0.08 * Curves.easeOut.transform((t - 0.25) * 5)
-                                      : 0.0);
-                          final glow = 6 + (8 * beat.clamp(0.0, 1.2));
-                          return Container(
-                            height: 34,
-                            width: 50,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFFF3D6A3),
-                                  Color(0xFFD8B16A),
-                                ],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Color(0x66FFD700),
-                                  blurRadius: glow,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                              borderRadius: BorderRadius.circular(7),
-                            ),
+                    ),
+                    Positioned(
+                      top: -6,
+                      right: -6,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.7, end: 1.2),
+                        duration: const Duration(seconds: 2),
+                        curve: Curves.easeInOut,
+                        builder: (context, value, child) {
+                          return Transform.scale(
+                            scale: value,
                             child: child,
                           );
                         },
                         child: const Icon(
-                          Icons.memory,
-                          size: 20,
-                          color: Color(0xFF6A4A1E),
+                          Icons.auto_awesome,
+                          size: 16,
+                          color: Colors.white,
                         ),
                       ),
-                      const Spacer(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            "Joined: $joinDate",
-                            style: const TextStyle(
-                              color: Color(0xFF7A3B58),
-                              fontSize: 11.5,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            "Expires: $expiryDate",
-                            style: const TextStyle(
-                              color: Color(0xFF9A5E7A),
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  "Sirelle Loyalty Card",
+                  style: TextStyle(
+                    color: Color(0xFF5A1036), // rich rose text
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                   ),
+                ),
+                const Spacer(),
+                ScaleTransition(
+                  scale: Tween(begin: 0.9, end: 1.2).animate(
+                    CurvedAnimation(
+                      parent: _bgAnimController,
+                      curve: Curves.elasticInOut,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.favorite,
+                    size: 20,
+                    color: Color(0xFF9E4C73),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 22),
+            // Card Number
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    "5278  3940  8274  6193",
+                    style: TextStyle(
+                      color: Color(0xFF6A1F43),
+                      fontSize: 18,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(seconds: 3),
+                  curve: Curves.easeInOut,
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(0, -6 * value),
+                      child: child,
+                    );
+                  },
+                  child: const Icon(
+                    Icons.star_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            // Chip + Dates
+            Row(
+              children: [
+                Container(
+                  height: 34,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFF3D6A3), // champagne gold
+                        Color(0xFFD8B16A),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: const Icon(
+                    Icons.memory,
+                    size: 20,
+                    color: Color(0xFF6A4A1E),
+                  ),
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Joined: $joinDate",
+                      style: const TextStyle(
+                        color: Color(0xFF7A3B58),
+                        fontSize: 11.5,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      "Expires: $expiryDate",
+                      style: const TextStyle(
+                        color: Color(0xFF9A5E7A),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      // --- subtle holographic sweep ---
+      Positioned.fill(
+        child: IgnorePointer(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withOpacity(0.02),
+                  Colors.white.withOpacity(0.08),
+                  Colors.white.withOpacity(0.02),
                 ],
+                stops: const [0.35, 0.5, 0.65],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
         ),
       ),
+    ],
+  );
+}
+
+Widget _loyaltyCardBack() {
+  return Container(
+    key: const ValueKey('back'),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        colors: [
+          Color(0xFFFF4F9A),
+          Color(0xFFE28BFF),
+          Color(0xFFF6C1FF),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(18),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x66FF6FAF),
+          blurRadius: 18,
+          offset: Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Stack(
+      children: [
+        // --- Subtle background watermark ---
+        Positioned(
+          right: -20,
+          bottom: -20,
+          child: Opacity(
+            opacity: 0.08,
+            child: Icon(
+              Icons.workspace_premium,
+              size: 140,
+              color: Colors.white,
+            ),
+          ),
+        ),
+
+        // --- Soft diagonal accent ---
+        Positioned(
+          left: -40,
+          top: 30,
+          child: Transform.rotate(
+            angle: -0.25,
+            child: Container(
+              height: 22,
+              width: 180,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                color: Colors.white.withOpacity(0.12),
+              ),
+            ),
+          ),
+        ),
+
+        // --- Actual card content (updated) ---
+        SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top row (mirrors front card height)
+              Row(
+                children: [
+                  // Invisible avatar placeholder to match front card height
+                  Opacity(
+                    opacity: 0.0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                      ),
+                      child: const CircleAvatar(
+                        radius: 40,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  const Icon(
+                    Icons.workspace_premium,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  const Text(
+                    "The Sirelle Co",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  const Spacer(),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Magnetic strip
+              Container(
+                height: 38,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  color: Colors.black.withOpacity(0.55),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Signature strip + CVV
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 28,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.85),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      child: const Text(
+                        "Authorized Signature",
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.black54,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    height: 28,
+                    width: 48,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      "CVV",
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 14),
+
+              // QR / barcode-style verification element
+              Row(
+                children: [
+                  Container(
+                    height: 44,
+                    width: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.85),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      Icons.qr_code_2,
+                      color: Colors.black87,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      "Scan for membership verification",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Bottom row (mirrors chip + dates row)
+              Row(
+                children: [
+                  const Icon(
+                    Icons.lock_outline,
+                    color: Colors.white70,
+                    size: 20,
+                  ),
+                  const Spacer(),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: const [
+                      Text(
+                        "Non-transferable • For member use only",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        "Support: support@thesirelleco.com",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 10.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     ),
   );
 }
@@ -1081,61 +1339,101 @@ Widget _loyaltyCard() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          height: 72,
-          width: 72,
+        AnimatedScale(
+          scale: earned ? 1.0 : 0.95,
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutBack,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 260),
+            duration: const Duration(milliseconds: 300),
+            height: 76,
+            width: 76,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16), // square with rounded corners
+              borderRadius: BorderRadius.circular(22),
               gradient: earned
                   ? const LinearGradient(
-                      colors: [Color(0xFFFF6FAF), Color(0xFFB97BFF)],
+                      colors: [
+                        Color(0xFFFFB3D9), // soft pink
+                        Color(0xFFC7A6FF), // soft purple
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     )
                   : null,
-              color:
-                  earned ? null : Colors.grey.shade200,
+              color: earned ? null : Colors.grey.shade100,
               boxShadow: [
                 if (earned)
                   BoxShadow(
-                    color:
-                        Colors.pink.withOpacity(0.25),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
+                    color: Colors.pink.withOpacity(0.35),
+                    blurRadius: 14,
+                    offset: const Offset(0, 8),
+                  )
+                else
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 6,
+                    offset: const Offset(0, 4),
                   ),
               ],
               border: Border.all(
                 color: earned
-                    ? Colors.transparent
+                    ? Colors.white.withOpacity(0.9)
                     : Colors.grey.shade300,
+                width: 1.2,
               ),
             ),
             child: Center(
-              child: earned
-                  ? const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 26,
-                    )
-                  : Text(
-                      number.toString(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade600,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                transitionBuilder: (child, animation) {
+                  return ScaleTransition(scale: animation, child: child);
+                },
+                // 🐰 Bunny for both states!
+                child: earned
+                    ? const Icon(
+                        Icons.pets_rounded, // 🐰 filled bunny
+                        key: ValueKey("earned"),
+                        color: Colors.white,
+                        size: 30,
+                      )
+                    : Icon(
+                        Icons.pets_outlined, // 🐰 outline bunny
+                        key: const ValueKey("unearned"),
+                        color: Colors.grey.shade400,
+                        size: 28,
                       ),
-                    ),
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 6),
-        Text(
-          "Stamp $number",
-          style: const TextStyle(
-            fontSize: 11.5,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        const SizedBox(height: 8),
+        earned
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(
+                    Icons.pets_rounded, // 🐰 bunny
+                    size: 14,
+                    color: Colors.pink,
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    "Collected",
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.pink,
+                    ),
+                  ),
+                ],
+              )
+            : Text(
+                "Stamp $number",
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                ),
+              ),
       ],
     );
   }
@@ -1190,7 +1488,7 @@ Widget _loyaltyCard() {
                   ),
                 ),
                 child: Text(
-                  isMember ? "Renew Membership" : "Join Membership",
+                  isMember ? "Stay With Sirelle" : "Join Membership",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
