@@ -11,6 +11,24 @@ class Product {
     required this.images,
   });
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'thumbnail': thumbnail,
+      'images': images,
+    };
+  }
+
+  factory Product.fromMap(Map<String, dynamic> map) {
+    return Product(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      thumbnail: map['thumbnail'] as String,
+      images: List<String>.from(map['images'] as List),
+    );
+  }
+
   /// Auto-calculated product price
   /// (derived from product ID / category)
   int get price {
@@ -24,4 +42,13 @@ class Product {
     if (id.startsWith("p")) return 999;   // plusie
     return 199;                           // letters / default
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Product && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

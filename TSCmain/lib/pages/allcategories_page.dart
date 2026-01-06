@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:math';
 
-
-
+import '../controllers/favorites_controller.dart';
 import '../data/products.dart';
 import 'product_details_page.dart';
 import '../models/product.dart';
@@ -36,9 +35,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
   int selectedCategoryIndex = 0;
   String selectedCategory = "All";
-
-  // Wishlist UI-only state
-  final Set<String> _wishlist = {};
 
   // Badge helper (randomized but stable per product)
   String? _badgeFor(product) {
@@ -440,22 +436,21 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                             Positioned(
                               top: 10,
                               left: 10,
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _wishlist.contains(product.id)
-                                        ? _wishlist.remove(product.id)
-                                        : _wishlist.add(product.id);
-                                  });
+                              child: ValueListenableBuilder<List<Product>>(
+                                valueListenable: FavoritesController.items,
+                                builder: (context, _, __) {
+                                  final isFav = FavoritesController.contains(product);
+
+                                  return IconButton(
+                                    icon: Icon(
+                                      isFav ? Icons.favorite : Icons.favorite_border,
+                                      color: Colors.pink,
+                                    ),
+                                    onPressed: () {
+                                      FavoritesController.toggle(product);
+                                    },
+                                  );
                                 },
-                                child: Icon(
-                                  _wishlist.contains(product.id)
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  color: _wishlist.contains(product.id)
-                                      ? Colors.pinkAccent
-                                      : Colors.white,
-                                ),
                               ),
                             ),
 

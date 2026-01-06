@@ -17,6 +17,7 @@ import '../widgets/drawer/home_drawer.dart';
 
 import '../data/products.dart';
 import '../models/product.dart';
+import '../controllers/favorites_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -411,64 +412,91 @@ class _HomeContent extends StatelessWidget {
                             ),
                           );
                         },
-                        child: AnimatedScale(
-                          scale: 1,
-                          duration: const Duration(milliseconds: 120),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(22),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 12,
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(22),
-                                    ),
-                                    child: Image.asset(
-                                      p.thumbnail,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
+                        child: Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(22),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.08),
+                                    blurRadius: 12,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(22),
+                                      ),
+                                      child: Image.asset(
+                                        p.thumbnail,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        p.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          p.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        "₹${p.price}",
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          "₹${p.price}",
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
-                                      ),
-                                      
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
+                            // ❤️ FAVORITE BUTTON
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: ValueListenableBuilder<List<Product>>(
+                                valueListenable: FavoritesController.items,
+                                builder: (context, _, __) {
+                                  final isFav = FavoritesController.contains(p);
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.9),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      iconSize: 20,
+                                      padding: EdgeInsets.zero,
+                                      icon: Icon(
+                                        isFav ? Icons.favorite : Icons.favorite_border,
+                                        color: Colors.pink,
+                                      ),
+                                      onPressed: () {
+                                        FavoritesController.toggle(p);
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
