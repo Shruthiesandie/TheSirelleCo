@@ -508,8 +508,8 @@ Widget _loyaltyCard() {
                   ),
                   const SizedBox(height: 22),
                   Row(
-                    children: const [
-                      Expanded(
+                    children: [
+                      const Expanded(
                         child: Text(
                           "5278  3940  8274  6193",
                           style: TextStyle(
@@ -520,10 +520,25 @@ Widget _loyaltyCard() {
                           ),
                         ),
                       ),
-                      Icon(
-                        Icons.star_rounded,
-                        size: 18,
-                        color: Colors.white,
+                      AnimatedBuilder(
+                        animation: _bgAnimController,
+                        builder: (_, child) {
+                          final t = _bgAnimController.value;
+                          final scale = 0.9 + (0.2 * Curves.easeInOut.transform(t));
+                          final opacity = 0.6 + (0.4 * Curves.easeInOut.transform(t));
+                          return Opacity(
+                            opacity: opacity,
+                            child: Transform.scale(
+                              scale: scale,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: const Icon(
+                          Icons.star_rounded,
+                          size: 18,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
