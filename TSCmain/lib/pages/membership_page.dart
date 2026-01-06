@@ -333,6 +333,8 @@ class _MembershipPageState extends State<MembershipPage>
                           const SizedBox(height: 18),
                           _shimmerCard(height: 120),
                         ] else ...[
+                          _loyaltyCard(),
+                          const SizedBox(height: 18),
                           _membershipStatusCard(),
                           const SizedBox(height: 18),
                           _activePlanCard(),
@@ -353,7 +355,142 @@ class _MembershipPageState extends State<MembershipPage>
       ),
     );
   }
+// ---------------- Loyalty Card ----------------
+// ---------------- Loyalty Card (Pink Premium + Bigger) ----------------
+Widget _loyaltyCard() {
+  final joinDate = formattedDate(purchaseDate);
+  final expiryDate =
+      formattedDate(purchaseDate.add(const Duration(days: 365)));
 
+  return Transform.scale(
+    scale: 1.10, // ⬅️ 15% bigger
+    alignment: Alignment.topCenter,
+    child: _glassCard(
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFFFFD6E8), // soft hot pink
+              Color(0xFFFFEEF4), // blush rose
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Row
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFFFA3C7), // hot pink ring
+                        Color(0xFFFFD1E3), // rose ring
+                      ],
+                    ),
+                  ),
+                  child: const CircleAvatar(
+                    radius: 40,
+                    backgroundColor: Color(0xFFFFFBFD),
+                    child: Icon(
+                      Icons.person,
+                      color: Color(0xFFB1005A), // deep hot pink
+                      size: 46,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  "Sirelle Loyalty Card",
+                  style: TextStyle(
+                    color: Color(0xFF5A1036), // rich rose text
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const Spacer(),
+                const Icon(
+                  Icons.credit_card,
+                  size: 18,
+                  color: Color(0xFF9E4C73),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 22),
+
+            // Card Number
+            const Text(
+              "5278  3940  8274  6193",
+              style: TextStyle(
+                color: Color(0xFF6A1F43),
+                fontSize: 18,
+                letterSpacing: 2,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+
+            const SizedBox(height: 18),
+
+            // Chip + Dates
+            Row(
+              children: [
+                Container(
+                  height: 34,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFF3D6A3), // champagne gold
+                        Color(0xFFD8B16A),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: const Icon(
+                    Icons.memory,
+                    size: 20,
+                    color: Color(0xFF6A4A1E),
+                  ),
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Joined: $joinDate",
+                      style: const TextStyle(
+                        color: Color(0xFF7A3B58),
+                        fontSize: 11.5,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      "Expires: $expiryDate",
+                      style: const TextStyle(
+                        color: Color(0xFF9A5E7A),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
   // ---------------- Shimmer placeholder ----------------
   Widget _shimmerCard({required double height}) {
     return ClipRRect(
