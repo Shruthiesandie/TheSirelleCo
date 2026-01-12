@@ -289,7 +289,7 @@ class _HomeContent extends StatelessWidget {
                 },
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
-                  height: 260,
+                  height: 410,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(28),
                     gradient: heroGradient,
@@ -306,13 +306,12 @@ class _HomeContent extends StatelessWidget {
                       Positioned.fill(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(28),
-                          child: AspectRatio(
-                            aspectRatio: 16 / 9,
-                            child: Image.asset(
-                              shuffled.first.thumbnail,
-                              fit: BoxFit.cover,
-                              alignment: Alignment.center,
-                            ),
+                          child: Image.asset(
+                            shuffled.first.thumbnail,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            alignment: Alignment.center,
                           ),
                         ),
                       ),
@@ -383,6 +382,168 @@ class _HomeContent extends StatelessWidget {
           ),
 
           const SizedBox(height: 32),
+
+          // 🔍 EXPLORE ALL — CATEGORY STORY STRIP
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 110),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionHeader(context, "Explore All"),
+                const SizedBox(height: 10),
+                Column(
+                  children: List.generate(_exploreItems.length, (index) {
+                    final item = _exploreItems[index];
+                    final bool imageLeft = index % 2 == 0;
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      child: Row(
+                        children: [
+                          if (imageLeft) _exploreImageFromCategory(item.categoryKey),
+                          const SizedBox(width: 16),
+                          Expanded(child: _exploreText(item.name)),
+                          const SizedBox(width: 16),
+                          if (!imageLeft) _exploreImageFromCategory(item.categoryKey),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 36),
+
+          // 🎁 CUSTOM GIFT HAMPER FEATURE (from sketch)
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 130),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                height: 520,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF1F4),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pinkAccent.withOpacity(0.08),
+                      blurRadius: 18,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Right semicircle bubble (true semicircle using ClipOval)
+                    Positioned(
+                      right: -140,
+                      top: 40,
+                      child: ClipOval(
+                        child: Stack(
+                          children: [
+                            Container(
+                              width: 440,
+                              height: 440,
+                              color: Colors.pink.shade100,
+                            ),
+                            // Place the shuffled product image inside the semicircle
+                            Positioned.fill(
+                              child: Image.asset(
+                                (List<Product>.from(products)..shuffle()).first.thumbnail,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            // Overlay gradient for text readability
+                            Positioned.fill(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                    colors: [
+                                      Colors.black.withOpacity(0.55),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Left content
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 22, 260, 100),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 22,
+                            width: 140,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const SizedBox(height: 16),
+                          const Spacer(),
+                          const SizedBox.shrink(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 0),
+
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 150),
+            child: Transform.translate(
+              offset: const Offset(0, -160),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  padding: const EdgeInsets.all(22),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFFFFFF), Color(0xFFFFF3F6)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pinkAccent.withOpacity(0.18),
+                        blurRadius: 24,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    "Create your own personalised gift hamper by mixing and matching products from every category. A perfect way to make your gift feel special and thoughtful.",
+                    style: TextStyle(
+                      fontSize: 15,
+                      height: 1.55,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 220),
+
+          const SizedBox(height: 36),
 
           // 3️⃣ TRENDING GRID
           _ScrollFadeIn(
@@ -1070,6 +1231,54 @@ class _HomeContent extends StatelessWidget {
   }
 }
 
+// ------------------------ EXPLORE ALL MODELS & HELPERS ------------------------
+
+class _ExploreItem {
+  final String name;
+  final String categoryKey;
+  const _ExploreItem(this.name, this.categoryKey);
+}
+
+const List<_ExploreItem> _exploreItems = [
+  _ExploreItem("Cute Bottles", "bottles"),
+  _ExploreItem("Aesthetic Candles", "candle"),
+  _ExploreItem("Custom Caps", "caps"),
+  _ExploreItem("Plush Toys", "plusie"),
+  _ExploreItem("Keychains", "key_chain"),
+];
+
+Widget _exploreText(String name) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: Text(
+          name,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      const SizedBox(height: 10),
+      Container(height: 6, width: 140, color: Colors.black12),
+      const SizedBox(height: 6),
+      Container(height: 6, width: 110, color: Colors.black12),
+    ],
+  );
+}
+
 class _CategoryChip extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -1234,4 +1443,30 @@ class _ScrollFadeInState extends State<_ScrollFadeIn>
       child: SlideTransition(position: _slide, child: widget.child),
     );
   }
+}
+Widget _exploreImageFromCategory(String categoryKey) {
+  final Product p = products.firstWhere(
+    (e) => e.thumbnail.contains(categoryKey),
+    orElse: () => products.first,
+  );
+
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(18),
+    child: Container(
+      width: 110,
+      height: 110,
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+          ),
+        ],
+      ),
+      child: Image.asset(
+        p.thumbnail,
+        fit: BoxFit.cover,
+      ),
+    ),
+  );
 }
