@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-
 // Pages
 import '../pages/membership_page.dart';
 import '../pages/cart_page.dart';
@@ -54,9 +53,10 @@ class _HomePageState extends State<HomePage>
       const ProfilePage(),
     ];
 
-    _marqueeController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 6))
-          ..repeat();
+    _marqueeController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoScroll());
   }
@@ -97,8 +97,7 @@ class _HomePageState extends State<HomePage>
                   if (selectedIndex == 0) ...[
                     _premiumOfferRibbon(),
                     HomeTopBar(
-                      onMenuTap: () =>
-                          _scaffoldKey.currentState!.openDrawer(),
+                      onMenuTap: () => _scaffoldKey.currentState!.openDrawer(),
                       onSearchTap: () =>
                           Navigator.pushNamed(context, "/search"),
                       onMembershipTap: () {
@@ -115,10 +114,7 @@ class _HomePageState extends State<HomePage>
                   Expanded(
                     child: selectedIndex == 0
                         ? _HomeContent()
-                        : IndexedStack(
-                            index: selectedIndex,
-                            children: screens,
-                          ),
+                        : IndexedStack(index: selectedIndex, children: screens),
                   ),
                 ],
               ),
@@ -141,7 +137,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
- // ⭐ BEAUTIFUL PREMIUM AUTO-SCROLL + USER-SCROLL OFFER RIBBON
+  // ⭐ BEAUTIFUL PREMIUM AUTO-SCROLL + USER-SCROLL OFFER RIBBON
   // -------------------------------------------------------------------
   Widget _premiumOfferRibbon() {
     List<String> offers = [
@@ -173,8 +169,10 @@ class _HomePageState extends State<HomePage>
                 String offer = offers[i % offers.length];
 
                 return Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
@@ -246,22 +244,16 @@ class _HomeContent extends StatelessWidget {
     final bool valentine = (month == 2);
 
     final heroGradient = festive
-        ? const LinearGradient(
-            colors: [Color(0xFFFFE082), Color(0xFFFFF7E0)],
-          )
+        ? const LinearGradient(colors: [Color(0xFFFFE082), Color(0xFFFFF7E0)])
         : valentine
-            ? const LinearGradient(
-                colors: [Color(0xFFFFC1D9), Color(0xFFFFF1F6)],
-              )
-            : const LinearGradient(
-                colors: [Color(0xFFFFE3EC), Color(0xFFFFFFFF)],
-              );
+        ? const LinearGradient(colors: [Color(0xFFFFC1D9), Color(0xFFFFF1F6)])
+        : const LinearGradient(colors: [Color(0xFFFFE3EC), Color(0xFFFFFFFF)]);
 
     final heroTag = festive
         ? "Festive Picks · Limited"
         : valentine
-            ? "Valentine Specials"
-            : "New Arrivals · Limited Stock";
+        ? "Valentine Specials"
+        : "New Arrivals · Limited Stock";
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(
@@ -283,7 +275,8 @@ class _HomeContent extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => ProductDetailsPage(product: shuffled.first),
+                      builder: (_) =>
+                          ProductDetailsPage(product: shuffled.first),
                     ),
                   );
                 },
@@ -343,29 +336,32 @@ class _HomeContent extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: 30),
 
-          // 2️⃣ SHOP BY CATEGORY
+          // 2️⃣ SHOP BY CATEGORY (header removed, only cards remain)
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 80),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _sectionHeader(context, "Shop by Category"),
-                const SizedBox(height: 14),
+                const SizedBox(height: 15),
                 Transform.translate(
-                  offset: const Offset(0, -12),
+                  offset: const Offset(-15, -29),
                   child: SizedBox(
-                    height: 110,
+                    height: 140,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 35),
                       physics: const BouncingScrollPhysics(
                         parent: AlwaysScrollableScrollPhysics(),
                       ),
                       children: const [
                         _CategoryChip("Bottles", Icons.local_drink, "bottles"),
-                        _CategoryChip("Candles", Icons.local_fire_department, "candle"),
+                        _CategoryChip(
+                          "Candles",
+                          Icons.local_fire_department,
+                          "candle",
+                        ),
                         _CategoryChip("Caps", Icons.checkroom, "caps"),
                         _CategoryChip("Ceramic", Icons.coffee, "ceramic"),
                         _CategoryChip("Hair", Icons.face, "hair_accessories"),
@@ -381,7 +377,7 @@ class _HomeContent extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height:0),
 
           // 🔍 EXPLORE ALL — CATEGORY STORY STRIP
           _ScrollFadeIn(
@@ -390,7 +386,7 @@ class _HomeContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _sectionHeader(context, "Explore All"),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 Column(
                   children: List.generate(_exploreItems.length, (index) {
                     final item = _exploreItems[index];
@@ -398,18 +394,76 @@ class _HomeContent extends StatelessWidget {
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                        horizontal: 10,
+                        vertical: 3,
+                      ),
                       child: Row(
                         children: [
-                          if (imageLeft) _exploreImageFromCategory(item.categoryKey),
-                          const SizedBox(width: 16),
-                          Expanded(child: _exploreText(item.name)),
-                          const SizedBox(width: 16),
-                          if (!imageLeft) _exploreImageFromCategory(item.categoryKey),
+                          if (imageLeft)
+                            _exploreImageFromCategory(context, item.categoryKey),
+                          const SizedBox(width: 6),
+                          Expanded(child: _exploreText(item.name, imageLeft: imageLeft)),
+                          const SizedBox(width: 6),
+                          if (!imageLeft)
+                            _exploreImageFromCategory(context, item.categoryKey),
                         ],
                       ),
                     );
                   }),
+                ),
+                // Inserted Gift Hamper premium heading block
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: Divider(
+                          thickness: 1.2,
+                          color: Color(0xFFf3c6d4),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 22,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFFE4EC), Color(0xFFFFFFFF)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.pinkAccent.withOpacity(0.25),
+                              blurRadius: 20,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: const Text(
+                          "Gift Hamper",
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                            color: Color(0xFFB2004D),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Divider(
+                          thickness: 1.2,
+                          color: Color(0xFFf3c6d4),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -453,7 +507,9 @@ class _HomeContent extends StatelessWidget {
                             // Place the shuffled product image inside the semicircle
                             Positioned.fill(
                               child: Image.asset(
-                                (List<Product>.from(products)..shuffle()).first.thumbnail,
+                                (List<Product>.from(
+                                  products,
+                                )..shuffle()).first.thumbnail,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -509,11 +565,11 @@ class _HomeContent extends StatelessWidget {
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 150),
             child: Transform.translate(
-              offset: const Offset(0, -160),
+              offset: const Offset(0, -100),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
-                  padding: const EdgeInsets.all(22),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFFFFFFFF), Color(0xFFFFF3F6)],
@@ -529,21 +585,94 @@ class _HomeContent extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Text(
-                    "Create your own personalised gift hamper by mixing and matching products from every category. A perfect way to make your gift feel special and thoughtful.",
-                    style: TextStyle(
-                      fontSize: 15,
-                      height: 1.55,
-                      fontWeight: FontWeight.w600,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Introducing Gift Hampers",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                          color: Color(0xFFB2004D),
+                          decoration: TextDecoration.underline,
+                          decorationColor: Color(0xFFB2004D),
+                          fontFamily: "Nunito",
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        "Create your own personalised gift hamper by mixing and matching products from every category. A perfect way to make your gift feel special and thoughtful.",
+                        style: TextStyle(
+                          fontSize: 16,
+                          height: 1.55,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 0),
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 160),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AllCategoriesPage(initialCategory: "bottles"),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFFE4EC), Color(0xFFFFFFFF)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.pinkAccent.withOpacity(0.35),
+                          blurRadius: 22,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: Color(0xFFFFC1D9),
+                        width: 1.4,
+                      ),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "Customize",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFFB2004D),
+                          letterSpacing: 0.6,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 220),
+          const SizedBox(height: 40),
 
-          const SizedBox(height: 36),
+          const SizedBox(height: 0),
 
           // 3️⃣ TRENDING GRID
           _ScrollFadeIn(
@@ -558,12 +687,13 @@ class _HomeContent extends StatelessWidget {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: 6,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.72,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 0.72,
+                        ),
                     itemBuilder: (_, i) {
                       final p = shuffled[i];
                       return GestureDetector(
@@ -606,7 +736,8 @@ class _HomeContent extends StatelessWidget {
                                   Padding(
                                     padding: const EdgeInsets.all(12),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           p.name,
@@ -648,7 +779,9 @@ class _HomeContent extends StatelessWidget {
                                       iconSize: 20,
                                       padding: EdgeInsets.zero,
                                       icon: Icon(
-                                        isFav ? Icons.favorite : Icons.favorite_border,
+                                        isFav
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
                                         color: Colors.pink,
                                       ),
                                       onPressed: () {
@@ -695,7 +828,8 @@ class _HomeContent extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => ProductDetailsPage(product: product),
+                              builder: (_) =>
+                                  ProductDetailsPage(product: product),
                             ),
                           );
                         },
@@ -761,10 +895,7 @@ class _HomeContent extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(32),
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFFE4EC),
-                      Color(0xFFFFFFFF),
-                    ],
+                    colors: [Color(0xFFFFE4EC), Color(0xFFFFFFFF)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -791,10 +922,7 @@ class _HomeContent extends StatelessWidget {
                       SizedBox(height: 10),
                       Text(
                         "Birthdays, surprises, self‑love or just because — find something meaningful.",
-                        style: TextStyle(
-                          fontSize: 14,
-                          height: 1.45,
-                        ),
+                        style: TextStyle(fontSize: 14, height: 1.45),
                       ),
                     ],
                   ),
@@ -957,9 +1085,7 @@ class _HomeContent extends StatelessWidget {
                 ),
                 child: const Text(
                   "Stamp 10 / 30  •  Collect Rewards",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -1050,10 +1176,7 @@ class _HomeContent extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(36),
                       gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFFFFEDF3),
-                          Color(0xFFFFFFFF),
-                        ],
+                        colors: [Color(0xFFFFEDF3), Color(0xFFFFFFFF)],
                       ),
                     ),
                     child: const Text(
@@ -1195,35 +1318,44 @@ class _HomeContent extends StatelessWidget {
 
   static Widget _sectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.4,
-            ),
+          const Expanded(
+            child: Divider(thickness: 1.2, color: Color(0xFFf3c6d4)),
           ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AllCategoriesPage(),
+          const SizedBox(width: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFFE4EC), Color(0xFFFFFFFF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.pinkAccent.withOpacity(0.25),
+                  blurRadius: 20,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 8),
                 ),
-              );
-            },
+              ],
+            ),
             child: Text(
-              "View all",
-              style: TextStyle(
-                fontSize: 12,
-                letterSpacing: 0.6,
-                color: Colors.pink.shade400,
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
+                color: Color(0xFFB2004D),
               ),
             ),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Divider(thickness: 3.0, color: Color(0xFFf3c6d4)),
           ),
         ],
       ),
@@ -1247,34 +1379,86 @@ const List<_ExploreItem> _exploreItems = [
   _ExploreItem("Keychains", "key_chain"),
 ];
 
-Widget _exploreText(String name) {
+Widget _exploreText(String name, {required bool imageLeft}) {
+  String subtitle;
+  switch (name) {
+    case "Cute Bottles":
+      subtitle = "Pretty bottles for everyday hydration with stylish touch.";
+      break;
+    case "Aesthetic Candles":
+      subtitle = "Soft candles that bring warmth and a cozy feeling to space.";
+      break;
+    case "Custom Caps":
+      subtitle = "Custom caps made to match personal style with ease.";
+      break;
+    case "Plush Toys":
+      subtitle = "Soft plush toys perfect for gifting and warm moments.";
+      break;
+    case "Keychains":
+      subtitle = "Cute keychains that add a charming touch to essentials.";
+      break;
+    default:
+      subtitle = "Hand‑picked just for you";
+  }
+
   return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.center,
     children: [
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
+      // Side-aware aligned heading that hugs the image side
+      Padding(
+        padding: imageLeft
+            ? const EdgeInsets.only(left: 6, right: 18)
+            : const EdgeInsets.only(left: 18, right: 6),
+        child: Align(
+          alignment: imageLeft ? Alignment.centerLeft : Alignment.centerRight,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
             ),
-          ],
-        ),
-        child: Text(
-          name,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+            child: Text(
+              name,
+              textAlign: imageLeft ? TextAlign.left : TextAlign.right,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+                color: Color(0xFF2B2B2B),
+              ),
+            ),
           ),
         ),
       ),
-      const SizedBox(height: 10),
-      Container(height: 6, width: 140, color: Colors.black12),
+
       const SizedBox(height: 6),
-      Container(height: 6, width: 110, color: Colors.black12),
+
+      // Darker professional description (no box), left/right aligned with padding
+      Padding(
+        padding: imageLeft
+            ? const EdgeInsets.only(left: 6, right: 18)
+            : const EdgeInsets.only(left: 18, right: 6),
+        child: Text(
+          subtitle,
+          textAlign: imageLeft ? TextAlign.left : TextAlign.right,
+          style: const TextStyle(
+            fontSize: 13,
+            height: 1.55,
+            color: Color(0xFF222222),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+
+      const SizedBox(height: 6),
+      const SizedBox(
+        width: 90,
+        child: Divider(
+          thickness: 1,
+          color: Color(0xFFDDDDDD),
+        ),
+      ),
     ],
   );
 }
@@ -1288,43 +1472,82 @@ class _CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Product p = products.firstWhere(
+      (e) => e.thumbnail.contains(categoryKey),
+      orElse: () => products.first,
+    );
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => AllCategoriesPage(
-              initialCategory: categoryKey,
-            ),
+            builder: (_) => AllCategoriesPage(initialCategory: categoryKey),
           ),
         );
       },
       child: Container(
-        width: 90,
+        width: 110,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 8,
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 14,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 28),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  p.thumbnail,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-          ],
+              // soft dark overlay for readability
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.55),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // category label
+              Positioned(
+                left: 10,
+                right: 10,
+                bottom: 10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF2B2B2B),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1341,19 +1564,12 @@ Widget _testimonialCard(String text) {
       borderRadius: BorderRadius.circular(24),
       color: Colors.white,
       boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 12,
-        ),
+        BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12),
       ],
     ),
     child: Text(
       text,
-      style: const TextStyle(
-        fontSize: 14,
-        height: 1.45,
-        letterSpacing: 0.1,
-      ),
+      style: const TextStyle(fontSize: 14, height: 1.45, letterSpacing: 0.1),
     ),
   );
 }
@@ -1372,10 +1588,7 @@ class _OccasionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         color: Colors.white,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 14,
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 14),
         ],
       ),
       child: Center(
@@ -1384,16 +1597,14 @@ class _OccasionCard extends StatelessWidget {
           child: Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
     );
   }
 }
+
 // Scroll-in fade/slide animation for sections
 class _ScrollFadeIn extends StatefulWidget {
   final Widget child;
@@ -1421,9 +1632,7 @@ class _ScrollFadeInState extends State<_ScrollFadeIn>
     _slide = Tween<Offset>(
       begin: const Offset(0, 0.08),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _c, curve: Curves.easeOutCubic),
-    );
+    ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOutCubic));
 
     Future.delayed(widget.delay, () {
       if (mounted) _c.forward();
@@ -1444,28 +1653,68 @@ class _ScrollFadeInState extends State<_ScrollFadeIn>
     );
   }
 }
-Widget _exploreImageFromCategory(String categoryKey) {
+
+Widget _exploreImageFromCategory(BuildContext context, String categoryKey) {
   final Product p = products.firstWhere(
     (e) => e.thumbnail.contains(categoryKey),
     orElse: () => products.first,
   );
 
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(18),
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AllCategoriesPage(initialCategory: categoryKey),
+        ),
+      );
+    },
     child: Container(
-      width: 110,
-      height: 110,
+      width: 180,
+      height: 180,
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFFFFF), Color(0xFFFFEEF3)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
+            color: Colors.pinkAccent.withOpacity(0.25),
+            blurRadius: 24,
+            offset: const Offset(0, 14),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Image.asset(
-        p.thumbnail,
-        fit: BoxFit.cover,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(p.thumbnail, fit: BoxFit.cover),
+            ),
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withOpacity(0.15),
+                      Colors.black.withOpacity(0.10),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     ),
   );
