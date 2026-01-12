@@ -1,13 +1,239 @@
 // lib/pages/profile_page.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../pages/cart_page.dart';
 // add to pubspec
 // import other packages as needed for your app routing/state management
 
+// ────────────── FULL-PAGE ADDRESS FORM ──────────────
+// Add/Edit Address (Nykaa / Amazon style)
+class AddressFormPage extends StatefulWidget {
+  final String? initialAddress;
+  final String title;
+
+  const AddressFormPage({
+    super.key,
+    required this.title,
+    this.initialAddress,
+  });
+
+  @override
+  State<AddressFormPage> createState() => _AddressFormPageState();
+}
+
+class _AddressFormPageState extends State<AddressFormPage> {
+  final _flatController = TextEditingController();
+  final _streetController = TextEditingController();
+  final _landmarkController = TextEditingController();
+  final _pincodeController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _stateController = TextEditingController();
+
+  String addressType = 'Home';
+  bool isDefault = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialAddress != null) {
+      _flatController.text = widget.initialAddress!;
+    }
+  }
+
+  @override
+  void dispose() {
+    _flatController.dispose();
+    _streetController.dispose();
+    _landmarkController.dispose();
+    _pincodeController.dispose();
+    _cityController.dispose();
+    _stateController.dispose();
+    super.dispose();
+  }
+
+  InputDecoration _input(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.black12),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.black12),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 1,
+        leading: const BackButton(color: Colors.black),
+        title: const Text(
+          'Add New Address',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _flatController,
+                    decoration: _input('Flat No / Building / Company*'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _streetController,
+                    decoration: _input('Street Name, Area*'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _landmarkController,
+                    decoration: _input('Landmark'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _pincodeController,
+                    keyboardType: TextInputType.number,
+                    decoration: _input('Pincode*'),
+                  ),
+                  const SizedBox(height: 12),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _cityController,
+                          decoration: _input('City/District'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: _stateController,
+                          decoration: _input('State'),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Save Address As',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 12),
+
+                  Row(
+                    children: ['Home', 'Work', 'Other'].map((type) {
+                      final selected = addressType == type;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: ChoiceChip(
+                          label: Text(type),
+                          selected: selected,
+                          selectedColor: Colors.red.shade50,
+                          labelStyle: TextStyle(
+                            color: selected ? Colors.red : Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          onSelected: (_) {
+                            setState(() => addressType = type);
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: isDefault,
+                    onChanged: (v) => setState(() => isDefault = v ?? false),
+                    title: const Text(
+                      'Save This As Default Address',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // SAVE BUTTON (sticky bottom)
+          Container(
+            padding: const EdgeInsets.all(14),
+            color: Colors.white,
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  if (_flatController.text.trim().isEmpty ||
+                      _streetController.text.trim().isEmpty ||
+                      _pincodeController.text.trim().isEmpty) return;
+
+                  final fullAddress = [
+                    _flatController.text,
+                    _streetController.text,
+                    _landmarkController.text,
+                    _cityController.text,
+                    _stateController.text,
+                    _pincodeController.text,
+                  ].where((e) => e.isNotEmpty).join(', ');
+
+                  Navigator.pop(context, fullAddress);
+                },
+                child: const Text(
+                  'SAVE',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final bool openCoupons;
+
+  const ProfilePage({
+    super.key,
+    this.openCoupons = false,
+  });
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -330,6 +556,310 @@ class _RetroDot extends StatelessWidget {
 
 class _ProfilePageState extends State<ProfilePage>
     with SingleTickerProviderStateMixin {
+  void _openGiftCardsSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        final TextEditingController controller = TextEditingController();
+
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.65,
+          padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.black12,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const Text(
+                'Gift Cards',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 18),
+
+              // Redeem section
+              const Text(
+                'Redeem Gift Card',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  hintText: 'Enter gift card code',
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pink.shade600,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    if (controller.text.isEmpty) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Invalid or expired gift card'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'REDEEM',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 26),
+              const Divider(),
+
+              // Buy section
+              const SizedBox(height: 16),
+              const Text(
+                'Buy Gift Card',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.pink.shade50,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.card_giftcard, color: Colors.pink.shade600),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Send gift cards to friends & family.\nComing soon!',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _openCouponsSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        String? appliedCoupon;
+        final TextEditingController controller = TextEditingController();
+
+        final coupons = [
+          {
+            'code': 'FLAT10',
+            'desc': 'Flat ₹100 OFF',
+            'cond': 'Min order ₹999',
+            'expiry': 'Expires in 3 days',
+          },
+          {
+            'code': 'WELCOME15',
+            'desc': '15% OFF for new users',
+            'cond': 'Max discount ₹300',
+            'expiry': 'Expires in 7 days',
+          },
+          {
+            'code': 'FREESHIP',
+            'desc': 'Free Delivery',
+            'cond': 'No minimum order',
+            'expiry': 'Limited time',
+          },
+        ];
+
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.black12,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    'Coupons',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 14),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: controller,
+                          decoration: InputDecoration(
+                            hintText: 'Enter coupon code',
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink.shade600,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          if (controller.text.isNotEmpty) {
+                            setSheetState(() {
+                              appliedCoupon =
+                                  controller.text.toUpperCase();
+                            });
+                          }
+                        },
+                        child: const Text('APPLY'),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: coupons.length,
+                      itemBuilder: (_, i) {
+                        final c = coupons[i];
+                        final bool isApplied =
+                            appliedCoupon == c['code'];
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 14),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isApplied
+                                  ? Colors.green
+                                  : Colors.black12,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      c['code']!,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(c['desc']!),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      c['cond']!,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      c['expiry']!,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.redAccent,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Clipboard.setData(
+                                    ClipboardData(text: c['code']!),
+                                  );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('${c['code']} copied'),
+                                      duration: const Duration(seconds: 2),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  'COPY',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.pink.shade600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
   // Replace with your real user state / provider
   String userName = 'Guest User';
   String membership = 'Non-Member';
@@ -339,6 +869,8 @@ class _ProfilePageState extends State<ProfilePage>
   String blood = '—';
   bool _pressed = false;
   String theme = 'pink';
+  List<String> addresses = [];
+  int defaultAddressIndex = -1;
   Color _themeBg() {
     switch (theme) {
       case 'beige':
@@ -378,6 +910,12 @@ class _ProfilePageState extends State<ProfilePage>
   void initState() {
     super.initState();
     _loadProfile();
+
+    if (widget.openCoupons) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openCouponsSheet();
+      });
+    }
   }
 
   Future<void> _loadProfile() async {
@@ -387,6 +925,8 @@ class _ProfilePageState extends State<ProfilePage>
       birth = prefs.getString('birth') ?? birth;
       height = prefs.getString('height') ?? height;
       blood = prefs.getString('blood') ?? blood;
+      addresses = prefs.getStringList('addresses') ?? [];
+      defaultAddressIndex = prefs.getInt('default_address_index') ?? -1;
     });
   }
 
@@ -396,6 +936,8 @@ class _ProfilePageState extends State<ProfilePage>
     await prefs.setString('birth', birth);
     await prefs.setString('height', height);
     await prefs.setString('blood', blood);
+    await prefs.setStringList('addresses', addresses);
+    await prefs.setInt('default_address_index', defaultAddressIndex);
   }
 
   Future<void> _editField(String label, String current, Function(String) onSave) async {
@@ -426,6 +968,245 @@ class _ProfilePageState extends State<ProfilePage>
   void dispose() {
     super.dispose();
   }
+
+  // ────────────── ADDRESS MANAGEMENT ──────────────
+  void _openAddressSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                18,
+                12,
+                18,
+                MediaQuery.of(context).viewInsets.bottom + 18,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // drag handle
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.black12,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Saved Addresses',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => _addAddress(setSheetState),
+                        child: const Text(
+                          '+ ADD NEW',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  if (addresses.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 32),
+                      child: Center(
+                        child: Column(
+                          children: const [
+                            Icon(Icons.location_on_outlined,
+                                size: 48, color: Colors.black26),
+                            SizedBox(height: 12),
+                            Text(
+                              'No saved addresses',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Add an address to get faster delivery',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  ...List.generate(addresses.length, (i) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.black12),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            defaultAddressIndex == i
+                                ? Icons.check_circle
+                                : Icons.location_on_outlined,
+                            size: 22,
+                            color: defaultAddressIndex == i
+                                ? Colors.green
+                                : Colors.black54,
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            fit: FlexFit.loose,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (defaultAddressIndex == i)
+                                  Container(
+                                    margin: const EdgeInsets.only(bottom: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade50,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Text(
+                                      'DEFAULT',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ),
+                                Text(
+                                  addresses[i],
+                                  style: const TextStyle(height: 1.4),
+                                ),
+                                const SizedBox(height: 6),
+                                GestureDetector(
+                                  onTap: () {
+                                    setSheetState(() {
+                                      defaultAddressIndex = i;
+                                      _saveProfile();
+                                    });
+                                  },
+                                  child: Text(
+                                    defaultAddressIndex == i
+                                        ? 'Default address'
+                                        : 'Make this default',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: defaultAddressIndex == i
+                                          ? Colors.green
+                                          : Colors.pink.shade600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          PopupMenuButton<String>(
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                _editAddress(i, setSheetState);
+                              } else if (value == 'delete') {
+                                setSheetState(() {
+                                  if (defaultAddressIndex == i) {
+                                    defaultAddressIndex = -1;
+                                  } else if (defaultAddressIndex > i) {
+                                    defaultAddressIndex--;
+                                  }
+                                  addresses.removeAt(i);
+                                  _saveProfile();
+                                });
+                              }
+                            },
+                            itemBuilder: (_) => const [
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Text('Edit'),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Text('Delete'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _addAddress(Function setSheetState) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AddressFormPage(title: 'Add Address'),
+      ),
+    );
+
+    if (result is String) {
+      setSheetState(() {
+        addresses.add(result);
+        if (defaultAddressIndex == -1) {
+          defaultAddressIndex = addresses.length - 1;
+        }
+        _saveProfile();
+      });
+    }
+  }
+
+  void _editAddress(int index, Function setSheetState) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddressFormPage(
+          title: 'Edit Address',
+          initialAddress: addresses[index],
+        ),
+      ),
+    );
+
+    if (result is String) {
+      setSheetState(() {
+        addresses[index] = result;
+        _saveProfile();
+      });
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -498,7 +1279,7 @@ class _ProfilePageState extends State<ProfilePage>
                           Icons.location_on_outlined,
                           'Addresses',
                           onTap: () {
-                            /* addresses */
+                            _openAddressSheet();
                           },
                         ),
                         profileOptionTile(
@@ -506,7 +1287,12 @@ class _ProfilePageState extends State<ProfilePage>
                           Icons.shopping_cart_outlined,
                           'Cart Shortcut',
                           onTap: () {
-                            /* cart */
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CartPage(),
+                              ),
+                            );
                           },
                         ),
                       ],
@@ -677,7 +1463,7 @@ class _ProfilePageState extends State<ProfilePage>
                           Icons.local_offer_outlined,
                           'Coupons',
                           onTap: () {
-                            /* coupons */
+                            _openCouponsSheet();
                           },
                         ),
                         profileOptionTile(
@@ -685,7 +1471,7 @@ class _ProfilePageState extends State<ProfilePage>
                           Icons.card_giftcard,
                           'Gift Cards',
                           onTap: () {
-                            /* gift cards */
+                            _openGiftCardsSheet();
                           },
                         ),
                         profileOptionTile(
@@ -716,7 +1502,7 @@ class _ProfilePageState extends State<ProfilePage>
                           Icons.location_on_outlined,
                           'Address',
                           onTap: () {
-                            /* open address manager */
+                            _openAddressSheet();
                           },
                         ),
                       ],
@@ -1310,3 +2096,6 @@ class _ScanlinePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+
+
+

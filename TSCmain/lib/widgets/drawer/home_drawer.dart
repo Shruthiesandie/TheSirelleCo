@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../pages/profile_page.dart';
+import '../../pages/sirelle_chat_page.dart';
 
 
 class HomeDrawer extends StatelessWidget {
@@ -184,12 +185,33 @@ class HomeDrawer extends StatelessWidget {
             ),
           ),
           onTap: () {
-            if (title == "My Profile" || title == "Profile") {
-              Navigator.pop(context); // Close drawer first to avoid dark overlay
-              Future.delayed(const Duration(milliseconds: 150), () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
-              });
-            }
+            Navigator.pop(context); // close drawer first
+
+            Future.delayed(const Duration(milliseconds: 150), () {
+              if (title == "My Profile" || title == "Profile") {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfilePage()),
+                );
+              }
+
+              if (title == "Coupons") {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProfilePage(openCoupons: true),
+                  ),
+                );
+              }
+              if (title == "Sirelle-chan") {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SirelleChatPage(),
+                  ),
+                );
+              }
+            });
           },
         ),
       ),
