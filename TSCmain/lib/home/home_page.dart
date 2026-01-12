@@ -1472,10 +1472,7 @@ class _CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Product p = products.firstWhere(
-      (e) => e.thumbnail.contains(categoryKey),
-      orElse: () => products.first,
-    );
+    final Product p = getThemedProduct(categoryKey);
 
     return GestureDetector(
       onTap: () {
@@ -1654,11 +1651,37 @@ class _ScrollFadeInState extends State<_ScrollFadeIn>
   }
 }
 
+Product getThemedProduct(String categoryKey) {
+  final month = DateTime.now().month;
+  final bool festive = (month == 10 || month == 11);
+  final bool valentine = (month == 2);
+
+  List<Product> filtered = products.where((p) {
+    if (!p.thumbnail.contains(categoryKey)) return false;
+
+    if (festive) {
+      return p.thumbnail.toLowerCase().contains("festive");
+    }
+
+    if (valentine) {
+      return p.thumbnail.toLowerCase().contains("valentine");
+    }
+
+    return true; // normal / fallback
+  }).toList();
+
+  if (filtered.isEmpty) {
+    filtered = products
+        .where((p) => p.thumbnail.contains(categoryKey))
+        .toList();
+  }
+
+  filtered.shuffle();
+  return filtered.isNotEmpty ? filtered.first : products.first;
+}
+
 Widget _exploreImageFromCategory(BuildContext context, String categoryKey) {
-  final Product p = products.firstWhere(
-    (e) => e.thumbnail.contains(categoryKey),
-    orElse: () => products.first,
-  );
+  final Product p = getThemedProduct(categoryKey);
 
   return GestureDetector(
     onTap: () {
