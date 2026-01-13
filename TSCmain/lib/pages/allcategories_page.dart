@@ -413,14 +413,99 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                         : const LinearGradient(colors: [Color(0xFFFFE3EC), Color(0xFFFFFFFF)]);
 
                 String heroTag;
+
+                final Map<String, List<String>> aestheticLines = {
+                  "bottles": [
+                    "Sip in Style ✨",
+                    "Everyday Hydration, Beautifully",
+                    "Designed for Your Daily Pour",
+                    "Where Function Meets Aesthetic",
+                    "Carry Calm in Every Sip",
+                    "Minimal, Practical, Timeless",
+                  ],
+                  "candle": [
+                    "Moments That Glow 🕯️",
+                    "Soft Light, Calm Evenings",
+                    "Where Warmth Begins",
+                    "A Gentle Pause in Your Day",
+                    "Set the Mood, Effortlessly",
+                    "Light That Feels Like Home",
+                  ],
+                  "caps": [
+                    "Top It Off ✨",
+                    "Casual Days, Styled Right",
+                    "Effortless Everyday Wear",
+                    "Comfort Meets Street Style",
+                    "Made for Easygoing Days",
+                    "Simple Fits, Strong Vibe",
+                  ],
+                  "ceramic": [
+                    "Crafted Calm 🤍",
+                    "Slow Living Essentials",
+                    "Art for Everyday Spaces",
+                    "Thoughtfully Made Forms",
+                    "Textures That Feel Grounded",
+                    "Beauty in Every Curve",
+                  ],
+                  "hair_accessories": [
+                    "Little Details, Big Charm ✨",
+                    "Styled in Seconds",
+                    "Everyday Hair Magic",
+                    "Soft Touches That Shine",
+                    "Made to Move With You",
+                    "Gentle on Hair, Big on Style",
+                  ],
+                  "key_chain": [
+                    "Small Things, Big Joy ✨",
+                    "Carry a Little Cute",
+                    "Tiny Details Matter",
+                    "A Little Joy, Everywhere You Go",
+                    "Everyday Companions",
+                    "Minimal Add-ons, Maximum Charm",
+                  ],
+                  "letter": [
+                    "Say It Your Way 💌",
+                    "Words Made Special",
+                    "Personal, Just Like You",
+                    "Because Every Word Matters",
+                    "Thoughts Turned Tangible",
+                    "Moments Worth Remembering",
+                  ],
+                  "nails": [
+                    "Polish Your Mood 💅",
+                    "Tiny Art, Big Style",
+                    "Everyday Nail Crush",
+                    "Little Pops of Confidence",
+                    "Details That Complete the Look",
+                    "Style at Your Fingertips",
+                  ],
+                  "plusie": [
+                    "Soft Hugs Only 🧸",
+                    "Comfort You Can Feel",
+                    "A Little Love to Hold",
+                    "Gentle Comfort for Quiet Moments",
+                    "Warmth in Its Softest Form",
+                    "Always There When You Need It",
+                  ],
+                };
+
+                String pickLine(String category) {
+                  final list = aestheticLines[category];
+                  if (list == null || list.isEmpty) {
+                    return "Beautiful Finds, Just for You ✨";
+                  }
+                  list.shuffle();
+                  return list.first;
+                }
+
                 if (festive) {
-                  heroTag = "Festive Favourites · Limited";
+                  heroTag = "A Little Festive Magic ✨";
                 } else if (valentine) {
-                  heroTag = "Made With Love ❤️";
+                  heroTag = "Thoughtfully Chosen, With Love ❤️";
                 } else if (selectedCategory != "All") {
-                  heroTag = "${selectedCategory.replaceAll('_', ' ').toUpperCase()} PICKS";
+                  heroTag = pickLine(selectedCategory);
                 } else {
-                  heroTag = "Handpicked Just For You ✨";
+                  heroTag = "Beautiful Finds, Just for You ✨";
                 }
 
                 return Padding(
