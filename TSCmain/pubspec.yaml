@@ -29,7 +29,6 @@ dependencies:
   # Add these packages for OpenAI support
   http: ^1.1.0
   dart_openai: ^6.1.1
-  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:

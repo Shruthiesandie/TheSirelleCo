@@ -13,9 +13,8 @@ import 'pages/login_page.dart';
 import 'pages/create_account_page.dart';
 import 'pages/username_page.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
   runApp(const MyApp());
 }
 
@@ -26,11 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-      /// ⭐ Splash loader remains your home launcher
       home: const SplashScreen(),
-
-      /// ⭐ Your full routing system preserved
       routes: {
         "/home": (_) => const HomePage(),
         "/membership": (_) => const MembershipPage(),
