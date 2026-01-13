@@ -278,22 +278,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               ),
             ),
 
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    "Shop by Category",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
             SizedBox(
               height: 125,
@@ -574,6 +558,14 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               },
             ),
 
+            const SizedBox(height: 12),
+
+            // 🔥 OFFERS MARQUEE
+            SizedBox(
+              height: 40,
+              child: _OffersMarquee(),
+            ),
+
 
             GridView.builder(
               shrinkWrap: true,
@@ -721,6 +713,150 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
           ),
         ), // <-- closes Container
       ),   // <-- closes SafeArea
+    );
+  }
+}
+
+class _WavyClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    const waveHeight = 6.0;
+    const waveWidth = 20.0;
+
+    path.moveTo(0, waveHeight);
+    for (double x = 0; x <= size.width; x += waveWidth) {
+      path.quadraticBezierTo(
+        x + waveWidth / 2,
+        x % (waveWidth * 2) == 0 ? 0 : waveHeight * 2,
+        x + waveWidth,
+        waveHeight,
+      );
+    }
+
+    path.lineTo(size.width, size.height - waveHeight);
+
+    for (double x = size.width; x >= 0; x -= waveWidth) {
+      path.quadraticBezierTo(
+        x - waveWidth / 2,
+        x % (waveWidth * 2) == 0 ? size.height : size.height - waveHeight * 2,
+        x - waveWidth,
+        size.height - waveHeight,
+      );
+    }
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+class _OffersMarquee extends StatefulWidget {
+  const _OffersMarquee();
+
+  @override
+  State<_OffersMarquee> createState() => _OffersMarqueeState();
+}
+
+class _OffersMarqueeState extends State<_OffersMarquee>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  final List<String> offers = [
+    "FLAT 20% OFF on Gift Hampers",
+    "Buy 2 Get 1 on Candles",
+    "Free Shipping above ₹999",
+    "Limited Edition Bottles Available",
+    "New Arrivals Just Dropped",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 18),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipPath(
+      clipper: _WavyClipper(),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFE4EC), Color(0xFFFFFFFF)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.pinkAccent.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final dx = -_controller.value * width;
+
+                return ClipRect(
+                  child: SizedBox(
+                    width: width,
+                    child: Transform.translate(
+                      offset: Offset(dx, 0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _offerRow(),
+                          _offerRow(), // repeat for seamless loop
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _offerRow() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: offers
+          .map(
+            (t) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                t,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFB2004D),
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }
