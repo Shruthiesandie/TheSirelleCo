@@ -1935,45 +1935,6 @@ class _BeverageAdSection extends StatelessWidget {
   }
 }
 
-class _RoundedArtCard extends StatelessWidget {
-  final String image;
-  const _RoundedArtCard({required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 70,
-      height: 70,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Image.asset(image, fit: BoxFit.cover),
-      ),
-    );
-  }
-}
-
-class _CanImage extends StatelessWidget {
-  final String image;
-  const _CanImage(this.image);
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.asset(
-      image,
-      height: 140,
-      fit: BoxFit.contain,
-    );
-  }
-}
 
 class _Badge extends StatelessWidget {
   final IconData icon;
