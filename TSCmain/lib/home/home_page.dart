@@ -671,6 +671,9 @@ class _HomeContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 40),
+          const SizedBox(height: 40),
+          _BeverageAdSection(),
+          const SizedBox(height: 40),
 
           // 3️⃣ TRENDING GRID
           _ScrollFadeIn(
@@ -1750,28 +1753,220 @@ Widget _exploreImageFromCategory(BuildContext context, String categoryKey) {
 
 // 🧱 Letter side frame (helper widget)
 Widget _sideFrame(String imagePath) {
-  return Container(
-    width: 160,
-    height: 95,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(26),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 16,
-        ),
-      ],
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(10),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
+  return ClipPath(
+    clipper: _ArchClipper(),
+    child: Container(
+      width: 380,
+      height: 440,
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.18),
+            blurRadius: 28,
+            offset: const Offset(0, 18),
+          ),
+          BoxShadow(
+            color: Colors.pinkAccent.withOpacity(0.12),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipPath(
+        clipper: _ArchClipper(),
         child: Image.asset(
           imagePath,
           fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
         ),
       ),
     ),
   );
+}
+
+
+class _ArchClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+
+    // Start bottom-left
+    path.moveTo(0, size.height);
+
+    // Left side straight up
+    path.lineTo(0, size.height * 0.28);
+
+    // Smooth rounded arch
+    path.cubicTo(
+      size.width * 0.08,
+      0,
+      size.width * 0.92,
+      0,
+      size.width,
+      size.height * 0.28,
+    );
+
+    // Right side straight down
+    path.lineTo(size.width, size.height);
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+
+class _BeverageAdSection extends StatelessWidget {
+  const _BeverageAdSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFEEF3),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Left content
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 18, 18, 18),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 4,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AllCategoriesPage(
+                              initialCategory: "letter",
+                            ),
+                          ),
+                        );
+                      },
+                      child: _sideFrame(getThemedProduct("letter").thumbnail),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    flex: 2,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Transform.translate(
+                        offset: const Offset(18, 0), // move boxes further RIGHT
+                        child: SizedBox(
+                          height: 480,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              _Badge(icon: Icons.favorite, label: "Loved"),
+                              SizedBox(height: 25),
+                              _Badge(icon: Icons.card_giftcard, label: "Giftable"),
+                              SizedBox(height: 25),
+                              _Badge(icon: Icons.auto_awesome, label: "Premium"),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RoundedArtCard extends StatelessWidget {
+  final String image;
+  const _RoundedArtCard({required this.image});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 70,
+      height: 70,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Image.asset(image, fit: BoxFit.cover),
+      ),
+    );
+  }
+}
+
+class _CanImage extends StatelessWidget {
+  final String image;
+  const _CanImage(this.image);
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      image,
+      height: 140,
+      fit: BoxFit.contain,
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _Badge({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 118,
+      height: 118,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFC1D9),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFFB2004D), size: 28),
+          const SizedBox(height: 10),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFFB2004D),
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
