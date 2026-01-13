@@ -234,6 +234,53 @@ class _HomePageState extends State<HomePage>
   }
 }
 
+// ------------------------ SECTION HEADER SHARED HELPER ------------------------
+Widget _sectionHeader(BuildContext context, String title) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+    child: Row(
+      children: [
+        const Expanded(
+          child: Divider(thickness: 1.2, color: Color(0xFFf3c6d4)),
+        ),
+        const SizedBox(width: 14),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFE4EC), Color(0xFFFFFFFF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.pinkAccent.withOpacity(0.25),
+                blurRadius: 20,
+                spreadRadius: 1,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
+              color: Color(0xFFB2004D),
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        const Expanded(
+          child: Divider(thickness: 3.0, color: Color(0xFFf3c6d4)),
+        ),
+      ],
+    ),
+  );
+}
+
 class _HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1324,51 +1371,6 @@ class _HomeContent extends StatelessWidget {
     );
   }
 
-  static Widget _sectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Row(
-        children: [
-          const Expanded(
-            child: Divider(thickness: 1.2, color: Color(0xFFf3c6d4)),
-          ),
-          const SizedBox(width: 14),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFFE4EC), Color(0xFFFFFFFF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.pinkAccent.withOpacity(0.25),
-                  blurRadius: 20,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.8,
-                color: Color(0xFFB2004D),
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          const Expanded(
-            child: Divider(thickness: 3.0, color: Color(0xFFf3c6d4)),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ------------------------ EXPLORE ALL MODELS & HELPERS ------------------------
@@ -1839,56 +1841,63 @@ class _BeverageAdSection extends StatelessWidget {
           ],
         ),
         clipBehavior: Clip.hardEdge,
-        child: Stack(
-          clipBehavior: Clip.none,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Left content
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 18, 18, 18),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => AllCategoriesPage(
-                              initialCategory: "letter",
+            // Section Heading
+            _sectionHeader(context, "Letters"),
+            const SizedBox(height: 14),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 18, 18),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AllCategoriesPage(
+                                  initialCategory: "letter",
+                                ),
+                              ),
+                            );
+                          },
+                          child: _sideFrame(getThemedProduct("letter").thumbnail),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        flex: 2,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Transform.translate(
+                            offset: const Offset(18, 0), // move boxes further RIGHT
+                            child: SizedBox(
+                              height: 480,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  _Badge(icon: Icons.favorite, label: "Loved"),
+                                  SizedBox(height: 25),
+                                  _Badge(icon: Icons.card_giftcard, label: "Giftable"),
+                                  SizedBox(height: 25),
+                                  _Badge(icon: Icons.auto_awesome, label: "Premium"),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      child: _sideFrame(getThemedProduct("letter").thumbnail),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    flex: 2,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Transform.translate(
-                        offset: const Offset(18, 0), // move boxes further RIGHT
-                        child: SizedBox(
-                          height: 480,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              _Badge(icon: Icons.favorite, label: "Loved"),
-                              SizedBox(height: 25),
-                              _Badge(icon: Icons.card_giftcard, label: "Giftable"),
-                              SizedBox(height: 25),
-                              _Badge(icon: Icons.auto_awesome, label: "Premium"),
-                            ],
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1954,14 +1963,17 @@ class _Badge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: const Color(0xFFB2004D), size: 28),
-          const SizedBox(height: 10),
+          Icon(icon, color: const Color(0xFFB2004D), size: 30),
+          const SizedBox(height: 12),
           Text(
             label,
+            textAlign: TextAlign.center,
             style: const TextStyle(
               color: Color(0xFFB2004D),
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
           ),
