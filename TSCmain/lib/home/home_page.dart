@@ -1755,32 +1755,61 @@ Widget _exploreImageFromCategory(BuildContext context, String categoryKey) {
 
 // 🧱 Letter side frame (helper widget)
 Widget _sideFrame(String imagePath) {
-  return ClipPath(
-    clipper: _ArchClipper(),
-    child: Container(
-      width: 840,
-      height: 440,
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.18),
-            blurRadius: 28,
-            offset: const Offset(0, 18),
+  return Container(
+    width: 540,
+    height: 440,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(240), // soft arch radius base
+      boxShadow: [
+        // Soft lift (depth)
+        BoxShadow(
+          color: Colors.black.withOpacity(0.14),
+          blurRadius: 22,
+          offset: const Offset(0, 14),
+        ),
+        // Subtle ambient shadow
+        BoxShadow(
+          color: Colors.black.withOpacity(0.06),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
+        // Gentle pink glow (halo, not neon)
+        BoxShadow(
+          color: const Color(0xFFFFB6CF).withOpacity(0.28),
+          blurRadius: 28,
+          spreadRadius: -4,
+          offset: const Offset(0, 0),
+        ),
+      ],
+    ),
+    child: ClipPath(
+      clipper: _ArchClipper(),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
           ),
-          BoxShadow(
-            color: Colors.pinkAccent.withOpacity(0.12),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+          // glass highlight
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withOpacity(0.14),
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.08),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
-      ),
-      child: ClipPath(
-        clipper: _ArchClipper(),
-        child: Image.asset(
-          imagePath,
-          fit: BoxFit.cover,
-          alignment: Alignment.topCenter,
-        ),
       ),
     ),
   );
