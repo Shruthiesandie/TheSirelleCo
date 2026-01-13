@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../pages/love_page.dart';
-import '../pages/cart_page.dart';
-import '../pages/allcategories_page.dart';
+import '../pages/product_details_page.dart';
+import '../services/ai_service.dart';
+import '../data/products.dart';
+import '../models/product.dart';
 
 class SirelleChatPage extends StatefulWidget {
   const SirelleChatPage({super.key});
@@ -12,6 +14,26 @@ class SirelleChatPage extends StatefulWidget {
 }
 
 class _SirelleChatPageState extends State<SirelleChatPage> {
+  int _extractBudget(String text) {
+    final match = RegExp(r'(\d{3,5})').firstMatch(text);
+    return match != null ? int.parse(match.group(0)!) : 2000;
+  }
+
+  String? _extractCategory(String text) {
+    if (text.contains('romantic')) return 'romantic';
+    if (text.contains('gift')) return 'gift';
+    if (text.contains('beauty')) return 'beauty';
+    if (text.contains('lifestyle')) return 'lifestyle';
+    return null;
+  }
+
+  String? _extractVibe(String text) {
+    if (text.contains('cute')) return 'cute';
+    if (text.contains('luxury')) return 'luxury';
+    if (text.contains('romantic')) return 'romantic';
+    if (text.contains('aesthetic')) return 'aesthetic';
+    return null;
+  }
   static const String _chatMemoryKey = 'sirelle_chat_messages';
   final TextEditingController _controller = TextEditingController();
   final List<_ChatMessage> _messages = [
@@ -62,6 +84,9 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
           }),
         );
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
   }
 
   Future<void> _clearChatHistory() async {
@@ -72,9 +97,21 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
   @override
   void initState() {
     super.initState();
-    _loadChatHistory();
-    _loadMemory();
+    _initChat();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
+  }
+
+  Future<void> _initChat() async {
+    await _loadChatHistory();
+    await _loadMemory();
+
+    if (!mounted) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       if (_lastIntent != null) {
         setState(() {
           _messages.add(
@@ -85,6 +122,10 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
         });
         _scrollToBottom();
       }
+    });
+    // Ensure scroll after all post frame callbacks and rebuilds
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
     });
   }
 
@@ -100,7 +141,19 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
     });
   }
 
-  void _sendMessage() {
+  bool _shouldShowProducts(String text) {
+    final t = text.toLowerCase();
+    return t.contains('show') ||
+        t.contains('recommend') ||
+        t.contains('suggest') ||
+        t.contains('gift') ||
+        t.contains('products') ||
+        t.contains('under') ||
+        t.contains('below') ||
+        t.contains('budget');
+  }
+
+  void _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
@@ -108,142 +161,41 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
       _messages.add(_ChatMessage.user(text));
       _isTyping = true;
     });
+    // Persist any existing memory values (intent, budget, vibe)
+    await _saveMemory();
     _saveChatHistory();
     _scrollToBottom();
 
     _controller.clear();
 
-    Future.delayed(const Duration(milliseconds: 600), () {
-      setState(() {
-        _messages.add(_ChatMessage.bot(_botReply(text)));
-        _isTyping = false;
-      });
-      _saveChatHistory();
-      _scrollToBottom();
+    String aiReply;
+    try {
+      aiReply = await AiService.sendMessage(text);
+    } catch (e) {
+      aiReply = "⚠️ I’m having trouble connecting right now. Please try again.";
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isTyping = false;
+        });
+      }
+    }
+
+    setState(() {
+      _messages.add(_ChatMessage.bot(aiReply));
+
+      // If user intent is product-related, show recommendations
+      if (_shouldShowProducts(text)) {
+        _messages.add(
+          _ChatMessage.bot("✨ Picks just for you"),
+        );
+      }
     });
+
+    _saveChatHistory();
+    _scrollToBottom();
   }
 
-  String _botReply(String userText) {
-    final t = userText.toLowerCase();
-
-    int pick(List<String> list) =>
-        DateTime.now().millisecondsSinceEpoch % list.length;
-
-    // --- Intent chaining for dynamic product cards ---
-    if (_lastIntent == "gift" && _budget != null && !_messages.last.text.contains("✨ Picks")) {
-      Future.microtask(_insertProductCards);
-    }
-
-    // --- Detect budget ---
-    if (t.contains("₹") || t.contains("rs") || t.contains("budget")) {
-      _budget = userText;
-      _lastIntent = "budget";
-      _saveMemory();
-      return [
-        "Got it 💗 I’ll stay within that.",
-        "Perfect ✨ That helps a lot.",
-        "Noted 💕 Want something cute, elegant, or premium?"
-      ][pick([
-        "a","b","c"
-      ])];
-    }
-
-    // --- Gift intent ---
-    if (t.contains("gift")) {
-      _lastIntent = "gift";
-      _saveMemory();
-      return [
-        "Gifting mood 🎁 Who are we shopping for?",
-        "Aww I love gift shopping 💗 What’s the occasion?",
-        "Okayyy gifts ✨ Tell me your budget?"
-      ][pick([
-        "a","b","c"
-      ])];
-    }
-
-    // --- Vibe detection ---
-    if (t.contains("cute") || t.contains("elegant") || t.contains("premium")) {
-      _vibe = userText;
-      _lastIntent = "vibe";
-      _saveMemory();
-      return [
-        "That vibe is lovely ✨",
-        "Ooo great choice 💕",
-        "Perfect taste 🤍 I have ideas."
-      ][pick([
-        "a","b","c"
-      ])];
-    }
-
-    // --- Wishlist ---
-    if (t.contains("wishlist")) {
-      _lastIntent = "wishlist";
-      _saveMemory();
-      return [
-        "Your wishlist has good taste 💗",
-        "I peeked at your wishlist 👀 It’s cute.",
-        "Want to move something from wishlist to cart?"
-      ][pick([
-        "a","b","c"
-      ])];
-    }
-
-    // --- Cart ---
-    if (t.contains("cart")) {
-      _lastIntent = "cart";
-      _saveMemory();
-      return [
-        "Your cart is waiting 🛍",
-        "Almost there ✨ Want help choosing the final one?",
-        "Shall we review your cart together?"
-      ][pick([
-        "a","b","c"
-      ])];
-    }
-
-    // --- Greetings ---
-    if (t.contains("hi") || t.contains("hello")) {
-      _saveMemory();
-      return [
-        "Hey love ✨ What are we shopping for today?",
-        "Hi 💗 Tell me your vibe today.",
-        "Hello 🤍 Ready to find something beautiful?"
-      ][pick([
-        "a","b","c"
-      ])];
-    }
-
-    // --- Dynamic product cards for gift + budget ---
-    if (_lastIntent == "gift" && _budget != null) {
-      Future.microtask(_insertProductCards);
-    }
-
-    // --- Contextual follow-ups ---
-    if (_lastIntent == "gift") {
-      _saveMemory();
-      return "Still thinking about that gift 🎁 Tell me who it’s for.";
-    }
-
-    if (_lastIntent == "cart") {
-      _saveMemory();
-      return "Your cart is still open 🛍 Want help deciding?";
-    }
-
-    if (_lastIntent == "wishlist") {
-      _saveMemory();
-      return "Your wishlist is calling 💕 Want to pick one?";
-    }
-
-    // --- Default ---
-    _saveMemory();
-    return [
-      "I’m listening 💗 Tell me more.",
-      "Hmm okay ✨ go on.",
-      "That sounds interesting 🤍"
-    ][pick([
-      "a","b","c"
-    ])];
-  }
 
   Widget _quickActions() {
     return Padding(
@@ -271,60 +223,60 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
     );
   }
 
-  void _insertProductCards() {
-    setState(() {
-      _messages.add(_ChatMessage.bot("✨ Picks just for you"));
-    });
-    _saveChatHistory();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.pink.shade50,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        backgroundColor: Colors.pink.shade50,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 0,
+        title: Row(
           children: [
-            Row(
-              children: [
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.9, end: 1.1),
-                  duration: const Duration(seconds: 2),
-                  curve: Curves.easeInOut,
-                  builder: (context, scale, child) {
-                    return Transform.scale(scale: scale, child: child);
-                  },
-                  child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.pink.shade200,
-                    child: const Icon(Icons.auto_awesome, color: Colors.white, size: 18),
-                  ),
+            const SizedBox(width: 8),
+            Container(
+              height: 36,
+              width: 36,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.pink.shade300,
+                    Colors.pink.shade500,
+                  ],
                 ),
-                const SizedBox(width: 10),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.auto_awesome, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
                   "Sirelle-chan",
                   style: TextStyle(
                     color: Colors.pink.shade800,
                     fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  _isTyping ? "typing…" : "Online",
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.pink.shade400,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 2),
-            _isTyping ? _TypingDots() : Text(
-              "Online",
-              style: TextStyle(fontSize: 12, color: Colors.pink.shade400),
-            ),
           ],
         ),
-        iconTheme: IconThemeData(color: Colors.pink.shade700),
         actions: [
           IconButton(
-            icon: const Icon(Icons.close),
+            icon: Icon(Icons.close, color: Colors.pink.shade700),
             onPressed: () {
               _clearChatHistory();
               Navigator.pop(context);
@@ -332,106 +284,154 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          _quickActions(),
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              itemCount: _messages.length + (_isTyping ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (_isTyping && index == _messages.length) {
-                  return const Padding(
-                    padding: EdgeInsets.only(left: 8, bottom: 12),
-                    child: _TypingBubble(),
-                  );
-                }
-                final m = _messages[index];
-                return AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
-                  child: Padding(
-                    key: ValueKey(m.text + index.toString()),
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        m.isUser
-                            ? _UserBubble(text: m.text)
-                            : _BotBubble(text: m.text),
-                        if (!m.isUser && m.text.contains("✨ Picks"))
-                          _ProductList(),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.pink.shade50,
+              Colors.white,
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 14,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    minLines: 1,
-                    maxLines: 4,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _sendMessage(),
-                    decoration: InputDecoration(
-                      hintText: "Ask Sirelle-chan something cute…",
-                      hintStyle: TextStyle(color: Colors.pink.shade300),
-                      filled: true,
-                      fillColor: Colors.pink.shade50,
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(26),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: _sendMessage,
-                  child: Container(
-                    height: 46,
-                    width: 46,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.pink.shade400,
-                          Colors.pink.shade600,
+        ),
+        child: Column(
+          children: [
+            _quickActions(),
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                itemCount: _messages.length + (_isTyping ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (_isTyping && index == _messages.length) {
+                    return const Padding(
+                      padding: EdgeInsets.only(left: 8, bottom: 12),
+                      child: _TypingBubble(),
+                    );
+                  }
+                  final m = _messages[index];
+                  if (index == 0) {
+                    return Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          "Today",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.pink.shade300,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        m.isUser ? _UserBubble(text: m.text) : _BotBubble(text: m.text),
+                        if (!m.isUser && m.text.contains("✨ Picks"))
+                          _ProductList(
+                            budget: _extractBudget(_messages.last.text.toLowerCase()),
+                            category: _extractCategory(_messages.last.text.toLowerCase()),
+                            vibe: _extractVibe(_messages.last.text.toLowerCase()),
+                          ),
+                      ],
+                    );
+                  }
+                  return TweenAnimationBuilder<Offset>(
+                    tween: Tween(begin: const Offset(0, 0.2), end: Offset.zero),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                    builder: (context, offset, child) {
+                      return Transform.translate(
+                        offset: Offset(0, offset.dy * 40),
+                        child: child,
+                      );
+                    },
+                    child: Padding(
+                      key: ValueKey(m.text + index.toString()),
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          m.isUser
+                              ? _UserBubble(text: m.text)
+                              : _BotBubble(text: m.text),
+                          if (!m.isUser && m.text.contains("✨ Picks"))
+                            _ProductList(
+                              budget: _extractBudget(_messages.last.text.toLowerCase()),
+                              category: _extractCategory(_messages.last.text.toLowerCase()),
+                              vibe: _extractVibe(_messages.last.text.toLowerCase()),
+                            ),
                         ],
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.pinkAccent.withOpacity(0.35),
-                          blurRadius: 10,
-                        ),
-                      ],
                     ),
-                    child: const Icon(Icons.send, color: Colors.white, size: 20),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 18,
+                    offset: const Offset(0, -6),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      minLines: 1,
+                      maxLines: 4,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => _sendMessage(),
+                      decoration: InputDecoration(
+                        hintText: "Ask Sirelle-chan something cute…",
+                        hintStyle: TextStyle(color: Colors.pink.shade300),
+                        filled: true,
+                        fillColor: Colors.pink.shade50,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(26),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: _sendMessage,
+                    child: Container(
+                      height: 46,
+                      width: 46,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.pink.shade400,
+                            Colors.pink.shade600,
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.pink.withOpacity(0.35),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.send, color: Colors.white, size: 20),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -450,12 +450,14 @@ class _BotBubble extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(6),
-            topRight: Radius.circular(22),
-            bottomLeft: Radius.circular(22),
-            bottomRight: Radius.circular(22),
-          ),
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Text(
           text,
@@ -478,13 +480,13 @@ class _UserBubble extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
-          color: Colors.pink,
-          borderRadius: BorderRadius.only(
-            topRight: Radius.circular(6),
-            topLeft: Radius.circular(22),
-            bottomLeft: Radius.circular(22),
-            bottomRight: Radius.circular(22),
+          gradient: LinearGradient(
+            colors: [
+              Colors.pink.shade400,
+              Colors.pink.shade600,
+            ],
           ),
+          borderRadius: BorderRadius.circular(22),
         ),
         child: Text(
           text,
@@ -500,26 +502,43 @@ class _UserBubble extends StatelessWidget {
 
 
 
-// --- Dynamic product model and product list widget ---
-class ChatProduct {
-  final String name;
-  final String price;
-  final String description;
-  final IconData icon;
-  ChatProduct(this.name, this.price, this.description, this.icon);
-}
 
 class _ProductList extends StatelessWidget {
-  final List<ChatProduct> products = [
-    ChatProduct("Pink Ceramic Mug", "₹799", "Perfect for cozy mornings ✨", Icons.local_cafe),
-    ChatProduct("Rose Candle Set", "₹999", "Soft romantic glow 🕯", Icons.auto_awesome),
-    ChatProduct("Gift Box Mini", "₹599", "Cute & elegant 🎁", Icons.card_giftcard),
-  ];
+  final int budget;
+  final String? category;
+  final String? vibe;
+
+  _ProductList({
+    Key? key,
+    required this.budget,
+    this.category,
+    this.vibe,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Filter real products by budget only (Product has no category/vibe)
+    final filtered = products
+        .where((p) => p.price <= budget)
+        .toList()
+      ..shuffle();
+
+    if (filtered.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: Text(
+          "No products found under your budget 💔",
+          style: TextStyle(
+            color: Colors.pink.shade400,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      );
+    }
+
     return Column(
-      children: products.map((p) {
+      children: filtered.take(3).map((p) {
         return _ProductChatCardDynamic(product: p);
       }).toList(),
     );
@@ -527,44 +546,93 @@ class _ProductList extends StatelessWidget {
 }
 
 class _ProductChatCardDynamic extends StatelessWidget {
-  final ChatProduct product;
+  final Product product;
   const _ProductChatCardDynamic({required this.product});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: Colors.pink.shade50,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductDetailsPage(product: product),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.white,
+              Colors.pink.shade50,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.pink.withOpacity(0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
               borderRadius: BorderRadius.circular(14),
+              child: Image.asset(
+                product.thumbnail,
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+              ),
             ),
-            child: Icon(product.icon, color: Colors.pink, size: 28),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(product.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 4),
-                Text(product.description),
-                const SizedBox(height: 6),
-                Text(product.price, style: const TextStyle(fontWeight: FontWeight.bold)),
-              ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(product.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Aesthetic pick just for you ✨",
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text("₹${product.price}",
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("${product.name} added to cart 💗"),
+                          backgroundColor: Colors.pink.shade400,
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      "Add to cart",
+                      style: TextStyle(
+                        color: Colors.pink.shade600,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -588,7 +656,6 @@ class _TypingDots extends StatefulWidget {
 class _TypingDotsState extends State<_TypingDots>
     with SingleTickerProviderStateMixin {
   late AnimationController _c;
-  late Animation<double> _a;
 
   @override
   void initState() {
@@ -597,7 +664,6 @@ class _TypingDotsState extends State<_TypingDots>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
-    _a = Tween(begin: 0.3, end: 1.0).animate(_c);
   }
 
   @override
@@ -608,9 +674,31 @@ class _TypingDotsState extends State<_TypingDots>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _a,
-      child: const Text("typing…", style: TextStyle(color: Colors.pink)),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return AnimatedBuilder(
+          animation: _c,
+          builder: (context, child) {
+            final opacity = ((_c.value + index * 0.3) % 1.0);
+            return Opacity(
+              opacity: opacity,
+              child: child,
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: Colors.pink.shade400,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        );
+      }),
     );
   }
 }

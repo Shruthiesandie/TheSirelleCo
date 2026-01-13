@@ -12,6 +12,8 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
 
+  bool _navigated = false;
+
   late AnimationController _controller;
   late Animation<double> _fade;
 
@@ -31,8 +33,17 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // ⏳ After 2 sec → go to LOGIN PAGE
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigateOnce();
+    });
+  }
+
+  void _navigateOnce() {
+    if (_navigated || !mounted) return;
+    _navigated = true;
+
     Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
       Navigator.pushReplacementNamed(context, "/login");
     });
   }
