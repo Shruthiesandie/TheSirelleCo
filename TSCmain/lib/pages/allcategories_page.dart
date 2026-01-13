@@ -157,8 +157,10 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
           decoration: const BoxDecoration(
             color: Colors.white,
           ),
-          child: Column(
-          children: [
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
             // Curved top bar with gradient glow
             Container(
               height: 90,
@@ -382,154 +384,258 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               ),
             ),
 
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                itemCount: filteredProducts.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.75,
-                ),
-                physics: const BouncingScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final product = filteredProducts[index];
+            // 🔹 Home Hero Banner (category-aware)
+            Builder(
+              builder: (context) {
+                final List<Product> bannerProducts;
+                if (selectedCategory == "All") {
+                  bannerProducts = List<Product>.from(products);
+                } else {
+                  bannerProducts = products.where((p) {
+                    final parts = p.thumbnail.split("/");
+                    return parts.length > 3 && parts[2] == selectedCategory;
+                  }).toList();
+                }
+                bannerProducts.shuffle();
+                // Safety fallback
+                if (bannerProducts.isEmpty) {
+                  return const SizedBox.shrink();
+                }
 
-                  return GestureDetector(
+                final month = DateTime.now().month;
+                final bool festive = (month == 10 || month == 11);
+                final bool valentine = (month == 2);
+
+                final heroGradient = festive
+                    ? const LinearGradient(colors: [Color(0xFFFFE082), Color(0xFFFFF7E0)])
+                    : valentine
+                        ? const LinearGradient(colors: [Color(0xFFFFC1D9), Color(0xFFFFF1F6)])
+                        : const LinearGradient(colors: [Color(0xFFFFE3EC), Color(0xFFFFFFFF)]);
+
+                String heroTag;
+                if (festive) {
+                  heroTag = "Festive Favourites · Limited";
+                } else if (valentine) {
+                  heroTag = "Made With Love ❤️";
+                } else if (selectedCategory != "All") {
+                  heroTag = "${selectedCategory.replaceAll('_', ' ').toUpperCase()} PICKS";
+                } else {
+                  heroTag = "Handpicked Just For You ✨";
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ProductDetailsPage(product: product),
+                          builder: (_) =>
+                              ProductDetailsPage(product: bannerProducts.first),
                         ),
                       );
                     },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 140),
-                      transform: Matrix4.identity()
-                        ..translate(0.0, -2.0),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      height: 320,
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(22),
+                        borderRadius: BorderRadius.circular(28),
+                        gradient: heroGradient,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.10),
-                            blurRadius: 24,
-                            offset: const Offset(0, 12),
+                            color: Colors.pinkAccent.withOpacity(0.15),
+                            blurRadius: 18,
+                            offset: const Offset(0, 10),
                           ),
                         ],
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(22),
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(28),
                               child: Image.asset(
-                                product.thumbnail,
+                                bannerProducts.first.thumbnail,
                                 fit: BoxFit.cover,
                               ),
                             ),
-
-
-                            // Wishlist
-                            Positioned(
-                              top: 10,
-                              left: 10,
-                              child: ValueListenableBuilder<List<Product>>(
-                                valueListenable: FavoritesController.items,
-                                builder: (context, _, __) {
-                                  final isFav = FavoritesController.contains(product);
-
-                                  return IconButton(
-                                    icon: Icon(
-                                      isFav ? Icons.favorite : Icons.favorite_border,
-                                      color: Colors.pink,
-                                    ),
-                                    onPressed: () {
-                                      FavoritesController.toggle(product);
-                                    },
-                                  );
-                                },
+                          ),
+                          Positioned(
+                            left: 20,
+                            bottom: 20,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 6,
                               ),
-                            ),
-
-                            // Badge
-                            if (_badgeFor(product) != null)
-                              Positioned(
-                                top: 10,
-                                right: 10,
-                                child: Container(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.9),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    _badgeFor(product)!,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.6,
-                                    ),
-                                  ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.85),
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Text(
+                                heroTag,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
 
-                            // Price at top-right, below badge if present
+
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              itemCount: filteredProducts.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.75,
+              ),
+              itemBuilder: (context, index) {
+                final product = filteredProducts[index];
+
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailsPage(product: product),
+                      ),
+                    );
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 140),
+                    transform: Matrix4.identity()
+                      ..translate(0.0, -2.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.10),
+                          blurRadius: 24,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Image.asset(
+                              product.thumbnail,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+
+                          // Wishlist
+                          Positioned(
+                            top: 10,
+                            left: 10,
+                            child: ValueListenableBuilder<List<Product>>(
+                              valueListenable: FavoritesController.items,
+                              builder: (context, _, __) {
+                                final isFav = FavoritesController.contains(product);
+
+                                return IconButton(
+                                  icon: Icon(
+                                    isFav ? Icons.favorite : Icons.favorite_border,
+                                    color: Colors.pink,
+                                  ),
+                                  onPressed: () {
+                                    FavoritesController.toggle(product);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+
+                          // Badge
+                          if (_badgeFor(product) != null)
                             Positioned(
-                              top: _badgeFor(product) != null ? 44 : 10,
+                              top: 10,
                               right: 10,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.75),
+                                  color: Colors.white.withOpacity(0.9),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Text(
-                                  "₹${product.price}",
+                                  _badgeFor(product)!,
                                   style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.3,
+                                    letterSpacing: 0.6,
                                   ),
                                 ),
                               ),
                             ),
 
-
-                            // Name
-                            Positioned(
-                              left: 12,
-                              right: 12,
-                              bottom: 12,
+                          // Price at top-right, below badge if present
+                          Positioned(
+                            top: _badgeFor(product) != null ? 44 : 10,
+                            right: 10,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.75),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                               child: Text(
-                                product.name,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                                "₹${product.price}",
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: 0.4,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.3,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+
+                          // Name
+                          Positioned(
+                            left: 12,
+                            right: 12,
+                            bottom: 12,
+                            child: Text(
+                              product.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
 
-          ],
-        ),
-      ), // <-- closes Container
-    ),   // <-- closes SafeArea
-  );
-}
+              ],
+            ),
+          ),
+        ), // <-- closes Container
+      ),   // <-- closes SafeArea
+    );
+  }
 }
