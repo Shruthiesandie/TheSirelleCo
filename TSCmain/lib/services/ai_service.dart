@@ -69,11 +69,16 @@ class AiService {
         "Let’s just say… I notice things 👀✨",
       ]);
     }
-    if (_has(text, ['what are you doing', 'what r u doing', 'wyd'])) {
+    if (_has(text, ['what are you doing', 'what r u doing', 'wyd', 'what are u doing', 'what is u doing', 'what is you doing', 'what are you up to'])) {
       return _pick([
         "Just hanging out here 💗 waiting to help you shop!",
         "Talking to you ✨ that’s my favorite thing right now.",
         "Thinking about cute gift ideas 💕 what’s on your mind?",
+        "Just vibing here 😌 keeping things cozy.",
+        "Nothing dramatic ✨ just existing beautifully and waiting for you.",
+        "Low‑key waiting for you to say something interesting 😌",
+        "Just me, you, and good vibes 💗",
+        "Pretending I’m busy but really just here for you ✨",
       ]);
     }
 
