@@ -560,11 +560,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
             const SizedBox(height: 12),
 
-            // 🔥 OFFERS MARQUEE
-            SizedBox(
-              height: 40,
-              child: _OffersMarquee(),
-            ),
 
 
             GridView.builder(
@@ -777,7 +772,7 @@ class _OffersMarqueeState extends State<_OffersMarquee>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 18),
+      duration: const Duration(seconds: 24),
     )..repeat();
   }
 
@@ -793,6 +788,7 @@ class _OffersMarqueeState extends State<_OffersMarquee>
       clipper: _WavyClipper(),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFFFFE4EC), Color(0xFFFFFFFF)],
@@ -844,11 +840,11 @@ class _OffersMarqueeState extends State<_OffersMarquee>
       children: offers
           .map(
             (t) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
                 t,
                 style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFFB2004D),
                   letterSpacing: 0.4,
