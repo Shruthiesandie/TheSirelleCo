@@ -1756,7 +1756,7 @@ Widget _sideFrame(String imagePath) {
   return ClipPath(
     clipper: _ArchClipper(),
     child: Container(
-      width: 380,
+      width: 840,
       height: 440,
       decoration: BoxDecoration(
         boxShadow: [
