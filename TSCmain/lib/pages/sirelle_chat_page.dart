@@ -14,6 +14,7 @@ class SirelleChatPage extends StatefulWidget {
 }
 
 class _SirelleChatPageState extends State<SirelleChatPage> {
+  int? _lastUserBudget;
   int _extractBudget(String text) {
     final match = RegExp(r'(\d{3,5})').firstMatch(text);
     return match != null ? int.parse(match.group(0)!) : 2000;
@@ -156,6 +157,9 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
   void _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
+
+    final extractedBudget = _extractBudget(text);
+    _lastUserBudget = extractedBudget;
 
     setState(() {
       _messages.add(_ChatMessage.user(text));
@@ -327,7 +331,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
                         m.isUser ? _UserBubble(text: m.text) : _BotBubble(text: m.text),
                         if (!m.isUser && m.text.contains("✨ Picks"))
                           _ProductList(
-                            budget: _extractBudget(_messages.last.text.toLowerCase()),
+                            budget: _lastUserBudget ?? 2000,
                             category: _extractCategory(_messages.last.text.toLowerCase()),
                             vibe: _extractVibe(_messages.last.text.toLowerCase()),
                           ),
@@ -355,7 +359,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
                               : _BotBubble(text: m.text),
                           if (!m.isUser && m.text.contains("✨ Picks"))
                             _ProductList(
-                              budget: _extractBudget(_messages.last.text.toLowerCase()),
+                              budget: _lastUserBudget ?? 2000,
                               category: _extractCategory(_messages.last.text.toLowerCase()),
                               vibe: _extractVibe(_messages.last.text.toLowerCase()),
                             ),
@@ -519,7 +523,9 @@ class _ProductList extends StatelessWidget {
   Widget build(BuildContext context) {
     // Filter real products by budget only (Product has no category/vibe)
     final filtered = products
-        .where((p) => p.price <= budget)
+        .where((p) {
+          return p.price <= budget;
+        })
         .toList()
       ..shuffle();
 
