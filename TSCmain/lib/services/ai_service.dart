@@ -10,6 +10,7 @@ class AiService {
   static String? _relationship;
   static String? _vibe;
   static bool _shruthiContext = false;
+  static int? _budgetValue;
 
   static DateTime _lastUserMessageTime = DateTime.now();
   static bool _idlePingSent = false;
@@ -346,6 +347,7 @@ class AiService {
       _relationship = null;
       _vibe = null;
       _shruthiContext = false;
+      _budgetValue = null;
       return _pick([
         "Bye bye 💗 Come back soon!",
         "Take care ✨ I’ll be right here.",
@@ -435,8 +437,13 @@ class AiService {
   }
 
   static String _extractBudget(String text) {
-    final match = RegExp(r'(\d+[kK]?)').firstMatch(text);
-    return match?.group(0) ?? 'flexible';
+    final match = RegExp(r'(\d{2,6})').firstMatch(text);
+    if (match != null) {
+      _budgetValue = int.tryParse(match.group(1)!);
+      return "₹${match.group(1)}";
+    }
+    _budgetValue = null;
+    return 'flexible';
   }
 
   static String _buildSummary() {
@@ -453,5 +460,23 @@ class AiService {
       "✨ PICKS_READY\n"
       "Want me to show product ideas now?",
     ]);
+  }
+
+  static int? get budgetValue => _budgetValue;
+
+  static bool isFollowUp(String text) {
+    final followUps = [
+      'anything else',
+      'what about',
+      'how about',
+      'more',
+      'similar',
+      'romantic',
+      'cute',
+      'cheaper',
+      'under',
+      'below'
+    ];
+    return followUps.any((k) => text.contains(k));
   }
 }

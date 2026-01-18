@@ -14,17 +14,106 @@ class SirelleChatPage extends StatefulWidget {
 }
 
 class _SirelleChatPageState extends State<SirelleChatPage> {
-  int? _lastUserBudget;
-  int _extractBudget(String text) {
-    final match = RegExp(r'(\d{3,5})').firstMatch(text);
-    return match != null ? int.parse(match.group(0)!) : 2000;
-  }
+
+  String? _activeCategory;
+  int? _activeBudget;
+  final Set<String> _shownProductIds = {};
+  bool _showProducts = false;
 
   String? _extractCategory(String text) {
-    if (text.contains('romantic')) return 'romantic';
-    if (text.contains('gift')) return 'gift';
-    if (text.contains('beauty')) return 'beauty';
-    if (text.contains('lifestyle')) return 'lifestyle';
+    // Remove non-letter characters for better fuzzy matching
+    text = text.replaceAll(RegExp(r'[^a-z ]'), '');
+    final words = text.split(RegExp(r'\s+'));
+    for (final w in words) {
+      final match = _fuzzyCategoryMatch(w);
+      if (match != null) return match;
+    }
+    return null;
+  }
+  // Helper: determine category from product thumbnail
+  String _productCategory(Product p) {
+    final t = p.thumbnail.toLowerCase();
+    if (t.contains('bottle')) return 'bottles';
+    if (t.contains('candle')) return 'candle';
+    if (t.contains('cap')) return 'caps';
+    if (t.contains('letter')) return 'letter';
+    if (t.contains('key')) return 'key_chain';
+    if (t.contains('plush')) return 'plusie';
+    if (t.contains('hair')) return 'hair_accessories';
+    if (t.contains('ceramic') || t.contains('mug')) return 'ceramic';
+    if (t.contains('nail')) return 'nails';
+    return 'unknown';
+  }
+
+  // --- Normalizes category names for matching
+  String _normalizeCategory(String c) {
+    switch (c) {
+      case 'bottle':
+      case 'bottles':
+        return 'bottles';
+      case 'cap':
+      case 'caps':
+        return 'caps';
+      case 'letter':
+      case 'letters':
+        return 'letter';
+      case 'candle':
+      case 'candles':
+        return 'candle';
+      default:
+        return c;
+    }
+  }
+
+  // ---------- FUZZY MATCH HELPERS ----------
+  int _levenshtein(String a, String b) {
+    if (a == b) return 0;
+    if (a.isEmpty) return b.length;
+    if (b.isEmpty) return a.length;
+
+    final matrix = List.generate(
+      a.length + 1,
+      (_) => List<int>.filled(b.length + 1, 0),
+    );
+
+    for (int i = 0; i <= a.length; i++) matrix[i][0] = i;
+    for (int j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+    for (int i = 1; i <= a.length; i++) {
+      for (int j = 1; j <= b.length; j++) {
+        final cost = a[i - 1] == b[j - 1] ? 0 : 1;
+        matrix[i][j] = [
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost,
+        ].reduce((a, b) => a < b ? a : b);
+      }
+    }
+    return matrix[a.length][b.length];
+  }
+
+  String? _fuzzyCategoryMatch(String input) {
+    const categoryMap = {
+      'bottles': ['bottle', 'botle', 'botles', 'bottel'],
+      'candle': ['candle', 'candl', 'candles'],
+      'caps': ['cap', 'caps', 'capss'],
+      'letter': ['letter', 'leter', 'letters'],
+      'key_chain': ['keychain', 'key chain', 'keychan'],
+      'plusie': ['plush', 'plushie', 'softtoy', 'soft toy'],
+      'hair_accessories': ['hair', 'band', 'clip'],
+      'ceramic': ['ceramic', 'cup', 'mug'],
+      'nails': ['nail', 'nails'],
+    };
+
+    for (final entry in categoryMap.entries) {
+      for (final keyword in entry.value) {
+        if (_levenshtein(input, keyword) <= 2 ||
+            input.contains(keyword) ||
+            keyword.contains(input)) {
+          return entry.key;
+        }
+      }
+    }
     return null;
   }
 
@@ -41,23 +130,32 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
     _ChatMessage.bot("Hey love ✨ I’m Sirelle-chan.\nReady to find something beautiful today?"),
   ];
   bool _isTyping = false;
-  String? _lastIntent;
-  String? _budget;
   String? _vibe;
+  Map<String, int> _vibeCounter = {};
   final ScrollController _scrollController = ScrollController();
 
   Future<void> _loadMemory() async {
     final prefs = await SharedPreferences.getInstance();
-    _lastIntent = prefs.getString('lastIntent');
-    _budget = prefs.getString('budget');
     _vibe = prefs.getString('vibe');
+    final vibeMap = prefs.getStringList('vibeCounter') ?? [];
+    _vibeCounter = {
+      for (var e in vibeMap)
+        e.split(':')[0]: int.parse(e.split(':')[1])
+    };
+    // --- Restore product state on reopen
+    // _activeBudget is NOT restored anymore!
+    // _activeCategory is NOT restored anymore!
+    // _shownProductIds is NOT restored anymore!
   }
 
   Future<void> _saveMemory() async {
     final prefs = await SharedPreferences.getInstance();
-    if (_lastIntent != null) prefs.setString('lastIntent', _lastIntent!);
-    if (_budget != null) prefs.setString('budget', _budget!);
     if (_vibe != null) prefs.setString('vibe', _vibe!);
+    final vibeList = _vibeCounter.entries
+        .map((e) => '${e.key}:${e.value}')
+        .toList();
+    prefs.setStringList('vibeCounter', vibeList);
+    // --- Do NOT persist active product state anymore
   }
 
   Future<void> _saveChatHistory() async {
@@ -90,11 +188,6 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
     });
   }
 
-  Future<void> _clearChatHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_chatMemoryKey);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -108,21 +201,15 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
     await _loadChatHistory();
     await _loadMemory();
 
+    // 🔁 Reset product flow on fresh chat open (do not auto-assume category)
+    _activeCategory = null;
+    _showProducts = false;
+    _shownProductIds.clear();
+
     if (!mounted) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
-      if (_lastIntent != null) {
-        setState(() {
-          _messages.add(
-            _ChatMessage.bot(
-              "Welcome back 💗 Last time we were chatting about $_lastIntent${_budget != null ? " under $_budget" : ""}. Want to continue?"
-            ),
-          );
-        });
-        _scrollToBottom();
-      }
     });
     // Ensure scroll after all post frame callbacks and rebuilds
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -142,24 +229,194 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
     });
   }
 
-  bool _shouldShowProducts(String text) {
-    final t = text.toLowerCase();
-    return t.contains('show') ||
-        t.contains('recommend') ||
-        t.contains('suggest') ||
-        t.contains('gift') ||
-        t.contains('products') ||
-        t.contains('under') ||
-        t.contains('below') ||
-        t.contains('budget');
+  int? _parseBudgetFromText(String text) {
+    final match = RegExp(r'(?:under|below|less than)?\s*(\d{2,6})').firstMatch(text);
+    if (match == null) return null;
+    return int.tryParse(match.group(1)!);
+  }
+
+
+  String _prettyCategoryName(String raw) {
+    switch (raw) {
+      case 'bottles':
+        return 'Bottles';
+      case 'candle':
+        return 'Candles';
+      case 'letter':
+        return 'Letters';
+      case 'key_chain':
+        return 'Keychains';
+      case 'plusie':
+        return 'Plush Toys';
+      case 'caps':
+        return 'Caps';
+      case 'hair_accessories':
+        return 'Hair Accessories';
+      case 'ceramic':
+        return 'Ceramics';
+      case 'nails':
+        return 'Nails';
+      default:
+        return raw;
+    }
   }
 
   void _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
+    _controller.clear(); // Always clear ONCE at top after reading
 
-    final extractedBudget = _extractBudget(text);
-    _lastUserBudget = extractedBudget;
+    final lower = text.toLowerCase();
+    final parsedBudget = _parseBudgetFromText(lower);
+
+    final rawCategory = _extractCategory(lower);
+    final detectedCategory =
+        rawCategory != null ? _normalizeCategory(rawCategory) : null;
+    final bool hasExplicitCategory =
+        detectedCategory != null &&
+        !lower.contains('gift') &&
+        !lower.contains('gifts') &&
+        !lower.contains('product') &&
+        !lower.contains('products');
+
+    final detectedVibe = _extractVibe(lower);
+    if (detectedVibe != null) {
+      setState(() {
+        _vibe = detectedVibe;
+        _vibeCounter[detectedVibe] = (_vibeCounter[detectedVibe] ?? 0) + 1;
+      });
+    }
+
+    // ===== STRICT BUDGET FLOW =====
+    if (parsedBudget != null) {
+      setState(() {
+        _messages.add(_ChatMessage.user(text));
+      });
+      _activeBudget = parsedBudget;
+      // ASK CATEGORY ONLY — DO NOT SHOW PRODUCTS YET
+      _activeCategory = null;
+      _showProducts = false;
+      _shownProductIds.clear();
+
+      final underBudget = products.where((p) => p.price <= parsedBudget).toList();
+
+      if (underBudget.isEmpty) {
+        setState(() {
+          _messages.add(
+            _ChatMessage.bot(
+              "Sorry 💔 No products available under ₹$parsedBudget.",
+            ),
+          );
+        });
+        _scrollToBottom();
+        return;
+      }
+
+      // CATEGORY SPECIFIED IN SAME MESSAGE
+      if (hasExplicitCategory) {
+        final catProducts = underBudget.where((p) =>
+          _normalizeCategory(_productCategory(p)) == detectedCategory!
+        ).toList();
+
+        if (catProducts.isEmpty) {
+          setState(() {
+            _messages.add(
+              _ChatMessage.bot(
+                "Sorry 💔 There are no ${_prettyCategoryName(detectedCategory!)} under ₹$parsedBudget.\nTry another category ✨",
+              ),
+            );
+          });
+          _scrollToBottom();
+          return;
+        }
+
+        _activeCategory = detectedCategory!;
+        _showProducts = true;
+
+        setState(() {
+          _messages.add(
+            _ChatMessage.bot("✨ Showing best picks under ₹$parsedBudget"),
+          );
+        });
+
+        _scrollToBottom();
+        return;
+      }
+
+      final categories = underBudget
+          .map((p) => _normalizeCategory(_productCategory(p)))
+          .toSet()
+          .map(_prettyCategoryName)
+          .join(', ');
+
+      setState(() {
+        _messages.add(
+          _ChatMessage.bot(
+            "I found products under ₹$parsedBudget 💗\nWhich category do you want?\n$categories",
+          ),
+        );
+      });
+
+      _scrollToBottom();
+      return;
+    }
+
+    // ===== CATEGORY SELECTION / SWITCH AFTER BUDGET =====
+    if (_activeBudget != null && hasExplicitCategory) {
+      setState(() {
+        _messages.add(_ChatMessage.user(text));
+      });
+
+      final catProducts = products.where((p) {
+        if (p.price > _activeBudget!) return false;
+        return _normalizeCategory(_productCategory(p)) ==
+            _normalizeCategory(detectedCategory!);
+      }).toList();
+
+      // ❌ No products in this category under budget
+      if (catProducts.isEmpty) {
+        setState(() {
+          _messages.add(
+            _ChatMessage.bot(
+              "Sorry 💔 There are no ${_prettyCategoryName(detectedCategory!)} under ₹$_activeBudget.\nYou can try another category ✨",
+            ),
+          );
+        });
+        _scrollToBottom();
+        return;
+      }
+
+      // 🔁 Category changed OR first selection
+      if (_activeCategory != detectedCategory) {
+        _shownProductIds.clear(); // reset shown products on category change
+      }
+
+      _activeCategory = detectedCategory!;
+      _showProducts = true;
+
+      setState(() {
+        _messages.add(
+          _ChatMessage.bot("✨ Showing best picks under ₹$_activeBudget"),
+        );
+      });
+
+      _scrollToBottom();
+      return;
+    }
+
+    // "SHOW MORE" — SAME CATEGORY, NEW PRODUCTS ONLY
+    if (lower.contains('show more') &&
+        _activeBudget != null &&
+        _activeCategory != null) {
+      setState(() {
+        _messages.add(_ChatMessage.user(text));
+        _messages.add(
+          _ChatMessage.bot("Here are more under ₹$_activeBudget 💗"),
+        );
+      });
+      _scrollToBottom();
+      return;
+    }
 
     setState(() {
       _messages.add(_ChatMessage.user(text));
@@ -170,35 +427,30 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
     _saveChatHistory();
     _scrollToBottom();
 
-    _controller.clear();
+    // PREVENT AI SERVICE FROM INTERRUPTING PRODUCT FLOW
+    if (_activeBudget != null) return;
 
     String aiReply;
     try {
       aiReply = await AiService.sendMessage(text);
     } catch (e) {
       aiReply = "⚠️ I’m having trouble connecting right now. Please try again.";
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isTyping = false;
-        });
-      }
+    }
+    if (mounted) {
+      setState(() {
+        _isTyping = false;
+      });
     }
 
     setState(() {
       _messages.add(_ChatMessage.bot(aiReply));
-
-      // If user intent is product-related, show recommendations
-      if (_shouldShowProducts(text)) {
-        _messages.add(
-          _ChatMessage.bot("✨ Picks just for you"),
-        );
-      }
     });
 
     _saveChatHistory();
     _scrollToBottom();
   }
+
+
 
 
   Widget _quickActions() {
@@ -230,7 +482,13 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        // ✅ Preserve chat when user navigates back
+        await _saveChatHistory();
+        return true;
+      },
+      child: Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -281,8 +539,28 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
         actions: [
           IconButton(
             icon: Icon(Icons.close, color: Colors.pink.shade700),
-            onPressed: () {
-              _clearChatHistory();
+            onPressed: () async {
+              await SharedPreferences.getInstance()
+                .then((prefs) => prefs.clear());
+
+              if (!mounted) return;
+
+              setState(() {
+                _messages
+                  ..clear()
+                  ..add(
+                    _ChatMessage.bot(
+                      "Hey love ✨ I’m Sirelle-chan.\nReady to find something beautiful today?",
+                    ),
+                  );
+
+                _activeBudget = null;
+                _activeCategory = null;
+                _showProducts = false;
+                _shownProductIds.clear();
+                _isTyping = false;
+              });
+
               Navigator.pop(context);
             },
           ),
@@ -329,12 +607,6 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
                         ),
                         const SizedBox(height: 16),
                         m.isUser ? _UserBubble(text: m.text) : _BotBubble(text: m.text),
-                        if (!m.isUser && m.text.contains("✨ Picks"))
-                          _ProductList(
-                            budget: _lastUserBudget ?? 2000,
-                            category: _extractCategory(_messages.last.text.toLowerCase()),
-                            vibe: _extractVibe(_messages.last.text.toLowerCase()),
-                          ),
                       ],
                     );
                   }
@@ -357,12 +629,6 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
                           m.isUser
                               ? _UserBubble(text: m.text)
                               : _BotBubble(text: m.text),
-                          if (!m.isUser && m.text.contains("✨ Picks"))
-                            _ProductList(
-                              budget: _lastUserBudget ?? 2000,
-                              category: _extractCategory(_messages.last.text.toLowerCase()),
-                              vibe: _extractVibe(_messages.last.text.toLowerCase()),
-                            ),
                         ],
                       ),
                     ),
@@ -370,6 +636,15 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
                 },
               ),
             ),
+            if (_showProducts && _activeBudget != null && _activeCategory != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _ProductList(
+                  budget: _activeBudget!,
+                  category: _activeCategory,
+                  vibe: _vibe,
+                ),
+              ),
             Container(
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               decoration: BoxDecoration(
@@ -437,7 +712,16 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
           ],
         ),
       ),
+    ),
     );
+  }
+
+  @override
+  void dispose() {
+    _saveChatHistory(); // ✅ Persist chat on exit
+    _scrollController.dispose();
+    _controller.dispose();
+    super.dispose();
   }
 }
 
@@ -521,32 +805,49 @@ class _ProductList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Filter real products by budget only (Product has no category/vibe)
-    final filtered = products
-        .where((p) {
-          return p.price <= budget;
-        })
-        .toList()
+    // Access parent state for shownProductIds and _productCategory helper
+    final state = context.findAncestorStateOfType<_SirelleChatPageState>();
+    final _shownProductIds = state?._shownProductIds ?? <String>{};
+    String Function(Product)? _productCategory;
+    if (state != null) {
+      _productCategory = state._productCategory;
+    } else {
+      _productCategory = (p) => 'unknown';
+    }
+
+    final available = products.where((p) {
+      if (p.price > budget) return false;
+      if (category != null &&
+          state != null &&
+          state._normalizeCategory(_productCategory!(p)) !=
+              state._normalizeCategory(category!)) return false;
+      if (_shownProductIds.contains(p.id)) return false;
+      return true;
+    }).toList()
       ..shuffle();
 
-    if (filtered.isEmpty) {
+    if (available.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.only(top: 12),
+        padding: const EdgeInsets.only(top: 8),
         child: Text(
-          "No products found under your budget 💔",
+          "That's all I have under ₹$budget 💗",
           style: TextStyle(
             color: Colors.pink.shade400,
-            fontWeight: FontWeight.w600,
             fontSize: 13,
           ),
         ),
       );
     }
 
+    final toShow = available.take(3).toList();
+    for (final p in toShow) {
+      _shownProductIds.add(p.id);
+    }
+
     return Column(
-      children: filtered.take(3).map((p) {
-        return _ProductChatCardDynamic(product: p);
-      }).toList(),
+      children: toShow
+          .map((p) => _ProductChatCardDynamic(product: p))
+          .toList(),
     );
   }
 }
