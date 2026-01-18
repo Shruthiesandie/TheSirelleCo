@@ -315,14 +315,14 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
       // CATEGORY SPECIFIED IN SAME MESSAGE
       if (hasExplicitCategory) {
         final catProducts = underBudget.where((p) =>
-          _normalizeCategory(_productCategory(p)) == detectedCategory!
+          _normalizeCategory(_productCategory(p)) == detectedCategory
         ).toList();
 
         if (catProducts.isEmpty) {
           setState(() {
             _messages.add(
               _ChatMessage.bot(
-                "Sorry 💔 There are no ${_prettyCategoryName(detectedCategory!)} under ₹$parsedBudget.\nTry another category ✨",
+                "Sorry 💔 There are no ${_prettyCategoryName(detectedCategory)} under ₹$parsedBudget.\nTry another category ✨",
               ),
             );
           });
@@ -330,7 +330,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
           return;
         }
 
-        _activeCategory = detectedCategory!;
+        _activeCategory = detectedCategory;
         _showProducts = true;
 
         setState(() {
@@ -370,7 +370,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
       final catProducts = products.where((p) {
         if (p.price > _activeBudget!) return false;
         return _normalizeCategory(_productCategory(p)) ==
-            _normalizeCategory(detectedCategory!);
+            _normalizeCategory(detectedCategory);
       }).toList();
 
       // ❌ No products in this category under budget
@@ -378,7 +378,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
         setState(() {
           _messages.add(
             _ChatMessage.bot(
-              "Sorry 💔 There are no ${_prettyCategoryName(detectedCategory!)} under ₹$_activeBudget.\nYou can try another category ✨",
+              "Sorry 💔 There are no ${_prettyCategoryName(detectedCategory)} under ₹$_activeBudget.\nYou can try another category ✨",
             ),
           );
         });
@@ -391,7 +391,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
         _shownProductIds.clear(); // reset shown products on category change
       }
 
-      _activeCategory = detectedCategory!;
+      _activeCategory = detectedCategory;
       _showProducts = true;
 
       setState(() {
