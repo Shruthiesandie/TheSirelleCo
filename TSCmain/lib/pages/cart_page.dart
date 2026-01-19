@@ -553,10 +553,6 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get the index of this category card in the horizontal list
-    // (We need this for deterministic cycling of product images)
-    // Since there's no direct index passed, we can try to infer it by matching the category in the list.
-    final int i = _categories.indexOf(category);
     return Container(
       width: 120,
       height: 180,

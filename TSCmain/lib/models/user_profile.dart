@@ -21,6 +21,13 @@ class UserProfile {
   int cuteVibeCount;
   int luxuryVibeCount;
 
+  // ======================
+  // RECOMMENDATION ENGINE DATA
+  // ======================
+  Map<String, int> categoryClicks;
+  Map<String, int> productViews;
+  Map<String, int> addToCartCounts;
+
   UserProfile({
     required this.name,
     required this.birth,
@@ -35,7 +42,12 @@ class UserProfile {
     this.selfIntentCount = 0,
     this.cuteVibeCount = 0,
     this.luxuryVibeCount = 0,
-  });
+    Map<String, int>? categoryClicks,
+    Map<String, int>? productViews,
+    Map<String, int>? addToCartCounts,
+  })  : categoryClicks = categoryClicks ?? {},
+        productViews = productViews ?? {},
+        addToCartCounts = addToCartCounts ?? {};
 
   /// Default profile (safe fallback)
   factory UserProfile.initial() {
@@ -46,6 +58,9 @@ class UserProfile {
       blood: "--",
       constellation: "--",
       avatarPath: "assets/profile/default_avatar.png",
+      categoryClicks: {},
+      productViews: {},
+      addToCartCounts: {},
     );
   }
 
@@ -81,6 +96,9 @@ class UserProfile {
     int? selfIntentCount,
     int? cuteVibeCount,
     int? luxuryVibeCount,
+    Map<String, int>? categoryClicks,
+    Map<String, int>? productViews,
+    Map<String, int>? addToCartCounts,
   }) {
     return UserProfile(
       name: name ?? this.name,
@@ -98,6 +116,9 @@ class UserProfile {
       selfIntentCount: selfIntentCount ?? this.selfIntentCount,
       cuteVibeCount: cuteVibeCount ?? this.cuteVibeCount,
       luxuryVibeCount: luxuryVibeCount ?? this.luxuryVibeCount,
+      categoryClicks: categoryClicks ?? this.categoryClicks,
+      productViews: productViews ?? this.productViews,
+      addToCartCounts: addToCartCounts ?? this.addToCartCounts,
     );
   }
 }

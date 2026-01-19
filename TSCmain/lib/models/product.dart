@@ -44,6 +44,29 @@ class Product {
     return 199;                          // letters / default
   }
 
+  /// Derived category from product ID
+  String get category {
+    if (id.startsWith("ca")) return "caps";
+    if (id.startsWith("ce")) return "ceramic";
+    if (id.startsWith("b")) return "bottles";
+    if (id.startsWith("c")) return "candles";
+    if (id.startsWith("h")) return "hair_accessories";
+    if (id.startsWith("k")) return "key_chains";
+    if (id.startsWith("n")) return "nails";
+    if (id.startsWith("p")) return "plushies";
+    return "letters";
+  }
+
+  /// Lightweight vibe inference (used by AI engine)
+  String get vibe {
+    final nameLower = name.toLowerCase();
+    if (nameLower.contains("cute")) return "cute";
+    if (nameLower.contains("minimal")) return "minimal";
+    if (nameLower.contains("premium")) return "luxury";
+    if (nameLower.contains("soft")) return "soft";
+    return "classic";
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

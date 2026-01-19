@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../models/product.dart';
 import '../data/products.dart';
 import '../controllers/cart_controllers.dart';
+import '../services/recommendation_engine.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final Product product;
@@ -331,72 +332,81 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                   ),
                   const SizedBox(height: 16),
 
-                  SizedBox(
-                    height: 220,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _similarProducts().length,
-                      itemBuilder: (context, index) {
-                        final item = _similarProducts()[index];
+                  // Hybrid RecommendationEngine - similar products
+                  (() {
+                    final suggestions = RecommendationEngine.recommend(
+                      allProducts: products,
+                      category: widget.product.id[0], // category key (b, c, n, etc.)
+                      budget: null,
+                      vibe: null,
+                      limit: 6,
+                    );
+                    return SizedBox(
+                      height: 220,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: suggestions.length,
+                        itemBuilder: (context, index) {
+                          final item = suggestions[index];
 
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ProductDetailsPage(product: item),
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ProductDetailsPage(product: item),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: 150,
+                              margin: EdgeInsets.only(
+                                right: index == suggestions.length - 1 ? 0 : 14,
                               ),
-                            );
-                          },
-                          child: Container(
-                            width: 150,
-                            margin: EdgeInsets.only(
-                              right: index == _similarProducts().length - 1 ? 0 : 14,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: AspectRatio(
-                                    aspectRatio: 1 / 1.25,
-                                    child: Container(
-                                      color: Colors.grey.shade100,
-                                      child: Image.asset(
-                                        item.thumbnail,
-                                        fit: BoxFit.cover,
-                                        alignment: Alignment.center,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Center(child: Icon(Icons.broken_image)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: AspectRatio(
+                                      aspectRatio: 1 / 1.25,
+                                      child: Container(
+                                        color: Colors.grey.shade100,
+                                        child: Image.asset(
+                                          item.thumbnail,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) =>
+                                              const Center(child: Icon(Icons.broken_image)),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  item.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    item.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "₹${item.price}",
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "₹${item.price}",
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                          );
+                        },
+                      ),
+                    );
+                  })(),
                 ],
               ),
             ),
@@ -503,17 +513,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
     );
   }
 
-  List<Product> _similarProducts() {
-    // Same first letter category (b, c, etc.)
-    final currentId = widget.product.id[0];
-
-    return products
-        .where((p) =>
-            p.id != widget.product.id &&
-            p.id.startsWith(currentId))
-        .take(6)
-        .toList();
-  }
 
   Widget _circleIcon(
     IconData icon, {

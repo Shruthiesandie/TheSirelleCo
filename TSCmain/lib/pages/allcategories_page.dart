@@ -8,6 +8,7 @@ import '../controllers/favorites_controller.dart';
 import '../data/products.dart';
 import 'product_details_page.dart';
 import '../models/product.dart';
+import '../services/recommendation_engine.dart';
 
 class AllCategoriesPage extends StatefulWidget {
   final VoidCallback? onBackToHome;
@@ -293,6 +294,11 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                         selectedCategoryIndex = index;
                         selectedCategory = categories[index];
                       });
+
+                      // 🔥 AI tracking: category interest
+                      if (categories[index] != "All") {
+                        RecommendationEngine.trackCategoryClick(categories[index]);
+                      }
                     },
                     child: Padding(
                       padding: const EdgeInsets.only(right: 12),
@@ -496,6 +502,9 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                   padding: const EdgeInsets.only(top: 16),
                   child: GestureDetector(
                     onTap: () {
+                      // 🔥 AI tracking: hero product viewed
+                      RecommendationEngine.trackProductView(bannerProducts.first);
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -578,6 +587,9 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
                 return GestureDetector(
                   onTap: () {
+                    // 🔥 AI tracking: product viewed
+                    RecommendationEngine.trackProductView(product);
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(

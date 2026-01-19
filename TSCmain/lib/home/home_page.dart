@@ -18,6 +18,7 @@ import '../widgets/drawer/home_drawer.dart';
 import '../data/products.dart';
 import '../models/product.dart';
 import '../controllers/favorites_controller.dart';
+import '../services/recommendation_engine.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -120,6 +121,48 @@ class _HomePageState extends State<HomePage>
               ),
             ),
 
+            Positioned(
+              right: 20,
+              bottom: 90,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, "/sirelle-chat");
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF9ACB), Color(0xFFFFC1D9)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pinkAccent.withOpacity(0.45),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        "Ask Sirelle AI",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             Positioned(
               left: 0,
               right: 0,
@@ -281,10 +324,23 @@ Widget _sectionHeader(BuildContext context, String title) {
   );
 }
 
-class _HomeContent extends StatelessWidget {
+class _HomeContent extends StatefulWidget {
+  const _HomeContent();
+
+  @override
+  State<_HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<_HomeContent> {
   @override
   Widget build(BuildContext context) {
     final List<Product> shuffled = List<Product>.from(products)..shuffle();
+    final recommended = RecommendationEngine.recommend(
+      allProducts: products,
+      category: null,
+      budget: null,
+      vibe: null,
+    );
 
     final month = DateTime.now().month;
     final bool festive = (month == 10 || month == 11); // Diwali window
@@ -312,6 +368,73 @@ class _HomeContent extends StatelessWidget {
         children: [
           const SizedBox(height: 16),
 
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 40),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(26),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFF1F6), Color(0xFFFFFFFF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pinkAccent.withOpacity(0.18),
+                      blurRadius: 20,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFFFFC1D9),
+                      ),
+                      child: const Icon(
+                        Icons.psychology_alt,
+                        color: Color(0xFFB2004D),
+                        size: 26,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Smart AI Shopping Assistant",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFFB2004D),
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            "Tell Sirelle your budget, vibe, or category — she instantly finds the best products for you. No filters, no scrolling.",
+                            style: TextStyle(
+                              fontSize: 14,
+                              height: 1.45,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
           // 1️⃣ HERO / FEATURED
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 0),
@@ -319,6 +442,7 @@ class _HomeContent extends StatelessWidget {
               onNotification: (_) => false,
               child: GestureDetector(
                 onTap: () {
+                  RecommendationEngine.trackProductView(shuffled.first);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -380,6 +504,100 @@ class _HomeContent extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+          ),
+
+          // 🤖 AI RECOMMENDED FOR YOU
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 60),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionHeader(context, "Recommended For You"),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 250,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: recommended.take(6).length,
+                    itemBuilder: (context, index) {
+                      final product = recommended[index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          RecommendationEngine.trackProductView(product);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ProductDetailsPage(product: product),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 180,
+                          margin: const EdgeInsets.only(right: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 14,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(24),
+                                  ),
+                                  child: Image.asset(
+                                    product.thumbnail,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      "₹${product.price}",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 30),
+              ],
             ),
           ),
 
@@ -746,6 +964,7 @@ class _HomeContent extends StatelessWidget {
                       final p = shuffled[i];
                       return GestureDetector(
                         onTap: () {
+                          RecommendationEngine.trackProductView(p);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -873,6 +1092,7 @@ class _HomeContent extends StatelessWidget {
                       final product = shuffled[index];
                       return GestureDetector(
                         onTap: () {
+                          RecommendationEngine.trackProductView(product);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -1179,6 +1399,7 @@ class _HomeContent extends StatelessWidget {
                             final product = shuffled[index];
                             return GestureDetector(
                               onTap: () {
+                                RecommendationEngine.trackProductView(product);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -1370,7 +1591,6 @@ class _HomeContent extends StatelessWidget {
       ),
     );
   }
-
 }
 
 // ------------------------ EXPLORE ALL MODELS & HELPERS ------------------------
@@ -1486,6 +1706,7 @@ class _CategoryChip extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
+        RecommendationEngine.trackCategoryClick(categoryKey);
         Navigator.push(
           context,
           MaterialPageRoute(

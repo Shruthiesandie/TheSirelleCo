@@ -1,47 +1,93 @@
-
-
 import '../models/product.dart';
 import '../models/user_profile.dart';
 
-/// Rule-Based Intelligent Recommendation Engine
-/// MCA Minor Project – Explainable AI Component
+/// Hybrid AI Recommendation Engine
+/// MCA Minor Project – Rule-based + Learning-based System
 class RecommendationEngine {
-  /// Filters products strictly under budget
-  /// and aligned with learned user preferences.
-  static List<Product> recommend({
-    required List<Product> allProducts,
-    required UserProfile profile,
-    required int budget,
-  }) {
-    return allProducts.where((product) {
-      // RULE 1: HARD BUDGET CONSTRAINT
-      if (product.price > budget) return false;
+  static final UserProfile _profile = UserProfile(
+    name: 'local_user',
+    birth: '2000-01-01',
+    height: '0.0',
+    blood: '',
+    constellation: '',
+    avatarPath: '',
+  );
 
-      // RULE 2: LEARNED BUDGET BEHAVIOR
-      if (profile.dominantBudget == "under_1500" &&
-          product.price > 1500) {
-        return false;
-      }
+  // =====================
+  // TRACKING (LEARNING)
+  // =====================
 
-      // RULE 3: INTENT-BASED FILTERING (GIFTS)
-      if (profile.dominantIntent == "gift") {
-        final name = product.name.toLowerCase();
-        return name.contains('candle') ||
-            name.contains('plush') ||
-            name.contains('key') ||
-            name.contains('gift');
-      }
-
-      // DEFAULT: ALLOW
-      return true;
-    }).toList();
+  static void trackCategoryClick(String categoryKey) {
+    _profile.categoryClicks[categoryKey] =
+        (_profile.categoryClicks[categoryKey] ?? 0) + 1;
   }
 
-  /// Explainable AI message shown in chat/UI
-  static String explanation(UserProfile profile, int budget) {
-    return "Picked for you based on your style 💗 "
-        "${profile.dominantIntent} shopper · "
-        "${profile.dominantVibe} vibe · "
-        "under ₹$budget.";
+  static void trackProductView(Product product) {
+    _profile.productViews[product.id] =
+        (_profile.productViews[product.id] ?? 0) + 1;
+  }
+
+  static void trackAddToCart(Product product) {
+    _profile.addToCartCounts[product.id] =
+        (_profile.addToCartCounts[product.id] ?? 0) + 1;
+  }
+
+  // =====================
+  // RECOMMENDATION CORE
+  // =====================
+
+  static List<Product> recommend({
+    required List<Product> allProducts,
+    String? category,
+    int? budget,
+    String? vibe,
+    int limit = 6,
+  }) {
+    // ---------- RULE-BASED FILTERING ----------
+    final filtered = allProducts.where((product) {
+      if (budget != null && product.price > budget) return false;
+
+      if (category != null && product.category != category) return false;
+
+      if (vibe != null && product.vibe != vibe) return false;
+
+      return true;
+    }).toList();
+
+    // ---------- LEARNING-BASED SCORING ----------
+    filtered.sort((a, b) {
+      final scoreA = _score(a, budget, vibe);
+      final scoreB = _score(b, budget, vibe);
+      return scoreB.compareTo(scoreA);
+    });
+
+    return filtered.take(limit).toList();
+  }
+
+  // =====================
+  // SCORING FUNCTION
+  // =====================
+
+  static double _score(Product product, int? budget, String? vibe) {
+    final categoryPreference =
+        (_profile.categoryClicks[product.category] ?? 0) * 0.4;
+
+    final productInterest =
+        (_profile.productViews[product.id] ?? 0) * 0.2;
+
+    final cartIntent =
+        (_profile.addToCartCounts[product.id] ?? 0) * 0.2;
+
+    final budgetMatch =
+        (budget != null && product.price <= budget) ? 0.3 : 0.0;
+
+    final vibeMatch =
+        (vibe != null && product.vibe == vibe) ? 0.2 : 0.0;
+
+    return categoryPreference +
+        productInterest +
+        cartIntent +
+        budgetMatch +
+        vibeMatch;
   }
 }

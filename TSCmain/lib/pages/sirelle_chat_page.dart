@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../pages/love_page.dart';
 import '../pages/product_details_page.dart';
 import '../services/ai_service.dart';
+import '../services/ai_learning_service.dart';
 import '../data/products.dart';
 import '../models/product.dart';
 
@@ -202,6 +203,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
     await _loadMemory();
 
     // 🔁 Reset product flow on fresh chat open (do not auto-assume category)
+    _activeBudget = null;
     _activeCategory = null;
     _showProducts = false;
     _shownProductIds.clear();
@@ -264,12 +266,23 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
   void _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-    _controller.clear(); // Always clear ONCE at top after reading
+    _controller.clear();
 
     final lower = text.toLowerCase();
     final parsedBudget = _parseBudgetFromText(lower);
 
-    final rawCategory = _extractCategory(lower);
+    final rawCategory =
+        (lower.contains('bottle') ||
+         lower.contains('cap') ||
+         lower.contains('candle') ||
+         lower.contains('letter') ||
+         lower.contains('key') ||
+         lower.contains('plush') ||
+         lower.contains('hair') ||
+         lower.contains('ceramic') ||
+         lower.contains('nail'))
+            ? _extractCategory(lower)
+            : null;
     final detectedCategory =
         rawCategory != null ? _normalizeCategory(rawCategory) : null;
     final bool hasExplicitCategory =
@@ -293,7 +306,6 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
         _messages.add(_ChatMessage.user(text));
       });
       _activeBudget = parsedBudget;
-      // ASK CATEGORY ONLY — DO NOT SHOW PRODUCTS YET
       _activeCategory = null;
       _showProducts = false;
       _shownProductIds.clear();
@@ -330,15 +342,14 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
           return;
         }
 
-        _activeCategory = detectedCategory;
-        _showProducts = true;
-
+        // Ensure no product cards shown here, only bot message
         setState(() {
           _messages.add(
-            _ChatMessage.bot("✨ Showing best picks under ₹$parsedBudget"),
+            _ChatMessage.bot(
+              "I found products under ₹$parsedBudget in ${_prettyCategoryName(detectedCategory)}! Want to see them? Type 'show me ${_prettyCategoryName(detectedCategory)}' or pick a category.",
+            ),
           );
         });
-
         _scrollToBottom();
         return;
       }
@@ -378,7 +389,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
         setState(() {
           _messages.add(
             _ChatMessage.bot(
-              "Sorry 💔 There are no ${_prettyCategoryName(detectedCategory)} under ₹$_activeBudget.\nYou can try another category ✨",
+              "Sorry 💔 There are no ${_prettyCategoryName(detectedCategory)} under ₹$_activeBudget.\nTry another category ✨",
             ),
           );
         });
@@ -386,17 +397,36 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
         return;
       }
 
-      // 🔁 Category changed OR first selection
       if (_activeCategory != detectedCategory) {
-        _shownProductIds.clear(); // reset shown products on category change
+        _shownProductIds.clear();
       }
+
+      // Availability check already above, so catProducts is not empty
 
       _activeCategory = detectedCategory;
       _showProducts = true;
+      // 🔁 Learning-based AI: record user preference silently
+      AiLearningService.recordCategory(_activeCategory!);
+      AiLearningService.recordBudget(_activeBudget!);
 
       setState(() {
+        final reasonText = _vibe != null
+            ? "Based on your ${_vibe!} vibe ✨"
+            : "Picked just for you 💗";
+
         _messages.add(
-          _ChatMessage.bot("✨ Showing best picks under ₹$_activeBudget"),
+          _ChatMessage.bot(
+            "✨ Showing best picks\n"
+            "• Budget: ₹${_activeBudget}\n"
+            "• Category: ${_prettyCategoryName(_activeCategory!)}\n"
+            "$reasonText",
+          ),
+        );
+        _messages.add(
+          _ChatMessage.bot(
+            "Want to see more ${_prettyCategoryName(_activeCategory!)} "
+            "or try another category under ₹${_activeBudget}?",
+          ),
         );
       });
 
@@ -553,7 +583,6 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
                       "Hey love ✨ I’m Sirelle-chan.\nReady to find something beautiful today?",
                     ),
                   );
-
                 _activeBudget = null;
                 _activeCategory = null;
                 _showProducts = false;
