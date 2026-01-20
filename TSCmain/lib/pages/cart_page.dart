@@ -1,20 +1,44 @@
-import 'dart:ui';
-import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import '../controllers/cart_controllers.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   const CartPage({super.key});
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  bool useWallet = false;
+  bool giftWrap = false;
+  bool showSavings = false;
+  String deliveryOption = "3–5 days";
+
+  final TextEditingController noteController = TextEditingController();
+  final TextEditingController giftMessageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: const Color(0xFFFFF6F9),
+        centerTitle: false,
+        title: const Text(
+          "Cart",
+          overflow: TextOverflow.visible,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+        ),
+      ),
       backgroundColor: const Color(0xFFFFF6F9),
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.only(bottom: 70),
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,35 +144,13 @@ class CartPage extends StatelessWidget {
               ),
             ),
 
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 0, 8),
-              child: const Text(
-                "Explore Categories",
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
-            SizedBox(
-              height: 180,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.only(left: 20),
-                itemCount: _categories.length,
-                itemBuilder: (context, i) {
-                  return _CategoryCard(category: _categories[i]);
-                },
-              ),
-            ),
+            const SizedBox(height: 5),
 
             // SUMMARY (no ClipRect/BackdropFilter)
             Container(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFFBFD),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFFFBFD), Colors.white],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+                color: Colors.white,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(34),
                 ),
@@ -161,57 +163,29 @@ class CartPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  ValueListenableBuilder<List<CartItem>>(
-                    valueListenable: CartController.items,
-                    builder: (_, __, ___) => _summaryRow(
-                      "Subtotal",
-                      "₹${CartController.totalPrice}",
+                  Container(
+                    height: 4,
+                    width: 40,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.pink.withOpacity(0.4),
                     ),
-                  ),
-                  LayoutBuilder(
-                    builder: (_, __) {
-                      final remaining = (299 - CartController.totalPrice).clamp(0, 299);
-                      final progress =
-                          (CartController.totalPrice / 299).clamp(0.0, 1.0);
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 8),
-                          LinearProgressIndicator(
-                            value: progress,
-                            minHeight: 6,
-                            backgroundColor: Colors.pink.shade50,
-                            valueColor:
-                                const AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            remaining == 0
-                                ? "You’ve unlocked free delivery 🎉"
-                                : "₹$remaining more for free shipping",
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  ValueListenableBuilder<List<CartItem>>(
-                    valueListenable: CartController.items,
-                    builder: (_, __, ___) => _summaryRow(
-                      "You Saved",
-                      "₹0",
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _summaryRow("Delivery", "Free"),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "Estimated delivery: 3–5 business days",
-                    style: TextStyle(fontSize: 12, color: Colors.black45),
                   ),
                   const SizedBox(height: 12),
                   const Divider(),
+                  const SizedBox(height: 12),
+                  // WALLET TOGGLE
+                  Row(
+                    children: [
+                      const Text("Use Sirelle Wallet (₹120)"),
+                      const Spacer(),
+                      Switch.adaptive(
+                        value: useWallet,
+                        onChanged: (v) => setState(() => useWallet = v),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   ValueListenableBuilder<List<CartItem>>(
                     valueListenable: CartController.items,
@@ -226,7 +200,10 @@ class CartPage extends StatelessWidget {
                     children: [
                       const Text("Gift wrap this order (₹49)"),
                       const Spacer(),
-                      Switch.adaptive(value: false, onChanged: (_) {}),
+                      Switch.adaptive(
+                        value: giftWrap,
+                        onChanged: (v) => setState(() => giftWrap = v),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -244,6 +221,112 @@ class CartPage extends StatelessWidget {
                       style: TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                   ),
+                  // -------- PRICING, DELIVERY & NOTES --------
+                  const Divider(),
+                  const SizedBox(height: 14),
+                  // SUBTOTAL
+                  ValueListenableBuilder<List<CartItem>>(
+                    valueListenable: CartController.items,
+                    builder: (_, __, ___) => _summaryRow(
+                      "Subtotal",
+                      "₹${CartController.totalPrice}",
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // FREE DELIVERY PROGRESS
+                  LayoutBuilder(
+                    builder: (_, __) {
+                      final remaining = (299 - CartController.totalPrice).clamp(0, 299);
+                      final progress =
+                          (CartController.totalPrice / 299).clamp(0.0, 1.0);
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 6,
+                            backgroundColor: Colors.pink.shade50,
+                            valueColor:
+                                const AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            remaining == 0
+                                ? "You've unlocked free delivery 🎉"
+                                : "₹$remaining more for free shipping",
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // SAVINGS
+                  GestureDetector(
+                    onTap: () => setState(() => showSavings = !showSavings),
+                    child: Row(
+                      children: [
+                        _summaryRow("You Saved", "₹49"),
+                        const Spacer(),
+                        Icon(
+                          showSavings ? Icons.expand_less : Icons.expand_more,
+                          size: 18,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (showSavings) ...[
+                    const SizedBox(height: 6),
+                    _summaryRow("Promo discount", "₹20"),
+                    _summaryRow("Shipping saved", "₹29"),
+                  ],
+                  const SizedBox(height: 12),
+                  // DELIVERY OPTIONS
+                  const Text(
+                    "Estimated delivery",
+                    style: TextStyle(fontSize: 12, color: Colors.black45),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      _deliveryChip("Tomorrow"),
+                      _deliveryChip("2–3 days"),
+                      _deliveryChip("3–5 days"),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  // NOTE TO SELLER
+                  TextField(
+                    controller: noteController,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText: "Add a note for the seller (optional)",
+                      filled: true,
+                      fillColor: Colors.pink.shade50,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  // GIFT MESSAGE
+                  if (giftWrap) ...[
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: giftMessageController,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        hintText: "Write a gift message 💝",
+                        filled: true,
+                        fillColor: Colors.pink.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ],
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
@@ -252,6 +335,15 @@ class CartPage extends StatelessWidget {
                       Icon(Icons.payment),
                       SizedBox(width: 12),
                       Icon(Icons.account_balance_wallet_outlined),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: const [
+                      _TrustItem(icon: Icons.lock, label: "Secure"),
+                      _TrustItem(icon: Icons.undo, label: "Easy Returns"),
+                      _TrustItem(icon: Icons.local_shipping, label: "Fast Delivery"),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -284,6 +376,26 @@ class CartPage extends StatelessWidget {
             const SizedBox(height: 24),
           ],
         ),
+      ),
+    );
+  }
+  Widget _deliveryChip(String label) {
+    final bool isSelected = deliveryOption == label;
+
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) {
+        setState(() {
+          deliveryOption = label;
+        });
+      },
+      selectedColor: Colors.pink.shade100,
+      backgroundColor: Colors.grey.shade200,
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: isSelected ? Colors.pinkAccent : Colors.black87,
       ),
     );
   }
@@ -429,6 +541,9 @@ class _CartItemCard extends StatelessWidget {
   }
 }
 
+
+
+
 /// SUMMARY ROW
 Widget _summaryRow(String label, String value, {bool isTotal = false}) {
   return Row(
@@ -456,6 +571,23 @@ Widget _summaryRow(String label, String value, {bool isTotal = false}) {
       ),
     ],
   );
+}
+
+class _TrustItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _TrustItem({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.pinkAccent),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 11)),
+      ],
+    );
+  }
 }
 
 Widget _qtyButton(IconData icon, VoidCallback onTap) {
@@ -534,103 +666,3 @@ class _PromoBottomSheet extends StatelessWidget {
 }
 
 
-Future<List<String>> _loadAllAssetImages() async {
-  final manifestJson = await rootBundle.loadString('AssetManifest.json');
-  final Map<String, dynamic> manifest = json.decode(manifestJson);
-
-  return manifest.keys
-      .where((path) =>
-          path.startsWith('assets/') &&
-          (path.endsWith('.png') ||
-              path.endsWith('.jpg') ||
-              path.endsWith('.jpeg')))
-      .toList();
-}
-
-class _CategoryCard extends StatelessWidget {
-  final _CategoryItem category;
-  const _CategoryCard({required this.category});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 120,
-      height: 180,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 14,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: AspectRatio(
-              aspectRatio: 1 / 1,
-              child: FutureBuilder<List<String>>(
-                future: _loadAllAssetImages(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                    final images = snapshot.data!;
-                    final randomImage =
-                        images[Random(category.title.hashCode).nextInt(images.length)];
-                    return Image.asset(
-                      randomImage,
-                      fit: BoxFit.cover,
-                    );
-                  }
-
-                  return Container(
-                    color: const Color(0xFFFFE4EC),
-                    child: const Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        color: Colors.pinkAccent,
-                        size: 32,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: Text(
-              category.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-
-final List<_CategoryItem> _categories = [
-  _CategoryItem("Hair Care", "assets/images/category/hair.png"),
-  _CategoryItem("Skin Care", "assets/images/category/skin.png"),
-  _CategoryItem("Accessories", "assets/images/category/accessories.png"),
-  _CategoryItem("Wellness", "assets/images/category/wellness.png"),
-  _CategoryItem("Gift Sets", "assets/images/category/gifts.png"),
-];
-
-class _CategoryItem {
-  final String title;
-  final String image;
-  _CategoryItem(this.title, this.image);
-}

@@ -59,6 +59,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
     "plusie",
   ];
 
+
   @override
   void initState() {
     super.initState();
@@ -136,6 +137,10 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
   @override
   Widget build(BuildContext context) {
     final List<Product> filteredProducts;
+
+    // Recommendations: always exclude current product (if any), shuffle, and limit to 6
+    final List<Product> recommended = List<Product>.from(products)
+      ..shuffle();
 
     if (selectedCategory == "All") {
       // Randomized once per app launch (cached in initState)
@@ -714,6 +719,107 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                 );
               },
             ),
+
+            // "You may also like" recommendations section
+            if (recommended.isNotEmpty) ...[
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "You may also like",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 260,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: recommended.length > 6 ? 6 : recommended.length,
+                  itemBuilder: (context, index) {
+                    final product = recommended[index];
+
+                    return GestureDetector(
+                      onTap: () {
+                        RecommendationEngine.trackProductView(product);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProductDetailsPage(product: product),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 180,
+                        margin: const EdgeInsets.only(right: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 14,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(24),
+                                ),
+                                child: Image.asset(
+                                  product.thumbnail,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    product.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    "₹${product.price}",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
 
               ],
             ),

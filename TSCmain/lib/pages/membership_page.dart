@@ -342,6 +342,8 @@ class _MembershipPageState extends State<MembershipPage>
                           const SizedBox(height: 18),
                           _stampsSection(), // ⭐ NEW GRID
                           const SizedBox(height: 18),
+                          _memberBenefitsSection(),
+                          const SizedBox(height: 18),
                           _ctaSection(),
                         ],
                         const SizedBox(height: 40),
@@ -1640,6 +1642,182 @@ Widget _loyaltyCardBack() {
               fontSize: 15,
             ),
           ),
+        ],
+      ),
+    );
+  }
+  // ---------------- Section 4: Member Benefits (UI like reference image) ----------------
+  Widget _memberBenefitsSection() {
+    return _glassCard(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Text("✨", style: TextStyle(fontSize: 20)),
+                      SizedBox(width: 6),
+                      Text(
+                        "Member Benefits",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      Text("✨", style: TextStyle(fontSize: 20)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "Little perks, big smiles 💕",
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Colors.black.withOpacity(0.55),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            Center(
+              child: Container(
+                height: 4,
+                width: 46,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.pink.withOpacity(0.7),
+                      Colors.purple.withOpacity(0.6),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 22),
+
+            _benefitRow(
+              icon: Icons.currency_rupee,
+              title: "BIG DISCOUNTS",
+              description:
+                  "All products at discounted prices throughout the year.",
+            ),
+
+            _benefitRow(
+              icon: Icons.lock_outline,
+              title: "EARLY ACCESS",
+              description:
+                  "Early access to products and community events just for you.",
+            ),
+
+            _benefitRow(
+              icon: Icons.local_shipping_outlined,
+              title: "PRIORITY SHIPPING",
+              description: "Enjoy free and priority shipping.",
+            ),
+
+            _benefitRow(
+              icon: Icons.card_giftcard,
+              title: "BIRTHDAY DISCOUNT",
+              description:
+                  "Flat 10% off on one order in your birthday month.",
+            ),
+
+            _benefitRow(
+              icon: Icons.celebration_outlined,
+              title: "MEMBER WEDNESDAYS",
+              description:
+                  "Stand a chance to win collectibles every Member Wednesday.",
+              showDivider: false,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _benefitRow({
+    required IconData icon,
+    required String title,
+    required String description,
+    bool showDivider = true,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Colors.pink.shade100,
+                  ),
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.pink,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.3,
+                        color: Colors.black.withOpacity(0.85),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      height: 3,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.pink.withOpacity(0.7),
+                            Colors.purple.withOpacity(0.5),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black.withOpacity(0.75),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (showDivider) ...[
+            const SizedBox(height: 14),
+          ],
         ],
       ),
     );

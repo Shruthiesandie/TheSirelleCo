@@ -126,7 +126,12 @@ class _HomePageState extends State<HomePage>
               bottom: 90,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, "/sirelle-chat");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Sirelle AI chat is coming soon 💗"),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
@@ -368,73 +373,6 @@ class _HomeContentState extends State<_HomeContent> {
         children: [
           const SizedBox(height: 16),
 
-          _ScrollFadeIn(
-            delay: const Duration(milliseconds: 40),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(26),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFF1F6), Color(0xFFFFFFFF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.pinkAccent.withOpacity(0.18),
-                      blurRadius: 20,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFFFFC1D9),
-                      ),
-                      child: const Icon(
-                        Icons.psychology_alt,
-                        color: Color(0xFFB2004D),
-                        size: 26,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Smart AI Shopping Assistant",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFFB2004D),
-                            ),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            "Tell Sirelle your budget, vibe, or category — she instantly finds the best products for you. No filters, no scrolling.",
-                            style: TextStyle(
-                              fontSize: 14,
-                              height: 1.45,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
           // 1️⃣ HERO / FEATURED
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 0),
@@ -507,101 +445,8 @@ class _HomeContentState extends State<_HomeContent> {
             ),
           ),
 
-          // 🤖 AI RECOMMENDED FOR YOU
-          _ScrollFadeIn(
-            delay: const Duration(milliseconds: 60),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _sectionHeader(context, "Recommended For You"),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 250,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: recommended.take(6).length,
-                    itemBuilder: (context, index) {
-                      final product = recommended[index];
-
-                      return GestureDetector(
-                        onTap: () {
-                          RecommendationEngine.trackProductView(product);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  ProductDetailsPage(product: product),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: 180,
-                          margin: const EdgeInsets.only(right: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 14,
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(24),
-                                  ),
-                                  child: Image.asset(
-                                    product.thumbnail,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      product.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      "₹${product.price}",
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 30),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 30),
+          // Add spacing below Hero section
+          const SizedBox(height: 20),
 
           // 2️⃣ SHOP BY CATEGORY (header removed, only cards remain)
           _ScrollFadeIn(
@@ -609,40 +454,32 @@ class _HomeContentState extends State<_HomeContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 15),
-                Transform.translate(
-                  offset: const Offset(-15, -29),
-                  child: SizedBox(
-                    height: 140,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 35),
-                      physics: const BouncingScrollPhysics(
-                        parent: AlwaysScrollableScrollPhysics(),
-                      ),
-                      children: const [
-                        _CategoryChip("Bottles", Icons.local_drink, "bottles"),
-                        _CategoryChip(
-                          "Candles",
-                          Icons.local_fire_department,
-                          "candle",
-                        ),
-                        _CategoryChip("Caps", Icons.checkroom, "caps"),
-                        _CategoryChip("Ceramic", Icons.coffee, "ceramic"),
-                        _CategoryChip("Hair", Icons.face, "hair_accessories"),
-                        _CategoryChip("Keychains", Icons.key, "key_chain"),
-                        _CategoryChip("Letters", Icons.text_fields, "letter"),
-                        _CategoryChip("Nails", Icons.brush, "nails"),
-                        _CategoryChip("Plushies", Icons.toys, "plusie"),
-                      ],
+                SizedBox(
+                  height: 140,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 23),
+                    physics: const BouncingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics(),
                     ),
+                    children: const [
+                      _CategoryChip("Bottles", Icons.local_drink, "bottles"),
+                      _CategoryChip("Candles", Icons.local_fire_department, "candle"),
+                      _CategoryChip("Caps", Icons.checkroom, "caps"),
+                      _CategoryChip("Ceramic", Icons.coffee, "ceramic"),
+                      _CategoryChip("Hair", Icons.face, "hair_accessories"),
+                      _CategoryChip("Keychains", Icons.key, "key_chain"),
+                      _CategoryChip("Letters", Icons.text_fields, "letter"),
+                      _CategoryChip("Nails", Icons.brush, "nails"),
+                      _CategoryChip("Plushies", Icons.toys, "plusie"),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height:0),
+          const SizedBox(height: 13),
 
           // 🔍 EXPLORE ALL — CATEGORY STORY STRIP
           _ScrollFadeIn(
@@ -939,6 +776,165 @@ class _HomeContentState extends State<_HomeContent> {
           const SizedBox(height: 40),
           _BeverageAdSection(),
           const SizedBox(height: 40),
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 40),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(26),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFF1F6), Color(0xFFFFFFFF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pinkAccent.withOpacity(0.18),
+                      blurRadius: 20,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFFFFC1D9),
+                      ),
+                      child: const Icon(
+                        Icons.psychology_alt,
+                        color: Color(0xFFB2004D),
+                        size: 26,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Smart AI Shopping Assistant",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFFB2004D),
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            "Tell Sirelle your budget, vibe, or category — she instantly finds the best products for you. No filters, no scrolling.",
+                            style: TextStyle(
+                              fontSize: 14,
+                              height: 1.45,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Moved "Recommended For You" section here
+          _ScrollFadeIn(
+            delay: const Duration(milliseconds: 60),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionHeader(context, "Recommended For You"),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 250,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: recommended.take(6).length,
+                    itemBuilder: (context, index) {
+                      final product = recommended[index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          RecommendationEngine.trackProductView(product);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ProductDetailsPage(product: product),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 180,
+                          margin: const EdgeInsets.only(right: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 14,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(24),
+                                  ),
+                                  child: Image.asset(
+                                    product.thumbnail,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      "₹${product.price}",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 30),
+              ],
+            ),
+          ),
 
           // 3️⃣ TRENDING GRID
           _ScrollFadeIn(
