@@ -364,10 +364,8 @@ class _HomeContentState extends State<_HomeContent> {
         : "New Arrivals · Limited Stock";
 
     return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      padding: const EdgeInsets.only(bottom: 90),
+      physics: const ClampingScrollPhysics(),
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1509,96 +1507,232 @@ class _HomeContentState extends State<_HomeContent> {
 
           const SizedBox(height: 60),
 
-          // 🎟️ STAMP END CAP — Custom Logo Stamp Section
-          _ScrollFadeIn(
-            delay: const Duration(milliseconds: 560),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
+          // 🌸 PREMIUM SIRELLE SIGNATURE ENDING
+          Column(
+            children: [
+              const SizedBox(height: 60),
 
-                  // Wavy container base
-                  Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        height: 220,
-                        width: double.infinity,
+              // ✨ Emotional Brand Quote
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(36),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFFEDF3), Color(0xFFFFFFFF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 18,
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    "Luxury isn’t loud.\nIt’s how something makes you feel.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 50),
+
+              // 💎 PREMIUM STAMP SECTION
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(top: 60, bottom: 60),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFEEF3),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(160),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // Soft glowing background
+                    Container(
+                      width: 260,
+                      height: 260,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            Color(0xFFFFF6FA),
+                            Color(0xFFFFEEF3),
+                          ],
+                        ),
+                      ),
+                      child: Center(
+                        child: Container(
+                          width: 190,
+                          height: 190,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFFF7E7CE),
+                                Color(0xFFF4B6C2),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFFB2004D).withOpacity(0.25),
+                                blurRadius: 30,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.auto_awesome,
+                                color: Color(0xFFB2004D),
+                                size: 36,
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                "Sirelle Stamp",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFFB2004D),
+                                  letterSpacing: 0.6,
+                                ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "Collect Love",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF7A0034),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // Progress text
+                    const Text(
+                      "Every order leaves a mark.",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2B2B2B),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    const Text(
+                      "6 of 10 stamps collected",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF666666),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // Stamp progress row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(10, (index) {
+                        final bool filled = index < 6;
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: filled ? 16 : 14,
+                          height: filled ? 16 : 14,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: filled ? const Color(0xFFF4B6C2) : Colors.transparent,
+                            border: Border.all(
+                              color: const Color(0xFFF4B6C2),
+                              width: 1.2,
+                            ),
+                            boxShadow: filled
+                                ? [
+                                    BoxShadow(
+                                      color: const Color(0xFFF4B6C2).withOpacity(0.6),
+                                      blurRadius: 8,
+                                    )
+                                  ]
+                                : [],
+                          ),
+                        );
+                      }),
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // AI Concierge CTA
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      child: Container(
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFEAF1),
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(140),
-                            bottom: Radius.circular(60),
+                          borderRadius: BorderRadius.circular(26),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFFFFFF), Color(0xFFFFF3F6)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.pinkAccent.withOpacity(0.18),
-                              blurRadius: 28,
-                              offset: const Offset(0, 14),
+                              color: Colors.pinkAccent.withOpacity(0.25),
+                              blurRadius: 22,
+                              offset: const Offset(0, 12),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: const [
+                            Icon(
+                              Icons.psychology_alt,
+                              color: Color(0xFFB2004D),
+                              size: 28,
+                            ),
+                            SizedBox(width: 14),
+                            Expanded(
+                              child: Text(
+                                "One last thing before you go…\nTell Sirelle the occasion and she’ll find the perfect gift.",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  height: 1.45,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
-
-                      // Center Stamp Logo
-                      Positioned(
-                        top: -40,
-                        child: Container(
-                          width: 180,
-                          height: 180,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.12),
-                                blurRadius: 24,
-                                offset: const Offset(0, 12),
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.all(12),
-                          child: ClipOval(
-                            child: Image.asset(
-                              "assets/stamp/stamp.png",
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 60),
-
-                  // Brand text
-                  const Text(
-                    "The Sirelle Co",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.6,
-                      color: Color(0xFFB2004D),
                     ),
-                  ),
 
-                  const SizedBox(height: 6),
-
-                  const Text(
-                    "Thoughtfully curated • Made with love",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF444444),
-                    ),
-                  ),
-
-                  const SizedBox(height: 50),
-                ],
+                    const SizedBox(height: 60),
+                  ],
+                ),
               ),
-            ),
+
+              // Safe spacing above bottom nav
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 40),
+            ],
           ),
         ],
       ),
