@@ -472,6 +472,8 @@ class _HomeContentState extends State<_HomeContent> {
                       _CategoryChip("Letters", Icons.text_fields, "letter"),
                       _CategoryChip("Nails", Icons.brush, "nails"),
                       _CategoryChip("Plushies", Icons.toys, "plusie"),
+                      _CategoryChip("Boy Friend", Icons.favorite, "boy_friend"),
+                      _CategoryChip("Girl Friend", Icons.favorite_border, "girl_friend"),
                     ],
                   ),
                 ),
@@ -1603,6 +1605,8 @@ const List<_ExploreItem> _exploreItems = [
   _ExploreItem("Custom Caps", "caps"),
   _ExploreItem("Plush Toys", "plusie"),
   _ExploreItem("Keychains", "key_chain"),
+  _ExploreItem("Boy Friend Gifts", "boy_friend"),
+  _ExploreItem("Girl Friend Gifts", "girl_friend"),
 ];
 
 Widget _exploreText(String name, {required bool imageLeft}) {

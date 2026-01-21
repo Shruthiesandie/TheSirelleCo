@@ -121,4 +121,10 @@ class UserProfile {
       addToCartCounts: addToCartCounts ?? this.addToCartCounts,
     );
   }
+  /// Safely record a category interaction.
+  /// Works for all categories including newly added ones
+  /// such as boy_friend and girl_friend.
+  void recordCategoryClick(String category) {
+    categoryClicks[category] = (categoryClicks[category] ?? 0) + 1;
+  }
 }

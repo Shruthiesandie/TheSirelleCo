@@ -23,7 +23,13 @@ class UserMemory {
     final lines = <String>[];
 
     if (intent != null) lines.add("Intent: $intent");
-    if (relationship != null) lines.add("For: $relationship");
+    if (relationship != null) {
+      final rel = relationship!
+          .replaceAll('_', ' ')
+          .replaceAll('boy friend', 'Boy Friend')
+          .replaceAll('girl friend', 'Girl Friend');
+      lines.add("For: $rel");
+    }
     if (occasion != null) lines.add("Occasion: $occasion");
     if (vibe != null) lines.add("Vibe: $vibe");
     if (budget != null) lines.add("Budget: $budget");

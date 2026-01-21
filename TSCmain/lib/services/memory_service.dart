@@ -57,4 +57,16 @@ class MemoryService {
     await prefs.remove(_budgetKey);
     await prefs.remove(_stageKey);
   }
+  /// Normalize relationship to match product category keys.
+  /// This allows relationships like boyfriend/girlfriend to
+  /// work seamlessly with categories such as boy_friend and girl_friend.
+  static String? normalizeRelationshipToCategory(String? relationship) {
+    if (relationship == null) return null;
+
+    final r = relationship.toLowerCase();
+    if (r.contains('boyfriend')) return 'boy_friend';
+    if (r.contains('girlfriend')) return 'girl_friend';
+
+    return relationship;
+  }
 }

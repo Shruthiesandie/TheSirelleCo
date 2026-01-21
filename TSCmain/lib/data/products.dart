@@ -1249,4 +1249,355 @@ final List<Product> products = [
     ],
   ),
 
+  Product(
+    id: "boy_friend_1",
+    name: "Boy Friend 1",
+    thumbnail: "assets/images/boy_friend/bf1.JPG",
+    images: [
+      "assets/images/boy_friend/bf1.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_2",
+    name: "Boy Friend 2",
+    thumbnail: "assets/images/boy_friend/bf10.JPG",
+    images: [
+      "assets/images/boy_friend/bf10.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_3",
+    name: "Boy Friend 3",
+    thumbnail: "assets/images/boy_friend/bf11.JPG",
+    images: [
+      "assets/images/boy_friend/bf11.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_4",
+    name: "Boy Friend 4",
+    thumbnail: "assets/images/boy_friend/bf12.JPG",
+    images: [
+      "assets/images/boy_friend/bf12.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_5",
+    name: "Boy Friend 5",
+    thumbnail: "assets/images/boy_friend/bf2.JPG",
+    images: [
+      "assets/images/boy_friend/bf2.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_6",
+    name: "Boy Friend 6",
+    thumbnail: "assets/images/boy_friend/bf3.JPG",
+    images: [
+      "assets/images/boy_friend/bf3.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_7",
+    name: "Boy Friend 7",
+    thumbnail: "assets/images/boy_friend/bf4.JPG",
+    images: [
+      "assets/images/boy_friend/bf4.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_8",
+    name: "Boy Friend 8",
+    thumbnail: "assets/images/boy_friend/bf5.JPG",
+    images: [
+      "assets/images/boy_friend/bf5.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_9",
+    name: "Boy Friend 9",
+    thumbnail: "assets/images/boy_friend/bf6.JPG",
+    images: [
+      "assets/images/boy_friend/bf6.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_10",
+    name: "Boy Friend 10",
+    thumbnail: "assets/images/boy_friend/bf7.JPG",
+    images: [
+      "assets/images/boy_friend/bf7.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_11",
+    name: "Boy Friend 11",
+    thumbnail: "assets/images/boy_friend/bf8.JPG",
+    images: [
+      "assets/images/boy_friend/bf8.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_12",
+    name: "Boy Friend 12",
+    thumbnail: "assets/images/boy_friend/bf9.JPG",
+    images: [
+      "assets/images/boy_friend/bf9.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_1",
+    name: "Boy Friend 1",
+    thumbnail: "assets/images/boy_friend/bf1.JPG",
+    images: [
+      "assets/images/boy_friend/bf1.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_2",
+    name: "Boy Friend 2",
+    thumbnail: "assets/images/boy_friend/bf10.JPG",
+    images: [
+      "assets/images/boy_friend/bf10.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_3",
+    name: "Boy Friend 3",
+    thumbnail: "assets/images/boy_friend/bf11.JPG",
+    images: [
+      "assets/images/boy_friend/bf11.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_4",
+    name: "Boy Friend 4",
+    thumbnail: "assets/images/boy_friend/bf12.JPG",
+    images: [
+      "assets/images/boy_friend/bf12.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_5",
+    name: "Boy Friend 5",
+    thumbnail: "assets/images/boy_friend/bf2.JPG",
+    images: [
+      "assets/images/boy_friend/bf2.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_6",
+    name: "Boy Friend 6",
+    thumbnail: "assets/images/boy_friend/bf3.JPG",
+    images: [
+      "assets/images/boy_friend/bf3.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_7",
+    name: "Boy Friend 7",
+    thumbnail: "assets/images/boy_friend/bf4.JPG",
+    images: [
+      "assets/images/boy_friend/bf4.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_8",
+    name: "Boy Friend 8",
+    thumbnail: "assets/images/boy_friend/bf5.JPG",
+    images: [
+      "assets/images/boy_friend/bf5.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_9",
+    name: "Boy Friend 9",
+    thumbnail: "assets/images/boy_friend/bf6.JPG",
+    images: [
+      "assets/images/boy_friend/bf6.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_10",
+    name: "Boy Friend 10",
+    thumbnail: "assets/images/boy_friend/bf7.JPG",
+    images: [
+      "assets/images/boy_friend/bf7.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_11",
+    name: "Boy Friend 11",
+    thumbnail: "assets/images/boy_friend/bf8.JPG",
+    images: [
+      "assets/images/boy_friend/bf8.JPG"
+    ],
+  ),
+
+  Product(
+    id: "boy_friend_12",
+    name: "Boy Friend 12",
+    thumbnail: "assets/images/boy_friend/bf9.JPG",
+    images: [
+      "assets/images/boy_friend/bf9.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_1",
+    name: "Girl Friend 1",
+    thumbnail: "assets/images/girl_friend/gf1.JPG",
+    images: [
+      "assets/images/girl_friend/gf1.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_2",
+    name: "Girl Friend 2",
+    thumbnail: "assets/images/girl_friend/gf10.JPG",
+    images: [
+      "assets/images/girl_friend/gf10.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_3",
+    name: "Girl Friend 3",
+    thumbnail: "assets/images/girl_friend/gf11.JPG",
+    images: [
+      "assets/images/girl_friend/gf11.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_4",
+    name: "Girl Friend 4",
+    thumbnail: "assets/images/girl_friend/gf12.JPG",
+    images: [
+      "assets/images/girl_friend/gf12.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_5",
+    name: "Girl Friend 5",
+    thumbnail: "assets/images/girl_friend/gf13.JPG",
+    images: [
+      "assets/images/girl_friend/gf13.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_6",
+    name: "Girl Friend 6",
+    thumbnail: "assets/images/girl_friend/gf14.JPG",
+    images: [
+      "assets/images/girl_friend/gf14.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_7",
+    name: "Girl Friend 7",
+    thumbnail: "assets/images/girl_friend/gf15.JPG",
+    images: [
+      "assets/images/girl_friend/gf15.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_8",
+    name: "Girl Friend 8",
+    thumbnail: "assets/images/girl_friend/gf2.JPG",
+    images: [
+      "assets/images/girl_friend/gf2.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_9",
+    name: "Girl Friend 9",
+    thumbnail: "assets/images/girl_friend/gf3.JPG",
+    images: [
+      "assets/images/girl_friend/gf3.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_10",
+    name: "Girl Friend 10",
+    thumbnail: "assets/images/girl_friend/gf4.JPG",
+    images: [
+      "assets/images/girl_friend/gf4.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_11",
+    name: "Girl Friend 11",
+    thumbnail: "assets/images/girl_friend/gf5.JPG",
+    images: [
+      "assets/images/girl_friend/gf5.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_12",
+    name: "Girl Friend 12",
+    thumbnail: "assets/images/girl_friend/gf6.JPG",
+    images: [
+      "assets/images/girl_friend/gf6.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_13",
+    name: "Girl Friend 13",
+    thumbnail: "assets/images/girl_friend/gf7.JPG",
+    images: [
+      "assets/images/girl_friend/gf7.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_14",
+    name: "Girl Friend 14",
+    thumbnail: "assets/images/girl_friend/gf8.JPG",
+    images: [
+      "assets/images/girl_friend/gf8.JPG"
+    ],
+  ),
+
+  Product(
+    id: "girl_friend_15",
+    name: "Girl Friend 15",
+    thumbnail: "assets/images/girl_friend/gf9.JPG",
+    images: [
+      "assets/images/girl_friend/gf9.JPG"
+    ],
+  ),
+
 ];

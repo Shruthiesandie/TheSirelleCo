@@ -32,6 +32,8 @@ class Product {
   /// Auto-calculated product price
   /// (derived from product ID / category)
   int get price {
+    if (id.startsWith("boy_friend")) return 1499; // boy friend gifts
+    if (id.startsWith("girl_friend")) return 1599; // girl friend gifts
     // Order matters: check longer prefixes first
     if (id.startsWith("ca")) return 699; // caps
     if (id.startsWith("ce")) return 899; // ceramic
@@ -46,6 +48,8 @@ class Product {
 
   /// Derived category from product ID
   String get category {
+    if (id.startsWith("boy_friend")) return "boy_friend";
+    if (id.startsWith("girl_friend")) return "girl_friend";
     if (id.startsWith("ca")) return "caps";
     if (id.startsWith("ce")) return "ceramic";
     if (id.startsWith("b")) return "bottles";

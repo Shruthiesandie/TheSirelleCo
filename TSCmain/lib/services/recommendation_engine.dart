@@ -47,7 +47,9 @@ class RecommendationEngine {
     final filtered = allProducts.where((product) {
       if (budget != null && product.price > budget) return false;
 
-      if (category != null && product.category != category) return false;
+      if (category != null) {
+        if (product.category != category) return false;
+      }
 
       if (vibe != null && product.vibe != vibe) return false;
 

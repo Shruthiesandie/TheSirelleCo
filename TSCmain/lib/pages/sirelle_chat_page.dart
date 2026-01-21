@@ -43,6 +43,9 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
     if (t.contains('hair')) return 'hair_accessories';
     if (t.contains('ceramic') || t.contains('mug')) return 'ceramic';
     if (t.contains('nail')) return 'nails';
+    // --- Added friend categories
+    if (t.contains('boy_friend')) return 'boy_friend';
+    if (t.contains('girl_friend')) return 'girl_friend';
     return 'unknown';
   }
 
@@ -104,6 +107,9 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
       'hair_accessories': ['hair', 'band', 'clip'],
       'ceramic': ['ceramic', 'cup', 'mug'],
       'nails': ['nail', 'nails'],
+      // --- Appended friend categories
+      'boy_friend': ['boy', 'boyfriend', 'bf', 'him'],
+      'girl_friend': ['girl', 'girlfriend', 'gf', 'her'],
     };
 
     for (final entry in categoryMap.entries) {
@@ -240,6 +246,10 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
 
   String _prettyCategoryName(String raw) {
     switch (raw) {
+      case 'boy_friend':
+        return 'Boy Friend Gifts';
+      case 'girl_friend':
+        return 'Girl Friend Gifts';
       case 'bottles':
         return 'Bottles';
       case 'candle':

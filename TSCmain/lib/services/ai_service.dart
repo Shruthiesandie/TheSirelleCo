@@ -257,6 +257,14 @@ class AiService {
     // ========== RELATIONSHIP ==========
     if (_has(text, ['girlfriend', 'boyfriend', 'wife', 'husband', 'mom', 'mother', 'dad', 'father', 'sister', 'brother', 'friend'])) {
       _relationship = _extractRelationship(text);
+      if (text.contains('boyfriend')) {
+        _intent = 'category';
+        return "Got it 💙 I’ll show you Boy Friend gifts.";
+      }
+      if (text.contains('girlfriend')) {
+        _intent = 'category';
+        return "Got it 💗 I’ll show you Girl Friend gifts.";
+      }
       return _pick([
         "That’s lovely 💗 What’s the occasion?",
         "Nice ✨ Do you want something emotional or practical?",
@@ -305,7 +313,7 @@ class AiService {
     }
 
     // ========== CATEGORIES ==========
-    if (_has(text, ['jewelry', 'perfume', 'dress', 'makeup', 'skincare', 'bag', 'shoes'])) {
+    if (_has(text, ['jewelry', 'perfume', 'dress', 'makeup', 'skincare', 'bag', 'shoes', 'boyfriend', 'girlfriend'])) {
       return _pick([
         "Great pick ✨ Want something bold or subtle?",
         "Lovely 💗 I have some great ideas there!",

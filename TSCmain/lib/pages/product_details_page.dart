@@ -336,7 +336,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                   (() {
                     final suggestions = RecommendationEngine.recommend(
                       allProducts: products,
-                      category: widget.product.id[0], // category key (b, c, n, etc.)
+                      category: widget.product.thumbnail.split("/")[2],
                       budget: null,
                       vibe: null,
                       limit: 6,

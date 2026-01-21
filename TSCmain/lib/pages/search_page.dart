@@ -2,6 +2,10 @@
 
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../data/products.dart';
+import '../pages/product_details_page.dart';
+
+import '../models/product.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -60,6 +64,14 @@ class _SearchPageState extends State<SearchPage>
         duration: Duration(seconds: 1),
       ),
     );
+  }
+
+  List<Product> _searchProducts(String query) {
+    final q = query.toLowerCase();
+    return products.where((p) {
+      return p.name.toLowerCase().contains(q) ||
+          p.thumbnail.toLowerCase().contains(q);
+    }).toList();
   }
 
   // ------------------------------------------------------------
@@ -259,60 +271,119 @@ class _SearchPageState extends State<SearchPage>
 
               const SizedBox(height: 30),
 
-              // Empty state
               Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      AnimatedBuilder(
-                        animation: bgController,
-                        builder: (_, __) {
-                          return Transform.scale(
-                            scale: 1 + sin(bgController.value * 2 * pi) * 0.03,
-                            child: Container(
-                              width: 140,
-                              height: 140,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black12.withOpacity(0.06),
-                                    blurRadius: 22,
-                                    offset: const Offset(0, 8),
+                child: _controller.text.trim().isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            AnimatedBuilder(
+                              animation: bgController,
+                              builder: (_, __) {
+                                return Transform.scale(
+                                  scale: 1 +
+                                      sin(bgController.value * 2 * pi) * 0.03,
+                                  child: Container(
+                                    width: 140,
+                                    height: 140,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black12
+                                              .withOpacity(0.06),
+                                          blurRadius: 22,
+                                          offset: const Offset(0, 8),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Center(
+                                      child: Icon(Icons.search_rounded,
+                                          size: 70,
+                                          color: Colors.pinkAccent),
+                                    ),
                                   ),
-                                ],
-                              ),
-                              child: const Center(
-                                child: Icon(Icons.search_rounded,
-                                    size: 70, color: Colors.pinkAccent),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 25),
+                            const Text(
+                              "Start typing to search",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              "Find products, outfits & more",
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Builder(
+                        builder: (_) {
+                          final results =
+                              _searchProducts(_controller.text);
+                          if (results.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                "No products found",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            );
+                          }
+                          return ListView.builder(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: results.length,
+                            itemBuilder: (_, i) {
+                              final p = results[i];
+                              return ListTile(
+                                contentPadding:
+                                    const EdgeInsets.symmetric(vertical: 6),
+                                leading: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.asset(
+                                    p.thumbnail,
+                                    width: 55,
+                                    height: 55,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                title: Text(
+                                  p.name,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                subtitle: Text(
+                                  p.thumbnail.split("/")[2]
+                                      .replaceAll("_", " ")
+                                      .toUpperCase(),
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          ProductDetailsPage(product: p),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                           );
                         },
                       ),
-
-                      const SizedBox(height: 25),
-                      const Text(
-                        "Start typing to search",
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        "Find products, outfits & more",
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ],
           ),

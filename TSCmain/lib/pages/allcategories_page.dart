@@ -57,6 +57,8 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
     "letter",
     "nails",
     "plusie",
+    "boy_friend",
+    "girl_friend",
   ];
 
 
@@ -129,6 +131,10 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
         return "assets/icons/nail.png";
       case "plusie":
         return "assets/icons/plusie.png";
+      case "boy_friend":
+        return "assets/icons/all.png";
+      case "girl_friend":
+        return "assets/icons/all.png";
       default:
         return "assets/icons/all.png";
     }
@@ -290,7 +296,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: 10, // 10 aesthetic circular categories
+                itemCount: categories.length,
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
                   return GestureDetector(
@@ -481,6 +487,22 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                     "Gentle Comfort for Quiet Moments",
                     "Warmth in Its Softest Form",
                     "Always There When You Need It",
+                  ],
+                  "boy_friend": [
+                    "For Him 💙",
+                    "Gifts He’ll Love",
+                    "Thoughtful Picks for Him",
+                    "Because He Matters",
+                    "Made for Your Person",
+                    "Little Surprises, Big Smiles",
+                  ],
+                  "girl_friend": [
+                    "For Her 💗",
+                    "Gifts She’ll Adore",
+                    "Thoughtfully Chosen",
+                    "Because She’s Special",
+                    "Love, Wrapped Perfectly",
+                    "Moments Made Magical",
                   ],
                 };
 
