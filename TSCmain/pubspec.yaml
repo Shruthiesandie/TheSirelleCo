@@ -46,6 +46,7 @@ flutter:
     - assets/splash/
     - assets/animation/
     - assets/icons/
+    - assets/stamp/
 
     - assets/images/bottles/b1/
     - assets/images/bottles/b2/

@@ -1509,80 +1509,95 @@ class _HomeContentState extends State<_HomeContent> {
 
           const SizedBox(height: 60),
 
-          // 🔒 BRAND SEAL — LOGO END CAP (VISUAL ONLY)
+          // 🎟️ STAMP END CAP — Custom Logo Stamp Section
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 560),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-                Center(
-                  child: Container(
-                    height: 128,
-                    width: 128,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          Colors.white,
-                          Colors.pink.shade50,
-                          Colors.pink.shade100.withOpacity(0.6),
-                        ],
-                        radius: 0.85,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.pinkAccent.withOpacity(0.22),
-                          blurRadius: 26,
-                          spreadRadius: 6,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Container(
-                        height: 86,
-                        width: 86,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  const SizedBox(height: 40),
+
+                  // Wavy container base
+                  Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        height: 220,
+                        width: double.infinity,
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
+                          color: const Color(0xFFFFEAF1),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(140),
+                            bottom: Radius.circular(60),
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 12,
+                              color: Colors.pinkAccent.withOpacity(0.18),
+                              blurRadius: 28,
+                              offset: const Offset(0, 14),
                             ),
                           ],
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(18),
-                          child: Image.asset(
-                            "assets/logo/logo.png",
-                            fit: BoxFit.contain,
+                      ),
+
+                      // Center Stamp Logo
+                      Positioned(
+                        top: -40,
+                        child: Container(
+                          width: 180,
+                          height: 180,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.12),
+                                blurRadius: 24,
+                                offset: const Offset(0, 12),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(12),
+                          child: ClipOval(
+                            child: Image.asset(
+                              "assets/stamp/stamp.png",
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 60),
+
+                  // Brand text
+                  const Text(
+                    "The Sirelle Co",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                      color: Color(0xFFB2004D),
                     ),
                   ),
-                ),
-                const SizedBox(height: 18),
-                const Text(
-                  "The Sirelle Co",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.6,
+
+                  const SizedBox(height: 6),
+
+                  const Text(
+                    "Thoughtfully curated • Made with love",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF444444),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  "Thoughtfully made · Loved deeply",
-                  style: TextStyle(
-                    fontSize: 12,
-                    letterSpacing: 0.4,
-                    color: Colors.black54,
-                  ),
-                ),
-                const SizedBox(height: 60),
-              ],
+
+                  const SizedBox(height: 50),
+                ],
+              ),
             ),
           ),
         ],
