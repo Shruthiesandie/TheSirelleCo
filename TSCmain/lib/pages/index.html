@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>REVA University Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #ffffff;
+            color: #333;
+        }
+
+        .page {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top spacing */
+        .logo-section {
+            margin-top: 80px;
+            text-align: center;
+        }
+
+        .logo-section img {
+            width: 320px;
+            max-width: 90%;
+        }
+
+        .login-box {
+            margin-top: 60px;
+            width: 420px;
+            max-width: 90%;
+            text-align: left;
+        }
+
+        .login-box p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-size: 15px;
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            height: 34px;
+            border: 1px solid #bbb;
+            padding: 6px 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2f6fcc;
+        }
+
+        .btn {
+            background-color: #2f6fcc;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #245bb5;
+        }
+
+        .footer-text {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .footer-text a {
+            color: #2f6fcc;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- LOGO -->
+        <div class="logo-section">
+            <!-- Replace src with actual logo if needed -->
+            <img src="https://www.reva.edu.in/reva-logo" alt="REVA University">
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="login-box">
+            <p>Please enter your username and password to continue.</p>
+
+            <form>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username">
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password">
+
+                <button type="submit" class="btn">Continue</button>
+            </form>
+
+            <div class="footer-text">
+                For any technical issues, please raise a IT support ticket by sending a mail to
+                <a href="mailto:ict.helpdesk@reva.edu.in">ict.helpdesk@reva.edu.in</a>.
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

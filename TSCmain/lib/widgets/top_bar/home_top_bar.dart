@@ -40,9 +40,9 @@ class HomeTopBar extends StatelessWidget {
               child: Transform.translate(
                 offset: Offset(logoShift, 0),
                 child: Image.asset(
-                  "assets/logo/logo.png",
-                  height: 85,
-                  width: 85,
+                  "assets/logo/logo1.png",
+                  height: 150,
+                  width: 150,
                   fit: BoxFit.contain,
                 ),
               ),

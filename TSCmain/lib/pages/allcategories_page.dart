@@ -206,9 +206,9 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                   Transform.translate(
                     offset: const Offset(-5, 0),
                     child: Image.asset(
-                      "assets/logo/logo.png",
-                      height: 85,
-                      width: 85,
+                      "assets/logo/logo1.png",
+                      height: 150,
+                      width: 150,
                       fit: BoxFit.contain,
                     ),
                   ),
