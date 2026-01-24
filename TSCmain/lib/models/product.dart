@@ -31,20 +31,23 @@ class Product {
 
   /// Auto-calculated product price
   /// (derived from product ID / category)
-  int get price {
-    if (id.startsWith("boy_friend")) return 1499; // boy friend gifts
-    if (id.startsWith("girl_friend")) return 1599; // girl friend gifts
+  double get price {
+    if (id.startsWith("boy_friend")) return 1499.0; // boy friend gifts
+    if (id.startsWith("girl_friend")) return 1599.0; // girl friend gifts
     // Order matters: check longer prefixes first
-    if (id.startsWith("ca")) return 699; // caps
-    if (id.startsWith("ce")) return 899; // ceramic
-    if (id.startsWith("b")) return 599;  // bottles
-    if (id.startsWith("c")) return 799;  // candles
-    if (id.startsWith("h")) return 349;  // hair accessories
-    if (id.startsWith("k")) return 299;  // key chains
-    if (id.startsWith("n")) return 399;  // nails
-    if (id.startsWith("p")) return 999;  // plushies
-    return 199;                          // letters / default
+    if (id.startsWith("ca")) return 699.0; // caps
+    if (id.startsWith("ce")) return 899.0; // ceramic
+    if (id.startsWith("b")) return 599.0;  // bottles
+    if (id.startsWith("c")) return 799.0;  // candles
+    if (id.startsWith("h")) return 349.0;  // hair accessories
+    if (id.startsWith("k")) return 299.0;  // key chains
+    if (id.startsWith("n")) return 399.0;  // nails
+    if (id.startsWith("p")) return 999.0;  // plushies
+    return 199.0;                          // letters / default
   }
+
+  /// Explicit alias for price (always non-null double)
+  double get safePrice => price;
 
   /// Derived category from product ID
   String get category {

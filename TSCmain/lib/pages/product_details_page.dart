@@ -54,6 +54,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
 
   @override
   void dispose() {
+    // Release image cache to free Metal/IOKit memory on iOS
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
     _scrollController.dispose();
     _heartController.dispose();
     super.dispose();
@@ -63,7 +66,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
   Widget build(BuildContext context) {
     final product = widget.product;
 
-    return Scaffold(
+    return HeroMode(
+      enabled: false,
+      child: Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
         controller: _scrollController,
@@ -99,6 +104,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                         itemCount: product.images.length,
                         onPageChanged: (i) =>
                             setState(() => _currentIndex = i),
+                        allowImplicitScrolling: false,
+                        padEnds: false,
                         itemBuilder: (context, index) {
                           return Transform.translate(
                             offset: Offset(0, -delta * 0.15),
@@ -114,9 +121,13 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                                   if (mounted) setState(() => _showHeartBurst = false);
                                 });
                               },
-                              child: Image.asset(
-                                product.images[index],
+                              child: Image(
+                                image: ResizeImage(
+                                  AssetImage(product.images[index]),
+                                  width: MediaQuery.of(context).size.width.toInt(),
+                                ),
                                 fit: BoxFit.cover,
+                                filterQuality: FilterQuality.low,
                                 errorBuilder: (_, __, ___) =>
                                     const Center(
                                       child: Icon(Icons.broken_image, size: 40),
@@ -202,7 +213,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
 
           // DETAILS CONTENT
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
             sliver: SliverList(
               delegate: SliverChildListDelegate(
                 [
@@ -319,7 +330,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                     ],
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
 
                   // SIMILAR PRODUCTS
                   Text(
@@ -332,23 +343,41 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                   ),
                   const SizedBox(height: 16),
 
-                  // Hybrid RecommendationEngine - similar products
+                  // RecommendationEngine-powered suggestions (related, non-random)
                   (() {
                     final suggestions = RecommendationEngine.recommend(
                       allProducts: products,
-                      category: widget.product.thumbnail.split("/")[2],
-                      budget: null,
-                      vibe: null,
+                      category: widget.product.category,
+                      budget: widget.product.price.toInt(),
+                      vibe: widget.product.vibe,
                       limit: 6,
-                    );
+                    ).where((p) => p.id != widget.product.id).toList();
+
+                    // If no relevant suggestions, show a clean fallback
+                    if (suggestions.isEmpty) {
+                      return Container(
+                        height: 160,
+                        alignment: Alignment.center,
+                        child: const Text(
+                          "More from this collection coming soon",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      );
+                    }
+
                     return SizedBox(
-                      height: 220,
-                      child: ListView.builder(
+                      height: 280,
+                      child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: suggestions.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 14),
+                        addAutomaticKeepAlives: false,
+                        addRepaintBoundaries: true,
                         itemBuilder: (context, index) {
                           final item = suggestions[index];
-
                           return GestureDetector(
                             onTap: () {
                               Navigator.pushReplacement(
@@ -358,46 +387,51 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                                 ),
                               );
                             },
-                            child: Container(
+                            child: SizedBox(
                               width: 150,
-                              margin: EdgeInsets.only(
-                                right: index == suggestions.length - 1 ? 0 : 14,
-                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.max,
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(14),
-                                    child: AspectRatio(
-                                      aspectRatio: 1 / 1.25,
-                                      child: Container(
-                                        color: Colors.grey.shade100,
-                                        child: Image.asset(
-                                          item.thumbnail,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) =>
-                                              const Center(child: Icon(Icons.broken_image)),
-                                        ),
+                                    child: SizedBox(
+                                      height: 170,
+                                      width: double.infinity,
+                                      child: Image.asset(
+                                        item.thumbnail,
+                                        fit: BoxFit.cover,
+                                        cacheWidth: 300,
+                                        cacheHeight: 400,
+                                        filterQuality: FilterQuality.low,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Center(child: Icon(Icons.broken_image)),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    item.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "₹${item.price}",
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                  const SizedBox(height: 6),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.name,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          height: 1.2,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "₹${item.price}",
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -429,10 +463,13 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
         child: SizedBox(
           height: 54,
           width: double.infinity,
-          child: ValueListenableBuilder<List<CartItem>>(
+          child: ValueListenableBuilder<List<dynamic>>(
             valueListenable: CartController.items,
             builder: (context, items, _) {
-              final cartItem = items.where((c) => c.product.id == product.id).toList();
+              final cartItem = items
+                  .whereType<CartItem>()
+                  .where((c) => c.product.id == product.id)
+                  .toList();
               _quantity = cartItem.isEmpty ? 0 : cartItem.first.quantity;
 
               if (_quantity == 0) {
@@ -509,6 +546,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
             },
           ),
         ),
+      ),
       ),
     );
   }

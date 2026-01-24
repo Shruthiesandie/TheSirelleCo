@@ -122,53 +122,6 @@ class _HomePageState extends State<HomePage>
             ),
 
             Positioned(
-              right: 20,
-              bottom: 90,
-              child: GestureDetector(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Sirelle AI chat is coming soon 💗"),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFF9ACB), Color(0xFFFFC1D9)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.pinkAccent.withOpacity(0.45),
-                        blurRadius: 18,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.auto_awesome, color: Colors.white, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        "Ask Sirelle AI",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
               left: 0,
               right: 0,
               bottom: 0,
@@ -728,10 +681,12 @@ class _HomeContentState extends State<_HomeContent> {
                 width: double.infinity,
                 child: GestureDetector(
                   onTap: () {
+                    // Optional: Clear previous hamper state for fresh start
+                    // HamperBuilderController.clear();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => AllCategoriesPage(),
+                        builder: (_) => AllCategoriesPage(isHamperMode: true),
                       ),
                     );
                   },
@@ -1313,10 +1268,12 @@ class _HomeContentState extends State<_HomeContent> {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
+                        // Optional: Clear previous hamper state for fresh start
+                        // HamperBuilderController.clear();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => AllCategoriesPage(),
+                            builder: (_) => AllCategoriesPage(isHamperMode: true),
                           ),
                         );
                       },

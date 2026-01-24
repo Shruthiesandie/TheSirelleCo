@@ -1,6 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import '../controllers/cart_controllers.dart';
+import '../models/gift_hamper.dart';
+import '../controllers/hamper_builder_controller.dart';
+import '../pages/allcategories_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -70,7 +73,7 @@ class _CartPageState extends State<CartPage> {
             Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 20), color: Colors.black12),
 
             // CART ITEMS
-            ValueListenableBuilder<List<CartItem>>(
+            ValueListenableBuilder<List<dynamic>>(
               valueListenable: CartController.items,
               builder: (context, items, _) {
                 if (items.isEmpty) {
@@ -187,7 +190,7 @@ class _CartPageState extends State<CartPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  ValueListenableBuilder<List<CartItem>>(
+                  ValueListenableBuilder<List<dynamic>>(
                     valueListenable: CartController.items,
                     builder: (_, __, ___) => _summaryRow(
                       "Total",
@@ -225,7 +228,7 @@ class _CartPageState extends State<CartPage> {
                   const Divider(),
                   const SizedBox(height: 14),
                   // SUBTOTAL
-                  ValueListenableBuilder<List<CartItem>>(
+                  ValueListenableBuilder<List<dynamic>>(
                     valueListenable: CartController.items,
                     builder: (_, __, ___) => _summaryRow(
                       "Subtotal",
@@ -403,11 +406,14 @@ class _CartPageState extends State<CartPage> {
 
 /// CART ITEM CARD
 class _CartItemCard extends StatelessWidget {
-  final CartItem item;
+  final dynamic item;
   const _CartItemCard({required this.item});
 
   @override
   Widget build(BuildContext context) {
+    if (item is GiftHamper) {
+      return _GiftHamperCard(hamper: item as GiftHamper);
+    }
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -441,7 +447,6 @@ class _CartItemCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 14),
-
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -470,15 +475,12 @@ class _CartItemCard extends StatelessWidget {
                       color: Colors.black87,
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   if (item.quantity <= 0)
                     const Text(
                       "Out of stock",
                       style: TextStyle(color: Colors.redAccent, fontSize: 12),
                     ),
-
                   // Quantity Controls (Amazon style)
                   Row(
                     children: [
@@ -511,7 +513,6 @@ class _CartItemCard extends StatelessWidget {
                 ],
               ),
             ),
-
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -536,6 +537,120 @@ class _CartItemCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+class _GiftHamperCard extends StatelessWidget {
+  final GiftHamper hamper;
+  const _GiftHamperCard({required this.hamper});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 14,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "🎁 Custom Gift Hamper",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 10),
+          ...hamper.items.map(
+            (p) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(
+                "• ${p.name} – ₹${p.price}",
+                style: const TextStyle(fontSize: 13),
+              ),
+            ),
+          ),
+          const Divider(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    "Subtotal: ₹${hamper.subtotal.toStringAsFixed(0)}",
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                  Text(
+                    "Hamper Discount (-${hamper.discountPercent.toStringAsFixed(0)}%)",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    "You Save: ₹${hamper.discountAmount.toStringAsFixed(0)}",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.green,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Total: ₹${hamper.totalPrice.toStringAsFixed(0)}",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      // MARK THIS HAMPER AS BEING EDITED
+                      CartController.editingHamperId = hamper.id;
+
+                      // PRELOAD ITEMS INTO BUILDER
+                      HamperBuilderController.selectedItems.value =
+                          List.from(hamper.items);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AllCategoriesPage(
+                            isHamperMode: true,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text("Edit"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      CartController.removeHamper(hamper);
+                    },
+                    child: const Text(
+                      "Remove",
+                      style: TextStyle(color: Colors.redAccent),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

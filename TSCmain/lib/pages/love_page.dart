@@ -50,9 +50,10 @@ class _LovePageState extends State<LovePage> {
           },
         ),
         actions: [
-          ValueListenableBuilder<List<CartItem>>(
+          ValueListenableBuilder<List<dynamic>>(
             valueListenable: CartController.items,
-            builder: (context, cartItems, _) {
+            builder: (context, items, _) {
+              final cartItems = items.whereType<CartItem>().toList();
               return Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -67,7 +68,6 @@ class _LovePageState extends State<LovePage> {
                       );
                     },
                   ),
-
                   if (cartItems.isNotEmpty)
                     Positioned(
                       right: 6,

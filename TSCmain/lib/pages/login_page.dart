@@ -23,6 +23,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage>
     with TickerProviderStateMixin {
+  final FocusNode _userFocus = FocusNode();
+  final FocusNode _passFocus = FocusNode();
   Artboard? _artboard;
 
   // ---------------- RIVE ANIMATIONS ----------------
@@ -89,6 +91,8 @@ class _LoginPageState extends State<LoginPage>
     idleTimer?.cancel();
     _email.dispose();
     _password.dispose();
+    _userFocus.dispose();
+    _passFocus.dispose();
     super.dispose();
   }
 
@@ -263,75 +267,79 @@ class _LoginPageState extends State<LoginPage>
       opacity: pageFade,
       child: Scaffold(
         backgroundColor: const Color(0xFFFAF5F7),
-        body: Listener(
-          onPointerHover: (e) => _onPointerMove(e.position, size),
-          onPointerMove: (e) => _onPointerMove(e.position, size),
-          onPointerUp: (_) => _resetTilt(),
-          onPointerCancel: (_) => _resetTilt(),
-          child: Stack(
-            children: [
-              // Background waves
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: bgController,
-                  builder: (_, __) => CustomPaint(
-                    painter: _WavesPainter(bgController.value),
+        body: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Listener(
+            onPointerHover: (e) => _onPointerMove(e.position, size),
+            onPointerMove: (e) => _onPointerMove(e.position, size),
+            onPointerUp: (_) => _resetTilt(),
+            onPointerCancel: (_) => _resetTilt(),
+            child: Stack(
+              children: [
+                // Background waves
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: bgController,
+                    builder: (_, __) => CustomPaint(
+                      painter: _WavesPainter(bgController.value),
+                    ),
                   ),
                 ),
-              ),
 
-              // Floating orbs
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Stack(
-                    children: [
-                      _orb(0.12, 0.18, 90, Colors.pinkAccent.withValues(alpha: 0.15)),
-                      _orb(0.78, 0.12, 110, Colors.purpleAccent.withValues(alpha: 0.18)),
-                      _orb(0.30, 0.70, 150, Colors.pink.withValues(alpha: 0.12)),
-                      _orb(0.65, 0.55, 100, Colors.purple.withValues(alpha: 0.14)),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Main content
-              SafeArea(
-                child: Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 30),
-                    child: Column(
+                // Floating orbs
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Stack(
                       children: [
-                        _header(),
-                        const SizedBox(height: 28),
-                        _glassCard(),
-                        const SizedBox(height: 120),
+                        _orb(0.12, 0.18, 90, Colors.pinkAccent.withValues(alpha: 0.15)),
+                        _orb(0.78, 0.12, 110, Colors.purpleAccent.withValues(alpha: 0.18)),
+                        _orb(0.30, 0.70, 150, Colors.pink.withValues(alpha: 0.12)),
+                        _orb(0.65, 0.55, 100, Colors.purple.withValues(alpha: 0.14)),
                       ],
                     ),
                   ),
                 ),
-              ),
 
-              // Character
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 600),
-                  opacity: characterOpacity,
-                  child: Transform(
-                    transform: Matrix4.identity()
-                      ..rotateX(tiltX * pi / 180)
-                      ..rotateY(tiltY * pi / 180),
-                    alignment: Alignment.center,
-                    child: SizedBox(
-                      height: 260,
-                      child: _artboard == null
-                          ? const Center(child: CircularProgressIndicator())
-                          : Rive(artboard: _artboard!, fit: BoxFit.contain),
+                // Main content
+                SafeArea(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 30),
+                      child: Column(
+                        children: [
+                          _header(),
+                          const SizedBox(height: 28),
+                          _glassCard(),
+                          const SizedBox(height: 120),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+
+                // Character
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 600),
+                    opacity: characterOpacity,
+                    child: Transform(
+                      transform: Matrix4.identity()
+                        ..rotateX(tiltX * pi / 180)
+                        ..rotateY(tiltY * pi / 180),
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        height: 260,
+                        child: _artboard == null
+                            ? const Center(child: CircularProgressIndicator())
+                            : Rive(artboard: _artboard!, fit: BoxFit.contain),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -476,7 +484,17 @@ class _LoginPageState extends State<LoginPage>
       ),
       child: TextField(
         controller: controller,
+        focusNode: hint == "Username" ? _userFocus : _passFocus,
         obscureText: obscure,
+        textInputAction:
+            hint == "Username" ? TextInputAction.next : TextInputAction.done,
+        onSubmitted: (_) {
+          if (hint == "Username") {
+            FocusScope.of(context).requestFocus(_passFocus);
+          } else {
+            FocusScope.of(context).unfocus();
+          }
+        },
         onTap: onTap,
         onChanged: onChanged,
         decoration: InputDecoration(

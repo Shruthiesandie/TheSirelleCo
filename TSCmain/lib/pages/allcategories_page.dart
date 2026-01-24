@@ -5,19 +5,25 @@ import 'dart:ui';
 import 'dart:math';
 
 import '../controllers/favorites_controller.dart';
+import '../controllers/hamper_builder_controller.dart';
 import '../data/products.dart';
 import 'product_details_page.dart';
 import '../models/product.dart';
 import '../services/recommendation_engine.dart';
+import '../controllers/cart_controllers.dart';
+import '../models/gift_hamper.dart';
+import 'cart_page.dart';
 
 class AllCategoriesPage extends StatefulWidget {
   final VoidCallback? onBackToHome;
   final String? initialCategory;
+  final bool isHamperMode;
 
   const AllCategoriesPage({
     super.key,
     this.onBackToHome,
     this.initialCategory,
+    this.isHamperMode = false,
   });
 
   @override
@@ -164,7 +170,9 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
+      body: Stack(
+        children: [
+          SafeArea(
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -228,6 +236,25 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               ),
             ),
             const SizedBox(height: 12), // lowered content spacing
+            if (widget.isHamperMode)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFEEF3),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Text(
+                    "🎁 Build Your Own Gift Hamper\nSelect products from any category to create your personalised gift box.",
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.45,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
 
             // 🔥 Animated Search Bar
             SizeTransition(
@@ -614,15 +641,19 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
                 return GestureDetector(
                   onTap: () {
-                    // 🔥 AI tracking: product viewed
-                    RecommendationEngine.trackProductView(product);
+                    if (widget.isHamperMode) {
+                      HamperBuilderController.toggle(product);
+                    } else {
+                      // 🔥 AI tracking: product viewed
+                      RecommendationEngine.trackProductView(product);
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ProductDetailsPage(product: product),
-                      ),
-                    );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProductDetailsPage(product: product),
+                        ),
+                      );
+                    }
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 140),
@@ -734,6 +765,31 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                               ),
                             ),
                           ),
+                          if (widget.isHamperMode)
+                            ValueListenableBuilder<List<Product>>(
+                              valueListenable: HamperBuilderController.selectedItems,
+                              builder: (_, selected, __) {
+                                if (!selected.contains(product)) {
+                                  return const SizedBox.shrink();
+                                }
+                                return Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(
+                                      Icons.check_circle,
+                                      color: Colors.pinkAccent,
+                                      size: 22,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                         ],
                       ),
                     ),
@@ -848,7 +904,78 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
           ),
         ), // <-- closes Container
       ),   // <-- closes SafeArea
-    );
+      if (widget.isHamperMode)
+        Positioned(
+          left: 16,
+          right: 16,
+          bottom: 16,
+          child: ValueListenableBuilder<List<Product>>(
+            valueListenable: HamperBuilderController.selectedItems,
+            builder: (context, selected, _) {
+              if (selected.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return SafeArea(
+                top: false,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pinkAccent,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    elevation: 10,
+                  ),
+                  onPressed: () {
+                    // ✅ ENFORCE MINIMUM ITEMS RULE
+                    if (selected.length < 4) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Please add at least 4 items to create a gift hamper 🎁",
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.pinkAccent,
+                        ),
+                      );
+                      return;
+                    }
+
+                    final hamperId = CartController.editingHamperId ??
+                        DateTime.now().millisecondsSinceEpoch.toString();
+
+                    final hamper = GiftHamper(
+                      id: hamperId,
+                      items: List<Product>.from(selected),
+                    );
+
+                    CartController.addOrUpdateHamper(hamper);
+                    HamperBuilderController.clear();
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CartPage(),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    "Add Gift Hamper to Cart (${selected.length} items)",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+    ],
+  ),
+);
   }
 }
 
