@@ -22,13 +22,14 @@ class CartController {
 
   /// Add product to cart (increase qty if exists)
   static void add(Product product) {
-    final list = List<CartItem>.from(items.value);
+    final list = List<Object>.from(items.value);
 
-    final index =
-        list.indexWhere((item) => item.product.id == product.id);
+    final index = list.indexWhere(
+      (e) => e is CartItem && e.product.id == product.id,
+    );
 
     if (index != -1) {
-      list[index].quantity += 1;
+      (list[index] as CartItem).quantity += 1;
     } else {
       list.add(CartItem(product: product));
     }
@@ -43,14 +44,16 @@ class CartController {
 
   /// Decrease quantity (remove if reaches 0)
   static void decrease(Product product) {
-    final list = List<CartItem>.from(items.value);
+    final list = List<Object>.from(items.value);
 
-    final index =
-        list.indexWhere((item) => item.product.id == product.id);
+    final index = list.indexWhere(
+      (e) => e is CartItem && e.product.id == product.id,
+    );
 
     if (index != -1) {
-      if (list[index].quantity > 1) {
-        list[index].quantity -= 1;
+      final item = list[index] as CartItem;
+      if (item.quantity > 1) {
+        item.quantity -= 1;
       } else {
         list.removeAt(index);
       }
@@ -60,8 +63,10 @@ class CartController {
 
   /// Remove product completely
   static void remove(Product product) {
-    final list = List<CartItem>.from(items.value)
-      ..removeWhere((item) => item.product.id == product.id);
+    final list = List<Object>.from(items.value)
+      ..removeWhere(
+        (e) => e is CartItem && e.product.id == product.id,
+      );
 
     items.value = list;
   }
