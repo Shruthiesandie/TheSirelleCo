@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../pages/cart_page.dart';
-// add to pubspec
+import 'package:sirelle/l10n/app_localizations.dart';
+import 'package:sirelle/controllers/app_locale.dart';
+import 'package:sirelle/controllers/app_theme.dart';
 // import other packages as needed for your app routing/state management
 
 // ────────────── FULL-PAGE ADDRESS FORM ──────────────
@@ -1216,9 +1217,9 @@ class _ProfilePageState extends State<ProfilePage>
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: _textDark,
-        title: const Text(
-          'Profile',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        title: Text(
+          AppLocalizations.of(context)!.profile,
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         centerTitle: false,
       ),
@@ -1262,274 +1263,288 @@ class _ProfilePageState extends State<ProfilePage>
 
                     const SizedBox(height: 10),
 
-                    // ======= My Account =======
-                    ProfileSection(
-                      title: 'My Account',
-                      children: [
-                        profileOptionTile(
-                          context,
-                          Icons.person_outline,
-                          'Profile',
-                          onTap: () {
-                            /* open profile details */
-                          },
-                        ),
-                        profileOptionTile(
-                          context,
-                          Icons.location_on_outlined,
-                          'Addresses',
-                          onTap: () {
-                            _openAddressSheet();
-                          },
-                        ),
-                        profileOptionTile(
-                          context,
-                          Icons.shopping_cart_outlined,
-                          'Cart Shortcut',
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const CartPage(),
+                    // ======= Orders (dropdown, UI unchanged) =======
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                                offset: Offset(0, 3),
                               ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-
-                    // ======= Orders (with statuses + track) =======
-                    ProfileSection(
-                      title: 'Orders',
-                      children: [
-                        // Show statuses as compact row + tile for full order list
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18.0,
-                            vertical: 6,
+                            ],
                           ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
+                          child: ExpansionTile(
+                            title: Text(
+                              AppLocalizations.of(context)!.orders,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: _textDark,
+                              ),
                             ),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 8,
-                                  ),
-                                  leading: Container(
-                                    height: 44,
-                                    width: 44,
-                                    decoration: BoxDecoration(
-                                      color: _muted,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(Icons.list_alt, color: _accent),
-                                  ),
-                                  title: Text(
-                                    'My Orders',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: _textDark,
-                                    ),
-                                  ),
-                                  trailing: Icon(
-                                    Icons.chevron_right,
-                                    color: Colors.black26,
-                                  ),
-                                  onTap: () {
-                                    /* open full orders page */
-                                  },
+                            iconColor: _accent,
+                            collapsedIconColor: Colors.black26,
+                            childrenPadding: const EdgeInsets.only(bottom: 12),
+                            children: [
+                              // --- ORIGINAL ORDERS UI (UNCHANGED) ---
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18.0,
+                                  vertical: 6,
                                 ),
-                                const Divider(height: 1),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10.0,
-                                    horizontal: 12,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 6,
+                                        offset: Offset(0, 3),
+                                      ),
+                                    ],
                                   ),
-                                  child: SizedBox(
-                                    width:
-                                        300, // Adjusted viewport to show exactly 4 items
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      physics: BouncingScrollPhysics(),
+                                  child: Column(
+                                    children: [
+                                      ListTile(
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 8,
+                                        ),
+                                        leading: Container(
+                                          height: 44,
+                                          width: 44,
+                                          decoration: BoxDecoration(
+                                            color: _muted,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Icon(Icons.list_alt, color: _accent),
+                                        ),
+                                        title: Text(
+                                          'My Orders',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: _textDark,
+                                          ),
+                                        ),
+                                        trailing: const Icon(
+                                          Icons.chevron_right,
+                                          color: Colors.black26,
+                                        ),
+                                        onTap: () {
+                                          /* open full orders page */
+                                        },
+                                      ),
+                                      const Divider(height: 1),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10.0,
+                                          horizontal: 12,
+                                        ),
+                                        child: SizedBox(
+                                          width: 300,
+                                          child: SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            physics: BouncingScrollPhysics(),
+                                            child: Row(
+                                              children: [
+                                                _orderStatus('Processing', Icons.hourglass_bottom),
+                                                const SizedBox(width: 14),
+                                                _orderStatus('Shipped', Icons.local_shipping),
+                                                const SizedBox(width: 14),
+                                                _orderStatus('Delivered', Icons.check_circle_outline),
+                                                const SizedBox(width: 14),
+                                                _orderStatus('Cancelled', Icons.cancel_outlined),
+                                                const SizedBox(width: 14),
+                                                _orderStatus('Returned', Icons.undo),
+                                                const SizedBox(width: 14),
+                                                _orderStatus('Unpaid', Icons.payments_outlined),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      /* open tracking page */
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 180),
+                                      curve: Curves.easeOut,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(14),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.08),
+                                            blurRadius: 10,
+                                            spreadRadius: 1,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ],
+                                      ),
                                       child: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          _orderStatus(
-                                            'Processing',
-                                            Icons.hourglass_bottom,
-                                          ),
-                                          const SizedBox(width: 14),
-                                          _orderStatus(
-                                            'Shipped',
-                                            Icons.local_shipping,
-                                          ),
-                                          const SizedBox(width: 14),
-                                          _orderStatus(
-                                            'Delivered',
-                                            Icons.check_circle_outline,
-                                          ),
-                                          const SizedBox(width: 14),
-                                          _orderStatus(
-                                            'Cancelled',
-                                            Icons.cancel_outlined,
-                                          ),
-                                          const SizedBox(width: 14),
-                                          _orderStatus('Returned', Icons.undo),
-                                          const SizedBox(width: 14),
-                                          _orderStatus(
-                                            'Unpaid',
-                                            Icons.payments_outlined,
+                                          Icon(
+                                            Icons.map_outlined,
+                                            size: 18,
+                                            color: Colors.pink.shade700,
                                           ),
                                           const SizedBox(width: 6),
+                                          Text(
+                                            'Track Order',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.pink.shade700,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: GestureDetector(
-                              onTap: () {
-                                /* open tracking page */
-                              },
-                              child: AnimatedContainer(
-                                duration: Duration(milliseconds: 180),
-                                curve: Curves.easeOut,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(14),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.08),
-                                      blurRadius: 10,
-                                      spreadRadius: 1,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.map_outlined,
-                                      size: 18,
-                                      color: Colors.pink.shade700,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Track Order',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.pink.shade700,
-                                      ),
-                                    ),
-                                  ],
+                      ),
+                    ),
+
+                    // ======= Addresses (no icon, after Orders) =======
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 26.0, vertical: 8),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(14),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(14),
+                            splashColor: Colors.pink.withOpacity(0.08),
+                            highlightColor: Colors.pink.withOpacity(0.04),
+                            onTap: () {
+                              _openAddressSheet();
+                            },
+                            child: ListTile(
+                              dense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                              visualDensity: VisualDensity.standard,
+                              title: Text(
+                                AppLocalizations.of(context)!.addresses,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.pink.shade900,
                                 ),
                               ),
+                              trailing: const Icon(Icons.chevron_right, color: Colors.black26),
                             ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
 
                     // ======= Offers & Wallet =======
-                    ProfileSection(
-                      title: 'Offers & Wallet',
-                      children: [
-                        profileOptionTile(
-                          context,
-                          Icons.local_offer_outlined,
-                          'Coupons',
-                          onTap: () {
-                            _openCouponsSheet();
-                          },
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: ExpansionTile(
+                            title: Text(
+                              'Offers & Wallet',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: _textDark,
+                              ),
+                            ),
+                            iconColor: _accent,
+                            collapsedIconColor: Colors.black26,
+                            childrenPadding: const EdgeInsets.only(bottom: 12),
+                            children: [
+                              profileOptionTile(
+                                context,
+                                Icons.local_offer_outlined,
+                                'Coupons',
+                                onTap: () {
+                                  _openCouponsSheet();
+                                },
+                              ),
+                              profileOptionTile(
+                                context,
+                                Icons.card_giftcard,
+                                'Gift Cards',
+                                onTap: () {
+                                  _openGiftCardsSheet();
+                                },
+                              ),
+                              profileOptionTile(
+                                context,
+                                Icons.account_balance_wallet,
+                                'App Wallet Balance',
+                                onTap: () {
+                                  /* wallet balance */
+                                },
+                              ),
+                              profileOptionTile(
+                                context,
+                                Icons.loyalty_outlined,
+                                'Rewards / Loyalty Points',
+                                onTap: () {
+                                  /* rewards */
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                        profileOptionTile(
-                          context,
-                          Icons.card_giftcard,
-                          'Gift Cards',
-                          onTap: () {
-                            _openGiftCardsSheet();
-                          },
-                        ),
-                        profileOptionTile(
-                          context,
-                          Icons.account_balance_wallet,
-                          'App Wallet Balance',
-                          onTap: () {
-                            /* wallet balance */
-                          },
-                        ),
-                        profileOptionTile(
-                          context,
-                          Icons.loyalty_outlined,
-                          'Rewards / Loyalty Points',
-                          onTap: () {
-                            /* rewards */
-                          },
-                        ),
-                      ],
-                    ),              
-
-                    // ======= Address & Delivery =======
-                    ProfileSection(
-                      title: 'Address & Delivery',
-                      children: [
-                        profileOptionTile(
-                          context,
-                          Icons.location_on_outlined,
-                          'Address',
-                          onTap: () {
-                            _openAddressSheet();
-                          },
-                        ),
-                      ],
+                      ),
                     ),
 
-                    // ======= Payment =======
-                    ProfileSection(
-                      title: 'Payment',
-                      children: [
-                        profileOptionTile(
-                          context,
-                          Icons.payment,
-                          'Payment Methods',
-                          onTap: () {
-                            /* open payment manager */
-                          },
-                        ),
-                        profileOptionTile(
-                          context,
-                          Icons.account_balance_wallet_outlined,
-                          'Payments / Wallet',
-                          onTap: () {
-                            /* wallet */
-                          },
-                        ),
-                      ],
-                    ),
+
 
                     // ======= App Settings (expansion) =======
                     Padding(
@@ -1540,16 +1555,6 @@ class _ProfilePageState extends State<ProfilePage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.only(left: 18.0, bottom: 6),
-                            child: Text(
-                              'App Settings',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
                           Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 18.0,
@@ -1583,28 +1588,115 @@ class _ProfilePageState extends State<ProfilePage>
                                 children: [
                                   profileOptionTile(
                                     context,
-                                    Icons.color_lens_outlined,
-                                    'Theme',
+                                    Icons.language,
+                                    AppLocalizations.of(context)!.language,
+                                    subtitle: languageNameFromLocale(AppLocale.locale.value),
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (_) => ListView(
+                                          children: [
+                                            ListTile(
+                                              title: const Text('English'),
+                                              onTap: () {
+                                                AppLocale.set(const Locale('en'));
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                            ListTile(
+                                              title: const Text('Hindi'),
+                                              onTap: () {
+                                                AppLocale.set(const Locale('hi'));
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                            ListTile(
+                                              title: const Text('Kannada'),
+                                              onTap: () {
+                                                AppLocale.set(const Locale('kn'));
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
                                   profileOptionTile(
                                     context,
-                                    Icons.language,
-                                    'Language',
+                                    Icons.color_lens_outlined,
+                                    AppLocalizations.of(context)!.theme,
+                                    subtitle: AppTheme.themeMode.value == ThemeMode.dark ? 'Dark' : 'Light',
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (_) => Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            ListTile(
+                                              title: const Text('Light Mode'),
+                                              trailing: AppTheme.themeMode.value == ThemeMode.light
+                                                  ? const Icon(Icons.check)
+                                                  : null,
+                                              onTap: () {
+                                                AppTheme.setDark(false);
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                            ListTile(
+                                              title: const Text('Dark Mode'),
+                                              trailing: AppTheme.themeMode.value == ThemeMode.dark
+                                                  ? const Icon(Icons.check)
+                                                  : null,
+                                              onTap: () {
+                                                AppTheme.setDark(true);
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
                                   profileOptionTile(
                                     context,
                                     Icons.public,
                                     'Country / Region',
-                                  ),
-                                  profileOptionTile(
-                                    context,
-                                    Icons.currency_rupee,
-                                    'Currency (INR)',
+                                    subtitle: 'India',
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (_) => ListView(
+                                          children: [
+                                            ListTile(title: Text('India'), onTap: () => Navigator.pop(context)),
+                                            ListTile(title: Text('United States'), onTap: () => Navigator.pop(context)),
+                                            ListTile(title: Text('United Kingdom'), onTap: () => Navigator.pop(context)),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
                                   profileOptionTile(
                                     context,
                                     Icons.notifications_none,
-                                    'Notification Settings',
+                                    AppLocalizations.of(context)!.notifications,
+                                    subtitle: 'On',
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (_) => SwitchListTile(
+                                          title: Text('Enable Notifications'),
+                                          value: true,
+                                          onChanged: (_) {},
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  profileOptionTile(
+                                    context,
+                                    Icons.lock_outline,
+                                    'Privacy Controls',
+                                    onTap: () {},
                                   ),
                                 ],
                               ),
@@ -1623,16 +1715,6 @@ class _ProfilePageState extends State<ProfilePage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.only(left: 18.0, bottom: 6),
-                            child: Text(
-                              'Help & Information',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
                           Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 18.0,
@@ -1694,7 +1776,7 @@ class _ProfilePageState extends State<ProfilePage>
 
                     // ======= Privacy Policies (expansion tile version) =======
                     ProfileSection(
-                      title: 'Privacy & Policies',
+                      title: '',
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(
@@ -1836,7 +1918,7 @@ class _ProfilePageState extends State<ProfilePage>
                             Navigator.pushReplacementNamed(context, '/login');
                           },
                           child: Text(
-                            'Log Out',
+                            AppLocalizations.of(context)!.logout,
                             style: TextStyle(
                               color: _accent,
                               fontWeight: FontWeight.w600,
@@ -1846,7 +1928,7 @@ class _ProfilePageState extends State<ProfilePage>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 90),
                   ],
                 ),
               ),
@@ -1942,19 +2024,28 @@ class ProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double gap = 12;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: gap),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 18.0, bottom: 6),
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          if (title.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 18.0, bottom: gap),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
-          ),
-          Column(children: children),
+          ...children
+              .expand((w) => [w, const SizedBox(height: gap)])
+              .toList()
+            ..removeLast(),
         ],
       ),
     );
@@ -1962,6 +2053,17 @@ class ProfileSection extends StatelessWidget {
 }
 
 // ===== Edit Profile Page (change username + change photo) =====
+
+String languageNameFromLocale(Locale locale) {
+  switch (locale.languageCode) {
+    case 'hi':
+      return 'हिन्दी';
+    case 'kn':
+      return 'ಕನ್ನಡ';
+    default:
+      return 'English';
+  }
+}
 class EditProfilePage extends StatefulWidget {
   final String? initialUsername;
   final File? initialAvatar;

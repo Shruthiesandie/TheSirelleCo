@@ -5,6 +5,8 @@ class UserMemory {
   String? occasion;     // birthday, anniversary, etc.
   String? vibe;         // romantic, cute, classy, luxury
   String? budget;       // under 2000, 5k, flexible
+  String? language;   // en, hi, kn
+  String? themeMode;  // light, dark, system
 
   // Conversation flow
   String stage;          // greeting, intent, relationship, occasion, budget, suggest
@@ -15,6 +17,8 @@ class UserMemory {
     this.occasion,
     this.vibe,
     this.budget,
+    this.language,
+    this.themeMode,
     this.stage = 'greeting',
   });
 
@@ -33,6 +37,8 @@ class UserMemory {
     if (occasion != null) lines.add("Occasion: $occasion");
     if (vibe != null) lines.add("Vibe: $vibe");
     if (budget != null) lines.add("Budget: $budget");
+    if (language != null) lines.add("Language: $language");
+    if (themeMode != null) lines.add("Theme: $themeMode");
 
     if (lines.isEmpty) {
       return "No preferences set yet.";
@@ -50,6 +56,8 @@ class UserMemory {
     if (occasion != null) data['occasion'] = occasion!;
     if (vibe != null) data['vibe'] = vibe!;
     if (budget != null) data['budget'] = budget!;
+    if (language != null) data['language'] = language!;
+    if (themeMode != null) data['themeMode'] = themeMode!;
     data['stage'] = stage;
 
     return data;
@@ -63,6 +71,8 @@ class UserMemory {
       occasion: map['occasion'],
       vibe: map['vibe'],
       budget: map['budget'],
+      language: map['language'],
+      themeMode: map['themeMode'],
       stage: map['stage'] ?? 'greeting',
     );
   }
@@ -74,6 +84,8 @@ class UserMemory {
     occasion = null;
     vibe = null;
     budget = null;
+    language = null;
+    themeMode = null;
     stage = 'greeting';
   }
 }

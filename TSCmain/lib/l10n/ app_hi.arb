@@ -1,0 +1,11 @@
+{
+  "@@locale": "hi",
+  "profile": "प्रोफ़ाइल",
+  "orders": "ऑर्डर",
+  "addresses": "पते",
+  "preferences": "सेटिंग्स",
+  "language": "भाषा",
+  "theme": "थीम",
+  "logout": "लॉग आउट",  
+  "notifications": "सूचनाएं"
+}

@@ -1,0 +1,11 @@
+{
+  "@@locale": "en",
+  "profile": "Profile",
+  "orders": "Orders",
+  "addresses": "Addresses",
+  "preferences": "Preferences",
+  "language": "Language",
+  "theme": "Theme",
+  "logout": "Log Out",
+  "notifications": "Notifications"
+}
