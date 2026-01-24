@@ -16,6 +16,23 @@ class SirelleChatPage extends StatefulWidget {
 
 class _SirelleChatPageState extends State<SirelleChatPage> {
 
+  // --- Virtual category mapping for friend groups
+  static const Map<String, List<String>> _virtualCategoryMap = {
+    'boy_friend': [
+      'bottles',
+      'caps',
+      'key_chain',
+      'ceramic',
+    ],
+    'girl_friend': [
+      'candle',
+      'hair_accessories',
+      'plusie',
+      'letter',
+      'nails',
+    ],
+  };
+
   String? _activeCategory;
   int? _activeBudget;
   final Set<String> _shownProductIds = {};
@@ -331,14 +348,24 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
           );
         });
         _scrollToBottom();
+        if (mounted) {
+          setState(() {
+            _isTyping = false;
+          });
+        }
         return;
       }
 
       // CATEGORY SPECIFIED IN SAME MESSAGE
       if (hasExplicitCategory) {
-        final catProducts = underBudget.where((p) =>
-          _normalizeCategory(_productCategory(p)) == detectedCategory
-        ).toList();
+        final catProducts = _virtualCategoryMap.containsKey(detectedCategory)
+            ? underBudget.where((p) =>
+                _virtualCategoryMap[detectedCategory]!
+                    .contains(_normalizeCategory(_productCategory(p))))
+                .toList()
+            : underBudget.where((p) =>
+                _normalizeCategory(_productCategory(p)) == detectedCategory)
+                .toList();
 
         if (catProducts.isEmpty) {
           setState(() {
@@ -349,6 +376,11 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
             );
           });
           _scrollToBottom();
+          if (mounted) {
+            setState(() {
+              _isTyping = false;
+            });
+          }
           return;
         }
 
@@ -361,6 +393,11 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
           );
         });
         _scrollToBottom();
+        if (mounted) {
+          setState(() {
+            _isTyping = false;
+          });
+        }
         return;
       }
 
@@ -379,6 +416,11 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
       });
 
       _scrollToBottom();
+      if (mounted) {
+        setState(() {
+          _isTyping = false;
+        });
+      }
       return;
     }
 
@@ -390,8 +432,14 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
 
       final catProducts = products.where((p) {
         if (p.price > _activeBudget!) return false;
-        return _normalizeCategory(_productCategory(p)) ==
-            _normalizeCategory(detectedCategory);
+
+        final normalized = _normalizeCategory(_productCategory(p));
+
+        if (_virtualCategoryMap.containsKey(detectedCategory)) {
+          return _virtualCategoryMap[detectedCategory]!.contains(normalized);
+        }
+
+        return normalized == _normalizeCategory(detectedCategory);
       }).toList();
 
       // ❌ No products in this category under budget
@@ -404,6 +452,11 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
           );
         });
         _scrollToBottom();
+        if (mounted) {
+          setState(() {
+            _isTyping = false;
+          });
+        }
         return;
       }
 
@@ -441,6 +494,11 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
       });
 
       _scrollToBottom();
+      if (mounted) {
+        setState(() {
+          _isTyping = false;
+        });
+      }
       return;
     }
 
@@ -455,6 +513,11 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
         );
       });
       _scrollToBottom();
+      if (mounted) {
+        setState(() {
+          _isTyping = false;
+        });
+      }
       return;
     }
 
@@ -468,7 +531,15 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
     _scrollToBottom();
 
     // PREVENT AI SERVICE FROM INTERRUPTING PRODUCT FLOW
-    if (_activeBudget != null) return;
+    // if (_activeBudget != null) return;
+    if (_activeBudget != null) {
+      if (mounted) {
+        setState(() {
+          _isTyping = false;
+        });
+      }
+      return;
+    }
 
     String aiReply;
     try {
@@ -488,6 +559,12 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
 
     _saveChatHistory();
     _scrollToBottom();
+    // Safety fallback: ensure typing indicator is always cleared
+    if (mounted) {
+      setState(() {
+        _isTyping = false;
+      });
+    }
   }
 
 
@@ -856,10 +933,22 @@ class _ProductList extends StatelessWidget {
 
     final available = products.where((p) {
       if (p.price > budget) return false;
-      if (category != null &&
-          state != null &&
-          state._normalizeCategory(_productCategory!(p)) !=
-              state._normalizeCategory(category!)) return false;
+      if (category != null && state != null) {
+        final normalized = state._normalizeCategory(_productCategory!(p));
+
+        // Handle virtual categories like boyfriend / girlfriend
+        if (_SirelleChatPageState._virtualCategoryMap.containsKey(category)) {
+          if (!_SirelleChatPageState._virtualCategoryMap[category]!
+              .contains(normalized)) {
+            return false;
+          }
+        } else {
+          // Normal category comparison
+          if (category != null && normalized != state._normalizeCategory(category!)) {
+            return false;
+          }
+        }
+      }
       if (_shownProductIds.contains(p.id)) return false;
       return true;
     }).toList()
