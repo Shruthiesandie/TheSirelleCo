@@ -1464,10 +1464,32 @@ class _HomeContentState extends State<_HomeContent> {
 
           const SizedBox(height: 60),
 
-          // 🌸 PREMIUM SIRELLE SIGNATURE ENDING
+          // 🌸 PINTEREST-STYLE BRAND ENDING (SOFT EDITORIAL)
           Column(
             children: [
               const SizedBox(height: 60),
+
+              // --- Soft floating divider animation above the quote ---
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(seconds: 2),
+                curve: Curves.easeOut,
+                builder: (_, value, __) {
+                  return Opacity(
+                    opacity: value,
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 20),
+                      height: 1.5,
+                      width: 140,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFFFC1D9), Color(0xFFB2004D)],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
 
               // ✨ Emotional Brand Quote
               Padding(
@@ -1501,13 +1523,345 @@ class _HomeContentState extends State<_HomeContent> {
                 ),
               ),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 40),
 
-              // 💎 PREMIUM STAMP SECTION
-              // (removed as per instructions)
+              // 💎 PREMIUM STAMP SECTION — OFFICIAL BRAND SEAL (UPGRADED)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 48),
+
+                    // Soft editorial divider
+                    Container(
+                      height: 2,
+                      width: 120,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFB2004D), Color(0xFFFFC1D9)],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    const Text(
+                      "It’s Official",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.6,
+                        color: Color(0xFF6A0030),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    const Text(
+                      "The Sirelle Co",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.1,
+                        color: Color(0xFFB2004D),
+                      ),
+                    ),
+
+                    // --- Luxury micro‑copy under brand name ---
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Thoughtfully curated · Made to feel personal",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.6,
+                        color: Color(0xFF7A2A4A),
+                      ),
+                    ),
+
+                    const SizedBox(height: 44),
+
+                    // 🌸 Editorial stamp seal (ENHANCED & LARGER)
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Soft scalloped silhouette backdrop
+                        Container(
+                          width: 300,
+                          height: 300,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFFFFE3EC),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.pinkAccent.withOpacity(0.18),
+                                blurRadius: 26,
+                                offset: const Offset(0, 14),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Soft outer glow
+                        Container(
+                          width: 260,
+                          height: 260,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                Color(0xFFFFC1D9).withOpacity(0.55),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Decorative dotted ring
+                        Container(
+                          width: 210,
+                          height: 210,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Color(0xFFFF9EBF),
+                              width: 1.4,
+                              style: BorderStyle.solid,
+                            ),
+                          ),
+                        ),
+                        // Inner fine divider ring
+                        Container(
+                          width: 170,
+                          height: 170,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Color(0xFFB2004D).withOpacity(0.35),
+                              width: 0.8,
+                            ),
+                          ),
+                        ),
+                        // Soft lifted plate
+                        Container(
+                          width: 190,
+                          height: 190,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.12),
+                                blurRadius: 34,
+                                offset: Offset(0, 20),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Soft horizontal ribbon band
+                        Container(
+                          width: 320,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD8E2C8),
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                        ),
+                        // ✨ Subtle sparkle accents
+                        Positioned(
+                          top: 38,
+                          right: 52,
+                          child: Icon(
+                            Icons.auto_awesome,
+                            size: 14,
+                            color: Color(0xFFFF9EBF),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 44,
+                          left: 48,
+                          child: Icon(
+                            Icons.auto_awesome,
+                            size: 12,
+                            color: Color(0xFFFFC1D9),
+                          ),
+                        ),
+                        // ✨ Animated shimmer halo
+                        AnimatedBuilder(
+                          animation: Tween<double>(begin: 0.6, end: 1.0).animate(
+                            CurvedAnimation(
+                              parent: AnimationController(
+                                vsync: Navigator.of(context),
+                                duration: const Duration(seconds: 4),
+                              )..repeat(reverse: true),
+                              curve: Curves.easeInOut,
+                            ),
+                          ),
+                          builder: (context, child) {
+                            return Container(
+                              width: 220,
+                              height: 220,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    const Color(0xFFFFC1D9).withOpacity(0.35),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        // Stamp itself (EXTRA LARGE — hero focus, NO WHITE CIRCLE)
+                        SizedBox(
+                          width: 280,
+                          height: 280,
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Image.asset(
+                              "assets/stamp/stamp.png",
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 46),
+
+                    // Bottom divider
+                    Container(
+                      height: 2,
+                      width: 160,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFFC1D9), Color(0xFFB2004D)],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+          // 🌸 CONTACT WITH US — DARK PINK PREMIUM FOOTER
+          const SizedBox(height: 28),
+
+          Container(
+            width: double.infinity,
+            clipBehavior: Clip.antiAlias,
+            // margin REMOVED for full edge-to-edge
+            padding: EdgeInsets.fromLTRB(
+              22,
+              34,
+              22,
+              MediaQuery.of(context).padding.bottom + 80,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFB2004D), Color(0xFFD81B60)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFFB2004D).withOpacity(0.35),
+                  blurRadius: 30,
+                  offset: Offset(0, 18),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  "Contact with Us",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                    color: Colors.white,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                const Text(
+                  "Thoughtful gifts. Made with heart 💗",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+
+                const SizedBox(height: 22),
+
+                // ✨ Compact premium features
+                Column(
+                  children: const [
+                    _FooterFeature("🎁", "Personalised with love"),
+                    SizedBox(height: 8),
+                    _FooterFeature("🚚", "Carefully delivered"),
+                    SizedBox(height: 8),
+                    _FooterFeature("💌", "Support that listens"),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                const Text(
+                  "Follow us for gifting inspiration ✨",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _PremiumFooterIcon(icon: Icons.facebook),
+                    const SizedBox(width: 22),
+                    _PremiumFooterIcon(icon: Icons.camera_alt), // Instagram
+                    const SizedBox(width: 22),
+                    _PremiumFooterIcon(icon: Icons.close), // X / Twitter
+                    const SizedBox(width: 22),
+                    _PremiumFooterIcon(icon: Icons.play_circle_fill), // YouTube
+                  ],
+                ),
+
+                const SizedBox(height: 26),
+
+                const Text(
+                  "Unsubscribe anytime · No hard feelings 💕",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+              // --- Final premium CTA hint ---
+              const SizedBox(height: 32),
+              const Text(
+                "Crafted for moments that matter",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                  letterSpacing: 0.4,
+                  color: Color(0xFF6A0030),
+                ),
+              ),
 
               // Safe spacing above bottom nav
-              SizedBox(height: MediaQuery.of(context).padding.bottom + 40),
             ],
           ),
         ],
@@ -2160,6 +2514,201 @@ class _Badge extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+// 🌸 Social Icon helper widget for soft footer
+class _SocialIcon extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _SocialIcon({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 46,
+        height: 46,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 10,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: Color(0xFFB2004D),
+        ),
+      ),
+    );
+  }
+}
+
+class _PremiumSocialIcon extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _PremiumSocialIcon({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFFFFF), Color(0xFFFFEDF3)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(
+            color: Color(0xFFFFC1D9),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xFFB2004D).withOpacity(0.18),
+              blurRadius: 16,
+              offset: Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: Color(0xFFB2004D),
+        ),
+      ),
+    );
+  }
+}
+
+class _ContactIcon extends StatelessWidget {
+  final IconData icon;
+
+  const _ContactIcon({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: const Color(0xFFF7F7F7),
+      ),
+      child: Icon(
+        icon,
+        size: 20,
+        color: Colors.black87,
+      ),
+    );
+  }
+}
+// --- DARK PINK PREMIUM FOOTER HELPERS ---
+
+class _DarkFooterIcon extends StatelessWidget {
+  final IconData icon;
+  const _DarkFooterIcon({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withOpacity(0.18),
+      ),
+      child: Icon(
+        icon,
+        size: 22,
+        color: Colors.white,
+      ),
+    );
+  }
+}
+
+class _FooterFeature extends StatelessWidget {
+  final String emoji;
+  final String text;
+
+  const _FooterFeature(this.emoji, this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 16)),
+        const SizedBox(width: 10),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 13.5,
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Premium glassy footer icon widget
+class _PremiumFooterIcon extends StatelessWidget {
+  final IconData icon;
+  const _PremiumFooterIcon({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 62,
+      height: 62,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withOpacity(0.28),
+            Colors.white.withOpacity(0.12),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.35),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 18,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Icon(
+        icon,
+        size: 30,
+        color: Colors.white,
       ),
     );
   }
