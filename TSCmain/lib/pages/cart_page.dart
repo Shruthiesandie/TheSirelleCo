@@ -15,11 +15,54 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   bool useWallet = false;
   bool giftWrap = false;
+  bool orderProtection = false;
   bool showSavings = false;
+  bool showSellerNote = false;
+  bool showGiftMessage = false;
   String deliveryOption = "3–5 days";
+
+  static const int walletBalance = 120;
+  static const int giftWrapFee = 49;
+  static const int orderProtectionFee = 49;
+
+  static const int sameDayDeliveryFee = 99;
+  static const int expressDeliveryFee = 49;
+  static const int standardDeliveryFee = 0;
+
+  int get deliveryFee {
+    switch (deliveryOption) {
+      case "Tomorrow":
+        return sameDayDeliveryFee;
+      case "2–3 days":
+        return expressDeliveryFee;
+      case "3–5 days":
+      default:
+        return standardDeliveryFee;
+    }
+  }
 
   final TextEditingController noteController = TextEditingController();
   final TextEditingController giftMessageController = TextEditingController();
+
+  int get cartSubtotal => CartController.totalPrice;
+
+  int get extrasTotal {
+    int total = 0;
+    if (giftWrap) total += giftWrapFee;
+    if (orderProtection) total += orderProtectionFee;
+    total += deliveryFee;
+    return total;
+  }
+
+  int get walletDeduction {
+    if (!useWallet) return 0;
+    return walletBalance.clamp(0, cartSubtotal + extrasTotal);
+  }
+
+  int get finalTotal {
+    final total = cartSubtotal + extrasTotal - walletDeduction;
+    return total < 0 ? 0 : total;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,13 +120,50 @@ class _CartPageState extends State<CartPage> {
               valueListenable: CartController.items,
               builder: (context, items, _) {
                 if (items.isEmpty) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 32),
-                      child: Text(
-                        "Your bag is empty",
-                        style: TextStyle(color: Colors.black54),
-                      ),
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 120),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.shopping_bag_outlined,
+                          size: 72,
+                          color: Colors.pinkAccent.withOpacity(0.6),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          "Your cart is empty",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          "Add items you love to get started",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AllCategoriesPage()),
+                            );
+                          },
+                          child: const Text(
+                            "Explore products",
+                            style: TextStyle(
+                              color: Colors.pinkAccent,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }
@@ -101,53 +181,6 @@ class _CartPageState extends State<CartPage> {
               },
             ),
 
-            // PROMO CODE SECTION
-            Container(
-              margin: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 16,
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.local_offer_outlined, color: Colors.pinkAccent),
-                  const SizedBox(width: 10),
-                  const Expanded(
-                    child: Text(
-                      "Apply promo code",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                        ),
-                        builder: (_) => _PromoBottomSheet(),
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.pinkAccent,
-                    ),
-                    child: const Text("Apply"),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 5),
 
             // SUMMARY (no ClipRect/BackdropFilter)
             Container(
@@ -180,8 +213,27 @@ class _CartPageState extends State<CartPage> {
                   const SizedBox(height: 12),
                   // WALLET TOGGLE
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text("Use Sirelle Wallet (₹120)"),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Use Sirelle Wallet",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            useWallet
+                                ? "₹$walletDeduction applied • Balance ₹${walletBalance - walletDeduction}"
+                                : "Balance ₹$walletBalance",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
                       const Spacer(),
                       Switch.adaptive(
                         value: useWallet,
@@ -189,12 +241,88 @@ class _CartPageState extends State<CartPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  // PROMO CODE (INLINE)
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFFF1F6), Colors.white],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: Colors.pink.shade100),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.pink.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.local_offer_outlined,
+                            color: Colors.pinkAccent,
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Apply promo code",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                "Save more on this order",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.pinkAccent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                              ),
+                              builder: (_) => _PromoBottomSheet(),
+                            );
+                          },
+                          child: const Text(
+                            "APPLY",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   ValueListenableBuilder<List<dynamic>>(
                     valueListenable: CartController.items,
                     builder: (_, __, ___) => _summaryRow(
                       "Total",
-                      "₹${CartController.totalPrice}",
+                      "₹$finalTotal",
                       isTotal: true,
                     ),
                   ),
@@ -214,7 +342,10 @@ class _CartPageState extends State<CartPage> {
                     children: [
                       const Text("Add order protection (₹49)"),
                       const Spacer(),
-                      Switch.adaptive(value: false, onChanged: (_) {}),
+                      Switch.adaptive(
+                        value: orderProtection,
+                        onChanged: (v) => setState(() => orderProtection = v),
+                      ),
                     ],
                   ),
                   const Padding(
@@ -232,9 +363,17 @@ class _CartPageState extends State<CartPage> {
                     valueListenable: CartController.items,
                     builder: (_, __, ___) => _summaryRow(
                       "Subtotal",
-                      "₹${CartController.totalPrice}",
+                      "₹$cartSubtotal",
                     ),
                   ),
+                  if (giftWrap)
+                    _summaryRow("Gift wrap", "₹$giftWrapFee"),
+                  if (orderProtection)
+                    _summaryRow("Order protection", "₹$orderProtectionFee"),
+                  if (deliveryFee > 0)
+                    _summaryRow("Delivery (${deliveryOption})", "₹$deliveryFee"),
+                  if (useWallet)
+                    _summaryRow("Wallet applied", "-₹$walletDeduction"),
                   const SizedBox(height: 10),
                   // FREE DELIVERY PROGRESS
                   LayoutBuilder(
@@ -284,63 +423,142 @@ class _CartPageState extends State<CartPage> {
                     _summaryRow("Shipping saved", "₹29"),
                   ],
                   const SizedBox(height: 12),
-                  // DELIVERY OPTIONS
+                  // DELIVERY OPTIONS (REDESIGNED)
                   const Text(
                     "Estimated delivery",
-                    style: TextStyle(fontSize: 12, color: Colors.black45),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 8,
+                  const SizedBox(height: 10),
+                  Row(
                     children: [
-                      _deliveryChip("Tomorrow"),
-                      _deliveryChip("2–3 days"),
-                      _deliveryChip("3–5 days"),
+                      _deliveryCard(
+                        label: "Tomorrow",
+                        subtitle: "Priority delivery",
+                        price: "+₹99",
+                        isSelected: deliveryOption == "Tomorrow",
+                        onTap: () => setState(() => deliveryOption = "Tomorrow"),
+                      ),
+                      const SizedBox(width: 10),
+                      _deliveryCard(
+                        label: "2–3 days",
+                        subtitle: "Express",
+                        price: "+₹49",
+                        isSelected: deliveryOption == "2–3 days",
+                        onTap: () => setState(() => deliveryOption = "2–3 days"),
+                      ),
+                      const SizedBox(width: 10),
+                      _deliveryCard(
+                        label: "3–5 days",
+                        subtitle: "Standard",
+                        price: "FREE",
+                        isSelected: deliveryOption == "3–5 days",
+                        onTap: () => setState(() => deliveryOption = "3–5 days"),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 14),
-                  // NOTE TO SELLER
-                  TextField(
-                    controller: noteController,
-                    maxLines: 2,
-                    decoration: InputDecoration(
-                      hintText: "Add a note for the seller (optional)",
-                      filled: true,
-                      fillColor: Colors.pink.shade50,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide.none,
+                  // NOTE TO SELLER (TAP TO EXPAND)
+                  GestureDetector(
+                    onTap: () => setState(() => showSellerNote = !showSellerNote),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.pink.shade50,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Expanded(
+                                child: Text(
+                                  "Add a note for the seller",
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                              Icon(
+                                showSellerNote ? Icons.expand_less : Icons.edit_outlined,
+                                size: 18,
+                              ),
+                            ],
+                          ),
+                          if (showSellerNote) ...[
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: noteController,
+                              maxLines: 3,
+                              autofocus: true,
+                              decoration: const InputDecoration(
+                                hintText: "Write your note here…",
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ),
-                  // GIFT MESSAGE
+                  // GIFT MESSAGE (TAP TO EXPAND)
                   if (giftWrap) ...[
                     const SizedBox(height: 8),
-                    TextField(
-                      controller: giftMessageController,
-                      maxLines: 2,
-                      decoration: InputDecoration(
-                        hintText: "Write a gift message 💝",
-                        filled: true,
-                        fillColor: Colors.pink.shade50,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
+                    GestureDetector(
+                      onTap: () => setState(() => showGiftMessage = !showGiftMessage),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.pink.shade50,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Text(
+                                    "Write a gift message 💝",
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                Icon(
+                                  showGiftMessage ? Icons.expand_less : Icons.favorite_border,
+                                  size: 18,
+                                  color: Colors.pinkAccent,
+                                ),
+                              ],
+                            ),
+                            if (showGiftMessage) ...[
+                              const SizedBox(height: 8),
+                              TextField(
+                                controller: giftMessageController,
+                                maxLines: 3,
+                                autofocus: true,
+                                decoration: const InputDecoration(
+                                  hintText: "Your message will be printed on the card 💌",
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ),
                   ],
+                  const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Icon(Icons.apple),
-                      SizedBox(width: 12),
+                      SizedBox(width: 16),
                       Icon(Icons.payment),
-                      SizedBox(width: 12),
+                      SizedBox(width: 16),
                       Icon(Icons.account_balance_wallet_outlined),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 22),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: const [
@@ -349,10 +567,10 @@ class _CartPageState extends State<CartPage> {
                       _TrustItem(icon: Icons.local_shipping, label: "Fast Delivery"),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
-                    height: 52,
+                    height: 54,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.pinkAccent,
@@ -402,6 +620,73 @@ class _CartPageState extends State<CartPage> {
       ),
     );
   }
+
+// Redesigned delivery card widget
+Widget _deliveryCard({
+  required String label,
+  required String subtitle,
+  required String price,
+  required bool isSelected,
+  required VoidCallback onTap,
+}) {
+  return Expanded(
+    child: GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.pink.shade50 : Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isSelected ? Colors.pinkAccent : Colors.black12,
+            width: isSelected ? 1.5 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.pinkAccent.withOpacity(0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
+              : [],
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: isSelected ? Colors.pinkAccent : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: const TextStyle(fontSize: 11, color: Colors.black54),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              price,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: price == "FREE"
+                    ? Colors.green
+                    : Colors.pinkAccent,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 }
 
 /// CART ITEM CARD
