@@ -415,7 +415,11 @@ class _HomeContentState extends State<_HomeContent> {
                     ),
                     children: const [
                       _CategoryChip("Bottles", Icons.local_drink, "bottles"),
-                      _CategoryChip("Candles", Icons.local_fire_department, "candle"),
+                      _CategoryChip(
+                        "Candles",
+                        Icons.local_fire_department,
+                        "candle",
+                      ),
                       _CategoryChip("Caps", Icons.checkroom, "caps"),
                       _CategoryChip("Ceramic", Icons.coffee, "ceramic"),
                       _CategoryChip("Hair", Icons.face, "hair_accessories"),
@@ -424,7 +428,11 @@ class _HomeContentState extends State<_HomeContent> {
                       _CategoryChip("Nails", Icons.brush, "nails"),
                       _CategoryChip("Plushies", Icons.toys, "plusie"),
                       _CategoryChip("Boy Friend", Icons.favorite, "boy_friend"),
-                      _CategoryChip("Girl Friend", Icons.favorite_border, "girl_friend"),
+                      _CategoryChip(
+                        "Girl Friend",
+                        Icons.favorite_border,
+                        "girl_friend",
+                      ),
                     ],
                   ),
                 ),
@@ -455,12 +463,23 @@ class _HomeContentState extends State<_HomeContent> {
                       child: Row(
                         children: [
                           if (imageLeft)
-                            _exploreImageFromCategory(context, item.categoryKey),
+                            _exploreImageFromCategory(
+                              context,
+                              item.categoryKey,
+                            ),
                           const SizedBox(width: 6),
-                          Expanded(child: _exploreText(item.name, imageLeft: imageLeft)),
+                          Expanded(
+                            child: _exploreText(
+                              item.name,
+                              imageLeft: imageLeft,
+                            ),
+                          ),
                           const SizedBox(width: 6),
                           if (!imageLeft)
-                            _exploreImageFromCategory(context, item.categoryKey),
+                            _exploreImageFromCategory(
+                              context,
+                              item.categoryKey,
+                            ),
                         ],
                       ),
                     );
@@ -706,10 +725,7 @@ class _HomeContentState extends State<_HomeContent> {
                           offset: const Offset(0, 12),
                         ),
                       ],
-                      border: Border.all(
-                        color: Color(0xFFFFC1D9),
-                        width: 1.4,
-                      ),
+                      border: Border.all(color: Color(0xFFFFC1D9), width: 1.4),
                     ),
                     child: const Center(
                       child: Text(
@@ -1273,7 +1289,8 @@ class _HomeContentState extends State<_HomeContent> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => AllCategoriesPage(isHamperMode: true),
+                            builder: (_) =>
+                                AllCategoriesPage(isHamperMode: true),
                           ),
                         );
                       },
@@ -1687,15 +1704,16 @@ class _HomeContentState extends State<_HomeContent> {
                         ),
                         // ✨ Animated shimmer halo
                         AnimatedBuilder(
-                          animation: Tween<double>(begin: 0.6, end: 1.0).animate(
-                            CurvedAnimation(
-                              parent: AnimationController(
-                                vsync: Navigator.of(context),
-                                duration: const Duration(seconds: 4),
-                              )..repeat(reverse: true),
-                              curve: Curves.easeInOut,
-                            ),
-                          ),
+                          animation: Tween<double>(begin: 0.6, end: 1.0)
+                              .animate(
+                                CurvedAnimation(
+                                  parent: AnimationController(
+                                    vsync: Navigator.of(context),
+                                    duration: const Duration(seconds: 4),
+                                  )..repeat(reverse: true),
+                                  curve: Curves.easeInOut,
+                                ),
+                              ),
                           builder: (context, child) {
                             return Container(
                               width: 220,
@@ -1744,110 +1762,111 @@ class _HomeContentState extends State<_HomeContent> {
                 ),
               ),
 
-          // 🌸 CONTACT WITH US — DARK PINK PREMIUM FOOTER
-          const SizedBox(height: 28),
+              // 🌸 CONTACT WITH US — DARK PINK PREMIUM FOOTER
+              const SizedBox(height: 28),
 
-          Container(
-            width: double.infinity,
-            clipBehavior: Clip.antiAlias,
-            // margin REMOVED for full edge-to-edge
-            padding: EdgeInsets.fromLTRB(
-              22,
-              34,
-              22,
-              MediaQuery.of(context).padding.bottom + 80,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-              gradient: const LinearGradient(
-                colors: [Color(0xFFB2004D), Color(0xFFD81B60)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0xFFB2004D).withOpacity(0.35),
-                  blurRadius: 30,
-                  offset: Offset(0, 18),
+              Container(
+                width: double.infinity,
+                clipBehavior: Clip.antiAlias,
+                // margin REMOVED for full edge-to-edge
+                padding: EdgeInsets.fromLTRB(
+                  22,
+                  34,
+                  22,
+                  MediaQuery.of(context).padding.bottom + 80,
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                const Text(
-                  "Contact with Us",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.6,
-                    color: Colors.white,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
                   ),
-                ),
-
-                const SizedBox(height: 10),
-
-                const Text(
-                  "Thoughtful gifts. Made with heart 💗",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.5,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w500,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFB2004D), Color(0xFFD81B60)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ),
-
-                const SizedBox(height: 22),
-
-                // ✨ Compact premium features
-                Column(
-                  children: const [
-                    _FooterFeature("🎁", "Personalised with love"),
-                    SizedBox(height: 8),
-                    _FooterFeature("🚚", "Carefully delivered"),
-                    SizedBox(height: 8),
-                    _FooterFeature("💌", "Support that listens"),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFFB2004D).withOpacity(0.35),
+                      blurRadius: 30,
+                      offset: Offset(0, 18),
+                    ),
                   ],
                 ),
-
-                const SizedBox(height: 24),
-
-                const Text(
-                  "Follow us for gifting inspiration ✨",
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-
-                const SizedBox(height: 18),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Column(
                   children: [
-                    _PremiumFooterIcon(icon: Icons.facebook),
-                    const SizedBox(width: 22),
-                    _PremiumFooterIcon(icon: Icons.camera_alt), // Instagram
-                    const SizedBox(width: 22),
-                    _PremiumFooterIcon(icon: Icons.close), // X / Twitter
-                    const SizedBox(width: 22),
-                    _PremiumFooterIcon(icon: Icons.play_circle_fill), // YouTube
+                    const Text(
+                      "Contact with Us",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    const Text(
+                      "Thoughtful gifts. Made with heart 💗",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.5,
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    // ✨ Compact premium features
+                    Column(
+                      children: const [
+                        _FooterFeature("🎁", "Personalised with love"),
+                        SizedBox(height: 8),
+                        _FooterFeature("🚚", "Carefully delivered"),
+                        SizedBox(height: 8),
+                        _FooterFeature("💌", "Support that listens"),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    const Text(
+                      "Follow us for gifting inspiration ✨",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _PremiumFooterIcon(icon: Icons.facebook),
+                        const SizedBox(width: 22),
+                        _PremiumFooterIcon(icon: Icons.camera_alt), // Instagram
+                        const SizedBox(width: 22),
+                        _PremiumFooterIcon(icon: Icons.close), // X / Twitter
+                        const SizedBox(width: 22),
+                        _PremiumFooterIcon(
+                          icon: Icons.play_circle_fill,
+                        ), // YouTube
+                      ],
+                    ),
+
+                    const SizedBox(height: 26),
+
+                    const Text(
+                      "Unsubscribe anytime · No hard feelings 💕",
+                      style: TextStyle(fontSize: 12, color: Colors.white70),
+                    ),
                   ],
                 ),
-
-                const SizedBox(height: 26),
-
-                const Text(
-                  "Unsubscribe anytime · No hard feelings 💕",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
 
               // --- Final premium CTA hint ---
               const SizedBox(height: 32),
@@ -1963,10 +1982,7 @@ Widget _exploreText(String name, {required bool imageLeft}) {
       const SizedBox(height: 6),
       const SizedBox(
         width: 90,
-        child: Divider(
-          thickness: 1,
-          color: Color(0xFFDDDDDD),
-        ),
+        child: Divider(thickness: 1, color: Color(0xFFDDDDDD)),
       ),
     ],
   );
@@ -2011,10 +2027,7 @@ class _CategoryChip extends StatelessWidget {
           child: Stack(
             children: [
               Positioned.fill(
-                child: Image.asset(
-                  p.thumbnail,
-                  fit: BoxFit.cover,
-                ),
+                child: Image.asset(p.thumbnail, fit: BoxFit.cover),
               ),
               // soft dark overlay for readability
               Positioned.fill(
@@ -2037,7 +2050,10 @@ class _CategoryChip extends StatelessWidget {
                 right: 10,
                 bottom: 10,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(16),
@@ -2229,9 +2245,7 @@ Widget _exploreImageFromCategory(BuildContext context, String categoryKey) {
         borderRadius: BorderRadius.circular(22),
         child: Stack(
           children: [
-            Positioned.fill(
-              child: Image.asset(p.thumbnail, fit: BoxFit.cover),
-            ),
+            Positioned.fill(child: Image.asset(p.thumbnail, fit: BoxFit.cover)),
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -2315,7 +2329,6 @@ Widget _sideFrame(String imagePath) {
   );
 }
 
-
 class _ArchClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -2347,7 +2360,6 @@ class _ArchClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
-
 
 class _BeverageAdSection extends StatelessWidget {
   const _BeverageAdSection();
@@ -2397,7 +2409,9 @@ class _BeverageAdSection extends StatelessWidget {
                               ),
                             );
                           },
-                          child: _sideFrame(getThemedProduct("letter").thumbnail),
+                          child: _sideFrame(
+                            getThemedProduct("letter").thumbnail,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -2406,7 +2420,10 @@ class _BeverageAdSection extends StatelessWidget {
                         child: Align(
                           alignment: Alignment.centerRight,
                           child: Transform.translate(
-                            offset: const Offset(18, 0), // move boxes further RIGHT
+                            offset: const Offset(
+                              18,
+                              0,
+                            ), // move boxes further RIGHT
                             child: SizedBox(
                               height: 480,
                               child: Column(
@@ -2415,19 +2432,25 @@ class _BeverageAdSection extends StatelessWidget {
                                   _Badge(
                                     icon: Icons.favorite,
                                     label: "Loved",
-                                    imagePath: getThemedProduct("letter").thumbnail,
+                                    imagePath: getThemedProduct(
+                                      "letter",
+                                    ).thumbnail,
                                   ),
                                   const SizedBox(height: 25),
                                   _Badge(
                                     icon: Icons.card_giftcard,
                                     label: "Giftable",
-                                    imagePath: getThemedProduct("letter").thumbnail,
+                                    imagePath: getThemedProduct(
+                                      "letter",
+                                    ).thumbnail,
                                   ),
                                   const SizedBox(height: 25),
                                   _Badge(
                                     icon: Icons.auto_awesome,
                                     label: "Premium",
-                                    imagePath: getThemedProduct("letter").thumbnail,
+                                    imagePath: getThemedProduct(
+                                      "letter",
+                                    ).thumbnail,
                                   ),
                                 ],
                               ),
@@ -2447,7 +2470,6 @@ class _BeverageAdSection extends StatelessWidget {
   }
 }
 
-
 class _Badge extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -2464,19 +2486,12 @@ class _Badge extends StatelessWidget {
     return Container(
       width: 118,
       height: 118,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
           // Background image
-          Positioned.fill(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-            ),
-          ),
+          Positioned.fill(child: Image.asset(imagePath, fit: BoxFit.cover)),
 
           // Light pink gradient overlay (images are clear and detailed)
           Positioned.fill(
@@ -2518,134 +2533,8 @@ class _Badge extends StatelessWidget {
     );
   }
 }
-// 🌸 Social Icon helper widget for soft footer
-class _SocialIcon extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
 
-  const _SocialIcon({
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 46,
-        height: 46,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          size: 20,
-          color: Color(0xFFB2004D),
-        ),
-      ),
-    );
-  }
-}
-
-class _PremiumSocialIcon extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _PremiumSocialIcon({
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFFFFFF), Color(0xFFFFEDF3)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          border: Border.all(
-            color: Color(0xFFFFC1D9),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0xFFB2004D).withOpacity(0.18),
-              blurRadius: 16,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          size: 20,
-          color: Color(0xFFB2004D),
-        ),
-      ),
-    );
-  }
-}
-
-class _ContactIcon extends StatelessWidget {
-  final IconData icon;
-
-  const _ContactIcon({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: const Color(0xFFF7F7F7),
-      ),
-      child: Icon(
-        icon,
-        size: 20,
-        color: Colors.black87,
-      ),
-    );
-  }
-}
 // --- DARK PINK PREMIUM FOOTER HELPERS ---
-
-class _DarkFooterIcon extends StatelessWidget {
-  final IconData icon;
-  const _DarkFooterIcon({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 46,
-      height: 46,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withOpacity(0.18),
-      ),
-      child: Icon(
-        icon,
-        size: 22,
-        color: Colors.white,
-      ),
-    );
-  }
-}
 
 class _FooterFeature extends StatelessWidget {
   final String emoji;
@@ -2693,10 +2582,7 @@ class _PremiumFooterIcon extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.35),
-          width: 1.4,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.4),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.25),
@@ -2705,11 +2591,7 @@ class _PremiumFooterIcon extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(
-        icon,
-        size: 30,
-        color: Colors.white,
-      ),
+      child: Icon(icon, size: 30, color: Colors.white),
     );
   }
 }
