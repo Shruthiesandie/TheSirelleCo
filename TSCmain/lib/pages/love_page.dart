@@ -58,13 +58,14 @@ class _LovePageState extends State<LovePage> {
                 clipBehavior: Clip.none,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
+                    icon: const Icon(
+                      Icons.shopping_bag_outlined,
+                      color: Colors.black,
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const CartPage(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const CartPage()),
                       );
                     },
                   ),
@@ -141,9 +142,7 @@ class _LovePageState extends State<LovePage> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => AllCategoriesPage(),
-                        ),
+                        MaterialPageRoute(builder: (_) => AllCategoriesPage()),
                       );
                     },
                     child: const Text(
@@ -224,9 +223,10 @@ class _LovePageState extends State<LovePage> {
                                   children: [
                                     Positioned.fill(
                                       child: ClipRRect(
-                                        borderRadius: const BorderRadius.vertical(
-                                          top: Radius.circular(22),
-                                        ),
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                              top: Radius.circular(22),
+                                            ),
                                         child: Image.asset(
                                           product.thumbnail,
                                           fit: BoxFit.cover,
@@ -253,15 +253,24 @@ class _LovePageState extends State<LovePage> {
                                       child: GestureDetector(
                                         onTap: () {
                                           FavoritesController.toggle(product);
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             SnackBar(
-                                              content: const Text('Removed from favourites'),
-                                              behavior: SnackBarBehavior.floating,
-                                              duration: const Duration(seconds: 3),
+                                              content: const Text(
+                                                'Removed from favourites',
+                                              ),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              duration: const Duration(
+                                                seconds: 3,
+                                              ),
                                               action: SnackBarAction(
                                                 label: 'UNDO',
                                                 onPressed: () {
-                                                  FavoritesController.toggle(product);
+                                                  FavoritesController.toggle(
+                                                    product,
+                                                  );
                                                 },
                                               ),
                                             ),
@@ -270,11 +279,14 @@ class _LovePageState extends State<LovePage> {
                                         child: Container(
                                           padding: const EdgeInsets.all(6),
                                           decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(0.85),
+                                            color: Colors.white.withOpacity(
+                                              0.85,
+                                            ),
                                             shape: BoxShape.circle,
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.pinkAccent.withOpacity(0.25),
+                                                color: Colors.pinkAccent
+                                                    .withOpacity(0.25),
                                                 blurRadius: 12,
                                                 spreadRadius: 1,
                                               ),
@@ -282,9 +294,14 @@ class _LovePageState extends State<LovePage> {
                                           ),
                                           child: TweenAnimationBuilder<double>(
                                             tween: Tween(begin: 1.0, end: 1.2),
-                                            duration: const Duration(milliseconds: 150),
+                                            duration: const Duration(
+                                              milliseconds: 150,
+                                            ),
                                             builder: (context, value, child) {
-                                              return Transform.scale(scale: value, child: child);
+                                              return Transform.scale(
+                                                scale: value,
+                                                child: child,
+                                              );
                                             },
                                             child: const Icon(
                                               Icons.favorite,
@@ -329,18 +346,26 @@ class _LovePageState extends State<LovePage> {
                                       height: 34,
                                       child: OutlinedButton(
                                         style: OutlinedButton.styleFrom(
-                                          side: BorderSide(color: Colors.pinkAccent.withOpacity(0.4)),
+                                          side: BorderSide(
+                                            color: Colors.pinkAccent
+                                                .withOpacity(0.4),
+                                          ),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
                                           ),
                                         ),
                                         onPressed: () {
                                           CartController.add(product);
                                           FavoritesController.toggle(product);
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             const SnackBar(
                                               content: Text('Moved to cart'),
-                                              behavior: SnackBarBehavior.floating,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
                                               duration: Duration(seconds: 2),
                                             ),
                                           );

@@ -5,6 +5,8 @@ import '../models/gift_hamper.dart';
 import '../controllers/hamper_builder_controller.dart';
 import '../pages/allcategories_page.dart';
 import '../pages/love_page.dart';
+import '../controllers/favorites_controller.dart';
+
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -104,9 +106,8 @@ class _CartPageState extends State<CartPage> {
         ),
         actions: [
           ValueListenableBuilder<List<dynamic>>(
-            valueListenable: CartController.items,
+            valueListenable: FavoritesController.items,
             builder: (context, items, _) {
-              final cartItems = items.whereType<CartItem>().toList();
               return Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -124,7 +125,7 @@ class _CartPageState extends State<CartPage> {
                       );
                     },
                   ),
-                  if (cartItems.isNotEmpty)
+                  if (items.isNotEmpty)
                     Positioned(
                       right: 6,
                       top: 6,
@@ -145,7 +146,7 @@ class _CartPageState extends State<CartPage> {
                           minHeight: 16,
                         ),
                         child: Text(
-                          cartItems.length > 9 ? '9+' : '${cartItems.length}',
+                          items.length > 9 ? '9+' : '${items.length}',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: Colors.white,
@@ -974,12 +975,33 @@ class _CartItemCard extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.favorite_border,
-                    color: Colors.pinkAccent,
-                  ),
+                ValueListenableBuilder<List<dynamic>>(
+                  valueListenable: FavoritesController.items,
+                  builder: (context, favorites, _) {
+                    final isLoved = favorites.contains(item.product);
+
+                    return IconButton(
+                      onPressed: () {
+                        FavoritesController.toggle(item.product);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              isLoved
+                                  ? 'Removed from wishlist'
+                                  : 'Added to wishlist',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      icon: Icon(
+                        isLoved ? Icons.favorite : Icons.favorite_border,
+                        color: Colors.pinkAccent,
+                      ),
+                    );
+                  },
                 ),
                 IconButton(
                   onPressed: () {
@@ -1257,4 +1279,23 @@ Widget _emptyBenefit(String text) {
       ],
     ),
   );
+}
+
+/// LOVE / WISHLIST CONTROLLER (temporary local fix)
+class LoveController {
+  static ValueNotifier<List<dynamic>> items = ValueNotifier([]);
+
+  static void add(dynamic product) {
+    if (!items.value.contains(product)) {
+      items.value = [...items.value, product];
+    }
+  }
+
+  static void remove(dynamic product) {
+    items.value = [...items.value]..remove(product);
+  }
+
+  static bool contains(dynamic product) {
+    return items.value.contains(product);
+  }
 }
