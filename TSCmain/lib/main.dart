@@ -6,8 +6,6 @@ import 'controllers/app_locale.dart';
 import 'controllers/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Pages
 import 'home/home_page.dart';
@@ -31,74 +29,8 @@ Future<void> main() async {
   runApp(const MyRootApp());
 }
 
-class SessionManager {
-  static const String _lastActiveKey = 'last_active_timestamp';
-  static const int maxInactiveDays = 15;
-
-  static Future<void> updateLastActive() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(
-      _lastActiveKey,
-      DateTime.now().millisecondsSinceEpoch,
-    );
-  }
-
-  static Future<bool> isSessionExpired() async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastActive = prefs.getInt(_lastActiveKey);
-
-    if (lastActive == null) return false;
-
-    final last = DateTime.fromMillisecondsSinceEpoch(lastActive);
-    final diff = DateTime.now().difference(last).inDays;
-
-    return diff >= maxInactiveDays;
-  }
-
-  static Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_lastActiveKey);
-  }
-}
-
-class MyRootApp extends StatefulWidget {
+class MyRootApp extends StatelessWidget {
   const MyRootApp({super.key});
-
-  @override
-  _MyRootAppState createState() => _MyRootAppState();
-}
-
-class _MyRootAppState extends State<MyRootApp>
-    with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _checkSession();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      SessionManager.updateLastActive();
-    }
-  }
-
-  Future<void> _checkSession() async {
-    final expired = await SessionManager.isSessionExpired();
-
-    if (expired) {
-      await FirebaseAuth.instance.signOut();
-      await SessionManager.clear();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
