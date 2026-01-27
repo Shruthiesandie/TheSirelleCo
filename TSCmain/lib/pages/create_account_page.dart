@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// ─────────────────────────────────────────────────────────
 /// Soft animated waves background (matching login style)
@@ -318,7 +319,21 @@ class _CreateAccountPageState extends State<CreateAccountPage>
       return _err("Please accept the terms");
     }
 
-    Navigator.pushNamed(context, "/username");
+    _createAccount();
+  }
+
+  Future<void> _createAccount() async {
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailCtrl.text.trim(),
+        password: _passwordCtrl.text.trim(),
+      );
+
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, "/login");
+    } on FirebaseAuthException catch (e) {
+      _err(e.message ?? "Account creation failed");
+    }
   }
 
   // Tilt Effect

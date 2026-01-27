@@ -4,6 +4,8 @@ import 'l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'controllers/app_locale.dart';
 import 'controllers/app_theme.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 // Pages
 import 'home/home_page.dart';
@@ -19,6 +21,9 @@ import 'pages/username_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await AppLocale.load();
   await AppTheme.load();
   runApp(const MyRootApp());
