@@ -65,4 +65,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'the-sirelle-co-4e308.firebasestorage.app',
     iosBundleId: 'com.spidey.tscmain',
   );
+
 }
