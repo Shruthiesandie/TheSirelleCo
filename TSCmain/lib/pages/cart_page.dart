@@ -4,6 +4,7 @@ import '../controllers/cart_controllers.dart';
 import '../models/gift_hamper.dart';
 import '../controllers/hamper_builder_controller.dart';
 import '../pages/allcategories_page.dart';
+import '../pages/love_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -69,28 +70,114 @@ class _CartPageState extends State<CartPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFFFFF6F9),
-        centerTitle: false,
-        title: const Text(
-          "Cart",
-          overflow: TextOverflow.visible,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Colors.black,
-          ),
+        shadowColor: Colors.pinkAccent.withOpacity(0.15),
+        backgroundColor: const Color(0xFFFCEEEE),
+        centerTitle: true,
+        title: ValueListenableBuilder<List<dynamic>>(
+          valueListenable: CartController.items,
+          builder: (context, items, _) {
+            final cartItems = items.whereType<CartItem>().toList();
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Cart',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.4,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${cartItems.length} item${cartItems.length == 1 ? '' : 's'}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.black54,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
+        actions: [
+          ValueListenableBuilder<List<dynamic>>(
+            valueListenable: CartController.items,
+            builder: (context, items, _) {
+              final cartItems = items.whereType<CartItem>().toList();
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.favorite_border,
+                      color: Colors.black,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LovePage(),
+                        ),
+                      );
+                    },
+                  ),
+                  if (cartItems.isNotEmpty)
+                    Positioned(
+                      right: 6,
+                      top: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.pinkAccent,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.pinkAccent.withOpacity(0.4),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          cartItems.length > 9 ? '9+' : '${cartItems.length}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
       backgroundColor: const Color(0xFFFFF6F9),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.only(bottom: 70),
-          children: [
+        top: false,
+        child: ValueListenableBuilder<List<dynamic>>(
+          valueListenable: CartController.items,
+          builder: (context, items, _) {
+            return ListView(
+              padding: const EdgeInsets.only(bottom: 70),
+              physics: items.isEmpty
+                  ? const NeverScrollableScrollPhysics()
+                  : const BouncingScrollPhysics(),
+              children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
                 Padding(
-                  padding: EdgeInsets.fromLTRB(20, 24, 20, 4),
+                  padding: EdgeInsets.fromLTRB(20, 8, 20, 4),
                   child: Text(
                     "Your Bag",
                     style: TextStyle(
@@ -104,16 +191,17 @@ class _CartPageState extends State<CartPage> {
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
                   child: Text(
                     "Review your picks before checkout",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.black54),
                   ),
                 ),
               ],
             ),
 
-            Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 20), color: Colors.black12),
+            Container(
+              height: 1,
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              color: Colors.black12,
+            ),
 
             // CART ITEMS
             ValueListenableBuilder<List<dynamic>>(
@@ -121,46 +209,124 @@ class _CartPageState extends State<CartPage> {
               builder: (context, items, _) {
                 if (items.isEmpty) {
                   return Padding(
-                    padding: const EdgeInsets.only(top: 120),
+                    padding: const EdgeInsets.only(top: 50),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.shopping_bag_outlined,
-                          size: 72,
-                          color: Colors.pinkAccent.withOpacity(0.6),
+                        Container(
+                          height: 150,
+                          width: 150,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.pinkAccent.withOpacity(0.18),
+                                Colors.pinkAccent.withOpacity(0.05),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 76,
+                            color: Colors.pinkAccent,
+                          ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 28),
                         const Text(
                           "Your cart is empty",
                           style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.3,
                           ),
                         ),
                         const SizedBox(height: 6),
                         const Text(
-                          "Add items you love to get started",
+                          "Add items you love to get started ✨",
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.black54,
                           ),
                         ),
-                        const SizedBox(height: 22),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const AllCategoriesPage()),
-                            );
-                          },
-                          child: const Text(
-                            "Explore products",
-                            style: TextStyle(
-                              color: Colors.pinkAccent,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                        const SizedBox(height: 26),
+                        SizedBox(
+                          width: 180,
+                          height: 48,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.pinkAccent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                              elevation: 0,
                             ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const AllCategoriesPage(),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              "Explore products",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 36),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 28),
+                          padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Color(0xFFFFF1F6),
+                                Color(0xFFFFFAFC),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(22),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.pinkAccent.withOpacity(0.08),
+                                blurRadius: 16,
+                                offset: Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(
+                                    Icons.account_balance_wallet_outlined,
+                                    size: 18,
+                                    color: Colors.pinkAccent,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    "Wallet & Offers",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              _emptyBenefit("Use wallet balance"),
+                              _emptyBenefit("Apply exclusive promo codes"),
+                              _emptyBenefit("Unlock free delivery offers"),
+                            ],
                           ),
                         ),
                       ],
@@ -176,29 +342,36 @@ class _CartPageState extends State<CartPage> {
                   itemBuilder: (context, index) {
                     return _CartItemCard(item: items[index]);
                   },
-                  separatorBuilder: (context, index) => const Divider(height: 24),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 24),
                 );
               },
             ),
 
+            // SUMMARY (only when cart has items)
+            ValueListenableBuilder<List<dynamic>>(
+              valueListenable: CartController.items,
+              builder: (context, items, _) {
+                if (items.isEmpty) {
+                  return const SizedBox.shrink();
+                }
 
-            // SUMMARY (no ClipRect/BackdropFilter)
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(34),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 18,
+                return Container(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(34),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 18,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
+                  child: Column(
+                    children: [
                   Container(
                     height: 4,
                     width: 40,
@@ -302,7 +475,9 @@ class _CartPageState extends State<CartPage> {
                             showModalBottomSheet(
                               context: context,
                               shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(24),
+                                ),
                               ),
                               builder: (_) => _PromoBottomSheet(),
                             );
@@ -320,11 +495,8 @@ class _CartPageState extends State<CartPage> {
                   ),
                   ValueListenableBuilder<List<dynamic>>(
                     valueListenable: CartController.items,
-                    builder: (_, __, ___) => _summaryRow(
-                      "Total",
-                      "₹$finalTotal",
-                      isTotal: true,
-                    ),
+                    builder: (_, __, ___) =>
+                        _summaryRow("Total", "₹$finalTotal", isTotal: true),
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -361,26 +533,31 @@ class _CartPageState extends State<CartPage> {
                   // SUBTOTAL
                   ValueListenableBuilder<List<dynamic>>(
                     valueListenable: CartController.items,
-                    builder: (_, __, ___) => _summaryRow(
-                      "Subtotal",
-                      "₹$cartSubtotal",
-                    ),
+                    builder: (_, __, ___) =>
+                        _summaryRow("Subtotal", "₹$cartSubtotal"),
                   ),
-                  if (giftWrap)
-                    _summaryRow("Gift wrap", "₹$giftWrapFee"),
+                  if (giftWrap) _summaryRow("Gift wrap", "₹$giftWrapFee"),
                   if (orderProtection)
                     _summaryRow("Order protection", "₹$orderProtectionFee"),
                   if (deliveryFee > 0)
-                    _summaryRow("Delivery (${deliveryOption})", "₹$deliveryFee"),
+                    _summaryRow(
+                      "Delivery (${deliveryOption})",
+                      "₹$deliveryFee",
+                    ),
                   if (useWallet)
                     _summaryRow("Wallet applied", "-₹$walletDeduction"),
                   const SizedBox(height: 10),
                   // FREE DELIVERY PROGRESS
                   LayoutBuilder(
                     builder: (_, __) {
-                      final remaining = (299 - CartController.totalPrice).clamp(0, 299);
-                      final progress =
-                          (CartController.totalPrice / 299).clamp(0.0, 1.0);
+                      final remaining = (299 - CartController.totalPrice).clamp(
+                        0,
+                        299,
+                      );
+                      final progress = (CartController.totalPrice / 299).clamp(
+                        0.0,
+                        1.0,
+                      );
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -388,8 +565,9 @@ class _CartPageState extends State<CartPage> {
                             value: progress,
                             minHeight: 6,
                             backgroundColor: Colors.pink.shade50,
-                            valueColor:
-                                const AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Colors.pinkAccent,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -436,7 +614,8 @@ class _CartPageState extends State<CartPage> {
                         subtitle: "Priority delivery",
                         price: "+₹99",
                         isSelected: deliveryOption == "Tomorrow",
-                        onTap: () => setState(() => deliveryOption = "Tomorrow"),
+                        onTap: () =>
+                            setState(() => deliveryOption = "Tomorrow"),
                       ),
                       const SizedBox(width: 10),
                       _deliveryCard(
@@ -444,7 +623,8 @@ class _CartPageState extends State<CartPage> {
                         subtitle: "Express",
                         price: "+₹49",
                         isSelected: deliveryOption == "2–3 days",
-                        onTap: () => setState(() => deliveryOption = "2–3 days"),
+                        onTap: () =>
+                            setState(() => deliveryOption = "2–3 days"),
                       ),
                       const SizedBox(width: 10),
                       _deliveryCard(
@@ -452,14 +632,16 @@ class _CartPageState extends State<CartPage> {
                         subtitle: "Standard",
                         price: "FREE",
                         isSelected: deliveryOption == "3–5 days",
-                        onTap: () => setState(() => deliveryOption = "3–5 days"),
+                        onTap: () =>
+                            setState(() => deliveryOption = "3–5 days"),
                       ),
                     ],
                   ),
                   const SizedBox(height: 14),
                   // NOTE TO SELLER (TAP TO EXPAND)
                   GestureDetector(
-                    onTap: () => setState(() => showSellerNote = !showSellerNote),
+                    onTap: () =>
+                        setState(() => showSellerNote = !showSellerNote),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 220),
                       padding: const EdgeInsets.all(14),
@@ -475,11 +657,16 @@ class _CartPageState extends State<CartPage> {
                               const Expanded(
                                 child: Text(
                                   "Add a note for the seller",
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                               Icon(
-                                showSellerNote ? Icons.expand_less : Icons.edit_outlined,
+                                showSellerNote
+                                    ? Icons.expand_less
+                                    : Icons.edit_outlined,
                                 size: 18,
                               ),
                             ],
@@ -504,7 +691,8 @@ class _CartPageState extends State<CartPage> {
                   if (giftWrap) ...[
                     const SizedBox(height: 8),
                     GestureDetector(
-                      onTap: () => setState(() => showGiftMessage = !showGiftMessage),
+                      onTap: () =>
+                          setState(() => showGiftMessage = !showGiftMessage),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 220),
                         padding: const EdgeInsets.all(14),
@@ -520,11 +708,16 @@ class _CartPageState extends State<CartPage> {
                                 const Expanded(
                                   child: Text(
                                     "Write a gift message 💝",
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                                 Icon(
-                                  showGiftMessage ? Icons.expand_less : Icons.favorite_border,
+                                  showGiftMessage
+                                      ? Icons.expand_less
+                                      : Icons.favorite_border,
                                   size: 18,
                                   color: Colors.pinkAccent,
                                 ),
@@ -537,7 +730,8 @@ class _CartPageState extends State<CartPage> {
                                 maxLines: 3,
                                 autofocus: true,
                                 decoration: const InputDecoration(
-                                  hintText: "Your message will be printed on the card 💌",
+                                  hintText:
+                                      "Your message will be printed on the card 💌",
                                   border: InputBorder.none,
                                 ),
                               ),
@@ -564,7 +758,10 @@ class _CartPageState extends State<CartPage> {
                     children: const [
                       _TrustItem(icon: Icons.lock, label: "Secure"),
                       _TrustItem(icon: Icons.undo, label: "Easy Returns"),
-                      _TrustItem(icon: Icons.local_shipping, label: "Fast Delivery"),
+                      _TrustItem(
+                        icon: Icons.local_shipping,
+                        label: "Fast Delivery",
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -592,101 +789,83 @@ class _CartPageState extends State<CartPage> {
                     ),
                   ),
                 ],
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-    );
-  }
-  Widget _deliveryChip(String label) {
-    final bool isSelected = deliveryOption == label;
-
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) {
-        setState(() {
-          deliveryOption = label;
-        });
-      },
-      selectedColor: Colors.pink.shade100,
-      backgroundColor: Colors.grey.shade200,
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: isSelected ? Colors.pinkAccent : Colors.black87,
-      ),
-    );
-  }
-
-// Redesigned delivery card widget
-Widget _deliveryCard({
-  required String label,
-  required String subtitle,
-  required String price,
-  required bool isSelected,
-  required VoidCallback onTap,
-}) {
-  return Expanded(
-    child: GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.pink.shade50 : Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isSelected ? Colors.pinkAccent : Colors.black12,
-            width: isSelected ? 1.5 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.pinkAccent.withOpacity(0.15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
                   ),
-                ]
-              : [],
-        ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: isSelected ? Colors.pinkAccent : Colors.black87,
-              ),
+                );
+              },
             ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(fontSize: 11, color: Colors.black54),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              price,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: price == "FREE"
-                    ? Colors.green
-                    : Colors.pinkAccent,
-              ),
-            ),
-          ],
+                const SizedBox(height: 24),
+              ],
+            );
+          },
         ),
       ),
-    ),
-  );
+    );
 }
+
+  // Redesigned delivery card widget
+  Widget _deliveryCard({
+    required String label,
+    required String subtitle,
+    required String price,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.pink.shade50 : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isSelected ? Colors.pinkAccent : Colors.black12,
+              width: isSelected ? 1.5 : 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.pinkAccent.withOpacity(0.15),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Column(
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected ? Colors.pinkAccent : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(fontSize: 11, color: Colors.black54),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                price,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: price == "FREE" ? Colors.green : Colors.pinkAccent,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// CART ITEM CARD
@@ -714,10 +893,7 @@ class _CartItemCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(26),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 14,
-            ),
+            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 14),
           ],
         ),
         child: Row(
@@ -746,10 +922,7 @@ class _CartItemCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     "₹${item.product.price}",
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Colors.black54,
-                    ),
+                    style: const TextStyle(fontSize: 13, color: Colors.black54),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -827,7 +1000,6 @@ class _CartItemCard extends StatelessWidget {
   }
 }
 
-
 class _GiftHamperCard extends StatelessWidget {
   final GiftHamper hamper;
   const _GiftHamperCard({required this.hamper});
@@ -841,10 +1013,7 @@ class _GiftHamperCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 14,
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 14),
         ],
       ),
       child: Column(
@@ -885,10 +1054,7 @@ class _GiftHamperCard extends StatelessWidget {
                   ),
                   Text(
                     "You Save: ₹${hamper.discountAmount.toStringAsFixed(0)}",
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.green,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: Colors.green),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -908,15 +1074,14 @@ class _GiftHamperCard extends StatelessWidget {
                       CartController.editingHamperId = hamper.id;
 
                       // PRELOAD ITEMS INTO BUILDER
-                      HamperBuilderController.selectedItems.value =
-                          List.from(hamper.items);
+                      HamperBuilderController.selectedItems.value = List.from(
+                        hamper.items,
+                      );
 
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => AllCategoriesPage(
-                            isHamperMode: true,
-                          ),
+                          builder: (_) => AllCategoriesPage(isHamperMode: true),
                         ),
                       );
                     },
@@ -940,9 +1105,6 @@ class _GiftHamperCard extends StatelessWidget {
     );
   }
 }
-
-
-
 
 /// SUMMARY ROW
 Widget _summaryRow(String label, String value, {bool isTotal = false}) {
@@ -1017,8 +1179,10 @@ class _PromoBottomSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Available Offers",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          const Text(
+            "Available Offers",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 16),
           _promoTile(context, "WELCOME10", "Save 10% on your first order"),
           _promoTile(context, "FREESHIP", "Free delivery on this order"),
@@ -1045,20 +1209,25 @@ class _PromoBottomSheet extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(code,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 14)),
+                Text(
+                  code,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(desc,
-                    style:
-                        const TextStyle(fontSize: 12, color: Colors.black54)),
+                Text(
+                  desc,
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                ),
               ],
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text("Apply"),
-          )
+          ),
         ],
       ),
     );
@@ -1066,3 +1235,26 @@ class _PromoBottomSheet extends StatelessWidget {
 }
 
 
+Widget _emptyBenefit(String text) {
+  return Padding(
+    padding: const EdgeInsets.only(top: 6),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(
+          Icons.check_circle,
+          size: 14,
+          color: Colors.pinkAccent,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 11,
+            color: Colors.black54,
+          ),
+        ),
+      ],
+    ),
+  );
+}
