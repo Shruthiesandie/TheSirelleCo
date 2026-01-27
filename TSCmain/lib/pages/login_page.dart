@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 // Fix gradient naming conflicts with Rive
 import 'package:flutter/painting.dart' as fg;
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:rive/rive.dart';
 
 class LoginPage extends StatefulWidget {
@@ -55,9 +57,6 @@ class _LoginPageState extends State<LoginPage>
   // Background animation
   late AnimationController bgController;
 
-  // Hardcoded login
-  final String hardUser = "user123";
-  final String hardPass = "4321";
 
   final _email = TextEditingController();
   final _password = TextEditingController();
@@ -196,22 +195,33 @@ class _LoginPageState extends State<LoginPage>
   // ------------------------------------------------------------
   // LOGIN LOGIC
   // ------------------------------------------------------------
-  void _attemptLogin() {
+  void _attemptLogin() async {
     inPassword = false;
     introPlaying = false;
     idleTimer?.cancel();
 
-    if (_email.text.trim() == hardUser &&
-        _password.text.trim() == hardPass) {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _email.text.trim(),
+        password: _password.text.trim(),
+      );
+
       _play("success");
 
       Future.delayed(const Duration(milliseconds: 800), () {
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, "/home");
       });
-    } else {
+    } on FirebaseAuthException catch (e) {
       _play("fail");
       Future.delayed(const Duration(seconds: 2), () => _play("idle"));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? "Login failed"),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
     }
   }
 
