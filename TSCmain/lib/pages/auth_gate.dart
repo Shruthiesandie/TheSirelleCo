@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -96,12 +95,18 @@ class _AuthGateState extends State<AuthGate>
 
             // Session expired → logout
             if (sessionSnap.data == true) {
-              _forceLogout();
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                if (!mounted) return;
+                await _forceLogout();
+              });
               return const LoginPage();
             }
 
             // Valid session
-            _updateLastActive();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _updateLastActive();
+            });
             return const HomePage();
           },
         );
