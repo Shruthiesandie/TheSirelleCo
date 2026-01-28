@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 // Fix gradient naming conflicts with Rive
 import 'package:flutter/painting.dart' as fg;
 
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:rive/rive.dart';
 
@@ -195,30 +194,28 @@ class _LoginPageState extends State<LoginPage>
   // ------------------------------------------------------------
   // LOGIN LOGIC
   // ------------------------------------------------------------
-  void _attemptLogin() async {
+  void _attemptLogin() {
     inPassword = false;
     introPlaying = false;
     idleTimer?.cancel();
 
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _email.text.trim(),
-        password: _password.text.trim(),
-      );
+    final username = _email.text.trim();
+    final password = _password.text.trim();
 
+    if (username == "user123" && password == "4321") {
       _play("success");
 
       Future.delayed(const Duration(milliseconds: 800), () {
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, "/home");
       });
-    } on FirebaseAuthException catch (e) {
+    } else {
       _play("fail");
       Future.delayed(const Duration(seconds: 2), () => _play("idle"));
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message ?? "Login failed"),
+        const SnackBar(
+          content: Text("Invalid username or password"),
           backgroundColor: Colors.redAccent,
         ),
       );

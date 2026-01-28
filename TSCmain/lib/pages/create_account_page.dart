@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 /// ─────────────────────────────────────────────────────────
 /// Soft animated waves background (matching login style)
@@ -323,17 +322,19 @@ class _CreateAccountPageState extends State<CreateAccountPage>
   }
 
   Future<void> _createAccount() async {
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailCtrl.text.trim(),
-        password: _passwordCtrl.text.trim(),
-      );
+    // Local dummy account creation (no Firebase)
+    await Future.delayed(const Duration(milliseconds: 600));
 
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, "/login");
-    } on FirebaseAuthException catch (e) {
-      _err(e.message ?? "Account creation failed");
-    }
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Account created locally. Please login."),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    Navigator.pushReplacementNamed(context, "/login");
   }
 
   // Tilt Effect
