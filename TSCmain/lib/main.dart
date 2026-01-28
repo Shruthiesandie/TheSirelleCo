@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'splash/splash_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -58,7 +59,7 @@ class MyRootApp extends StatelessWidget {
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,
               ],
-              home: const SplashScreen(),
+              home: const AuthGate(),
               routes: {
                 "/home": (_) => const HomePage(),
                 "/membership": (_) => const MembershipPage(),
@@ -78,6 +79,78 @@ class MyRootApp extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class AuthGate extends StatefulWidget {
+  const AuthGate({super.key});
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  @override
+  void initState() {
+    super.initState();
+    _validateUser();
+  }
+
+  Future<void> _validateUser() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    // No user → go to Splash (normal flow)
+    if (user == null) {
+      _goToSplash();
+      return;
+    }
+
+    try {
+      // 🔥 Force token refresh
+      await user.getIdToken(true);
+
+      // Token valid → continue normal flow
+      _goToSplash();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found' || e.code == 'user-disabled') {
+        await FirebaseAuth.instance.signOut();
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Your account was removed. Please log in again.',
+            ),
+          ),
+        );
+
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login',
+          (_) => false,
+        );
+      } else {
+        _goToSplash();
+      }
+    }
+  }
+
+  void _goToSplash() {
+    if (!mounted) return;
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const SplashScreen()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Temporary loader while validating session
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }

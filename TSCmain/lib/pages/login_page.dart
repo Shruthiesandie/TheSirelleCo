@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 // Fix gradient naming conflicts with Rive
 import 'package:flutter/painting.dart' as fg;
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 import 'package:rive/rive.dart';
 
@@ -24,12 +26,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage>
     with TickerProviderStateMixin {
-  final FocusNode _userFocus = FocusNode();
+  Timer? _eyeTimer;
+  Timer? _navTimer;
+  final FocusNode _emailFocus = FocusNode();
   final FocusNode _passFocus = FocusNode();
   Artboard? _artboard;
 
   // ---------------- RIVE ANIMATIONS ----------------
-  late SimpleAnimation idleLookAround;
   late SimpleAnimation idle;
   late SimpleAnimation eyeCover;
   late SimpleAnimation successAnim;
@@ -37,7 +40,7 @@ class _LoginPageState extends State<LoginPage>
 
   Timer? idleTimer;
   bool inPassword = false;
-  bool introPlaying = false;
+  bool _showPassword = false;
   double characterOpacity = 0;
 
   // Parallax movement
@@ -84,12 +87,14 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   void dispose() {
+    _eyeTimer?.cancel();
+    _navTimer?.cancel();
+    idleTimer?.cancel();
     pageController.dispose();
     bgController.dispose();
-    idleTimer?.cancel();
     _email.dispose();
     _password.dispose();
-    _userFocus.dispose();
+    _emailFocus.dispose();
     _passFocus.dispose();
     super.dispose();
   }
@@ -102,68 +107,26 @@ class _LoginPageState extends State<LoginPage>
     final file = RiveFile.import(data);
     final artboard = file.mainArtboard;
 
-    idleLookAround = SimpleAnimation("idle_look_around", autoplay: false);
     idle = SimpleAnimation("idle", autoplay: false);
     eyeCover = SimpleAnimation("eye_cover", autoplay: false);
     successAnim = SimpleAnimation("success", autoplay: false);
     failAnim = SimpleAnimation("fail", autoplay: false);
 
+    // Add all controllers to artboard
+    artboard.addController(idle);
+    artboard.addController(eyeCover);
+    artboard.addController(successAnim);
+    artboard.addController(failAnim);
+
+    // start with idle
+    idle.isActive = true;
+
     _artboard = artboard;
 
-    // Smooth fade-in
-    Future.delayed(const Duration(milliseconds: 80), () {
+    // Safe fade-in (never runs after dispose)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       setState(() => characterOpacity = 1);
-    });
-
-    // Play intro
-    _playIntroOnce();
-
-    // Idle detection timer
-    _restartIdleTimer();
-  }
-
-  // ------------------------------------------------------------
-  // INTRO PLAYS FULLY
-  // ------------------------------------------------------------
-  void _playIntroOnce() {
-    if (_artboard == null) return;
-
-    introPlaying = true;
-
-    idleLookAround = SimpleAnimation("idle_look_around", autoplay: false);
-    _artboard!.addController(idleLookAround);
-    idleLookAround.isActive = true;
-
-    double dur = idleLookAround.instance?.animation.durationSeconds ?? 2;
-
-    Future.delayed(Duration(milliseconds: (dur * 1000).toInt()), () {
-      if (!mounted) return;
-      introPlaying = false;
-      _play("idle");
-    });
-  }
-
-  // ------------------------------------------------------------
-  // LOOP idle_look_around WHEN USER IS INACTIVE
-  // ------------------------------------------------------------
-  void _loopIdleLook() {
-    if (_artboard == null) return;
-    introPlaying = true;
-
-    idleLookAround = SimpleAnimation("idle_look_around", autoplay: false);
-    _artboard!.addController(idleLookAround);
-    idleLookAround.isActive = true;
-
-    double dur = idleLookAround.instance?.animation.durationSeconds ?? 2;
-
-    Future.delayed(Duration(milliseconds: (dur * 1000).toInt()), () {
-      if (!mounted) return;
-
-      if (introPlaying) {
-        _loopIdleLook();
-      } else {
-        _play("idle");
-      }
     });
   }
 
@@ -172,50 +135,79 @@ class _LoginPageState extends State<LoginPage>
   // ------------------------------------------------------------
   void _play(String name) {
     if (_artboard == null) return;
-    if (introPlaying) return;
 
-    final anim = SimpleAnimation(name, autoplay: false);
-    _artboard!.addController(anim);
-    anim.isActive = true;
-  }
+    idle.isActive = false;
+    eyeCover.isActive = false;
+    successAnim.isActive = false;
+    failAnim.isActive = false;
 
-  // ------------------------------------------------------------
-  // INACTIVITY IDLE TIMER
-  // ------------------------------------------------------------
-  void _restartIdleTimer() {
-    idleTimer?.cancel();
-    idleTimer = Timer(const Duration(seconds: 5), () {
-      if (!inPassword) {
-        _loopIdleLook();
-      }
-    });
+    switch (name) {
+      case "success":
+        successAnim.isActive = true;
+        break;
+      case "fail":
+        failAnim.isActive = true;
+        break;
+      case "eye_cover":
+        eyeCover.isActive = true;
+        break;
+      default:
+        idle.isActive = true;
+    }
   }
 
   // ------------------------------------------------------------
   // LOGIN LOGIC
   // ------------------------------------------------------------
-  void _attemptLogin() {
+  Future<void> _attemptLogin() async {
     inPassword = false;
-    introPlaying = false;
-    idleTimer?.cancel();
 
-    final username = _email.text.trim();
+    final email = _email.text.trim();
     final password = _password.text.trim();
 
-    if (username == "user123" && password == "4321") {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // 🔥 CRITICAL: force refresh user profile (displayName)
+      await FirebaseAuth.instance.currentUser?.reload();
+
       _play("success");
 
-      Future.delayed(const Duration(milliseconds: 800), () {
+      // wait for EXACTLY 2 seconds for the success animation before navigating
+      const successDuration = Duration(seconds: 2);
+      _navTimer?.cancel();
+      _navTimer = Timer(successDuration, () {
         if (!mounted) return;
-        Navigator.pushReplacementNamed(context, "/home");
+        // Let Splash → AuthGate decide Home/Login
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          "/home",
+          (route) => false,
+        );
       });
-    } else {
+    } on FirebaseAuthException catch (e) {
       _play("fail");
-      Future.delayed(const Duration(seconds: 2), () => _play("idle"));
+      _navTimer?.cancel();
+      _navTimer = Timer(const Duration(milliseconds: 1200), () {
+        if (!mounted) return;
+        _play("idle");
+      });
+
+      String msg = "Login failed";
+      if (e.code == 'user-not-found') {
+        msg = "No account found for this email";
+      } else if (e.code == 'wrong-password') {
+        msg = "Incorrect password";
+      } else if (e.code == 'invalid-email') {
+        msg = "Invalid email address";
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Invalid username or password"),
+        SnackBar(
+          content: Text(msg),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -408,17 +400,14 @@ class _LoginPageState extends State<LoginPage>
         children: [
           _inputField(
             controller: _email,
-            hint: "Username",
+            hint: "Email",
             icon: Icons.person,
             onTap: () {
-              introPlaying = false;
               inPassword = false;
               _play("idle");
-              _restartIdleTimer();
             },
             onChanged: (_) {
-              introPlaying = false;
-              _restartIdleTimer();
+              inPassword = false;
             },
           ),
 
@@ -428,17 +417,37 @@ class _LoginPageState extends State<LoginPage>
             controller: _password,
             hint: "Password",
             icon: Icons.lock,
-            obscure: true,
+            obscure: !_showPassword,
+            suffixIcon: IconButton(
+              icon: Icon(
+                _showPassword ? Icons.visibility : Icons.visibility_off,
+                color: Colors.pink.shade400,
+              ),
+              onPressed: () {
+                setState(() {
+                  _showPassword = !_showPassword;
+                });
+              },
+            ),
             onTap: () {
-              introPlaying = false;
               inPassword = true;
               _play("eye_cover");
-              _restartIdleTimer();
+
+              // wait for FULL eye_cover animation to finish
+              final dur =
+                  eyeCover.instance?.animation.durationSeconds ?? 0.8;
+
+              _eyeTimer?.cancel();
+              _eyeTimer = Timer(
+                Duration(milliseconds: (dur * 1000).toInt()),
+                () {
+                  if (!mounted) return;
+                  _play("idle");
+                },
+              );
             },
             onChanged: (_) {
-              introPlaying = false;
-              inPassword = true;
-              _restartIdleTimer();
+              // do nothing here — let eye_cover finish fully
             },
           ),
 
@@ -448,7 +457,29 @@ class _LoginPageState extends State<LoginPage>
 
           const SizedBox(height: 12),
 
-          // ⭐ ADDED — "Create an account" button
+          // ⭐ ADDED — "Continue as Guest" button
+          TextButton(
+            onPressed: () {
+              // Navigate as Guest (no auth)
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                "/home",
+                (route) => false,
+                arguments: {"guest": true},
+              );
+            },
+            child: const Text(
+              "Continue as Guest",
+              style: TextStyle(
+                color: Colors.black54,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          // ⭐ "Create an account" button
           TextButton(
             onPressed: () {
               Navigator.pushNamed(context, "/register");
@@ -474,6 +505,7 @@ class _LoginPageState extends State<LoginPage>
     required String hint,
     required IconData icon,
     bool obscure = false,
+    Widget? suffixIcon,
     Function()? onTap,
     Function(String)? onChanged,
   }) {
@@ -491,12 +523,12 @@ class _LoginPageState extends State<LoginPage>
       ),
       child: TextField(
         controller: controller,
-        focusNode: hint == "Username" ? _userFocus : _passFocus,
+        focusNode: hint == "Email" ? _emailFocus : _passFocus,
         obscureText: obscure,
         textInputAction:
-            hint == "Username" ? TextInputAction.next : TextInputAction.done,
+            hint == "Email" ? TextInputAction.next : TextInputAction.done,
         onSubmitted: (_) {
-          if (hint == "Username") {
+          if (hint == "Email") {
             FocusScope.of(context).requestFocus(_passFocus);
           } else {
             FocusScope.of(context).unfocus();
@@ -507,6 +539,7 @@ class _LoginPageState extends State<LoginPage>
         decoration: InputDecoration(
           hintText: hint,
           prefixIcon: Icon(icon, color: Colors.pink.shade400),
+          suffixIcon: suffixIcon,
           filled: true,
           fillColor: Colors.white,
           contentPadding:

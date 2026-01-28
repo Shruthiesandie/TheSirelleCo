@@ -7,18 +7,20 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/rendering.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// RetroProfileCard: Aesthetic profile card with CRT flicker, editable fields, guest lock, and export.
 class RetroProfileCard extends StatefulWidget {
   final File? avatarFile;
   const RetroProfileCard({Key? key, this.avatarFile}) : super(key: key);
   @override
+
   State<RetroProfileCard> createState() => _RetroProfileCardState();
 }
 
 class _RetroProfileCardState extends State<RetroProfileCard> {
   // Profile fields
-  String name = 'HAERIN';
+  String name = 'Guest User';
   String birth = '2004.05.15';
   String height = '167cm';
   String blood = 'A';
@@ -38,7 +40,22 @@ class _RetroProfileCardState extends State<RetroProfileCard> {
   void initState() {
     super.initState();
     _loadPrefs();
+    _listenAuth();
     _startFlicker();
+  }
+
+  void _listenAuth() {
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (!mounted) return;
+      setState(() {
+        isGuest = user == null;
+        if (user != null &&
+            user.displayName != null &&
+            user.displayName!.isNotEmpty) {
+          name = user.displayName!;
+        }
+      });
+    });
   }
 
   @override
@@ -80,13 +97,7 @@ class _RetroProfileCardState extends State<RetroProfileCard> {
                             _themeButton('mint'),
                           ],
                         ),
-                        TextButton(
-                          onPressed: () {
-                            setState(() => isGuest = !isGuest);
-                            _savePrefs();
-                          },
-                          child: Text(isGuest ? 'GUEST MODE' : 'LOGGED IN'),
-                        ),
+                        // Removed manual guest toggle button
                       ],
                     ),
                   ),
@@ -134,9 +145,9 @@ class _RetroProfileCardState extends State<RetroProfileCard> {
               color: const Color(0xFFD9EEF2),
               border: Border.all(color: Colors.black),
             ),
-            child: const Text(
-              'HAERIN',
-              style: TextStyle(
+            child: Text(
+              name.toUpperCase(),
+              style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
@@ -549,14 +560,26 @@ class _RetroProfileCardState extends State<RetroProfileCard> {
   // --- Persistence and flicker ---
   Future<void> _loadPrefs() async {
     final p = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
+
     setState(() {
+      // Load saved prefs first
       name = p.getString('name') ?? name;
       birth = p.getString('birth') ?? birth;
       height = p.getString('height') ?? height;
       blood = p.getString('blood') ?? blood;
       constellation = p.getString('constellation') ?? constellation;
       theme = p.getString('theme') ?? theme;
-      isGuest = p.getBool('guest') ?? true;
+
+      // Auth is source of truth
+      isGuest = user == null;
+
+      // 🔥 AUTO-SYNC USERNAME
+      if (user != null &&
+          user.displayName != null &&
+          user.displayName!.isNotEmpty) {
+        name = user.displayName!;
+      }
     });
   }
 

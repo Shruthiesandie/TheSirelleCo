@@ -1,12 +1,18 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../pages/profile_page.dart';
 import '../../pages/sirelle_chat_page.dart';
 
 
 class HomeDrawer extends StatelessWidget {
-  const HomeDrawer({super.key});
+  final VoidCallback onProfileTap;
+  final bool isGuest;
+
+  const HomeDrawer({
+    super.key,
+    required this.onProfileTap,
+    required this.isGuest,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,62 +49,100 @@ class HomeDrawer extends StatelessWidget {
                     // Profile Card
                     Padding(
                       padding: const EdgeInsets.only(left:18, right:18, top:28, bottom:18),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical:20, horizontal:18),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 10,
-                              offset: Offset(0, 4),
-                            )
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 28,
-                              backgroundColor: Colors.pink.shade200.withOpacity(0.7),
-                              child: Icon(Icons.person, size: 30, color: Colors.white),
-                            ),
-                            SizedBox(width: 14),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Guest User",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.pink.shade700,
-                                  ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () {
+                          Navigator.pop(context); // close drawer
+                          Future.delayed(const Duration(milliseconds: 150), () {
+                            if (isGuest) {
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                "/login",
+                                (route) => false,
+                              );
+                            } else {
+                              onProfileTap();
+                            }
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical:20, horizontal:18),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 10,
+                                offset: Offset(0, 4),
+                              )
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 28,
+                                backgroundColor: Colors.pink.shade200.withOpacity(0.7),
+                                child: Icon(Icons.person, size: 30, color: Colors.white),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    StreamBuilder<User?>(
+                                      stream: FirebaseAuth.instance.authStateChanges(),
+                                      builder: (context, snapshot) {
+                                        final user = snapshot.data;
+
+                                        final displayName = isGuest
+                                            ? "Guest User"
+                                            : user?.displayName?.isNotEmpty == true
+                                                ? "@${user!.displayName!}"
+                                                : user?.email ?? "User";
+
+                                        return Text(
+                                          displayName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.pink.shade700,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    SizedBox(height: 6),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal:10, vertical:4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.pink.shade50,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        "Non‑Member",
+                                        style: TextStyle(fontSize: 12, color: Colors.pink.shade700),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(height: 6),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal:10, vertical:4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.pink.shade50,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    "Non‑Member",
-                                    style: TextStyle(fontSize: 12, color: Colors.pink.shade700),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
 
                     SizedBox(height: 10),
 
-                    drawerItem(context, Icons.person, "My Profile"),
-                    SizedBox(height: 1),
-                    drawerItem(context, Icons.shopping_bag, "Orders"),
+                    if (isGuest)
+                      drawerItem(context, Icons.login, "Login")
+                    else ...[
+                      drawerItem(context, Icons.person, "My Profile"),
+                      SizedBox(height: 1),
+                      drawerItem(context, Icons.shopping_bag, "Orders"),
+                    ],
                     SizedBox(height: 1),
                     drawerItem(context, Icons.card_giftcard, "Coupons"),
                     SizedBox(height: 1),
@@ -189,9 +233,14 @@ class HomeDrawer extends StatelessWidget {
 
             Future.delayed(const Duration(milliseconds: 150), () {
               if (title == "My Profile" || title == "Profile") {
-                Navigator.push(
+                onProfileTap();
+              }
+
+              if (title == "Login") {
+                Navigator.pushNamedAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => const ProfilePage()),
+                  "/login",
+                  (route) => false,
                 );
               }
 

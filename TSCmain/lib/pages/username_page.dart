@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UsernamePage extends StatefulWidget {
   const UsernamePage({super.key});
@@ -20,9 +20,6 @@ class _UsernamePageState extends State<UsernamePage>
   final RegExp _validRegex = RegExp(r'^[a-zA-Z0-9_]+$');
 
   // Preblocked usernames
-  final List<String> defaultTaken = ["vishruth", "shruthi"];
-
-  List<String> savedUsernames = [];
 
   // status = empty, checking, taken, available
   String status = "empty";
@@ -42,7 +39,6 @@ class _UsernamePageState extends State<UsernamePage>
   @override
   void initState() {
     super.initState();
-    _loadSavedUsernames();
 
     successCtrl =
         AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
@@ -57,12 +53,6 @@ class _UsernamePageState extends State<UsernamePage>
     )..repeat();
   }
 
-  Future<void> _loadSavedUsernames() async {
-    final prefs = await SharedPreferences.getInstance();
-    savedUsernames = prefs.getStringList("usernames") ?? [];
-    setState(() {});
-  }
-
   @override
   void dispose() {
     _controller.dispose();
@@ -74,15 +64,14 @@ class _UsernamePageState extends State<UsernamePage>
   // ---------------------------------------------------------------------------
   // CHECK USERNAME
   // ---------------------------------------------------------------------------
-  void checkUsername(String value) {
-    value = value.trim();
+  Future<void> checkUsername(String value) async {
+    value = value.trim().toLowerCase();
 
     if (value.isEmpty) {
       setState(() => status = "empty");
       return;
     }
 
-    // BASIC VALIDATIONS FIRST
     if (value.contains(" ")) {
       setState(() => status = "space");
       return;
@@ -98,27 +87,12 @@ class _UsernamePageState extends State<UsernamePage>
       return;
     }
 
-    // FAKE LOADING
     setState(() {
-      loading = true;
-      status = "checking";
+      loading = false;
+      status = "available";
     });
 
-    Future.delayed(const Duration(milliseconds: 900), () async {
-      final username = value.toLowerCase();
-
-      bool exists =
-          defaultTaken.contains(username) || savedUsernames.contains(username);
-
-      setState(() {
-        loading = false;
-        status = exists ? "taken" : "available";
-      });
-
-      if (!exists) {
-        successCtrl.forward().then((_) => successCtrl.reverse());
-      }
-    });
+    successCtrl.forward().then((_) => successCtrl.reverse());
   }
 
   // ---------------------------------------------------------------------------
@@ -332,10 +306,18 @@ class _UsernamePageState extends State<UsernamePage>
       child: GestureDetector(
         onTap: status == "available"
             ? () async {
-                final prefs = await SharedPreferences.getInstance();
-                savedUsernames.add(_controller.text.toLowerCase());
-                prefs.setStringList("usernames", savedUsernames);
-                Navigator.pushReplacementNamed(context, "/home");
+                final username = _controller.text.trim().toLowerCase();
+                final user = FirebaseAuth.instance.currentUser;
+
+                if (user == null) return;
+
+                await user.updateDisplayName(username);
+
+                // 🔑 Sign out before going to Login page
+                await FirebaseAuth.instance.signOut();
+
+                if (!mounted) return;
+                Navigator.pushReplacementNamed(context, "/login");
               }
             : null,
         child: AnimatedScale(

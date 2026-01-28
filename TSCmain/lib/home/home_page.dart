@@ -32,6 +32,18 @@ class _HomePageState extends State<HomePage>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int selectedIndex = 0;
+  bool isGuest = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    if (args != null && args["guest"] == true) {
+      isGuest = true;
+    }
+  }
 
   late final AnimationController _marqueeController;
   final ScrollController _scrollController = ScrollController();
@@ -83,7 +95,14 @@ class _HomePageState extends State<HomePage>
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFFCEEEE),
-      drawer: const HomeDrawer(),
+      drawer: HomeDrawer(
+        isGuest: isGuest,
+        onProfileTap: () {
+          setState(() {
+            selectedIndex = 4; // Profile tab index
+          });
+        },
+      ),
       extendBody: true,
 
       body: MediaQuery.removePadding(

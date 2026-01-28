@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// ─────────────────────────────────────────────────────────
 /// Soft animated waves background (matching login style)
@@ -322,19 +323,37 @@ class _CreateAccountPageState extends State<CreateAccountPage>
   }
 
   Future<void> _createAccount() async {
-    // Local dummy account creation (no Firebase)
-    await Future.delayed(const Duration(milliseconds: 600));
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailCtrl.text.trim(),
+        password: _passwordCtrl.text,
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Account created locally. Please login."),
-        backgroundColor: Colors.green,
-      ),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Account created successfully"),
+          backgroundColor: Colors.green,
+        ),
+      );
 
-    Navigator.pushReplacementNamed(context, "/login");
+      Navigator.pushReplacementNamed(
+        context,
+        "/username",
+      );
+    } on FirebaseAuthException catch (e) {
+      String msg = "Something went wrong";
+      if (e.code == 'email-already-in-use') {
+        msg = "Email already in use";
+      } else if (e.code == 'invalid-email') {
+        msg = "Invalid email address";
+      } else if (e.code == 'weak-password') {
+        msg = "Password is too weak";
+      }
+
+      _err(msg);
+    }
   }
 
   // Tilt Effect

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../pages/login_page.dart';
 import 'package:sirelle/l10n/app_localizations.dart';
 import 'package:sirelle/controllers/app_locale.dart';
 import 'package:sirelle/controllers/app_theme.dart';
@@ -863,6 +865,8 @@ class _ProfilePageState extends State<ProfilePage>
   }
   // Replace with your real user state / provider
   String userName = 'Guest User';
+  bool get isGuest =>
+      FirebaseAuth.instance.currentUser == null;
   String membership = 'Non-Member';
   File? avatarFile;
   String birth = 'YYYYMMDD';
@@ -911,6 +915,7 @@ class _ProfilePageState extends State<ProfilePage>
   void initState() {
     super.initState();
     _loadProfile();
+    _listenAuth();
 
     if (widget.openCoupons) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -922,12 +927,25 @@ class _ProfilePageState extends State<ProfilePage>
   Future<void> _loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      userName = prefs.getString('name') ?? userName;
+      // userName comes from FirebaseAuth, not prefs
       birth = prefs.getString('birth') ?? birth;
       height = prefs.getString('height') ?? height;
       blood = prefs.getString('blood') ?? blood;
       addresses = prefs.getStringList('addresses') ?? [];
       defaultAddressIndex = prefs.getInt('default_address_index') ?? -1;
+    });
+  }
+
+  void _listenAuth() {
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (!mounted) return;
+      setState(() {
+        if (user != null && user.displayName?.isNotEmpty == true) {
+          userName = user.displayName!;
+        } else {
+          userName = 'Guest User';
+        }
+      });
     });
   }
 
@@ -1895,7 +1913,7 @@ class _ProfilePageState extends State<ProfilePage>
                       ],
                     ),
 
-                    // ======= Logout button (scrollable element) =======
+                    // ======= Logout/Login button (scrollable element) =======
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -1913,12 +1931,48 @@ class _ProfilePageState extends State<ProfilePage>
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          onPressed: () {
-                            // replace with your login route
-                            Navigator.pushReplacementNamed(context, '/login');
+                          onPressed: () async {
+                            if (isGuest) {
+                              // 👉 Guest → Login
+                              if (!context.mounted) return;
+                              Navigator.of(context).pushReplacement(
+                                PageRouteBuilder(
+                                  transitionDuration: const Duration(milliseconds: 250),
+                                  pageBuilder: (_, __, ___) => const LoginPage(),
+                                  transitionsBuilder: (_, animation, __, child) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    );
+                                  },
+                                ),
+                              );
+                            } else {
+                              // 👉 Logged-in → Logout
+                              await FirebaseAuth.instance.signOut();
+
+                              final prefs = await SharedPreferences.getInstance();
+                              await prefs.remove('last_active_time');
+
+                              if (!context.mounted) return;
+                              Navigator.of(context).pushReplacement(
+                                PageRouteBuilder(
+                                  transitionDuration: const Duration(milliseconds: 250),
+                                  pageBuilder: (_, __, ___) => const LoginPage(),
+                                  transitionsBuilder: (_, animation, __, child) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    );
+                                  },
+                                ),
+                              );
+                            }
                           },
                           child: Text(
-                            AppLocalizations.of(context)!.logout,
+                            isGuest
+                                ? 'Login'
+                                : AppLocalizations.of(context)!.logout,
                             style: TextStyle(
                               color: _accent,
                               fontWeight: FontWeight.w600,
