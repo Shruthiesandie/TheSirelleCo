@@ -34,6 +34,7 @@ dependencies:
   # Add these packages for OpenAI support
   http: ^1.1.0
   dart_openai: ^6.1.1
+  firebase_core: ^2.32.0
 
 dev_dependencies:
   flutter_test:
