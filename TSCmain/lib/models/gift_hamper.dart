@@ -43,4 +43,22 @@ class GiftHamper {
       items.add(product);
     }
   }
+  Map<String, dynamic> toMap() {
+    return {
+      'type': 'hamper',
+      'id': id,
+      'items': items.map((p) => p.toMap()).toList(),
+      'discountPercent': _discountPercent,
+    };
+  }
+
+  factory GiftHamper.fromMap(Map<String, dynamic> map) {
+    return GiftHamper(
+      id: map['id'] as String,
+      items: (map['items'] as List)
+          .map((e) => Product.fromMap(e as Map<String, dynamic>))
+          .toList(),
+      discountPercent: map['discountPercent'] as double?,
+    );
+  }
 }

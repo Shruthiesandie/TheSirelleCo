@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../models/product.dart';
 import '../../models/gift_hamper.dart';
 
@@ -11,17 +15,66 @@ class CartItem {
     required this.product,
     this.quantity = 1,
   });
+
+  Map<String, dynamic> toMap() => {
+        'type': 'product',
+        'product': product.toMap(),
+        'quantity': quantity,
+      };
+
+  factory CartItem.fromMap(Map<String, dynamic> map) {
+    return CartItem(
+      product: Product.fromMap(map['product']),
+      quantity: map['quantity'] ?? 1,
+    );
+  }
 }
 
 class CartController {
-  /// Global cart items (real-time, quantity-aware)
   static final ValueNotifier<List<Object>> items =
       ValueNotifier<List<Object>>([]);
 
   static String? editingHamperId;
 
-  /// Add product to cart (increase qty if exists)
-  static void add(Product product) {
+  static String? get _uid => FirebaseAuth.instance.currentUser?.uid;
+
+  static String get _storageKey =>
+      _uid == null ? 'cart_guest' : 'cart_$_uid';
+
+  /// Load cart for current user (call after login)
+  static Future<void> loadForCurrentUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_storageKey);
+
+    if (raw == null) {
+      items.value = [];
+      return;
+    }
+
+    final List decoded = jsonDecode(raw);
+    items.value = decoded.map<Object>((e) {
+      if (e['type'] == 'product') {
+        return CartItem.fromMap(e);
+      } else {
+        return GiftHamper.fromMap(e);
+      }
+    }).toList();
+  }
+
+  static Future<void> _persist() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = jsonEncode(
+      items.value.map((e) {
+        if (e is CartItem) return e.toMap();
+        if (e is GiftHamper) return e.toMap();
+        return {};
+      }).toList(),
+    );
+    await prefs.setString(_storageKey, encoded);
+  }
+
+  /// Add product to cart
+  static Future<void> add(Product product) async {
     final list = List<Object>.from(items.value);
 
     final index = list.indexWhere(
@@ -35,15 +88,14 @@ class CartController {
     }
 
     items.value = list;
+    await _persist();
   }
 
-  /// Increase quantity (alias for add)
-  static void increase(Product product) {
-    add(product);
+  static Future<void> increase(Product product) async {
+    await add(product);
   }
 
-  /// Decrease quantity (remove if reaches 0)
-  static void decrease(Product product) {
+  static Future<void> decrease(Product product) async {
     final list = List<Object>.from(items.value);
 
     final index = list.indexWhere(
@@ -58,49 +110,48 @@ class CartController {
         list.removeAt(index);
       }
       items.value = list;
+      await _persist();
     }
   }
 
-  /// Remove product completely
-  static void remove(Product product) {
+  static Future<void> remove(Product product) async {
     final list = List<Object>.from(items.value)
       ..removeWhere(
         (e) => e is CartItem && e.product.id == product.id,
       );
 
     items.value = list;
+    await _persist();
   }
 
-  /// Quantity of a product
   static int quantity(Product product) {
-    final item = items.value
-        .firstWhere((e) => e is CartItem && e.product.id == product.id, orElse: () => CartItem(product: product, quantity: 0)) as CartItem;
+    final item = items.value.firstWhere(
+      (e) => e is CartItem && e.product.id == product.id,
+      orElse: () => CartItem(product: product, quantity: 0),
+    ) as CartItem;
     return item.quantity;
   }
 
-  /// Check if product exists in cart
   static bool contains(Product product) {
-    return items.value.any((item) => item is CartItem && item.product.id == product.id);
+    return items.value.any(
+      (item) => item is CartItem && item.product.id == product.id,
+    );
   }
 
-  /// Clear cart
-  static void clear() {
+  static Future<void> clear() async {
     items.value = [];
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_storageKey);
   }
 
-  /// Total item count (sum of quantities)
   static int get count {
     return items.value.fold(0, (sum, item) {
-      if (item is CartItem) {
-        return sum + item.quantity;
-      } else if (item is GiftHamper) {
-        return sum + 1;
-      }
+      if (item is CartItem) return sum + item.quantity;
+      if (item is GiftHamper) return sum + 1;
       return sum;
     });
   }
 
-  /// Total cart price (price × quantity)
   static int get totalPrice {
     return items.value.fold(0, (sum, item) {
       if (item is CartItem) {
@@ -113,7 +164,7 @@ class CartController {
   }
 
   /// Add or update a gift hamper as ONE cart item
-  static void addOrUpdateHamper(GiftHamper hamper) {
+  static Future<void> addOrUpdateHamper(GiftHamper hamper) async {
     final list = List<Object>.from(items.value);
 
     if (editingHamperId != null) {
@@ -132,13 +183,14 @@ class CartController {
 
     editingHamperId = null;
     items.value = list;
+    await _persist();
   }
 
-  /// Remove entire gift hamper by id
-  static void removeHamper(GiftHamper hamper) {
+  static Future<void> removeHamper(GiftHamper hamper) async {
     final list = List<Object>.from(items.value)
       ..removeWhere((e) => e is GiftHamper && e.id == hamper.id);
     items.value = list;
+    await _persist();
   }
 
   static GiftHamper? getHamperById(String id) {

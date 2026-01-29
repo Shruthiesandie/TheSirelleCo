@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../pages/login_page.dart';
 import '../home/home_page.dart';
+import '../controllers/favorites_controller.dart';
+import '../controllers/cart_controllers.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -103,9 +105,11 @@ class _AuthGateState extends State<AuthGate>
             }
 
             // Valid session
-            WidgetsBinding.instance.addPostFrameCallback((_) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
               if (!mounted) return;
-              _updateLastActive();
+              await _updateLastActive();
+              await FavoritesController.loadForCurrentUser();
+              await CartController.loadForCurrentUser();
             });
             return const HomePage();
           },
