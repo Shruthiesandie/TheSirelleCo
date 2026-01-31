@@ -261,7 +261,7 @@ Widget _sectionHeader(BuildContext context, String title) {
     child: Row(
       children: [
         const Expanded(
-          child: Divider(thickness: 1.2, color: Color(0xFFf3c6d4)),
+          child: Divider(thickness: 2.0, color: Color(0xFFf3c6d4)),
         ),
         const SizedBox(width: 14),
         Container(
@@ -294,7 +294,7 @@ Widget _sectionHeader(BuildContext context, String title) {
         ),
         const SizedBox(width: 14),
         const Expanded(
-          child: Divider(thickness: 3.0, color: Color(0xFFf3c6d4)),
+          child: Divider(thickness: 2.0, color: Color(0xFFf3c6d4)),
         ),
       ],
     ),
