@@ -201,7 +201,7 @@ class _HomePageState extends State<HomePage>
                     borderRadius: BorderRadius.circular(28),
                     gradient: LinearGradient(
                       colors: [
-                        Colors.pinkAccent.withOpacity(0.17),
+                        const Color.fromARGB(255, 250, 32, 105).withOpacity(0.17),
                         Colors.white.withOpacity(0.9),
                       ],
                       begin: Alignment.topLeft,
@@ -209,7 +209,7 @@ class _HomePageState extends State<HomePage>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.pinkAccent.withOpacity(0.15),
+                        color: const Color.fromARGB(255, 203, 9, 74).withOpacity(0.15),
                         blurRadius: 8,
                         spreadRadius: 2,
                       ),
@@ -220,7 +220,7 @@ class _HomePageState extends State<HomePage>
                     style: TextStyle(
                       fontSize: 12.8,
                       fontWeight: FontWeight.w600,
-                      color: Colors.pink.shade900,
+                      color: const Color.fromARGB(255, 98, 2, 53),
                     ),
                   ),
                 );
