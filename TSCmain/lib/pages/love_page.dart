@@ -346,9 +346,8 @@ class _LovePageState extends State<LovePage> {
                                       height: 34,
                                       child: OutlinedButton(
                                         style: OutlinedButton.styleFrom(
-                                          side: BorderSide(
-                                            color: Colors.pinkAccent
-                                                .withOpacity(0.4),
+                                          side: const BorderSide(
+                                            color: Color(0xFFCDE8C1),
                                           ),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
@@ -363,7 +362,7 @@ class _LovePageState extends State<LovePage> {
                                             context,
                                           ).showSnackBar(
                                             const SnackBar(
-                                              content: Text('Moved to cart'),
+                                              content: Text('Moved to cart 💚'),
                                               behavior:
                                                   SnackBarBehavior.floating,
                                               duration: Duration(seconds: 2),
@@ -376,7 +375,7 @@ class _LovePageState extends State<LovePage> {
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
                                             letterSpacing: 0.3,
-                                            color: Colors.pinkAccent,
+                                            color: Color.fromARGB(255, 51, 109, 60),
                                           ),
                                         ),
                                       ),

@@ -169,13 +169,20 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFFF5F8),
       body: Stack(
         children: [
           SafeArea(
         child: Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFFFFEEF3),
+                Color(0xFFFFFFFF),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
