@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../pages/profile_page.dart';
@@ -32,8 +33,8 @@ class HomeDrawer extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.white.withOpacity(0.9),
-                      const Color(0xFFE6F0E6).withOpacity(0.95),
+                      const Color.fromARGB(255, 212, 45, 84).withOpacity(0.85),
+                      const Color.fromARGB(255, 110, 5, 43).withOpacity(0.9),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -171,7 +172,7 @@ class HomeDrawer extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.pink.shade800,
+                      color: const Color.fromARGB(255, 255, 196, 222),
                     ),
                   ),
                   SizedBox(height: 10),
@@ -199,7 +200,7 @@ class HomeDrawer extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color.fromARGB(255, 255, 243, 246),
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
