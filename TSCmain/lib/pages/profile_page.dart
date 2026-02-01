@@ -1233,13 +1233,29 @@ class _ProfilePageState extends State<ProfilePage>
       backgroundColor: Color(0xFFFCEEEE),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: _textDark,
-        title: Text(
-          AppLocalizations.of(context)!.profile,
-          style: const TextStyle(fontWeight: FontWeight.w700),
+        backgroundColor: const Color(0xFFFCEEEE),
+        centerTitle: true,
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.profile,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 2),
+            const Text(
+              '',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black45,
+              ),
+            ),
+          ],
         ),
-        centerTitle: false,
       ),
       body: SafeArea(
         child: Column(
