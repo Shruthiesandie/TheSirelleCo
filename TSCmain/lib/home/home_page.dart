@@ -261,7 +261,7 @@ Widget _sectionHeader(BuildContext context, String title) {
     child: Row(
       children: [
         const Expanded(
-          child: Divider(thickness: 2.0, color: Color(0xFFf3c6d4)),
+          child: Divider(thickness: 2.0, color: Color(0xFF5F6F52)),
         ),
         const SizedBox(width: 14),
         Container(
@@ -294,7 +294,7 @@ Widget _sectionHeader(BuildContext context, String title) {
         ),
         const SizedBox(width: 14),
         const Expanded(
-          child: Divider(thickness: 2.0, color: Color(0xFFf3c6d4)),
+          child: Divider(thickness: 2.0, color: Color(0xFF5F6F52)),
         ),
       ],
     ),
@@ -513,7 +513,7 @@ class _HomeContentState extends State<_HomeContent> {
                       const Expanded(
                         child: Divider(
                           thickness: 1.2,
-                          color: Color(0xFFf3c6d4),
+                          color: Color(0xFF5F6F52),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -552,7 +552,7 @@ class _HomeContentState extends State<_HomeContent> {
                       const Expanded(
                         child: Divider(
                           thickness: 1.2,
-                          color: Color(0xFFf3c6d4),
+                          color: Color(0xFF5F6F52),
                         ),
                       ),
                     ],
@@ -2001,7 +2001,7 @@ Widget _exploreText(String name, {required bool imageLeft}) {
       const SizedBox(height: 6),
       const SizedBox(
         width: 90,
-        child: Divider(thickness: 1, color: Color(0xFFDDDDDD)),
+        child: Divider(thickness: 1, color: Color(0xFF5F6F52)),
       ),
     ],
   );
