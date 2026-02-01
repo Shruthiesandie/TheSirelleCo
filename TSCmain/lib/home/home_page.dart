@@ -201,7 +201,12 @@ class _HomePageState extends State<HomePage>
                     borderRadius: BorderRadius.circular(28),
                     gradient: LinearGradient(
                       colors: [
-                        const Color.fromARGB(255, 250, 32, 105).withOpacity(0.17),
+                        const Color.fromARGB(
+                          255,
+                          250,
+                          32,
+                          105,
+                        ).withOpacity(0.17),
                         Colors.white.withOpacity(0.9),
                       ],
                       begin: Alignment.topLeft,
@@ -209,7 +214,12 @@ class _HomePageState extends State<HomePage>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color.fromARGB(255, 203, 9, 74).withOpacity(0.15),
+                        color: const Color.fromARGB(
+                          255,
+                          203,
+                          9,
+                          74,
+                        ).withOpacity(0.15),
                         blurRadius: 8,
                         spreadRadius: 2,
                       ),
@@ -464,115 +474,77 @@ class _HomeContentState extends State<_HomeContent> {
           // 🔍 EXPLORE ALL — CATEGORY STORY STRIP
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 110),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _sectionHeader(context, "Explore All"),
-                const SizedBox(height: 20),
-                Column(
-                  children: List.generate(_exploreItems.length, (index) {
-                    final item = _exploreItems[index];
-                    final bool imageLeft = index % 2 == 0;
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 3,
-                      ),
-                      child: Row(
-                        children: [
-                          if (imageLeft)
-                            _exploreImageFromCategory(
-                              context,
-                              item.categoryKey,
-                            ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: _exploreText(
-                              item.name,
-                              imageLeft: imageLeft,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          if (!imageLeft)
-                            _exploreImageFromCategory(
-                              context,
-                              item.categoryKey,
-                            ),
-                        ],
-                      ),
-                    );
-                  }),
-                ),
-                // Inserted Gift Hamper premium heading block
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      const Expanded(
-                        child: Divider(
-                          thickness: 1.2,
-                          color: Color(0xFF5F6F52),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 22,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFFE4EC), Color(0xFFFFFFFF)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.pinkAccent.withOpacity(0.25),
-                              blurRadius: 20,
-                              spreadRadius: 1,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Text(
-                          "Gift Hamper",
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                            color: Color(0xFFB2004D),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Divider(
-                          thickness: 1.2,
-                          color: Color(0xFF5F6F52),
-                        ),
-                      ),
-                    ],
+            child: ClipPath(
+              clipper: _TopAndBottomWaveClipper(),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color.fromARGB(255, 112, 4, 47), Color(0xFFD81B60)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 40),
+                    _sectionHeader(context, "Explore All"),
+                    const SizedBox(height: 20),
+                    Column(
+                      children: List.generate(_exploreItems.length, (index) {
+                        final item = _exploreItems[index];
+                        final bool imageLeft = index % 2 == 0;
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 3,
+                          ),
+                          child: Row(
+                            children: [
+                              if (imageLeft)
+                                _exploreImageFromCategory(
+                                  context,
+                                  item.categoryKey,
+                                ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: _exploreText(
+                                  item.name,
+                                  imageLeft: imageLeft,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              if (!imageLeft)
+                                _exploreImageFromCategory(
+                                  context,
+                                  item.categoryKey,
+                                ),
+                            ],
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 60),
+                  ],
+                ),
+              ),
             ),
           ),
 
-          const SizedBox(height: 36),
-
+          // (Pink section above Gift Hamper header removed)
+          _sectionHeader(context, "Gift Hamper"),
+          const SizedBox(height: 16),
           // 🎁 CUSTOM GIFT HAMPER FEATURE (from sketch)
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 130),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 28),
               child: Container(
-                height: 520,
+                height: 500,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF1F4),
+                  color: const Color.fromARGB(255, 238, 237, 240),
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
@@ -588,7 +560,7 @@ class _HomeContentState extends State<_HomeContent> {
                     // Right semicircle bubble (true semicircle using ClipOval)
                     Positioned(
                       right: -140,
-                      top: 40,
+                      top: 10,
                       child: ClipOval(
                         child: Stack(
                           children: [
@@ -662,55 +634,88 @@ class _HomeContentState extends State<_HomeContent> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(22, 26, 22, 26),
                   decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFFFFFFF), Color(0xFFFFF3F6)],
+                      colors: [Color(0xFFFFFFFF), Color(0xFFFFEEF3)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.pinkAccent.withOpacity(0.18),
-                        blurRadius: 24,
-                        offset: const Offset(0, 12),
+                        color: Color(0xFFB2004D).withOpacity(0.18),
+                        blurRadius: 30,
+                        offset: Offset(0, 16),
                       ),
                     ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
                     children: [
+                      // 🌸 Soft pill label
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFFFE4EC),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          "GIFTING FEATURE",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                            color: Color(0xFFB2004D),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      // ✨ Headline
                       const Text(
-                        "Introducing Gift Hampers",
+                        "Build Your Own Gift Hamper",
                         style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.4,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.3,
                           color: Color(0xFFB2004D),
-                          decoration: TextDecoration.underline,
-                          decorationColor: Color(0xFFB2004D),
-                          fontFamily: "Nunito",
                         ),
                       ),
-                      const SizedBox(height: 10),
+
+                      const SizedBox(height: 12),
+
+                      // 🌷 Description
                       const Text(
-                        "Create your own personalised gift hamper by mixing and matching products from every category. A perfect way to make your gift feel special and thoughtful.",
+                        "Mix and match products across all categories to create a personalised gift hamper. Thoughtful, custom, and made to feel truly special.",
                         style: TextStyle(
-                          fontSize: 16,
-                          height: 1.55,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          height: 1.6,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF333333),
                         ),
                       ),
-                      const SizedBox(height: 40),
+
+                      const SizedBox(height: 20),
+
+                      // 💗 Micro highlights
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 10,
+                        children: const [
+                          _HamperHighlight("🎁", "Personalised"),
+                          _HamperHighlight("💌", "Thoughtful"),
+                          _HamperHighlight("✨", "Premium"),
+                        ],
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 0),
+          const SizedBox(height: 15),
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 160),
             child: Padding(
@@ -731,31 +736,43 @@ class _HomeContentState extends State<_HomeContent> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28),
                       gradient: const LinearGradient(
-                        colors: [Color(0xFFFFE4EC), Color(0xFFFFFFFF)],
+                        colors: [
+                          Color(0xFFB2004D),
+                          Color(0xFFD81B60),
+                          Color(0xFFFF9EBF),
+                        ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.pinkAccent.withOpacity(0.35),
-                          blurRadius: 22,
-                          offset: const Offset(0, 12),
+                          color: const Color(0xFFB2004D).withOpacity(0.45),
+                          blurRadius: 26,
+                          offset: const Offset(0, 14),
                         ),
                       ],
-                      border: Border.all(color: Color(0xFFFFC1D9), width: 1.4),
                     ),
-                    child: const Center(
-                      child: Text(
-                        "Customize",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFFB2004D),
-                          letterSpacing: 0.6,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          "Customize",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.8,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
+                        SizedBox(width: 10),
+                        Icon(
+                          Icons.auto_awesome,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -1910,6 +1927,44 @@ class _HomeContentState extends State<_HomeContent> {
 
 // ------------------------ EXPLORE ALL MODELS & HELPERS ------------------------
 
+// ------------------------ TOP AND BOTTOM WAVE CLIPPER FOR EXPLORE ALL SECTION ------------------------
+class _TopAndBottomWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+
+    // 🌊 Top wave (unchanged)
+    path.lineTo(0, 24);
+    path.quadraticBezierTo(size.width * 0.25, 0, size.width * 0.5, 16);
+    path.quadraticBezierTo(size.width * 0.75, 32, size.width, 12);
+
+    // Go down right side
+    path.lineTo(size.width, size.height - 24);
+
+    // 🌊 Bottom wave (same family curve)
+    path.quadraticBezierTo(
+      size.width * 0.75,
+      size.height,
+      size.width * 0.5,
+      size.height - 16,
+    );
+    path.quadraticBezierTo(
+      size.width * 0.25,
+      size.height - 32,
+      0,
+      size.height - 12,
+    );
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+// ------------------------ BOTTOM WAVE CLIPPER FOR GIFT HAMPER SECTION ------------------------
+
 class _ExploreItem {
   final String name;
   final String categoryKey;
@@ -1960,19 +2015,30 @@ Widget _exploreText(String name, {required bool imageLeft}) {
         child: Align(
           alignment: imageLeft ? Alignment.centerLeft : Alignment.centerRight,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFE6F0E3), Color(0xFFFFFFFF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF9DB8A0).withOpacity(0.35),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Text(
               name,
               textAlign: imageLeft ? TextAlign.left : TextAlign.right,
               style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
-                color: Color(0xFF2B2B2B),
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+                color: Color.fromARGB(255, 35, 52, 37),
               ),
             ),
           ),
@@ -2611,6 +2677,45 @@ class _PremiumFooterIcon extends StatelessWidget {
         ],
       ),
       child: Icon(icon, size: 30, color: Colors.white),
+    );
+  }
+}
+
+// --- Helper widget for gift hamper highlights ---
+class _HamperHighlight extends StatelessWidget {
+  final String emoji;
+  final String label;
+  const _HamperHighlight(this.emoji, this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Text(emoji, style: TextStyle(fontSize: 14)),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF444444),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
