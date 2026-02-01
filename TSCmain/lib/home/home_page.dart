@@ -480,7 +480,7 @@ class _HomeContentState extends State<_HomeContent> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color.fromARGB(255, 112, 4, 47), Color(0xFFD81B60)],
+                    colors: [Color.fromARGB(255, 125, 5, 53), Color.fromARGB(255, 192, 12, 87)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -1978,7 +1978,6 @@ const List<_ExploreItem> _exploreItems = [
   _ExploreItem("Plush Toys", "plusie"),
   _ExploreItem("Keychains", "key_chain"),
   _ExploreItem("Boy Friend Gifts", "boy_friend"),
-  _ExploreItem("Girl Friend Gifts", "girl_friend"),
 ];
 
 Widget _exploreText(String name, {required bool imageLeft}) {
@@ -2058,7 +2057,7 @@ Widget _exploreText(String name, {required bool imageLeft}) {
           style: const TextStyle(
             fontSize: 13,
             height: 1.55,
-            color: Color(0xFF222222),
+            color: Color.fromARGB(255, 209, 208, 208),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -2456,7 +2455,7 @@ class _BeverageAdSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFEEF3),
+          color: const Color.fromARGB(255, 249, 244, 199),
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
