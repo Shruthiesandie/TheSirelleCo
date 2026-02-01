@@ -535,16 +535,16 @@ class _HomeContentState extends State<_HomeContent> {
 
           // (Pink section above Gift Hamper header removed)
           _sectionHeader(context, "Gift Hamper"),
-          const SizedBox(height: 16),
+          const SizedBox(height: 36),
           // 🎁 CUSTOM GIFT HAMPER FEATURE (from sketch)
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 130),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Container(
                 height: 500,
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 238, 237, 240),
+                  color: const Color.fromARGB(255, 255, 210, 210),
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
@@ -560,7 +560,7 @@ class _HomeContentState extends State<_HomeContent> {
                     // Right semicircle bubble (true semicircle using ClipOval)
                     Positioned(
                       right: -140,
-                      top: 10,
+                      top: 25,
                       child: ClipOval(
                         child: Stack(
                           children: [
@@ -625,12 +625,12 @@ class _HomeContentState extends State<_HomeContent> {
             ),
           ),
 
-          const SizedBox(height: 0),
+          const SizedBox(height:0),
 
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 150),
             child: Transform.translate(
-              offset: const Offset(0, -100),
+              offset: const Offset(0, -10),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
@@ -680,7 +680,7 @@ class _HomeContentState extends State<_HomeContent> {
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.3,
-                          color: Color(0xFFB2004D),
+                          color: Color.fromARGB(255, 183, 15, 35),
                         ),
                       ),
 
@@ -706,7 +706,7 @@ class _HomeContentState extends State<_HomeContent> {
                         children: const [
                           _HamperHighlight("🎁", "Personalised"),
                           _HamperHighlight("💌", "Thoughtful"),
-                          _HamperHighlight("✨", "Premium"),
+                          _HamperHighlight("✨", "Unique"),
                         ],
                       ),
                     ],
@@ -715,7 +715,7 @@ class _HomeContentState extends State<_HomeContent> {
               ),
             ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 0),
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 160),
             child: Padding(
@@ -779,7 +779,7 @@ class _HomeContentState extends State<_HomeContent> {
               ),
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 0),
           const SizedBox(height: 40),
           _BeverageAdSection(),
           const SizedBox(height: 40),
