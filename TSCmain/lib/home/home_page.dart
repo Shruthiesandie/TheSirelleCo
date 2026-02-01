@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFFFF8E9),
+      backgroundColor: const Color(0xFFFCEEEE),
       drawer: HomeDrawer(
         isGuest: isGuest,
         onProfileTap: () {
