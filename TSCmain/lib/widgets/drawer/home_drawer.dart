@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../pages/profile_page.dart';
 import '../../pages/sirelle_chat_page.dart';
 
@@ -31,8 +32,8 @@ class HomeDrawer extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.white.withOpacity(0.85),
-                      Colors.pink.shade50.withOpacity(0.95),
+                      Colors.white.withOpacity(0.9),
+                      const Color(0xFFE6F0E6).withOpacity(0.95),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -81,8 +82,8 @@ class HomeDrawer extends StatelessWidget {
                           child: Row(
                             children: [
                               CircleAvatar(
-                                radius: 28,
-                                backgroundColor: Colors.pink.shade200.withOpacity(0.7),
+                                radius: 42,
+                                backgroundColor: const Color.fromARGB(255, 241, 177, 205).withOpacity(0.7),
                                 child: Icon(Icons.person, size: 30, color: Colors.white),
                               ),
                               const SizedBox(width: 14),
@@ -177,11 +178,11 @@ class HomeDrawer extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      socialIcon(Icons.camera_alt_outlined), // placeholder IG icon
+                      socialIcon(FontAwesomeIcons.instagram),
                       SizedBox(width: 16),
-                      socialIcon(Icons.facebook),
+                      socialIcon(FontAwesomeIcons.facebookF),
                       SizedBox(width: 16),
-                      socialIcon(Icons.play_circle_fill),
+                      socialIcon(FontAwesomeIcons.youtube),
                     ],
                   ),
                 ],
@@ -213,7 +214,7 @@ class HomeDrawer extends StatelessWidget {
             height: 40,
             width: 40,
             decoration: BoxDecoration(
-              color: Colors.pink.shade50,
+              color: const Color.fromARGB(255, 239, 244, 240),
               borderRadius: BorderRadius.circular(12),
             ),
             child: title == "Sirelle-chan"
@@ -225,7 +226,7 @@ class HomeDrawer extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Colors.pink.shade900,
+              color: const Color.fromARGB(255, 7, 41, 10),
             ),
           ),
           onTap: () {
@@ -281,7 +282,15 @@ class HomeDrawer extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(icon, color: Colors.pink.shade700, size: 20),
+      child: Icon(
+        icon,
+        size: 20,
+        color: icon == FontAwesomeIcons.instagram
+            ? const Color(0xFFE1306C) // Instagram
+            : icon == FontAwesomeIcons.facebookF
+                ? const Color(0xFF1877F2) // Facebook
+                : const Color(0xFFFF0000), // YouTube
+      ),
     );
   }
 }

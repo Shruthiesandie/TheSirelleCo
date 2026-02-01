@@ -13,6 +13,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   rive: ^0.12.4
+  font_awesome_flutter: ^10.6.0
   image_picker: ^1.0.7
   country_picker: ^2.0.21
   shimmer: ^3.0.0
