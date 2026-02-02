@@ -114,10 +114,18 @@ class _LovePageState extends State<LovePage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.favorite_border,
-                    size: 72,
-                    color: Colors.pink.shade300,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => AllCategoriesPage()),
+                      );
+                    },
+                    child: Icon(
+                      Icons.favorite_border,
+                      size: 72,
+                      color: const Color.fromARGB(255, 191, 1, 64),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -149,7 +157,7 @@ class _LovePageState extends State<LovePage> {
                       "Explore products",
                       style: TextStyle(
                         letterSpacing: 0.4,
-                        color: Colors.pinkAccent,
+                        color: Color.fromARGB(255, 255, 38, 110),
                       ),
                     ),
                   ),
