@@ -35,11 +35,11 @@ class GiftHamper {
   }
 
   void removeItem(Product product) {
-    items.removeWhere((p) => p.id == product.id);
+    items.removeWhere((p) => p.uiId == product.uiId);
   }
 
   void addItem(Product product) {
-    if (!items.any((p) => p.id == product.id)) {
+    if (!items.any((p) => p.uiId == product.uiId)) {
       items.add(product);
     }
   }
@@ -47,7 +47,7 @@ class GiftHamper {
     return {
       'type': 'hamper',
       'id': id,
-      'items': items.map((p) => p.toMap()).toList(),
+      'items': items.map((p) => p.toJson()).toList(),
       'discountPercent': _discountPercent,
     };
   }
@@ -56,7 +56,7 @@ class GiftHamper {
     return GiftHamper(
       id: map['id'] as String,
       items: (map['items'] as List)
-          .map((e) => Product.fromMap(e as Map<String, dynamic>))
+          .map((e) => Product.fromJson(e as Map<String, dynamic>))
           .toList(),
       discountPercent: map['discountPercent'] as double?,
     );

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class UsernamePage extends StatefulWidget {
   const UsernamePage({super.key});
@@ -234,7 +236,7 @@ class _UsernamePageState extends State<UsernamePage>
           children: [
             TextField(
               controller: _controller,
-              onChanged: checkUsername,
+              onChanged: (_) {},
               decoration: InputDecoration(
                 hintText: "Enter username",
                 prefixIcon: Icon(Icons.person, color: Colors.pink.shade300),
@@ -304,28 +306,43 @@ class _UsernamePageState extends State<UsernamePage>
       onPointerDown: (_) => setState(() => btnScale = 0.95),
       onPointerUp: (_) => setState(() => btnScale = 1.0),
       child: GestureDetector(
-        onTap: status == "available"
-            ? () async {
-                final username = _controller.text.trim().toLowerCase();
-                final user = FirebaseAuth.instance.currentUser;
+        onTap: () async {
+          final username = _controller.text.trim().toLowerCase();
+          final user = FirebaseAuth.instance.currentUser;
 
-                if (user == null) return;
+          if (user == null) return;
 
-                await user.updateDisplayName(username);
+          await user.updateDisplayName(username);
 
-                // 🔑 Sign out before going to Login page
-                await FirebaseAuth.instance.signOut();
+          // 🔁 SAVE USERNAME TO MYSQL VIA NODE BACKEND
+          final res = await http.post(
+            Uri.parse("http://192.168.0.150:3000/username"),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({
+              "firebaseUid": user.uid,
+              "username": username,
+            }),
+          );
 
-                if (!mounted) return;
-                Navigator.pushReplacementNamed(context, "/login");
-              }
-            : null,
+          if (res.statusCode != 200) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Failed to save username")),
+            );
+            return;
+          }
+
+          // 🔑 Sign out before going to Login page
+          await FirebaseAuth.instance.signOut();
+
+          if (!mounted) return;
+          Navigator.pushReplacementNamed(context, "/login");
+        },
         child: AnimatedScale(
           scale: btnScale,
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
           child: AnimatedOpacity(
-            opacity: status == "available" ? 1 : 0.4,
+            opacity: 1,
             duration: const Duration(milliseconds: 300),
             child: Container(
               height: 58,

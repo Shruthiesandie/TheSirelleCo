@@ -50,19 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAaeNAUHaqiAif6H3KpCVxud_33q4GYeGs',
-    appId: '1:87551858129:android:f3136ca8fc97827928bcf0',
-    messagingSenderId: '87551858129',
-    projectId: 'the-sirelle-co-4e308',
-    storageBucket: 'the-sirelle-co-4e308.firebasestorage.app',
+    apiKey: 'AIzaSyA0JO3d9j4I6SoIyd62nZqn05cCIanoVI8',
+    appId: '1:151255964959:android:854c793c3a63f08097e42a',
+    messagingSenderId: '151255964959',
+    projectId: 'thesirelleco-b80d7',
+    storageBucket: 'thesirelleco-b80d7.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyD02Kp2FBA3dEgdNtyxgPhCUuPvIbEZx54',
-    appId: '1:87551858129:ios:e3edf78aca93c3c528bcf0',
-    messagingSenderId: '87551858129',
-    projectId: 'the-sirelle-co-4e308',
-    storageBucket: 'the-sirelle-co-4e308.firebasestorage.app',
-    iosBundleId: 'com.spidey.tscmain',
+    apiKey: 'AIzaSyCHvSFFeI4QLdwv4MReogCIOsxftYrA9mc',
+    appId: '1:151255964959:ios:faec3de509d13f7a97e42a',
+    messagingSenderId: '151255964959',
+    projectId: 'thesirelleco-b80d7',
+    storageBucket: 'thesirelleco-b80d7.firebasestorage.app',
+    iosBundleId: 'com.company.sirelle',
   );
+
 }

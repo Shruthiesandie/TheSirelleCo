@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/product.dart';
-import '../data/products.dart';
 import '../controllers/cart_controllers.dart';
 import '../services/recommendation_engine.dart';
+import '../services/product_gallery.dart';
+
+import '../services/product_service.dart';
+import '../services/behavior_logger.dart';
+
 
 class ProductDetailsPage extends StatefulWidget {
   final Product product;
@@ -33,6 +38,16 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
   @override
   void initState() {
     super.initState();
+    // 🔥 AI Behavior Log — Product page opened
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      BehaviorLogger.log(
+        userId: user.uid,
+        screenName: "product_details_page",
+        actionType: "navigation",
+        actionValue: widget.product.uiId,
+      );
+    }
     _scrollController = ScrollController();
 
     _scrollController.addListener(() {
@@ -65,6 +80,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
+    final List<String> displayImages =
+    ProductGallery.getImages(product.uiId, product.imageUrl);
+    final bool hasMultipleImages = displayImages.length > 1;
 
     return HeroMode(
       enabled: false,
@@ -101,9 +119,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                           (constraints.maxHeight - kToolbarHeight).clamp(0.0, 300.0);
 
                       return PageView.builder(
-                        itemCount: product.images.length,
-                        onPageChanged: (i) =>
-                            setState(() => _currentIndex = i),
+                        itemCount: displayImages.length,
+                        onPageChanged: hasMultipleImages
+                            ? (i) => setState(() => _currentIndex = i)
+                            : null,
                         allowImplicitScrolling: false,
                         padEnds: false,
                         itemBuilder: (context, index) {
@@ -123,7 +142,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                               },
                               child: Image(
                                 image: ResizeImage(
-                                  AssetImage(product.images[index]),
+                                  AssetImage(displayImages[index]),
                                   width: MediaQuery.of(context).size.width.toInt(),
                                 ),
                                 fit: BoxFit.cover,
@@ -187,33 +206,35 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
           ),
 
           // PAGE INDICATORS
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  product.images.length,
-                  (i) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 280),
-                    curve: Curves.easeOutCubic,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: _currentIndex == i ? 18 : 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color:
-                          _currentIndex == i ? Colors.black : Colors.black26,
-                      borderRadius: BorderRadius.circular(6),
+          if (hasMultipleImages)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    displayImages.length,
+                    (i) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeOutCubic,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: _currentIndex == i ? 18 : 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: _currentIndex == i
+                            ? Colors.black
+                            : Colors.black26,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
 
           // DETAILS CONTENT
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 180),
             sliver: SliverList(
               delegate: SliverChildListDelegate(
                 [
@@ -332,8 +353,70 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
 
                   const SizedBox(height: 20),
 
+                  // ✨ LETTER CUSTOMIZATION SECTION
+                  if (product.category.toLowerCase() == "letter") ...[
+                    const SizedBox(height: 28),
+                    const Text(
+                      "CUSTOMIZE YOUR LETTER",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Message input
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        color: Colors.grey.shade50,
+                        border: Border.all(color: Colors.black12),
+                      ),
+                      child: const TextField(
+                        maxLines: 5,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Write what you want inside the letter...",
+                          hintStyle: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Image selection mock UI
+                    const Text(
+                      "Add Photos (Optional)",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    Row(
+                      children: List.generate(
+                        3,
+                        (index) => Container(
+                          margin: const EdgeInsets.only(right: 10),
+                          height: 64,
+                          width: 64,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.black26),
+                          ),
+                          child: const Icon(Icons.add_a_photo_outlined, size: 20),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+                  ],
                   // SIMILAR PRODUCTS
-                  Text(
+                  const Text(
                     "You may also like",
                     style: TextStyle(
                       fontSize: 14,
@@ -343,104 +426,119 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                   ),
                   const SizedBox(height: 16),
 
-                  // RecommendationEngine-powered suggestions (related, non-random)
-                  (() {
-                    final suggestions = RecommendationEngine.recommend(
-                      allProducts: products,
-                      category: widget.product.category,
-                      budget: widget.product.price.toInt(),
-                      vibe: widget.product.vibe,
-                      limit: 6,
-                    ).where((p) => p.id != widget.product.id).toList();
-
-                    // If no relevant suggestions, show a clean fallback
-                    if (suggestions.isEmpty) {
-                      return Container(
-                        height: 160,
-                        alignment: Alignment.center,
-                        child: const Text(
-                          "More from this collection coming soon",
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.black54,
+                  FutureBuilder<List<Product>>(
+                    future: ProductService.fetchProducts(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Container(
+                          height: 160,
+                          alignment: Alignment.center,
+                          child: const Text(
+                            "More from this collection coming soon",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black54,
+                            ),
                           ),
-                        ),
-                      );
-                    }
+                        );
+                      }
 
-                    return SizedBox(
-                      height: 280,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: suggestions.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 14),
-                        addAutomaticKeepAlives: false,
-                        addRepaintBoundaries: true,
-                        itemBuilder: (context, index) {
-                          final item = suggestions[index];
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailsPage(product: item),
-                                ),
-                              );
-                            },
-                            child: SizedBox(
-                              width: 150,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(14),
-                                    child: SizedBox(
-                                      height: 170,
-                                      width: double.infinity,
-                                      child: Image.asset(
-                                        item.thumbnail,
-                                        fit: BoxFit.cover,
-                                        cacheWidth: 300,
-                                        cacheHeight: 400,
-                                        filterQuality: FilterQuality.low,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Center(child: Icon(Icons.broken_image)),
-                                      ),
+                      final List<Product> recommended = RecommendationEngine.recommend(
+                        allProducts: snapshot.data!,
+                        category: product.category,
+                        budget: null,
+                        vibe: null,
+                      );
+
+                      final suggestions = recommended
+                          .where((p) => p.uiId != product.uiId)
+                          .take(6)
+                          .toList();
+
+                      if (suggestions.isEmpty) {
+                        return Container(
+                          height: 160,
+                          alignment: Alignment.center,
+                          child: const Text(
+                            "More from this collection coming soon",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        child: SizedBox(
+                          height: 148,
+                          child: ListView.separated(
+                            physics: const BouncingScrollPhysics(),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: suggestions.length,
+                            separatorBuilder: (_, __) => const SizedBox(width: 12),
+                            itemBuilder: (context, index) {
+                              final item = suggestions[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ProductDetailsPage(product: item),
                                     ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Column(
+                                  );
+                                },
+                                child: SizedBox(
+                                  width: 120,
+                                  child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        item.name,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          height: 1.2,
-                                          fontWeight: FontWeight.w500,
+                                      AspectRatio(
+                                        aspectRatio: 1,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(14),
+                                          child: Image.asset(
+                                            item.imageUrl,
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(
-                                        "₹${item.price}",
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
+                                      SizedBox(
+                                        height: 44,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              item.name,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(fontSize: 12),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              "₹${item.price}",
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  })(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -449,7 +547,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
       ),
       // STICKY CTA (Nike / Zara style)
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -461,20 +559,41 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
           ],
         ),
         child: SizedBox(
-          height: 54,
+          height: 56,
           width: double.infinity,
           child: ValueListenableBuilder<List<dynamic>>(
             valueListenable: CartController.items,
             builder: (context, items, _) {
               final cartItem = items
                   .whereType<CartItem>()
-                  .where((c) => c.product.id == product.id)
+                  .where((c) => c.product.uiId == product.uiId)
                   .toList();
               _quantity = cartItem.isEmpty ? 0 : cartItem.first.quantity;
 
               if (_quantity == 0) {
                 return ElevatedButton(
                   onPressed: () {
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    if (user == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Login to add to cart"),
+                        ),
+                      );
+                      return;
+                    }
+
+                    // 🔥 AI Behavior Log — add to cart
+                    if (user != null) {
+                      BehaviorLogger.log(
+                        userId: user.uid,
+                        screenName: "product_details_page",
+                        actionType: "click",
+                        actionValue: "add_to_cart_" + product.uiId,
+                      );
+                    }
+
                     CartController.add(product);
                     HapticFeedback.mediumImpact();
                     setState(() => _addedFeedback = true);
@@ -536,6 +655,27 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                     IconButton(
                       icon: const Icon(Icons.add),
                       onPressed: () {
+                        final user = FirebaseAuth.instance.currentUser;
+
+                        if (user == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Login to add to cart"),
+                            ),
+                          );
+                          return;
+                        }
+
+                        // 🔥 AI Behavior Log — increase quantity
+                        if (user != null) {
+                          BehaviorLogger.log(
+                            userId: user.uid,
+                            screenName: "product_details_page",
+                            actionType: "click",
+                            actionValue: "increase_qty_" + product.uiId,
+                          );
+                        }
+
                         CartController.add(product);
                         HapticFeedback.lightImpact();
                       },

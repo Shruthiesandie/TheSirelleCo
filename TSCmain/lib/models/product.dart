@@ -1,85 +1,51 @@
 class Product {
-  final String id;
+  final int productId;
+  final String uiId;
   final String name;
-  final String thumbnail;
-  final List<String> images;
+  final double price;
+  final String category;
+  final String imageUrl;
+  final String description;
 
   Product({
-    required this.id,
+    required this.productId,
+    required this.uiId,
     required this.name,
-    required this.thumbnail,
-    required this.images,
+    required this.price,
+    required this.category,
+    required this.imageUrl,
+    required this.description,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'thumbnail': thumbnail,
-      'images': images,
-    };
-  }
-
-  factory Product.fromMap(Map<String, dynamic> map) {
+  factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      thumbnail: map['thumbnail'] as String,
-      images: List<String>.from(map['images'] as List),
+      productId: json['product_id'],
+      uiId: json['ui_id'],
+      name: json['name'],
+      price: json['price'] is num
+          ? (json['price'] as num).toDouble()
+          : double.parse(json['price'].toString()),
+      category: json['category'],
+      imageUrl: json['image_url'],
+      description: json['description'] ?? '',
     );
   }
 
-  /// Auto-calculated product price
-  /// (derived from product ID / category)
-  double get price {
-    if (id.startsWith("boy_friend")) return 1499.0; // boy friend gifts
-    if (id.startsWith("girl_friend")) return 1599.0; // girl friend gifts
-    // Order matters: check longer prefixes first
-    if (id.startsWith("ca")) return 699.0; // caps
-    if (id.startsWith("ce")) return 899.0; // ceramic
-    if (id.startsWith("b")) return 599.0;  // bottles
-    if (id.startsWith("c")) return 799.0;  // candles
-    if (id.startsWith("h")) return 349.0;  // hair accessories
-    if (id.startsWith("k")) return 299.0;  // key chains
-    if (id.startsWith("n")) return 399.0;  // nails
-    if (id.startsWith("p")) return 999.0;  // plushies
-    return 199.0;                          // letters / default
-  }
-
-  /// Explicit alias for price (always non-null double)
-  double get safePrice => price;
-
-  /// Derived category from product ID
-  String get category {
-    if (id.startsWith("boy_friend")) return "boy_friend";
-    if (id.startsWith("girl_friend")) return "girl_friend";
-    if (id.startsWith("ca")) return "caps";
-    if (id.startsWith("ce")) return "ceramic";
-    if (id.startsWith("b")) return "bottles";
-    if (id.startsWith("c")) return "candles";
-    if (id.startsWith("h")) return "hair_accessories";
-    if (id.startsWith("k")) return "key_chains";
-    if (id.startsWith("n")) return "nails";
-    if (id.startsWith("p")) return "plushies";
-    return "letters";
-  }
-
-  /// Lightweight vibe inference (used by AI engine)
-  String get vibe {
-    final nameLower = name.toLowerCase();
-    if (nameLower.contains("cute")) return "cute";
-    if (nameLower.contains("minimal")) return "minimal";
-    if (nameLower.contains("premium")) return "luxury";
-    if (nameLower.contains("soft")) return "soft";
-    return "classic";
-  }
+  Map<String, dynamic> toJson() => {
+        'product_id': productId,
+        'ui_id': uiId,
+        'name': name,
+        'price': price,
+        'category': category,
+        'image_url': imageUrl,
+        'description': description,
+      };
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Product && other.id == id;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Product && other.uiId == uiId;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => uiId.hashCode;
 }

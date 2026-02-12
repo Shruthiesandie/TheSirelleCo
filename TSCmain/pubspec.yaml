@@ -27,13 +27,16 @@ dependencies:
   sqflite: ^2.3.3
   path: ^1.9.0
   cupertino_icons: ^1.0.8
+  custom_refresh_indicator: ^2.2.1
+  
+  
  
   
   
   
 
   # Add these packages for OpenAI support
-  http: ^1.1.0
+  http: ^1.2.0
   dart_openai: ^6.1.1
   firebase_core: ^2.32.0
   firebase_auth: ^4.20.0
@@ -61,6 +64,7 @@ flutter:
     - assets/logo/
     - assets/splash/
     - assets/animation/
+    - assets/animation/pull_refresh.json
     - assets/icons/
     - assets/stamp/
 

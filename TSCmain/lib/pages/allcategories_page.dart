@@ -3,13 +3,15 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:math';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+import '../config/api.dart';
 
 import '../controllers/favorites_controller.dart';
 import '../controllers/hamper_builder_controller.dart';
-import '../data/products.dart';
 import 'product_details_page.dart';
 import '../models/product.dart';
-import '../services/recommendation_engine.dart';
 import '../controllers/cart_controllers.dart';
 import '../models/gift_hamper.dart';
 import 'cart_page.dart';
@@ -43,9 +45,40 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
   int selectedCategoryIndex = 0;
   String selectedCategory = "All";
 
+  List<Product> _products = [];
+  bool _isLoading = true;
+
+  Future<void> _fetchProducts() async {
+    try {
+      final res = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/products'),
+      );
+
+      if (res.statusCode == 200) {
+        final List data = jsonDecode(res.body);
+
+        setState(() {
+          _products = data.map((e) => Product.fromJson(e)).toList();
+          _isLoading = false;
+
+          _allCategoryCachedThumbs = _products
+              .map((p) => p.imageUrl)
+              .where((t) => t.isNotEmpty)
+              .toList();
+          _allCategoryCachedThumbs.shuffle(Random());
+        });
+      } else {
+        _isLoading = false;
+      }
+    } catch (e) {
+      debugPrint('Product fetch error: $e');
+      _isLoading = false;
+    }
+  }
+
   // Badge helper (randomized but stable per product)
-  String? _badgeFor(product) {
-    final r = product.id.hashCode % 5;
+  String? _badgeFor(Product product) {
+    final r = product.uiId.hashCode % 5;
     if (r == 0) return "NEW";
     if (r == 1) return "-20%";
     if (r == 2) return "BESTSELLER";
@@ -71,12 +104,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
   @override
   void initState() {
     super.initState();
-
-    _allCategoryCachedThumbs = products
-        .map((p) => p.thumbnail)
-        .where((t) => t.isNotEmpty)
-        .toList();
-    _allCategoryCachedThumbs.shuffle(Random());
 
     _animController = AnimationController(
       vsync: this,
@@ -105,6 +132,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
         selectedCategory = categories[index];
       }
     }
+    _fetchProducts();
   }
 
   @override
@@ -148,23 +176,43 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_products.isEmpty) {
+      return const Scaffold(
+        body: Center(child: Text('No products found')),
+      );
+    }
     final List<Product> filteredProducts;
 
-    // Recommendations: always exclude current product (if any), shuffle, and limit to 6
-    final List<Product> recommended = List<Product>.from(products)
-      ..shuffle();
 
     if (selectedCategory == "All") {
       // Randomized once per app launch (cached in initState)
       filteredProducts = _allCategoryCachedThumbs
           .map((thumb) =>
-              products.firstWhere((p) => p.thumbnail == thumb))
+              _products.firstWhere((p) => p.imageUrl == thumb))
           .toList();
     } else {
-      // Keep category-specific products in natural order
-      filteredProducts = products.where((p) {
-        final parts = p.thumbnail.split("/");
-        return parts.length > 3 && parts[2] == selectedCategory;
+      // Normalize backend category names to match UI categories
+      String normalize(String value) {
+        return value
+            .toLowerCase()
+            .replaceAll(" ", "_")
+            .replaceAll(RegExp(r"^hair$"), "hair_accessories")
+            .replaceAll("keychain", "key_chain")
+            .replaceAll("plush", "plusie")
+            .replaceAll("boyfriend", "boy_friend")
+            .replaceAll("girlfriend", "girl_friend")
+            .replaceAll(RegExp(r"^cap$"), "caps")
+            .replaceAll(RegExp(r"^bottle$"), "bottles");
+      }
+
+      filteredProducts = _products.where((p) {
+        return normalize(p.category) == normalize(selectedCategory);
       }).toList();
     }
 
@@ -340,10 +388,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                         selectedCategory = categories[index];
                       });
 
-                      // 🔥 AI tracking: category interest
-                      if (categories[index] != "All") {
-                        RecommendationEngine.trackCategoryClick(categories[index]);
-                      }
                     },
                     child: Padding(
                       padding: const EdgeInsets.only(right: 12),
@@ -424,11 +468,23 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               builder: (context) {
                 final List<Product> bannerProducts;
                 if (selectedCategory == "All") {
-                  bannerProducts = List<Product>.from(products);
+                  bannerProducts = List<Product>.from(_products);
                 } else {
-                  bannerProducts = products.where((p) {
-                    final parts = p.thumbnail.split("/");
-                    return parts.length > 3 && parts[2] == selectedCategory;
+                  String normalize(String value) {
+                    return value
+                        .toLowerCase()
+                        .replaceAll(" ", "_")
+                        .replaceAll(RegExp(r"^hair$"), "hair_accessories")
+                        .replaceAll("keychain", "key_chain")
+                        .replaceAll("plush", "plusie")
+                        .replaceAll("boyfriend", "boy_friend")
+                        .replaceAll("girlfriend", "girl_friend")
+                        .replaceAll(RegExp(r"^cap$"), "caps")
+                        .replaceAll(RegExp(r"^bottle$"), "bottles");
+                  }
+
+                  bannerProducts = _products.where((p) {
+                    return normalize(p.category) == normalize(selectedCategory);
                   }).toList();
                 }
                 bannerProducts.shuffle();
@@ -563,8 +619,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                   padding: const EdgeInsets.only(top: 16),
                   child: GestureDetector(
                     onTap: () {
-                      // 🔥 AI tracking: hero product viewed
-                      RecommendationEngine.trackProductView(bannerProducts.first);
 
                       Navigator.push(
                         context,
@@ -594,7 +648,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(28),
                               child: Image.asset(
-                                bannerProducts.first.thumbnail,
+                                bannerProducts.first.imageUrl,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -651,8 +705,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                     if (widget.isHamperMode) {
                       HamperBuilderController.toggle(product);
                     } else {
-                      // 🔥 AI tracking: product viewed
-                      RecommendationEngine.trackProductView(product);
 
                       Navigator.push(
                         context,
@@ -683,7 +735,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
                         children: [
                           Positioned.fill(
                             child: Image.asset(
-                              product.thumbnail,
+                              product.imageUrl,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -805,106 +857,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage>
               },
             ),
 
-            // "You may also like" recommendations section
-            if (recommended.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "You may also like",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 260,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: recommended.length > 6 ? 6 : recommended.length,
-                  itemBuilder: (context, index) {
-                    final product = recommended[index];
-
-                    return GestureDetector(
-                      onTap: () {
-                        RecommendationEngine.trackProductView(product);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ProductDetailsPage(product: product),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: 180,
-                        margin: const EdgeInsets.only(right: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 14,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(24),
-                                ),
-                                child: Image.asset(
-                                  product.thumbnail,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    product.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    "₹${product.price}",
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
 
               ],
             ),

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "87551858129",
-    "project_id": "the-sirelle-co-4e308",
-    "storage_bucket": "the-sirelle-co-4e308.firebasestorage.app"
+    "project_number": "151255964959",
+    "project_id": "thesirelleco-b80d7",
+    "storage_bucket": "thesirelleco-b80d7.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:87551858129:android:f3136ca8fc97827928bcf0",
+        "mobilesdk_app_id": "1:151255964959:android:854c793c3a63f08097e42a",
         "android_client_info": {
           "package_name": "com.example.sirelle"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAaeNAUHaqiAif6H3KpCVxud_33q4GYeGs"
+          "current_key": "AIzaSyA0JO3d9j4I6SoIyd62nZqn05cCIanoVI8"
         }
       ],
       "services": {

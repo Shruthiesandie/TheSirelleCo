@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/product.dart';
 import '../controllers/favorites_controller.dart';
+import '../controllers/cart_controllers.dart';
 import '../controllers/hamper_builder_controller.dart';
 
 class ProductCard extends StatelessWidget {
@@ -50,7 +52,7 @@ class ProductCard extends StatelessWidget {
                           borderRadius:
                               const BorderRadius.vertical(top: Radius.circular(14)),
                           child: Image.asset(
-                            product.thumbnail,
+                            product.imageUrl,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -63,8 +65,19 @@ class ProductCard extends StatelessWidget {
                             isFav ? Icons.favorite : Icons.favorite_border,
                             color: Colors.pink,
                           ),
-                          onPressed: () {
-                            FavoritesController.toggle(product);
+                          onPressed: () async {
+                            final user = FirebaseAuth.instance.currentUser;
+
+                            if (user == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Login to use wishlist"),
+                                ),
+                              );
+                              return;
+                            }
+
+                            await FavoritesController.toggle(product);
                           },
                         ),
                       ),
@@ -79,7 +92,7 @@ class ProductCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            product.thumbnail.split("/")[2]
+                            product.imageUrl.split("/")[2]
                                 .replaceAll("_", " ")
                                 .toUpperCase(),
                             style: const TextStyle(
@@ -140,7 +153,24 @@ class ProductCard extends StatelessWidget {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: onAddToCart,
+                            onPressed: () async {
+                              final user = FirebaseAuth.instance.currentUser;
+
+                              if (user == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Login to add items to cart"),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              await CartController.add(product);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Added to cart")),
+                              );
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.pink,
                               padding:

@@ -22,8 +22,11 @@ class HomeBottomNavBar extends StatefulWidget {
 }
 
 class _HomeBottomNavBarState extends State<HomeBottomNavBar>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {  // Changed from SingleTickerProvider to support multiple controllers
+  
   late final AnimationController _pulseController;
+  late final AnimationController _glowController;        // NEW: For radiating rings
+  late final AnimationController _centerPulseController; // NEW: For breathing effect
 
   @override
   void initState() {
@@ -32,11 +35,25 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat();
+    
+    // NEW: Initialize glow rings (continuous)
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat();
+    
+    // NEW: Initialize center breathing (reversing)
+    _centerPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
+    _glowController.dispose();        // NEW
+    _centerPulseController.dispose(); // NEW
     super.dispose();
   }
 
@@ -81,8 +98,8 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
                       _navItem(Icons.home_rounded, 0),
                       _navItem(Icons.favorite_border, 1),
 
-                      // Center floating action button
-                      _centerButton(),
+                      // UPGRADED CENTER BUTTON with glow & particles
+                      _centerTransformationButton(),
 
                       _navItem(Icons.shopping_bag_outlined, 3),
                       _navItem(Icons.person, 4),
@@ -97,47 +114,134 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
     );
   }
 
-  /// Center highlighted circular button (Categories)
-  Widget _centerButton() {
+  /// ENHANCED CENTER BUTTON - Glowing Rings & Particles
+  Widget _centerTransformationButton() {
     final bool isSelected = widget.selectedIndex == 2;
-
+    
+    // Complex animation values from controllers
+    final double pulseScale = 1 + (_centerPulseController.value * 0.08);
+    final double glowIntensity = 0.3 + (_centerPulseController.value * 0.2);
+    
     return GestureDetector(
-      onTap: () => widget.onItemTap(2),
-      child: AnimatedPadding(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutBack,
-        padding: EdgeInsets.only(bottom: isSelected ? 10 : 4),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutBack,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Colors.pinkAccent,
-                Color(0xFFB97BFF),
+      onTap: () {
+        HapticFeedback.heavyImpact(); // Upgraded from light to heavy
+        widget.onItemTap(2);
+      },
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_glowController, _centerPulseController]),
+        builder: (context, child) {
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
+            curve: Sprung.overDamped,
+            transform: Matrix4.identity()
+              ..translate(0.0, isSelected ? -8.0 : 0.0, 0.0)
+              ..scale(isSelected ? pulseScale : 1.0),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // GLOW RINGS (only when selected)
+                if (isSelected) ...[
+                  ...List.generate(3, (index) {
+                    final double t = (_glowController.value + (index * 0.33)) % 1.0;
+                    final double scale = 1 + (t * 0.5);
+                    final double opacity = (1 - t) * glowIntensity;
+                    
+                    return Container(
+                      width: 66,
+                      height: 66,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            Colors.pinkAccent.withOpacity(opacity),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                      child: Transform.scale(
+                        scale: scale,
+                        child: const SizedBox.shrink(),
+                      ),
+                    );
+                  }),
+                ],
+                
+                // MAIN BUTTON CONTAINER
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Sprung.underDamped,
+                  width: isSelected ? 52 : 48,
+                  height: isSelected ? 52 : 48,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isSelected
+                          ? [
+                              Colors.pinkAccent.shade200,
+                              const Color(0xFFB97BFF),
+                              Colors.pinkAccent,
+                            ]
+                          : [
+                              Colors.pink.shade100,
+                              Colors.pink.shade50,
+                            ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pinkAccent.withOpacity(isSelected ? 0.5 : 0.25),
+                        blurRadius: isSelected ? 8 : 4,
+                        offset: const Offset(0, 8),
+                        spreadRadius: -5,
+                      ),
+                    ],
+                  ),
+                  child: AnimatedScale(
+                    scale: isSelected ? 1.1 : 1.0,
+                    duration: const Duration(milliseconds: 260),
+                    curve: Curves.easeOutBack,
+                    child: Icon(
+                      isSelected ? Icons.grid_view_rounded : Icons.grid_view_outlined,
+                      size: 24,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                
+                // PARTICLE BURST (8 particles radiating)
+                if (isSelected) ...List.generate(8, (index) {
+                  final double angle = (index / 8) * 2 * math.pi;
+                  final double t = _centerPulseController.value;
+                  final double distance = 35 + (t * 10);
+                  final double size = 4 * (1 - t);
+                  
+                  return Positioned(
+                    left: 29 + math.cos(angle) * distance * t, // Center offset
+                    top: 29 + math.sin(angle) * distance * t,
+                    child: Opacity(
+                      opacity: 1 - t,
+                      child: Container(
+                        width: size,
+                        height: size,
+                        decoration: BoxDecoration(
+                          color: Colors.pinkAccent,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.pinkAccent.withOpacity(0.8),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
               ],
             ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.pinkAccent.withOpacity(0.35),
-                blurRadius: isSelected ? 22 : 14,
-                offset: const Offset(0, 6),
-              )
-            ],
-          ),
-          child: AnimatedScale(
-            scale: isSelected ? 1.1 : 1.0,
-            duration: const Duration(milliseconds: 260),
-            curve: Curves.easeOutBack,
-            child: const Icon(
-              Icons.grid_view_rounded,
-              size: 30,
-              color: Colors.white,
-            ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -220,5 +324,34 @@ class _HomeBottomNavBarState extends State<HomeBottomNavBar>
         ),
       ),
     );
+  }
+}
+
+// Spring physics helper for luxury feel
+class Sprung extends Curve {
+  final double stiffness;
+  final double damping;
+  
+  const Sprung._(this.stiffness, this.damping);
+  
+  static const Sprung underDamped = Sprung._(100, 10);
+  static const Sprung overDamped = Sprung._(80, 20);
+  
+  @override
+  double transform(double t) {
+    final double omega = math.sqrt(stiffness);
+    final double zeta = damping / (2 * math.sqrt(stiffness));
+    
+    if (zeta < 1) {
+      final double omegaD = omega * math.sqrt(1 - zeta * zeta);
+      return 1 - 
+        math.exp(-zeta * omega * t) * 
+        (math.cos(omegaD * t) + (zeta * omega / omegaD) * math.sin(omegaD * t));
+    } else {
+      final double r1 = -omega * (zeta - math.sqrt(zeta * zeta - 1));
+      final double r2 = -omega * (zeta + math.sqrt(zeta * zeta - 1));
+      return 1 - 
+        (math.exp(r1 * t) * r2 - math.exp(r2 * t) * r1) / (r2 - r1);
+    }
   }
 }

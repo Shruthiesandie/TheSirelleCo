@@ -1,5 +1,5 @@
-import '../models/product.dart';
 import '../models/user_profile.dart';
+import '../models/product.dart';
 
 /// Hybrid AI Recommendation Engine
 /// MCA Minor Project – Rule-based + Learning-based System
@@ -23,13 +23,13 @@ class RecommendationEngine {
   }
 
   static void trackProductView(Product product) {
-    _profile.productViews[product.id] =
-        (_profile.productViews[product.id] ?? 0) + 1;
+    _profile.productViews[product.imageUrl] =
+        (_profile.productViews[product.imageUrl] ?? 0) + 1;
   }
 
   static void trackAddToCart(Product product) {
-    _profile.addToCartCounts[product.id] =
-        (_profile.addToCartCounts[product.id] ?? 0) + 1;
+    _profile.addToCartCounts[product.imageUrl] =
+        (_profile.addToCartCounts[product.imageUrl] ?? 0) + 1;
   }
 
   // =====================
@@ -39,27 +39,24 @@ class RecommendationEngine {
   static List<Product> recommend({
     required List<Product> allProducts,
     String? category,
-    int? budget,
-    String? vibe,
-    int limit = 6,
+    double? budget,
+    int limit = 6, required vibe,
   }) {
     // ---------- RULE-BASED FILTERING ----------
     final filtered = allProducts.where((product) {
       if (budget != null && product.price > budget) return false;
 
-      if (category != null) {
-        if (product.category != category) return false;
+      if (category != null && product.category != category) {
+        return false;
       }
-
-      if (vibe != null && product.vibe != vibe) return false;
 
       return true;
     }).toList();
 
     // ---------- LEARNING-BASED SCORING ----------
     filtered.sort((a, b) {
-      final scoreA = _score(a, budget, vibe);
-      final scoreB = _score(b, budget, vibe);
+      final scoreA = _score(a, budget);
+      final scoreB = _score(b, budget);
       return scoreB.compareTo(scoreA);
     });
 
@@ -70,26 +67,22 @@ class RecommendationEngine {
   // SCORING FUNCTION
   // =====================
 
-  static double _score(Product product, int? budget, String? vibe) {
+  static double _score(Product product, double? budget) {
     final categoryPreference =
         (_profile.categoryClicks[product.category] ?? 0) * 0.4;
 
     final productInterest =
-        (_profile.productViews[product.id] ?? 0) * 0.2;
+        (_profile.productViews[product.imageUrl] ?? 0) * 0.2;
 
     final cartIntent =
-        (_profile.addToCartCounts[product.id] ?? 0) * 0.2;
+        (_profile.addToCartCounts[product.imageUrl] ?? 0) * 0.2;
 
     final budgetMatch =
         (budget != null && product.price <= budget) ? 0.3 : 0.0;
 
-    final vibeMatch =
-        (vibe != null && product.vibe == vibe) ? 0.2 : 0.0;
-
     return categoryPreference +
         productInterest +
         cartIntent +
-        budgetMatch +
-        vibeMatch;
+        budgetMatch;
   }
 }

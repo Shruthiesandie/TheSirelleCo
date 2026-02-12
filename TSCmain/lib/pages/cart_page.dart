@@ -5,7 +5,10 @@ import '../models/gift_hamper.dart';
 import '../controllers/hamper_builder_controller.dart';
 import '../pages/allcategories_page.dart';
 import '../pages/love_page.dart';
+
 import '../controllers/favorites_controller.dart';
+import '../pages/address_book_page.dart';
+import '../pages/checkout_page.dart';
 
 
 class CartPage extends StatefulWidget {
@@ -16,6 +19,152 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
+  // ────────────────────────────────
+  // CHECKOUT PROGRESS, DISCOUNT, ADDRESS UI
+  Widget _checkoutProgress() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      child: Row(
+        children: [
+          _stepCircle("My Bag", true),
+          _stepLine(),
+          _stepCircle("Address", true),
+          _stepLine(),
+          _stepCircle("Payment", false),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepCircle(String label, bool active) {
+    return Column(
+      children: [
+        Container(
+          height: 26,
+          width: 26,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: active ? Colors.pinkAccent : Colors.grey.shade300,
+          ),
+          child: Icon(
+            active ? Icons.check : Icons.circle,
+            size: 14,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: active ? Colors.pinkAccent : Colors.black45,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _stepLine() {
+    return Expanded(
+      child: Container(
+        height: 2,
+        color: Colors.pinkAccent.withOpacity(0.3),
+        margin: const EdgeInsets.only(bottom: 18),
+      ),
+    );
+  }
+
+  Widget _discountBanner() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFFE3EE), Color(0xFFFFF6FA)],
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: const [
+            Icon(Icons.percent, color: Colors.pinkAccent),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "Get 10% extra OFF with Sirelle Membership",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _deliveryAddressSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.location_on_outlined, color: Colors.pinkAccent),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Delivering to",
+                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    CartController.selectedAddress.value ?? "",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "Estimated delivery: $estimatedDelivery",
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AddressBookPage(selectMode: true),
+                  ),
+                );
+                if (result != null) {
+                  CartController.selectedAddress.value = result;
+                }
+              },
+              child: const Text(
+                "CHANGE",
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   bool useWallet = false;
   bool giftWrap = false;
   bool orderProtection = false;
@@ -23,6 +172,10 @@ class _CartPageState extends State<CartPage> {
   bool showSellerNote = false;
   bool showGiftMessage = false;
   String deliveryOption = "3–5 days";
+
+  // Address & ETA helper model
+  String? selectedAddress = "Vishruth, Flat 12, Indiranagar, Bangalore";
+  String estimatedDelivery = "Tomorrow, Feb 4";
 
   static const int walletBalance = 120;
   static const int giftWrapFee = 49;
@@ -174,28 +327,45 @@ class _CartPageState extends State<CartPage> {
                   ? const NeverScrollableScrollPhysics()
                   : const BouncingScrollPhysics(),
               children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(20, 8, 20, 4),
-                  child: Text(
-                    "Your Bag",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.4,
+            ValueListenableBuilder<List<dynamic>>(
+              valueListenable: CartController.items,
+              builder: (context, items, _) {
+                if (items.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(20, 8, 20, 4),
+                      child: Text(
+                        "Your Bag",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
-                  child: Text(
-                    "Review your picks before checkout",
-                    style: TextStyle(fontSize: 13, color: Colors.black54),
-                  ),
-                ),
-              ],
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
+                      child: Text(
+                        "Review your picks before checkout",
+                        style: TextStyle(fontSize: 13, color: Colors.black54),
+                      ),
+                    ),
+                    _checkoutProgress(),
+                    _discountBanner(),
+                    _deliveryAddressSection(),
+                    Container(
+                      height: 1,
+                      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      color: Colors.black12,
+                    ),
+                  ],
+                );
+              },
             ),
 
             Container(
@@ -778,7 +948,24 @@ class _CartPageState extends State<CartPage> {
                         elevation: 0,
                         overlayColor: Colors.pinkAccent.withOpacity(0.1),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        if (CartController.selectedAddress.value == null || CartController.selectedAddress.value!.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Please select a delivery address"),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          return;
+                        }
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CheckoutPage(),
+                          ),
+                        );
+                      },
                       child: const Text(
                         "Checkout Securely",
                         style: TextStyle(
@@ -902,7 +1089,7 @@ class _CartItemCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.asset(
-                item.product.thumbnail,
+                item.product.imageUrl,
                 height: 80,
                 width: 80,
                 fit: BoxFit.cover,

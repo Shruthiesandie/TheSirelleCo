@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../config/api.dart';
 
 import '../../models/product.dart';
 import '../../models/gift_hamper.dart';
@@ -17,14 +19,14 @@ class CartItem {
   });
 
   Map<String, dynamic> toMap() => {
-        'type': 'product',
-        'product': product.toMap(),
-        'quantity': quantity,
-      };
+    'type': 'product',
+    'product': product.toJson(),
+    'quantity': quantity,
+  };
 
   factory CartItem.fromMap(Map<String, dynamic> map) {
     return CartItem(
-      product: Product.fromMap(map['product']),
+      product: Product.fromJson(map['product']),
       quantity: map['quantity'] ?? 1,
     );
   }
@@ -34,61 +36,112 @@ class CartController {
   static final ValueNotifier<List<Object>> items =
       ValueNotifier<List<Object>>([]);
 
+  /// Always assign a NEW list so ValueNotifier rebuilds listeners (Checkout, Cart UI, etc.)
+  static void _setItems(List<Object> newItems) {
+    items.value = List<Object>.from(newItems);
+  }
+
   static String? editingHamperId;
+
+  /// Selected delivery address for checkout (persisted per user UID)
+  static final ValueNotifier<String?> selectedAddress = ValueNotifier<String?>(null)
+    ..addListener(() async {
+      final prefs = await SharedPreferences.getInstance();
+      final uid = _uid ?? 'guest';
+      final key = 'selected_address_$uid';
+
+      final value = selectedAddress.value;
+      if (value == null || value.isEmpty) {
+        await prefs.remove(key);
+      } else {
+        await prefs.setString(key, value);
+      }
+    });
 
   static String? get _uid => FirebaseAuth.instance.currentUser?.uid;
 
-  static String get _storageKey =>
-      _uid == null ? 'cart_guest' : 'cart_$_uid';
+  /// Restore last selected address for the CURRENT user
+  static Future<void> restoreSavedAddress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final uid = _uid ?? 'guest';
+    final key = 'selected_address_$uid';
+
+    final saved = prefs.getString(key);
+    if (saved != null && saved.isNotEmpty) {
+      selectedAddress.value = saved;
+    } else {
+      selectedAddress.value = null;
+    }
+  }
+
+  /// Listen for auth changes and auto-switch address memory
+  static void attachAuthListener() {
+    FirebaseAuth.instance.authStateChanges().listen((_) async {
+      await restoreSavedAddress();
+    });
+  }
+
 
   /// Load cart for current user (call after login)
   static Future<void> loadForCurrentUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_storageKey);
-
-    if (raw == null) {
+    final uid = _uid;
+    if (uid == null) {
       items.value = [];
+      await restoreSavedAddress();
       return;
     }
 
-    final List decoded = jsonDecode(raw);
-    items.value = decoded.map<Object>((e) {
-      if (e['type'] == 'product') {
-        return CartItem.fromMap(e);
-      } else {
-        return GiftHamper.fromMap(e);
+    try {
+      final res = await http.get(
+        Uri.parse("${ApiConfig.baseUrl}/cart/$uid"),
+      );
+
+      if (res.statusCode != 200) {
+        items.value = [];
+        return;
       }
-    }).toList();
+
+      final List data = jsonDecode(res.body);
+
+      _setItems(data.map<Object>((e) {
+        return CartItem(
+          product: Product(
+            productId: e['product_id'],
+            uiId: e['ui_id'] ?? e['product_id'].toString(),
+            name: e['name'],
+            price: double.parse(e['price'].toString()),
+            category: e['category'],
+            imageUrl: e['image_url'],
+            description: e['description'] ?? '',
+          ),
+          quantity: e['quantity'] ?? 1,
+        );
+      }).toList());
+      await restoreSavedAddress();
+    } catch (e) {
+      items.value = [];
+    }
   }
 
   static Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    final encoded = jsonEncode(
-      items.value.map((e) {
-        if (e is CartItem) return e.toMap();
-        if (e is GiftHamper) return e.toMap();
-        return {};
-      }).toList(),
-    );
-    await prefs.setString(_storageKey, encoded);
+    // Persistence handled by backend (MySQL)
   }
 
   /// Add product to cart
   static Future<void> add(Product product) async {
-    final list = List<Object>.from(items.value);
+    final uid = _uid;
+    if (uid == null) return;
 
-    final index = list.indexWhere(
-      (e) => e is CartItem && e.product.id == product.id,
+    await http.post(
+      Uri.parse("${ApiConfig.baseUrl}/cart/add"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "uid": uid,
+        "ui_id": product.uiId,
+      }),
     );
 
-    if (index != -1) {
-      (list[index] as CartItem).quantity += 1;
-    } else {
-      list.add(CartItem(product: product));
-    }
-
-    items.value = list;
-    await _persist();
+    await loadForCurrentUser();
   }
 
   static Future<void> increase(Product product) async {
@@ -96,37 +149,40 @@ class CartController {
   }
 
   static Future<void> decrease(Product product) async {
-    final list = List<Object>.from(items.value);
+    final uid = _uid;
+    if (uid == null) return;
 
-    final index = list.indexWhere(
-      (e) => e is CartItem && e.product.id == product.id,
+    await http.post(
+      Uri.parse("${ApiConfig.baseUrl}/cart/remove"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "uid": uid,
+        "ui_id": product.uiId,
+      }),
     );
 
-    if (index != -1) {
-      final item = list[index] as CartItem;
-      if (item.quantity > 1) {
-        item.quantity -= 1;
-      } else {
-        list.removeAt(index);
-      }
-      items.value = list;
-      await _persist();
-    }
+    await loadForCurrentUser();
   }
 
   static Future<void> remove(Product product) async {
-    final list = List<Object>.from(items.value)
-      ..removeWhere(
-        (e) => e is CartItem && e.product.id == product.id,
-      );
+    final uid = _uid;
+    if (uid == null) return;
 
-    items.value = list;
-    await _persist();
+    await http.post(
+      Uri.parse("${ApiConfig.baseUrl}/cart/remove"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "uid": uid,
+        "ui_id": product.uiId,
+      }),
+    );
+
+    await loadForCurrentUser();
   }
 
   static int quantity(Product product) {
     final item = items.value.firstWhere(
-      (e) => e is CartItem && e.product.id == product.id,
+      (e) => e is CartItem && e.product.uiId == product.uiId,
       orElse: () => CartItem(product: product, quantity: 0),
     ) as CartItem;
     return item.quantity;
@@ -134,14 +190,19 @@ class CartController {
 
   static bool contains(Product product) {
     return items.value.any(
-      (item) => item is CartItem && item.product.id == product.id,
+      (item) => item is CartItem && item.product.uiId == product.uiId,
     );
   }
 
   static Future<void> clear() async {
-    items.value = [];
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_storageKey);
+    final uid = _uid;
+    if (uid == null) return;
+
+    await http.delete(
+      Uri.parse("${ApiConfig.baseUrl}/cart/$uid"),
+    );
+
+    _setItems([]);
   }
 
   static int get count {
@@ -182,14 +243,14 @@ class CartController {
     }
 
     editingHamperId = null;
-    items.value = list;
+    _setItems(list);
     await _persist();
   }
 
   static Future<void> removeHamper(GiftHamper hamper) async {
     final list = List<Object>.from(items.value)
       ..removeWhere((e) => e is GiftHamper && e.id == hamper.id);
-    items.value = list;
+    _setItems(list);
     await _persist();
   }
 

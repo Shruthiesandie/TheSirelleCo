@@ -1,5 +1,4 @@
 platform :ios, '13.0'
-
 use_modular_headers!
 
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'

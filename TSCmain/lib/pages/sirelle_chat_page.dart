@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../pages/love_page.dart';
 import '../pages/product_details_page.dart';
 import '../services/ai_service.dart';
-import '../services/ai_learning_service.dart';
-import '../data/products.dart';
 import '../models/product.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../config/api.dart';
 
 class SirelleChatPage extends StatefulWidget {
   const SirelleChatPage({super.key});
@@ -15,6 +17,21 @@ class SirelleChatPage extends StatefulWidget {
 }
 
 class _SirelleChatPageState extends State<SirelleChatPage> {
+  List<Product> _products = [];
+  bool _productsLoaded = false;
+
+  Future<void> _fetchProducts() async {
+    try {
+      final res = await http.get(Uri.parse('${ApiConfig.baseUrl}/products'));
+      if (res.statusCode == 200) {
+        final List data = jsonDecode(res.body);
+        _products = data.map((e) => Product.fromJson(e)).toList();
+        _productsLoaded = true;
+      }
+    } catch (e) {
+      _productsLoaded = false;
+    }
+  }
 
   // --- Virtual category mapping for friend groups
   static const Map<String, List<String>> _virtualCategoryMap = {
@@ -50,7 +67,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
   }
   // Helper: determine category from product thumbnail
   String _productCategory(Product p) {
-    final t = p.thumbnail.toLowerCase();
+    final t = p.imageUrl.toLowerCase();
     if (t.contains('bottle')) return 'bottles';
     if (t.contains('candle')) return 'candle';
     if (t.contains('cap')) return 'caps';
@@ -224,6 +241,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
   Future<void> _initChat() async {
     await _loadChatHistory();
     await _loadMemory();
+    await _fetchProducts();
 
     // 🔁 Reset product flow on fresh chat open (do not auto-assume category)
     _activeBudget = null;
@@ -329,6 +347,12 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
 
     // ===== STRICT BUDGET FLOW =====
     if (parsedBudget != null) {
+      if (!_productsLoaded) {
+        setState(() {
+          _messages.add(_ChatMessage.bot("⏳ Loading products… please try again in a moment 💗"));
+        });
+        return;
+      }
       setState(() {
         _messages.add(_ChatMessage.user(text));
       });
@@ -337,7 +361,7 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
       _showProducts = false;
       _shownProductIds.clear();
 
-      final underBudget = products.where((p) => p.price <= parsedBudget).toList();
+      final underBudget = _products.where((p) => p.price <= parsedBudget).toList();
 
       if (underBudget.isEmpty) {
         setState(() {
@@ -426,11 +450,17 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
 
     // ===== CATEGORY SELECTION / SWITCH AFTER BUDGET =====
     if (_activeBudget != null && hasExplicitCategory) {
+      if (!_productsLoaded) {
+        setState(() {
+          _messages.add(_ChatMessage.bot("⏳ Loading products… please try again in a moment 💗"));
+        });
+        return;
+      }
       setState(() {
         _messages.add(_ChatMessage.user(text));
       });
 
-      final catProducts = products.where((p) {
+      final catProducts = _products.where((p) {
         if (p.price > _activeBudget!) return false;
 
         final normalized = _normalizeCategory(_productCategory(p));
@@ -468,9 +498,6 @@ class _SirelleChatPageState extends State<SirelleChatPage> {
 
       _activeCategory = detectedCategory;
       _showProducts = true;
-      // 🔁 Learning-based AI: record user preference silently
-      AiLearningService.recordCategory(_activeCategory!);
-      AiLearningService.recordBudget(_activeBudget!);
 
       setState(() {
         final reasonText = _vibe != null
@@ -931,28 +958,27 @@ class _ProductList extends StatelessWidget {
       _productCategory = (p) => 'unknown';
     }
 
-    final available = products.where((p) {
-      if (p.price > budget) return false;
-      if (category != null && state != null) {
-        final normalized = state._normalizeCategory(_productCategory!(p));
-
-        // Handle virtual categories like boyfriend / girlfriend
-        if (_SirelleChatPageState._virtualCategoryMap.containsKey(category)) {
-          if (!_SirelleChatPageState._virtualCategoryMap[category]!
-              .contains(normalized)) {
-            return false;
-          }
-        } else {
-          // Normal category comparison
-          if (category != null && normalized != state._normalizeCategory(category!)) {
-            return false;
-          }
-        }
-      }
-      if (_shownProductIds.contains(p.id)) return false;
-      return true;
-    }).toList()
-      ..shuffle();
+    final List<Product> available = state == null
+        ? <Product>[]
+        : state._products.where((p) {
+            if (p.price > budget) return false;
+            if (category != null) {
+              final normalized = state._normalizeCategory(_productCategory!(p));
+              if (_SirelleChatPageState._virtualCategoryMap.containsKey(category)) {
+                if (!_SirelleChatPageState._virtualCategoryMap[category]!
+                    .contains(normalized)) {
+                  return false;
+                }
+              } else {
+                if (normalized != state._normalizeCategory(category!)) {
+                  return false;
+                }
+              }
+            }
+            if (_shownProductIds.contains(p.uiId)) return false;
+            return true;
+          }).toList()
+          ..shuffle();
 
     if (available.isEmpty) {
       return Padding(
@@ -969,7 +995,7 @@ class _ProductList extends StatelessWidget {
 
     final toShow = available.take(3).toList();
     for (final p in toShow) {
-      _shownProductIds.add(p.id);
+      _shownProductIds.add(p.uiId);
     }
 
     return Column(
@@ -1019,10 +1045,23 @@ class _ProductChatCardDynamic extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(14),
               child: Image.asset(
-                product.thumbnail,
+                product.imageUrl,
                 width: 64,
                 height: 64,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: 64,
+                    height: 64,
+                    color: Colors.pink.shade100,
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.image_not_supported,
+                      color: Colors.pink.shade400,
+                      size: 28,
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(width: 12),
@@ -1044,13 +1083,30 @@ class _ProductChatCardDynamic extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      final user = FirebaseAuth.instance.currentUser;
+
+                      if (user == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Login to add to cart")),
+                        );
+                        return;
+                      }
+
+                      await http.post(
+                        Uri.parse('${ApiConfig.baseUrl}/cart/add'),
+                        headers: {'Content-Type': 'application/json'},
+                        body: jsonEncode({
+                          'firebase_uid': user.uid,
+                          'product_id': product.uiId,
+                          'quantity': 1,
+                        }),
+                      );
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text("${product.name} added to cart 💗"),
                           backgroundColor: Colors.pink.shade400,
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 2),
                         ),
                       );
                     },

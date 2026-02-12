@@ -4,6 +4,7 @@ import 'l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'controllers/app_locale.dart';
 import 'controllers/app_theme.dart';
+import 'controllers/cart_controllers.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -29,6 +30,7 @@ Future<void> main() async {
 
   await AppLocale.load();
   await AppTheme.load();
+  CartController.attachAuthListener();
 
   runApp(const MyRootApp());
 }

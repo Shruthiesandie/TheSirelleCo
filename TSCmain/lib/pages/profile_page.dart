@@ -9,6 +9,7 @@ import '../pages/login_page.dart';
 import 'package:sirelle/l10n/app_localizations.dart';
 import 'package:sirelle/controllers/app_locale.dart';
 import 'package:sirelle/controllers/app_theme.dart';
+import 'address_book_page.dart';
 // import other packages as needed for your app routing/state management
 
 // ────────────── FULL-PAGE ADDRESS FORM ──────────────
@@ -874,8 +875,6 @@ class _ProfilePageState extends State<ProfilePage>
   String blood = '—';
   bool _pressed = false;
   String theme = 'pink';
-  List<String> addresses = [];
-  int defaultAddressIndex = -1;
   Color _themeBg() {
     switch (theme) {
       case 'beige':
@@ -931,8 +930,6 @@ class _ProfilePageState extends State<ProfilePage>
       birth = prefs.getString('birth') ?? birth;
       height = prefs.getString('height') ?? height;
       blood = prefs.getString('blood') ?? blood;
-      addresses = prefs.getStringList('addresses') ?? [];
-      defaultAddressIndex = prefs.getInt('default_address_index') ?? -1;
     });
   }
 
@@ -955,8 +952,6 @@ class _ProfilePageState extends State<ProfilePage>
     await prefs.setString('birth', birth);
     await prefs.setString('height', height);
     await prefs.setString('blood', blood);
-    await prefs.setStringList('addresses', addresses);
-    await prefs.setInt('default_address_index', defaultAddressIndex);
   }
 
   Future<void> _editField(String label, String current, Function(String) onSave) async {
@@ -988,242 +983,6 @@ class _ProfilePageState extends State<ProfilePage>
     super.dispose();
   }
 
-  // ────────────── ADDRESS MANAGEMENT ──────────────
-  void _openAddressSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            return Container(
-              padding: EdgeInsets.fromLTRB(
-                18,
-                12,
-                18,
-                MediaQuery.of(context).viewInsets.bottom + 18,
-              ),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // drag handle
-                  Center(
-                    child: Container(
-                      width: 42,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.black12,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Saved Addresses',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => _addAddress(setSheetState),
-                        child: const Text(
-                          '+ ADD NEW',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  if (addresses.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 32),
-                      child: Center(
-                        child: Column(
-                          children: const [
-                            Icon(Icons.location_on_outlined,
-                                size: 48, color: Colors.black26),
-                            SizedBox(height: 12),
-                            Text(
-                              'No saved addresses',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Add an address to get faster delivery',
-                              style: TextStyle(color: Colors.black54),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  ...List.generate(addresses.length, (i) {
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.black12),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            defaultAddressIndex == i
-                                ? Icons.check_circle
-                                : Icons.location_on_outlined,
-                            size: 22,
-                            color: defaultAddressIndex == i
-                                ? Colors.green
-                                : Colors.black54,
-                          ),
-                          const SizedBox(width: 12),
-                          Flexible(
-                            fit: FlexFit.loose,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (defaultAddressIndex == i)
-                                  Container(
-                                    margin: const EdgeInsets.only(bottom: 6),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.shade50,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: const Text(
-                                      'DEFAULT',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.green,
-                                      ),
-                                    ),
-                                  ),
-                                Text(
-                                  addresses[i],
-                                  style: const TextStyle(height: 1.4),
-                                ),
-                                const SizedBox(height: 6),
-                                GestureDetector(
-                                  onTap: () {
-                                    setSheetState(() {
-                                      defaultAddressIndex = i;
-                                      _saveProfile();
-                                    });
-                                  },
-                                  child: Text(
-                                    defaultAddressIndex == i
-                                        ? 'Default address'
-                                        : 'Make this default',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: defaultAddressIndex == i
-                                          ? Colors.green
-                                          : Colors.pink.shade600,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          PopupMenuButton<String>(
-                            onSelected: (value) {
-                              if (value == 'edit') {
-                                _editAddress(i, setSheetState);
-                              } else if (value == 'delete') {
-                                setSheetState(() {
-                                  if (defaultAddressIndex == i) {
-                                    defaultAddressIndex = -1;
-                                  } else if (defaultAddressIndex > i) {
-                                    defaultAddressIndex--;
-                                  }
-                                  addresses.removeAt(i);
-                                  _saveProfile();
-                                });
-                              }
-                            },
-                            itemBuilder: (_) => const [
-                              PopupMenuItem(
-                                value: 'edit',
-                                child: Text('Edit'),
-                              ),
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: Text('Delete'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _addAddress(Function setSheetState) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const AddressFormPage(title: 'Add Address'),
-      ),
-    );
-
-    if (result is String) {
-      setSheetState(() {
-        addresses.add(result);
-        if (defaultAddressIndex == -1) {
-          defaultAddressIndex = addresses.length - 1;
-        }
-        _saveProfile();
-      });
-    }
-  }
-
-  void _editAddress(int index, Function setSheetState) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AddressFormPage(
-          title: 'Edit Address',
-          initialAddress: addresses[index],
-        ),
-      ),
-    );
-
-    if (result is String) {
-      setSheetState(() {
-        addresses[index] = result;
-        _saveProfile();
-      });
-    }
-  }
 
 
 
@@ -1489,7 +1248,12 @@ class _ProfilePageState extends State<ProfilePage>
                             splashColor: Colors.pink.withOpacity(0.08),
                             highlightColor: Colors.pink.withOpacity(0.04),
                             onTap: () {
-                              _openAddressSheet();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const AddressBookPage(),
+                                ),
+                              );
                             },
                             child: ListTile(
                               dense: true,

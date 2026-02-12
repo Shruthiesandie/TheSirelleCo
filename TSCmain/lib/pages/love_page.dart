@@ -236,7 +236,7 @@ class _LovePageState extends State<LovePage> {
                                               top: Radius.circular(22),
                                             ),
                                         child: Image.asset(
-                                          product.thumbnail,
+                                          product.imageUrl,
                                           fit: BoxFit.cover,
                                         ),
                                       ),

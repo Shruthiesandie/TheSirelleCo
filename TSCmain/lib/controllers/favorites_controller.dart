@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/product.dart';
+import '../config/api.dart';
 
 class FavoritesController {
   /// UI listens to this
@@ -11,46 +12,76 @@ class FavoritesController {
 
   static String? get _uid => FirebaseAuth.instance.currentUser?.uid;
 
-  static String get _storageKey =>
-      _uid == null ? 'wishlist_guest' : 'wishlist_$_uid';
+  static String get baseUrl => ApiConfig.baseUrl;
 
-  /// Load wishlist for current user (call after login)
-  static Future<void> loadForCurrentUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_storageKey);
-
-    if (raw == null) {
+  // ---------------- LOAD WISHLIST ----------------
+  static Future<void> load() async {
+    if (_uid == null) {
       items.value = [];
       return;
     }
 
-    final List decoded = jsonDecode(raw);
-    items.value =
-        decoded.map((e) => Product.fromMap(e as Map<String, dynamic>)).toList();
+    final res = await http.get(
+      Uri.parse('$baseUrl/wishlist/$_uid'),
+    );
+
+    debugPrint('Wishlist status: ${res.statusCode}');
+    debugPrint('Wishlist body: ${res.body}');
+
+    if (res.statusCode != 200) {
+      items.value = [];
+      return;
+    }
+
+    final List data = jsonDecode(res.body);
+
+    items.value = data
+        .map<Product>((e) => Product.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  // ---------------- LOAD FOR CURRENT USER (USED BY AUTH GATE) ----------------
+  static Future<void> loadForCurrentUser() async {
+    await load();
   }
 
   static bool contains(Product product) {
-    return items.value.any((p) => p.id == product.id);
+    return items.value.any((p) => p.uiId == product.uiId);
   }
 
-  static Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    final encoded =
-        jsonEncode(items.value.map((p) => p.toMap()).toList());
-    await prefs.setString(_storageKey, encoded);
-  }
-
+  // ---------------- ADD ----------------
   static Future<void> add(Product product) async {
-    if (contains(product)) return;
-    items.value = [...items.value, product];
-    await _persist();
+    if (_uid == null) return;
+
+    await http.post(
+      Uri.parse('$baseUrl/wishlist/add'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'uid': _uid,
+        'ui_id': product.uiId,
+      }),
+    );
+
+    await load();
   }
 
+  // ---------------- REMOVE ----------------
   static Future<void> remove(Product product) async {
-    items.value = items.value.where((p) => p.id != product.id).toList();
-    await _persist();
+    if (_uid == null) return;
+
+    await http.delete(
+      Uri.parse('$baseUrl/wishlist/remove'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'uid': _uid,
+        'ui_id': product.uiId,
+      }),
+    );
+
+    await load();
   }
 
+  // ---------------- TOGGLE ----------------
   static Future<void> toggle(Product product) async {
     if (contains(product)) {
       await remove(product);

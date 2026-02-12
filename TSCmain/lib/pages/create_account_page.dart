@@ -301,7 +301,9 @@ class _CreateAccountPageState extends State<CreateAccountPage>
       _scrollTo(_firstKey);
       return _err("Enter first name");
     }
-    if (!_emailCtrl.text.contains("@")) {
+    final email = _emailCtrl.text.trim();
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (!emailRegex.hasMatch(email)) {
       _scrollTo(_emailKey);
       return _err("Enter a valid email");
     }
@@ -319,6 +321,7 @@ class _CreateAccountPageState extends State<CreateAccountPage>
       return _err("Please accept the terms");
     }
 
+    FocusScope.of(context).unfocus();
     _createAccount();
   }
 
@@ -343,13 +346,20 @@ class _CreateAccountPageState extends State<CreateAccountPage>
         "/username",
       );
     } on FirebaseAuthException catch (e) {
-      String msg = "Something went wrong";
+      // 🔍 Log full Firebase error for debugging
+      debugPrint("🔥 FirebaseAuth error: ${e.code} | ${e.message}");
+
+      String msg = e.message ?? "Authentication failed";
+
+      // Friendly messages
       if (e.code == 'email-already-in-use') {
-        msg = "Email already in use";
+        msg = "This email is already registered";
       } else if (e.code == 'invalid-email') {
-        msg = "Invalid email address";
+        msg = "Please enter a valid email address";
       } else if (e.code == 'weak-password') {
-        msg = "Password is too weak";
+        msg = "Password must be at least 6 characters";
+      } else if (e.code == 'operation-not-allowed') {
+        msg = "Email/password sign-up is disabled in Firebase";
       }
 
       _err(msg);
