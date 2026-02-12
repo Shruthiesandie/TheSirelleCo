@@ -33,8 +33,8 @@ class HomeDrawer extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color.fromARGB(255, 255, 173, 185).withOpacity(0.85),
-                      const Color.fromARGB(255, 255, 255, 255).withOpacity(0.9),
+                      const Color.fromARGB(255, 212, 45, 84).withOpacity(0.85),
+                      const Color.fromARGB(255, 110, 5, 43).withOpacity(0.9),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
