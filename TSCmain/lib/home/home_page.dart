@@ -220,6 +220,7 @@ class _HomePageState extends State<HomePage>
               itemBuilder: (_, i) {
                 String offer = offers[i % offers.length];
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
                 return Container(
                   margin: const EdgeInsets.symmetric(
@@ -266,6 +267,56 @@ class _HomePageState extends State<HomePage>
                       color: const Color.fromARGB(255, 98, 2, 53),
                     ),
                   ),
+=======
+                
+                return TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.9, end: 1.0),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutBack,
+                  builder: (context, scale, child) {
+                    return Transform.scale(
+                      scale: scale,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.pinkAccent.withOpacity(0.2),
+                              Colors.white.withOpacity(0.95),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.pinkAccent.withOpacity(0.2),
+                              blurRadius: 12,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          offer,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.pink.shade900,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+>>>>>>> Stashed changes
 =======
                 
                 return TweenAnimationBuilder<double>(
@@ -397,7 +448,11 @@ Widget _sectionHeader(BuildContext context, String title) {
         const SizedBox(width: 14),
         const Expanded(
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           child: Divider(thickness: 2.0, color: Color(0xFF5F6F52)),
+=======
+          child: Divider(thickness: 1.2, color: Color(0xFFf3c6d4)),
+>>>>>>> Stashed changes
 =======
           child: Divider(thickness: 1.2, color: Color(0xFFf3c6d4)),
 >>>>>>> Stashed changes
@@ -732,6 +787,7 @@ class _MajesticCard extends StatefulWidget {
   const _MajesticCard({required this.child, required this.onTap});
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           // 🔍 EXPLORE ALL — CATEGORY STORY STRIP
           _ScrollFadeIn(
             delay: const Duration(milliseconds: 110),
@@ -745,6 +801,8 @@ class _MajesticCard extends StatefulWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
 =======
+=======
+>>>>>>> Stashed changes
   @override
   State<_MajesticCard> createState() => _MajesticCardState();
 }
@@ -959,6 +1017,7 @@ class _HeroBanner extends StatelessWidget {
 }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           // (Pink section above Gift Hamper header removed)
           _sectionHeader(context, "Gift Hamper"),
           const SizedBox(height: 36),
@@ -980,6 +1039,8 @@ class _HeroBanner extends StatelessWidget {
                     ),
                   ],
 =======
+=======
+>>>>>>> Stashed changes
 // ------------------------ ENHANCED CATEGORY SECTION ------------------------
 class _EnhancedCategorySection extends StatelessWidget {
   final List<Product> products;
@@ -1065,6 +1126,9 @@ class _EnhancedCategoryChip extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) => AllCategoriesPage(initialCategory: categoryKey),
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                 ),
               );
@@ -1086,6 +1150,7 @@ class _EnhancedCategoryChip extends StatelessWidget {
                 borderRadius: BorderRadius.circular(26),
                 child: Stack(
                   children: [
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
                     // Right semicircle bubble (true semicircle using ClipOval)
                     Positioned(
@@ -1124,6 +1189,8 @@ class _EnhancedCategoryChip extends StatelessWidget {
                               ),
                             ),
 =======
+=======
+>>>>>>> Stashed changes
                     Positioned.fill(
                       child: matchedProduct == null
                           ? Container(color: const Color(0xFFFFE3EC))
@@ -1137,6 +1204,9 @@ class _EnhancedCategoryChip extends StatelessWidget {
                           colors: [
                             Colors.black.withOpacity(0.6),
                             Colors.transparent,
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                           ],
                         ),
@@ -1178,6 +1248,7 @@ class _EnhancedCategoryChip extends StatelessWidget {
   }
 }
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
           const SizedBox(height:0),
 
@@ -1374,6 +1445,42 @@ class _EnhancedExploreSection extends StatelessWidget {
               exploreImageBuilder: exploreImageBuilder,
               delay: 100,
             ),
+=======
+// ------------------------ ENHANCED EXPLORE SECTION ------------------------
+class _EnhancedExploreSection extends StatelessWidget {
+  final List<Product> products;
+  final Widget Function(BuildContext, String) exploreImageBuilder;
+
+  const _EnhancedExploreSection({
+    required this.products,
+    required this.exploreImageBuilder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _sectionHeader(context, "Explore All"),
+        const SizedBox(height: 20),
+        Column(
+          children: [
+            _ExploreRowItem(
+              name: "Cute Bottles",
+              subtitle: "Pretty bottles for everyday hydration with stylish touch.",
+              categoryKey: "Bottle",
+              imageLeft: true,
+              exploreImageBuilder: exploreImageBuilder,
+              delay: 0,
+            ),
+            _ExploreRowItem(
+              name: "Aesthetic Candles",
+              subtitle: "Soft candles that bring warmth and a cozy feeling to space.",
+              categoryKey: "Candle",
+              imageLeft: false,
+              exploreImageBuilder: exploreImageBuilder,
+              delay: 100,
+            ),
+>>>>>>> Stashed changes
             _ExploreRowItem(
               name: "Custom Caps",
               subtitle: "Custom caps made to match personal style with ease.",
@@ -1427,6 +1534,9 @@ class _ExploreRowItem extends StatelessWidget {
           offset: Offset(imageLeft ? -offset : offset, 0),
           child: Opacity(
             opacity: (50 - offset.abs()) / 50,
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -2684,6 +2794,7 @@ class _MajesticBrandEnding extends StatelessWidget {
             ],
           ),
         ),
+<<<<<<< Updated upstream
 
         const SizedBox(height: 40),
 
@@ -2891,6 +3002,30 @@ class _CategoryChip extends StatelessWidget {
           ),
           child: Column(
 >>>>>>> Stashed changes
+=======
+
+        const SizedBox(height: 40),
+
+        // Enhanced Dark Footer
+        Container(
+          width: double.infinity,
+          clipBehavior: Clip.antiAlias,
+          padding: EdgeInsets.fromLTRB(
+            24,
+            40,
+            24,
+            MediaQuery.of(context).padding.bottom + 100,
+          ),
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+            gradient: LinearGradient(
+              colors: [Color(0xFFB2004D), Color(0xFFD81B60)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Column(
+>>>>>>> Stashed changes
             children: [
               const Text(
                 "Contact with Us",
@@ -3047,6 +3182,7 @@ class _ScrollFadeInState extends State<_ScrollFadeIn>
       child: SlideTransition(position: _slide, child: widget.child),
     );
   }
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 }
 
@@ -3506,6 +3642,8 @@ class _HamperHighlight extends StatelessWidget {
       ),
     );
   }
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 }
