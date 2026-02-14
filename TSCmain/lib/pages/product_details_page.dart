@@ -585,15 +585,13 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                     }
 
                     // 🔥 AI Behavior Log — add to cart
-                    if (user != null) {
-                      BehaviorLogger.log(
-                        userId: user.uid,
-                        screenName: "product_details_page",
-                        actionType: "click",
-                        actionValue: "add_to_cart_" + product.uiId,
-                      );
-                    }
-
+                    BehaviorLogger.log(
+                      userId: user.uid,
+                      screenName: "product_details_page",
+                      actionType: "click",
+                      actionValue: "add_to_cart_" + product.uiId,
+                    );
+                  
                     CartController.add(product);
                     HapticFeedback.mediumImpact();
                     setState(() => _addedFeedback = true);
@@ -667,15 +665,13 @@ class _ProductDetailsPageState extends State<ProductDetailsPage>
                         }
 
                         // 🔥 AI Behavior Log — increase quantity
-                        if (user != null) {
-                          BehaviorLogger.log(
-                            userId: user.uid,
-                            screenName: "product_details_page",
-                            actionType: "click",
-                            actionValue: "increase_qty_" + product.uiId,
-                          );
-                        }
-
+                        BehaviorLogger.log(
+                          userId: user.uid,
+                          screenName: "product_details_page",
+                          actionType: "click",
+                          actionValue: "increase_qty_" + product.uiId,
+                        );
+                      
                         CartController.add(product);
                         HapticFeedback.lightImpact();
                       },

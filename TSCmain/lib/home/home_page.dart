@@ -20,6 +20,8 @@ import '../services/product_service.dart';
 import '../models/product.dart';
 import '../controllers/favorites_controller.dart';
 import '../services/behavior_logger.dart';
+import '../services/confusion_engine.dart';
+import '../services/predictive_engine.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HomePage extends StatefulWidget {
@@ -57,6 +59,13 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        // 🧠 Provide UI context to both AI Engines
+        ConfusionEngine.setContext(context);
+        PredictiveEngine.setContext(context);
+      }
+    });
 
     // 🔥 AI Behavior Log — Home page opened
     final user = FirebaseAuth.instance.currentUser;
@@ -169,18 +178,24 @@ class _HomePageState extends State<HomePage>
               child: HomeBottomNavBar(
                 selectedIndex: selectedIndex,
                 onItemTap: (index) {
-                  // 🔥 AI Behavior Log — bottom navigation tap
+                  setState(() => selectedIndex = index);
+
+                  // 🧠 Map bottom tabs to REAL screen names for Predictive AI
+                  String screenName = "home_page";
+                  if (index == 1) screenName = "love_page";
+                  if (index == 2) screenName = "categories_page";
+                  if (index == 3) screenName = "cart_page";
+                  if (index == 4) screenName = "profile_page";
+
                   final user = FirebaseAuth.instance.currentUser;
                   if (user != null) {
                     BehaviorLogger.log(
                       userId: user.uid,
-                      screenName: "home_page",
+                      screenName: screenName,
                       actionType: "navigation",
-                      actionValue: "tab_" + index.toString(),
+                      actionValue: "open",
                     );
                   }
-
-                  setState(() => selectedIndex = index);
                 },
               ),
             ),
@@ -219,54 +234,6 @@ class _HomePageState extends State<HomePage>
               itemCount: 9999,
               itemBuilder: (_, i) {
                 String offer = offers[i % offers.length];
-<<<<<<< Updated upstream
-
-                return Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 5,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color.fromARGB(
-                          255,
-                          250,
-                          32,
-                          105,
-                        ).withOpacity(0.17),
-                        Colors.white.withOpacity(0.9),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color.fromARGB(
-                          255,
-                          203,
-                          9,
-                          74,
-                        ).withOpacity(0.15),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    offer,
-                    style: TextStyle(
-                      fontSize: 12.8,
-                      fontWeight: FontWeight.w600,
-                      color: const Color.fromARGB(255, 98, 2, 53),
-                    ),
-                  ),
-=======
                 
                 return TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.9, end: 1.0),
@@ -315,7 +282,6 @@ class _HomePageState extends State<HomePage>
                       ),
                     );
                   },
->>>>>>> Stashed changes
                 );
               },
             ),
@@ -353,7 +319,7 @@ Widget _sectionHeader(BuildContext context, String title) {
     child: Row(
       children: [
         const Expanded(
-          child: Divider(thickness: 2.0, color: Color(0xFF5F6F52)),
+          child: Divider(thickness: 1.2, color: Color(0xFFf3c6d4)),
         ),
         const SizedBox(width: 14),
         TweenAnimationBuilder<double>(
@@ -396,11 +362,7 @@ Widget _sectionHeader(BuildContext context, String title) {
         ),
         const SizedBox(width: 14),
         const Expanded(
-<<<<<<< Updated upstream
-          child: Divider(thickness: 2.0, color: Color(0xFF5F6F52)),
-=======
           child: Divider(thickness: 1.2, color: Color(0xFFf3c6d4)),
->>>>>>> Stashed changes
         ),
       ],
     ),
@@ -731,20 +693,6 @@ class _MajesticCard extends StatefulWidget {
   
   const _MajesticCard({required this.child, required this.onTap});
 
-<<<<<<< Updated upstream
-          // 🔍 EXPLORE ALL — CATEGORY STORY STRIP
-          _ScrollFadeIn(
-            delay: const Duration(milliseconds: 110),
-            child: ClipPath(
-              clipper: _TopAndBottomWaveClipper(),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color.fromARGB(255, 125, 5, 53), Color.fromARGB(255, 192, 12, 87)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-=======
   @override
   State<_MajesticCard> createState() => _MajesticCardState();
 }
@@ -902,54 +850,9 @@ class _HeroBanner extends StatelessWidget {
                         ),
                       ),
                     ],
->>>>>>> Stashed changes
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 40),
-                    _sectionHeader(context, "Explore All"),
-                    const SizedBox(height: 20),
-                    Column(
-                      children: List.generate(_exploreItems.length, (index) {
-                        final item = _exploreItems[index];
-                        final bool imageLeft = index % 2 == 0;
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 3,
-                          ),
-                          child: Row(
-                            children: [
-                              if (imageLeft)
-                                _exploreImageFromCategory(
-                                  context,
-                                  item.categoryKey,
-                                ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: _exploreText(
-                                  item.name,
-                                  imageLeft: imageLeft,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              if (!imageLeft)
-                                _exploreImageFromCategory(
-                                  context,
-                                  item.categoryKey,
-                                ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 60),
-                  ],
-                ),
-              ),
+              ],
             ),
           ),
         ),
@@ -958,28 +861,6 @@ class _HeroBanner extends StatelessWidget {
   }
 }
 
-<<<<<<< Updated upstream
-          // (Pink section above Gift Hamper header removed)
-          _sectionHeader(context, "Gift Hamper"),
-          const SizedBox(height: 36),
-          // 🎁 CUSTOM GIFT HAMPER FEATURE (from sketch)
-          _ScrollFadeIn(
-            delay: const Duration(milliseconds: 130),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Container(
-                height: 500,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 210, 210),
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.pinkAccent.withOpacity(0.08),
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-=======
 // ------------------------ ENHANCED CATEGORY SECTION ------------------------
 class _EnhancedCategorySection extends StatelessWidget {
   final List<Product> products;
@@ -1065,7 +946,6 @@ class _EnhancedCategoryChip extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) => AllCategoriesPage(initialCategory: categoryKey),
->>>>>>> Stashed changes
                 ),
               );
             },
@@ -1086,44 +966,6 @@ class _EnhancedCategoryChip extends StatelessWidget {
                 borderRadius: BorderRadius.circular(26),
                 child: Stack(
                   children: [
-<<<<<<< Updated upstream
-                    // Right semicircle bubble (true semicircle using ClipOval)
-                    Positioned(
-                      right: -140,
-                      top: 25,
-                      child: ClipOval(
-                        child: Stack(
-                          children: [
-                            Container(
-                              width: 440,
-                              height: 440,
-                              color: Colors.pink.shade100,
-                            ),
-                            // Place the shuffled product image inside the semicircle
-                            Positioned.fill(
-                              child: Image.asset(
-                                (List<Product>.from(
-                                  products,
-                                )..shuffle()).first.thumbnail,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            // Overlay gradient for text readability
-                            Positioned.fill(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                    colors: [
-                                      Colors.black.withOpacity(0.55),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-=======
                     Positioned.fill(
                       child: matchedProduct == null
                           ? Container(color: const Color(0xFFFFE3EC))
@@ -1137,7 +979,6 @@ class _EnhancedCategoryChip extends StatelessWidget {
                           colors: [
                             Colors.black.withOpacity(0.6),
                             Colors.transparent,
->>>>>>> Stashed changes
                           ],
                         ),
                       ),
@@ -1178,168 +1019,6 @@ class _EnhancedCategoryChip extends StatelessWidget {
   }
 }
 
-<<<<<<< Updated upstream
-          const SizedBox(height:0),
-
-          _ScrollFadeIn(
-            delay: const Duration(milliseconds: 150),
-            child: Transform.translate(
-              offset: const Offset(0, -10),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(22, 26, 22, 26),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFFFFFF), Color(0xFFFFEEF3)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0xFFB2004D).withOpacity(0.18),
-                        blurRadius: 30,
-                        offset: Offset(0, 16),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 🌸 Soft pill label
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFFFE4EC),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          "GIFTING FEATURE",
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
-                            color: Color(0xFFB2004D),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      // ✨ Headline
-                      const Text(
-                        "Build Your Own Gift Hamper",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.3,
-                          color: Color.fromARGB(255, 183, 15, 35),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // 🌷 Description
-                      const Text(
-                        "Mix and match products across all categories to create a personalised gift hamper. Thoughtful, custom, and made to feel truly special.",
-                        style: TextStyle(
-                          fontSize: 15,
-                          height: 1.6,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF333333),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // 💗 Micro highlights
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 10,
-                        children: const [
-                          _HamperHighlight("🎁", "Personalised"),
-                          _HamperHighlight("💌", "Thoughtful"),
-                          _HamperHighlight("✨", "Unique"),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 0),
-          _ScrollFadeIn(
-            delay: const Duration(milliseconds: 160),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SizedBox(
-                width: double.infinity,
-                child: GestureDetector(
-                  onTap: () {
-                    // Optional: Clear previous hamper state for fresh start
-                    // HamperBuilderController.clear();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => AllCategoriesPage(isHamperMode: true),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(28),
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFFB2004D),
-                          Color(0xFFD81B60),
-                          Color(0xFFFF9EBF),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFB2004D).withOpacity(0.45),
-                          blurRadius: 26,
-                          offset: const Offset(0, 14),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text(
-                          "Customize",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.8,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Icon(
-                          Icons.auto_awesome,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 0),
-          const SizedBox(height: 40),
-          _BeverageAdSection(),
-          const SizedBox(height: 40),
-          _ScrollFadeIn(
-            delay: const Duration(milliseconds: 40),
-=======
 // ------------------------ ENHANCED EXPLORE SECTION ------------------------
 class _EnhancedExploreSection extends StatelessWidget {
   final List<Product> products;
@@ -1427,7 +1106,6 @@ class _ExploreRowItem extends StatelessWidget {
           offset: Offset(imageLeft ? -offset : offset, 0),
           child: Opacity(
             opacity: (50 - offset.abs()) / 50,
->>>>>>> Stashed changes
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
@@ -2687,190 +2365,6 @@ class _MajesticBrandEnding extends StatelessWidget {
 
         const SizedBox(height: 40),
 
-<<<<<<< Updated upstream
-// ------------------------ TOP AND BOTTOM WAVE CLIPPER FOR EXPLORE ALL SECTION ------------------------
-class _TopAndBottomWaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-
-    // 🌊 Top wave (unchanged)
-    path.lineTo(0, 24);
-    path.quadraticBezierTo(size.width * 0.25, 0, size.width * 0.5, 16);
-    path.quadraticBezierTo(size.width * 0.75, 32, size.width, 12);
-
-    // Go down right side
-    path.lineTo(size.width, size.height - 24);
-
-    // 🌊 Bottom wave (same family curve)
-    path.quadraticBezierTo(
-      size.width * 0.75,
-      size.height,
-      size.width * 0.5,
-      size.height - 16,
-    );
-    path.quadraticBezierTo(
-      size.width * 0.25,
-      size.height - 32,
-      0,
-      size.height - 12,
-    );
-
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
-// ------------------------ BOTTOM WAVE CLIPPER FOR GIFT HAMPER SECTION ------------------------
-
-class _ExploreItem {
-  final String name;
-  final String categoryKey;
-  const _ExploreItem(this.name, this.categoryKey);
-}
-
-const List<_ExploreItem> _exploreItems = [
-  _ExploreItem("Cute Bottles", "bottles"),
-  _ExploreItem("Aesthetic Candles", "candle"),
-  _ExploreItem("Custom Caps", "caps"),
-  _ExploreItem("Plush Toys", "plusie"),
-  _ExploreItem("Keychains", "key_chain"),
-  _ExploreItem("Boy Friend Gifts", "boy_friend"),
-];
-
-Widget _exploreText(String name, {required bool imageLeft}) {
-  String subtitle;
-  switch (name) {
-    case "Cute Bottles":
-      subtitle = "Pretty bottles for everyday hydration with stylish touch.";
-      break;
-    case "Aesthetic Candles":
-      subtitle = "Soft candles that bring warmth and a cozy feeling to space.";
-      break;
-    case "Custom Caps":
-      subtitle = "Custom caps made to match personal style with ease.";
-      break;
-    case "Plush Toys":
-      subtitle = "Soft plush toys perfect for gifting and warm moments.";
-      break;
-    case "Keychains":
-      subtitle = "Cute keychains that add a charming touch to essentials.";
-      break;
-    default:
-      subtitle = "Hand‑picked just for you";
-  }
-
-  return Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      // Side-aware aligned heading that hugs the image side
-      Padding(
-        padding: imageLeft
-            ? const EdgeInsets.only(left: 6, right: 18)
-            : const EdgeInsets.only(left: 18, right: 6),
-        child: Align(
-          alignment: imageLeft ? Alignment.centerLeft : Alignment.centerRight,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFE6F0E3), Color(0xFFFFFFFF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF9DB8A0).withOpacity(0.35),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Text(
-              name,
-              textAlign: imageLeft ? TextAlign.left : TextAlign.right,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.3,
-                color: Color.fromARGB(255, 35, 52, 37),
-              ),
-            ),
-          ),
-        ),
-      ),
-
-      const SizedBox(height: 6),
-
-      // Darker professional description (no box), left/right aligned with padding
-      Padding(
-        padding: imageLeft
-            ? const EdgeInsets.only(left: 6, right: 18)
-            : const EdgeInsets.only(left: 18, right: 6),
-        child: Text(
-          subtitle,
-          textAlign: imageLeft ? TextAlign.left : TextAlign.right,
-          style: const TextStyle(
-            fontSize: 13,
-            height: 1.55,
-            color: Color.fromARGB(255, 209, 208, 208),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-
-      const SizedBox(height: 6),
-      const SizedBox(
-        width: 90,
-        child: Divider(thickness: 1, color: Color(0xFF5F6F52)),
-      ),
-    ],
-  );
-}
-
-class _CategoryChip extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final String categoryKey;
-
-  const _CategoryChip(this.title, this.icon, this.categoryKey);
-
-  @override
-  Widget build(BuildContext context) {
-    final Product p = getThemedProduct(categoryKey);
-
-    return GestureDetector(
-      onTap: () {
-        RecommendationEngine.trackCategoryClick(categoryKey);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => AllCategoriesPage(initialCategory: categoryKey),
-          ),
-        );
-      },
-      child: Container(
-        width: 110,
-        margin: const EdgeInsets.only(right: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 14,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: Stack(
-=======
         // Enhanced Dark Footer
         Container(
           width: double.infinity,
@@ -2890,7 +2384,6 @@ class _CategoryChip extends StatelessWidget {
             ),
           ),
           child: Column(
->>>>>>> Stashed changes
             children: [
               const Text(
                 "Contact with Us",
@@ -3047,465 +2540,4 @@ class _ScrollFadeInState extends State<_ScrollFadeIn>
       child: SlideTransition(position: _slide, child: widget.child),
     );
   }
-<<<<<<< Updated upstream
-}
-
-Product getThemedProduct(String categoryKey) {
-  final month = DateTime.now().month;
-  final bool festive = (month == 10 || month == 11);
-  final bool valentine = (month == 2);
-
-  List<Product> filtered = products.where((p) {
-    if (!p.thumbnail.contains(categoryKey)) return false;
-
-    if (festive) {
-      return p.thumbnail.toLowerCase().contains("festive");
-    }
-
-    if (valentine) {
-      return p.thumbnail.toLowerCase().contains("valentine");
-    }
-
-    return true; // normal / fallback
-  }).toList();
-
-  if (filtered.isEmpty) {
-    filtered = products
-        .where((p) => p.thumbnail.contains(categoryKey))
-        .toList();
-  }
-
-  filtered.shuffle();
-  return filtered.isNotEmpty ? filtered.first : products.first;
-}
-
-Widget _exploreImageFromCategory(BuildContext context, String categoryKey) {
-  final Product p = getThemedProduct(categoryKey);
-
-  return GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => AllCategoriesPage(initialCategory: categoryKey),
-        ),
-      );
-    },
-    child: Container(
-      width: 180,
-      height: 180,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFFFFF), Color(0xFFFFEEF3)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.pinkAccent.withOpacity(0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 14),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
-        child: Stack(
-          children: [
-            Positioned.fill(child: Image.asset(p.thumbnail, fit: BoxFit.cover)),
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withOpacity(0.15),
-                      Colors.black.withOpacity(0.10),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-// 🧱 Letter side frame (helper widget)
-Widget _sideFrame(String imagePath) {
-  return Container(
-    width: 540,
-    height: 440,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(240), // soft arch radius base
-      boxShadow: [
-        // Soft lift (depth)
-        BoxShadow(
-          color: Colors.black.withOpacity(0.14),
-          blurRadius: 22,
-          offset: const Offset(0, 14),
-        ),
-        // Subtle ambient shadow
-        BoxShadow(
-          color: Colors.black.withOpacity(0.06),
-          blurRadius: 8,
-          offset: const Offset(0, 4),
-        ),
-        // Gentle pink glow (halo, not neon)
-        BoxShadow(
-          color: const Color(0xFFFFB6CF).withOpacity(0.28),
-          blurRadius: 28,
-          spreadRadius: -4,
-          offset: const Offset(0, 0),
-        ),
-      ],
-    ),
-    child: ClipPath(
-      clipper: _ArchClipper(),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-          // glass highlight
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white.withOpacity(0.14),
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.08),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _ArchClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-
-    // Start bottom-left
-    path.moveTo(0, size.height);
-
-    // Left side straight up
-    path.lineTo(0, size.height * 0.28);
-
-    // Smooth rounded arch
-    path.cubicTo(
-      size.width * 0.08,
-      0,
-      size.width * 0.92,
-      0,
-      size.width,
-      size.height * 0.28,
-    );
-
-    // Right side straight down
-    path.lineTo(size.width, size.height);
-
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
-class _BeverageAdSection extends StatelessWidget {
-  const _BeverageAdSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 249, 244, 199),
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.hardEdge,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section Heading
-            _sectionHeader(context, "Letters"),
-            const SizedBox(height: 14),
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 18, 18),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => AllCategoriesPage(
-                                  initialCategory: "letter",
-                                ),
-                              ),
-                            );
-                          },
-                          child: _sideFrame(
-                            getThemedProduct("letter").thumbnail,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        flex: 2,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Transform.translate(
-                            offset: const Offset(
-                              18,
-                              0,
-                            ), // move boxes further RIGHT
-                            child: SizedBox(
-                              height: 480,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _Badge(
-                                    icon: Icons.favorite,
-                                    label: "Loved",
-                                    imagePath: getThemedProduct(
-                                      "letter",
-                                    ).thumbnail,
-                                  ),
-                                  const SizedBox(height: 25),
-                                  _Badge(
-                                    icon: Icons.card_giftcard,
-                                    label: "Giftable",
-                                    imagePath: getThemedProduct(
-                                      "letter",
-                                    ).thumbnail,
-                                  ),
-                                  const SizedBox(height: 25),
-                                  _Badge(
-                                    icon: Icons.auto_awesome,
-                                    label: "Premium",
-                                    imagePath: getThemedProduct(
-                                      "letter",
-                                    ).thumbnail,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Badge extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String imagePath;
-
-  const _Badge({
-    required this.icon,
-    required this.label,
-    required this.imagePath,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 118,
-      height: 118,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          // Background image
-          Positioned.fill(child: Image.asset(imagePath, fit: BoxFit.cover)),
-
-          // Light pink gradient overlay (images are clear and detailed)
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0xFFFFC1D9).withOpacity(0.48),
-                    const Color(0xFFFFC1D9).withOpacity(0.70),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Icon + label (unchanged visual identity)
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: const Color(0xFFB2004D), size: 30),
-                const SizedBox(height: 12),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFFB2004D),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// --- DARK PINK PREMIUM FOOTER HELPERS ---
-
-class _FooterFeature extends StatelessWidget {
-  final String emoji;
-  final String text;
-
-  const _FooterFeature(this.emoji, this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(emoji, style: const TextStyle(fontSize: 16)),
-        const SizedBox(width: 10),
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 13.5,
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// Premium glassy footer icon widget
-class _PremiumFooterIcon extends StatelessWidget {
-  final IconData icon;
-  const _PremiumFooterIcon({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 62,
-      height: 62,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withOpacity(0.28),
-            Colors.white.withOpacity(0.12),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.4),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 18,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Icon(icon, size: 30, color: Colors.white),
-    );
-  }
-}
-
-// --- Helper widget for gift hamper highlights ---
-class _HamperHighlight extends StatelessWidget {
-  final String emoji;
-  final String label;
-  const _HamperHighlight(this.emoji, this.label);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Text(emoji, style: TextStyle(fontSize: 14)),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF444444),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-=======
->>>>>>> Stashed changes
 }

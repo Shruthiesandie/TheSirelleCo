@@ -256,6 +256,7 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 }
 
+// ignore: unused_element
 class _PaymentOptionTile extends StatelessWidget {
   final IconData icon;
   final String title;

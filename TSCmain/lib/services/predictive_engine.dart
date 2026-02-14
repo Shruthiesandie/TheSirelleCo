@@ -104,7 +104,7 @@ class PredictiveEngine {
     }
 
     if (predicted != null) {
-      _showSuggestion(userId, predicted!, "home_page");
+      _showSuggestion(userId, predicted, "home_page");
     }
   }
 
